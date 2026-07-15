@@ -14,11 +14,15 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 // =======================
 
 app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/areas", require("./routes/areaRoutes"));
 app.use("/api/asistencia", require("./routes/asistenciaRoutes"));
 app.use("/api/usuarios", require("./routes/usuariosRoutes"));
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 app.use("/api/cargos", require("./routes/cargoRoutes"));
+app.use("/api/empleados", require("./routes/empleadoRoutes"));
 app.use("/api/incidencias", require("./routes/incidenciaRoutes"));
+app.use("/api/reportes", require("./routes/reportesRoutes"));
+app.use("/api/pdf", require("./routes/pdfRoutes"));
 
 // =======================
 

@@ -13,7 +13,7 @@ exports.obtenerTodas = async (filtros = {}) => {
   let sql = `
     SELECT i.*, e.nombre as empleado_nombre, e.cedula
     FROM incidencias i
-    LEFT JOIN empleados e ON i.empleado_id = e.id
+    LEFT JOIN empleado e ON i.empleado_id = e.id
     WHERE 1=1
   `;
   const params = [];
@@ -31,7 +31,7 @@ exports.obtenerPorId = async (id) => {
   const [rows] = await pool.query(
     `SELECT i.*, e.nombre as empleado_nombre, e.cedula
      FROM incidencias i
-     LEFT JOIN empleados e ON i.empleado_id = e.id
+     LEFT JOIN empleado e ON i.empleado_id = e.id
      WHERE i.id = ?`,
     [id]
   );
@@ -46,10 +46,22 @@ exports.aprobar = async (id, revisado_por) => {
   return result.affectedRows > 0;
 };
 
+exports.aprobarConFirma = async (id, archivo_firmado, revisado_por) => {
+  const [result] = await pool.query(
+    "UPDATE incidencias SET estado = 'aprobado', archivo_firmado = ?, revisado_por = ? WHERE id = ? AND estado = 'pendiente'",
+    [archivo_firmado, revisado_por, id]
+  );
+  return result.affectedRows > 0;
+};
+
 exports.rechazar = async (id, motivo, revisado_por) => {
   const [result] = await pool.query(
     "UPDATE incidencias SET estado = 'rechazado', motivo_rechazo = ?, revisado_por = ? WHERE id = ? AND estado = 'pendiente'",
     [motivo, revisado_por, id]
   );
   return result.affectedRows > 0;
+};
+
+exports.eliminar = async (id) => {
+  await pool.query("DELETE FROM incidencias WHERE id = ?", [id]);
 };

@@ -6,28 +6,30 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import theme from "./styles/theme";
+import theme from "./shared/theme";
 
-import LoginPage from "./pages/login/LoginPage";
-import DashboardPage from "./pages/dashboard/DashboardPage";
-import AsistenciaPage from "./pages/asistencia/AsistenciaPage";
-import ReportesPage from "./pages/reportes/ReportesPage";
-import UsuariosPage from "./pages/usuarios/UsuariosPage";
-import CargosPage from "./pages/cargos/CargosPage";
-import EmpleadosPage from "./pages/empleados/EmpleadosPage";
-import HorariosPage from "./pages/horarios/HorariosPage";
-import IncidenciasPage from "./pages/incidencias/IncidenciasPage";
-import IndicadoresPage from "./pages/indicadores/IndicadoresPage";
-import ConfiguracionPage from "./pages/configuracion/ConfiguracionPage";
-import MiPerfilPage from "./pages/miperfil/MiPerfilPage";
-import MisSolicitudesPage from "./pages/misSolicitudes/MisSolicitudesPage";
-import IntegracionesPage from "./pages/integraciones/IntegracionesPage";
-import ReportarIncidenciaPage from "./pages/reportarIncidencia/ReportarIncidenciaPage";
-import Layout from "./components/shared/Layout";
-import RoleRoute from "./components/auth/RoleRoute";
-import ErrorBoundary from "./components/shared/ErrorBoundary";
+import LoginPage from "./features/login/pages/LoginPage";
+import DashboardPage from "./features/dashboard/pages/DashboardPage";
+import AsistenciaPage from "./features/asistencia/pages/AsistenciaPage";
+import ReportesPage from "./features/reportes/pages/ReportesPage";
+import UsuariosPage from "./features/usuarios/pages/UsuariosPage";
+import CargosPage from "./features/cargos/pages/CargosPage";
+import EmpleadosPage from "./features/empleados/pages/EmpleadosPage";
+import HorariosPage from "./features/horarios/pages/HorariosPage";
+import IncidenciasPage from "./features/incidencias/pages/IncidenciasPage";
+import AreasPage from "./features/areas/pages/AreasPage";
+import IndicadoresPage from "./features/indicadores/pages/IndicadoresPage";
+import ConfiguracionPage from "./features/configuracion/pages/ConfiguracionPage";
+import MiPerfilPage from "./features/miperfil/pages/MiPerfilPage";
+import MisSolicitudesPage from "./features/misSolicitudes/pages/MisSolicitudesPage";
+import IntegracionesPage from "./features/integraciones/pages/IntegracionesPage";
+import ReportarIncidenciaPage from "./features/reportarIncidencia/pages/ReportarIncidenciaPage";
+import RegistroPage from "./features/registro/pages/RegistroPage";
+import Layout from "./shared/components/Layout";
+import RoleRoute from "./shared/components/RoleRoute";
+import ErrorBoundary from "./shared/components/ErrorBoundary";
 
-const MiAsistenciaPage = lazy(() => import("./pages/miAsistencia/MiAsistenciaPage"));
+const MiAsistenciaPage = lazy(() => import("./features/miAsistencia/pages/MiAsistenciaPage"));
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -52,6 +54,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/registro" element={<RegistroPage />} />
 
         {/* General */}
         <Route path="/dashboard" element={<R roles={["admin", "talento_humano", "empleado"]}><DashboardPage /></R>} />
@@ -60,6 +63,7 @@ export default function App() {
         <Route path="/empleados" element={<R roles={["admin", "talento_humano"]}><EmpleadosPage /></R>} />
         <Route path="/cargos" element={<R roles={["admin", "talento_humano"]}><CargosPage /></R>} />
         <Route path="/horarios" element={<R roles={["admin"]}><HorariosPage /></R>} />
+        <Route path="/areas" element={<R roles={["admin", "talento_humano"]}><AreasPage /></R>} />
         <Route path="/incidencias" element={<R roles={["admin", "talento_humano"]}><IncidenciasPage /></R>} />
 
         {/* Operación */}

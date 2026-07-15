@@ -66,3 +66,26 @@ exports.rechazar = async (req, res) => {
     res.status(500).json({ mensaje: "Error al rechazar la incidencia" });
   }
 };
+
+exports.aprobarConFirma = async (req, res) => {
+  try {
+    const archivo_firmado = req.file ? `/uploads/incidencias/firmas/${req.file.filename}` : null;
+    if (!archivo_firmado) return res.status(400).json({ mensaje: "Debes adjuntar el PDF firmado" });
+    const ok = await incidenciaService.aprobarConFirma(req.params.id, archivo_firmado, req.user.id);
+    if (!ok) return res.status(400).json({ mensaje: "No se pudo aprobar. Puede que ya no esté pendiente." });
+    res.json({ mensaje: "Incidencia aprobada con firma" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al aprobar con firma" });
+  }
+};
+
+exports.eliminar = async (req, res) => {
+  try {
+    await incidenciaService.eliminar(req.params.id);
+    res.json({ mensaje: "Incidencia eliminada" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al eliminar la incidencia" });
+  }
+};
