@@ -193,10 +193,10 @@ export default function CargosPage() {
   const promedio = total > 0 ? (cargos.reduce((s, c) => s + (c.empleados_count || 0), 0) / total).toFixed(1) : "0";
 
   const cards = [
-    { icon: <Users />, value: total, label: "Total cargos", color: "#1B5E20" },
-    { icon: <UserCheck />, value: activos, label: "Cargos activos", color: "#1565C0" },
-    { icon: <UserX />, value: inactivos, label: "Cargos inactivos", color: "#DC2626" },
-    { icon: <UserRound />, value: promedio, label: "Promedio empleados", color: "#7C3AED" },
+    { icon: <Users />, value: total, label: "Total cargos", color: "#1B5E20", onClick: () => { setFiltroEstado("Todos"); setFiltroArea("Todas"); setOrden("Nombre A-Z"); setSearch(""); }, isActive: filtroEstado === "Todos" && filtroArea === "Todas" && orden === "Nombre A-Z" && !search },
+    { icon: <UserCheck />, value: activos, label: "Cargos activos", color: "#1565C0", onClick: () => setFiltroEstado("Activo"), isActive: filtroEstado === "Activo" },
+    { icon: <UserX />, value: inactivos, label: "Cargos inactivos", color: "#DC2626", onClick: () => setFiltroEstado("Inactivo"), isActive: filtroEstado === "Inactivo" },
+    { icon: <UserRound />, value: promedio, label: "Promedio empleados", color: "#7C3AED", onClick: () => setOrden("Más empleados"), isActive: orden === "Más empleados" },
   ];
 
   if (loading) return <Loading />;
@@ -230,10 +230,13 @@ export default function CargosPage() {
           <Paper
             key={i}
             elevation={0}
+            onClick={card.onClick}
             sx={{
               p: 3, borderRadius: "20px",
-              border: "1px solid #ECECEC", minHeight: 150,
+              border: card.isActive ? `2px solid ${card.color}` : "1px solid #ECECEC",
+              minHeight: 150,
               display: "flex", flexDirection: "column", justifyContent: "space-between",
+              cursor: "pointer",
               transition: "all .25s ease",
               "&:hover": { transform: "translateY(-3px)", boxShadow: "0 8px 30px rgba(0,0,0,.07)" },
             }}

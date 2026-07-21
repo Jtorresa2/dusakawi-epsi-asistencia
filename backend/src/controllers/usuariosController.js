@@ -13,7 +13,7 @@ exports.getUsuarios = async (req, res) => {
         a.piso
       FROM usuarios u
       JOIN roles r ON u.rol_id = r.id
-      JOIN empleados e ON u.empleado_id = e.id
+      JOIN empleado e ON u.empleado_id = e.id
       JOIN areas a ON e.area_id = a.id
       ORDER BY u.creado_en DESC
     `);

@@ -2,9 +2,11 @@ const db = require("../config/db");
 
 exports.obtenerTodos = async () => {
   const [rows] = await db.query(`
-    SELECT *
-    FROM cargos
-    ORDER BY nombre ASC
+    SELECT c.*, COUNT(e.id) AS empleados_count
+    FROM cargos c
+    LEFT JOIN empleado e ON e.cargo_id = c.id
+    GROUP BY c.id
+    ORDER BY c.nombre ASC
   `);
 
   return rows;

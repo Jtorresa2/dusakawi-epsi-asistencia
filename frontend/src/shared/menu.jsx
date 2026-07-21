@@ -3,7 +3,7 @@ import {
   ClipboardCheck,
   Users,
   Clock3,
-  BarChart3,
+
   FileText,
   Settings,
   //CalendarClock,
@@ -65,21 +65,20 @@ export const menuPorRol = {
           icon: <ClipboardCheck size={18} />
         },
         {
-          label: "Indicadores",
-          path: "/indicadores",
-          icon: <BarChart3 size={18} />
-        },
-        {
           label: "Reportes",
           path: "/reportes",
           icon: <FileText size={18} />
         }
       ]
     },
-
     {
       section: "ADMINISTRACIÓN",
       items: [
+        {
+          label: "Usuarios",
+          path: "/usuarios",
+          icon: <Users size={18} />
+        },
         {
           label: "Configuración",
           path: "/configuracion",
@@ -136,11 +135,6 @@ export const menuPorRol = {
           icon: <ClipboardCheck size={18} />
         },
         {
-          label: "Indicadores",
-          path: "/indicadores",
-          icon: <BarChart3 size={18} />
-        },
-        {
           label: "Reportes",
           path: "/reportes",
           icon: <FileText size={18} />
@@ -168,6 +162,11 @@ export const menuPorRol = {
           label: "Reportar incidencia",
           path: "/reportar-incidencia",
           icon: <TriangleAlert size={18} />
+        },
+        {
+          label: "Mis solicitudes",
+          path: "/mis-solicitudes",
+          icon: <FileText size={18} />
         },
       ]
     }

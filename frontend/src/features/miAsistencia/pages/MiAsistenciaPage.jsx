@@ -55,7 +55,7 @@ export default function MiAsistenciaPage() {
       flex: 1,
       minWidth: 140,
       renderCell: (params) => {
-        const d = new Date(params.value + "T00:00:00");
+        const d = new Date(params.value);
         return d.toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" });
       },
     },

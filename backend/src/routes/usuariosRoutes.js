@@ -6,10 +6,10 @@ const {
   eliminarUsuario, getRoles
 } = require('../controllers/usuariosController');
 
-router.get('/',       auth, rol('Administrador'), getUsuarios);
-router.post('/',      auth, rol('Administrador'), crearUsuario);
-router.put('/:id',    auth, rol('Administrador'), actualizarUsuario);
-router.delete('/:id', auth, rol('Administrador'), eliminarUsuario);
+router.get('/',       auth, rol('admin'), getUsuarios);
+router.post('/',      auth, rol('admin'), crearUsuario);
+router.put('/:id',    auth, rol('admin'), actualizarUsuario);
+router.delete('/:id', auth, rol('admin'), eliminarUsuario);
 router.get('/roles',  auth, getRoles);
 
 module.exports = router;

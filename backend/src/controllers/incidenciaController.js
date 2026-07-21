@@ -80,6 +80,19 @@ exports.aprobarConFirma = async (req, res) => {
   }
 };
 
+exports.solicitarCorreccion = async (req, res) => {
+  try {
+    const { observacion } = req.body;
+    if (!observacion) return res.status(400).json({ mensaje: "Debes indicar una observación" });
+    const ok = await incidenciaService.solicitarCorreccion(req.params.id, observacion, req.user.id);
+    if (!ok) return res.status(400).json({ mensaje: "No se pudo solicitar corrección. Puede que ya no esté pendiente." });
+    res.json({ mensaje: "Corrección solicitada" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al solicitar corrección" });
+  }
+};
+
 exports.eliminar = async (req, res) => {
   try {
     await incidenciaService.eliminar(req.params.id);

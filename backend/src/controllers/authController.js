@@ -51,13 +51,14 @@ exports.login = async (req, res) => {
       });
     }
 
+    const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
     const token = jwt.sign(
       {
         id: user.id,
         empleado_id: user.empleado_id,
         username: user.username,
         nombre: `${user.nombre} ${user.apellido}`,
-        rol: user.rol,
+        rol: rolesMap[user.rol] || user.rol,
       },
       process.env.JWT_SECRET,
       {

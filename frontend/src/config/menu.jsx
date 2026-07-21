@@ -57,18 +57,12 @@ export const menuPorRol = {
           icon: <ClipboardCheck size={18} />
         },
         {
-          label: "Indicadores",
-          path: "/indicadores",
-          icon: <BarChart3 size={18} />
-        },
-        {
           label: "Reportes",
           path: "/reportes",
           icon: <FileText size={18} />
         }
       ]
     },
-
     {
       section: "ADMINISTRACIÓN",
       items: [
@@ -81,6 +75,11 @@ export const menuPorRol = {
           label: "Configuración",
           path: "/configuracion",
           icon: <Settings size={18} />
+        },
+        {
+          label: "Usuarios",
+          path: "/usuarios",
+          icon: <Users size={18} />
         },
         {
           label: "Auditoría",
@@ -126,11 +125,6 @@ export const menuPorRol = {
           label: "Asistencia",
           path: "/asistencia",
           icon: <ClipboardCheck size={18} />
-        },
-        {
-          label: "Indicadores",
-          path: "/indicadores",
-          icon: <BarChart3 size={18} />
         },
         {
           label: "Reportes",

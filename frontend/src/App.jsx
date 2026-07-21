@@ -17,8 +17,8 @@ import CargosPage from "./features/cargos/pages/CargosPage";
 import EmpleadosPage from "./features/empleados/pages/EmpleadosPage";
 import HorariosPage from "./features/horarios/pages/HorariosPage";
 import IncidenciasPage from "./features/incidencias/pages/IncidenciasPage";
+import IncidenciaExpedientePage from "./features/incidencias/pages/IncidenciaExpedientePage";
 import AreasPage from "./features/areas/pages/AreasPage";
-import IndicadoresPage from "./features/indicadores/pages/IndicadoresPage";
 import ConfiguracionPage from "./features/configuracion/pages/ConfiguracionPage";
 import MiPerfilPage from "./features/miperfil/pages/MiPerfilPage";
 import MisSolicitudesPage from "./features/misSolicitudes/pages/MisSolicitudesPage";
@@ -65,10 +65,10 @@ export default function App() {
         <Route path="/horarios" element={<R roles={["admin"]}><HorariosPage /></R>} />
         <Route path="/areas" element={<R roles={["admin", "talento_humano"]}><AreasPage /></R>} />
         <Route path="/incidencias" element={<R roles={["admin", "talento_humano"]}><IncidenciasPage /></R>} />
+<Route path="/incidencias/:id" element={<R roles={["admin", "talento_humano", "empleado"]}><IncidenciaExpedientePage /></R>} />
 
         {/* Operación */}
         <Route path="/asistencia" element={<R roles={["admin", "talento_humano"]}><AsistenciaPage /></R>} />
-        <Route path="/indicadores" element={<R roles={["admin", "talento_humano"]}><IndicadoresPage /></R>} />
         <Route path="/reportes" element={<R roles={["admin", "talento_humano"]}><ReportesPage /></R>} />
 
         {/* Administración */}

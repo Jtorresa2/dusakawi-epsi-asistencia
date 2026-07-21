@@ -25,6 +25,7 @@ export default function AreasPage() {
   const [guardando, setGuardando] = useState(false);
   const [orden, setOrden] = useState("nombre");
   const { puede } = useRol();
+  const tieneAcciones = puede("areas", "editar") || puede("areas", "eliminar");
   const [areaExpandida, setAreaExpandida] = useState(null);
   const [empleados, setEmpleados] = useState([]);
   const [cargandoEmpleados, setCargandoEmpleados] = useState(false);
@@ -143,7 +144,7 @@ export default function AreasPage() {
           <Table>
             <TableHead>
               <TableRow>
-                {["Nombre", "Piso", "Descripción", "Acciones"].map((h) => (
+                {["Nombre", "Piso", "Descripción", ...(tieneAcciones ? ["Acciones"] : [])].map((h) => (
                   <TableCell key={h} sx={{ fontWeight: 600, color: "#6B7280", fontSize: 12, bgcolor: "#F9FAFB", py: 1.5 }}>
                     {h}
                   </TableCell>
@@ -153,11 +154,11 @@ export default function AreasPage() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={4} align="center" sx={{ py: 6, color: "#9CA3AF", fontSize: 14 }}>Cargando...</TableCell>
+                  <TableCell colSpan={tieneAcciones ? 4 : 3} align="center" sx={{ py: 6, color: "#9CA3AF", fontSize: 14 }}>Cargando...</TableCell>
                 </TableRow>
               ) : filtrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} align="center" sx={{ py: 6, color: "#9CA3AF", fontSize: 14 }}>
+                  <TableCell colSpan={tieneAcciones ? 4 : 3} align="center" sx={{ py: 6, color: "#9CA3AF", fontSize: 14 }}>
                     {buscar ? "No se encontraron áreas" : "No hay áreas registradas"}
                   </TableCell>
                 </TableRow>
@@ -182,18 +183,20 @@ export default function AreasPage() {
                         sx={{ height: 24, fontSize: 11, fontWeight: 600, bgcolor: "#E8F5E9", color: "#2E7D32" }} />
                     </TableCell>
                     <TableCell sx={{ py: 1.2, fontSize: 13, color: "#6B7280" }}>{a.descripcion || "—"}</TableCell>
-                    <TableCell sx={{ py: 1.2 }}>
-                      {puede("areas", "editar") && (
-                        <IconButton size="small" sx={{ color: "#6B7280" }} onClick={() => abrirEditar(a)}>
-                          <Edit2 size={15} />
-                        </IconButton>
-                      )}
-                      {puede("areas", "eliminar") && (
-                        <IconButton size="small" sx={{ color: "#DC2626" }} onClick={() => setConfirmDelete(a)}>
-                          <Trash2 size={15} />
-                        </IconButton>
-                      )}
-                    </TableCell>
+                    {tieneAcciones && (
+                      <TableCell sx={{ py: 1.2 }}>
+                        {puede("areas", "editar") && (
+                          <IconButton size="small" sx={{ color: "#6B7280" }} onClick={() => abrirEditar(a)}>
+                            <Edit2 size={15} />
+                          </IconButton>
+                        )}
+                        {puede("areas", "eliminar") && (
+                          <IconButton size="small" sx={{ color: "#DC2626" }} onClick={() => setConfirmDelete(a)}>
+                            <Trash2 size={15} />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               )}

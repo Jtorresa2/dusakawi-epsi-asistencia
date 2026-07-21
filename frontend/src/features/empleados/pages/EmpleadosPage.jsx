@@ -196,7 +196,7 @@ export default function EmpleadosPage() {
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                         <Button onClick={() => setPerfilEmpleadoId(e.id)}
                           sx={{ textTransform: "none", p: 0, minWidth: 0, justifyContent: "flex-start", textAlign: "left", display: "block" }}>
-                          <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#1565C0", "&:hover": { textDecoration: "underline" } }}>{getName(e)}</Typography>
+                          <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827", "&:hover": { textDecoration: "underline" } }}>{getName(e)}</Typography>
                         </Button>
                         <IconButton size="small" onClick={() => setPerfilEmpleadoId(e.id)}
                           sx={{ borderRadius: "6px", color: "#9CA3AF", p: 0.3 }}>

@@ -2,24 +2,20 @@ const pool = require('../config/db');
 
 exports.getRegistros = async (req, res) => {
   try {
-    const { fecha, area, piso, estado } = req.query;
-    
+    const { fecha, fecha_desde, fecha_hasta, area, piso, estado } = req.query;
+
     let query = `
-      SELECT 
-        a.id,
-        e.cedula,
-        CONCAT(e.nombre, ' ', e.apellido) AS colaborador,
-        ar.nombre AS area,
-        ar.piso,
-        a.fecha,
-        a.fecha_hora_entrada,
-        a.fecha_hora_salida,
-        a.horas_trabajadas,
-        a.horas_extra,
-        a.minutos_tardanza,
-        a.tipo_marcacion,
-        a.estado,
-        a.observacion
+      SELECT
+        a.id, e.cedula,
+        CONCAT(e.nombre, ' ', e.apellido) AS empleado,
+        ar.nombre AS area, ar.piso, a.fecha,
+        TIME_FORMAT(a.fecha_hora_entrada, '%H:%i') AS entrada1,
+        TIME_FORMAT(a.fecha_hora_salida_manana, '%H:%i') AS salida1,
+        TIME_FORMAT(a.fecha_hora_entrada_tarde, '%H:%i') AS entrada2,
+        TIME_FORMAT(a.fecha_hora_salida, '%H:%i') AS salida2,
+        a.horas_trabajadas, a.horas_extra, a.minutos_tardanza,
+        a.tipo_marcacion, a.estado, a.observacion,
+        DAYOFWEEK(a.fecha) AS dia_semana
       FROM asistencia a
       JOIN empleado e ON a.empleado_id = e.id
       JOIN areas ar ON e.area_id = ar.id
@@ -28,14 +24,21 @@ exports.getRegistros = async (req, res) => {
 
     const params = [];
 
-    if (fecha) { query += ` AND a.fecha = ?`; params.push(fecha); }
-    else { query += ` AND a.fecha = CURDATE()`; }
+    if (fecha_desde && fecha_hasta) {
+      query += ` AND a.fecha BETWEEN ? AND ?`;
+      params.push(fecha_desde, fecha_hasta);
+    } else if (fecha) {
+      query += ` AND a.fecha = ?`;
+      params.push(fecha);
+    } else {
+      query += ` AND a.fecha = CURDATE()`;
+    }
 
     if (area)   { query += ` AND ar.nombre LIKE ?`; params.push(`%${area}%`); }
     if (piso)   { query += ` AND ar.piso = ?`;      params.push(piso); }
     if (estado) { query += ` AND a.estado = ?`;     params.push(estado); }
 
-    query += ` ORDER BY a.fecha_hora_entrada DESC`;
+    query += ` ORDER BY a.fecha DESC, a.fecha_hora_entrada DESC`;
 
     const [rows] = await pool.query(query, params);
     res.json({ registros: rows });
@@ -46,17 +49,25 @@ exports.getRegistros = async (req, res) => {
 
 exports.registrarManual = async (req, res) => {
   try {
-    const { empleado_id, fecha, fecha_hora_entrada, fecha_hora_salida, tipo_marcacion, observacion } = req.body;
+    const { empleado_id, fecha, entrada1, salida1, entrada2, salida2, tipo_marcacion, observacion } = req.body;
+
+    const fecha_e1 = `${fecha} ${entrada1}:00`;
+    const fecha_s1 = salida1 ? `${fecha} ${salida1}:00` : null;
+    const fecha_e2 = entrada2 ? `${fecha} ${entrada2}:00` : null;
+    const fecha_s2 = salida2 ? `${fecha} ${salida2}:00` : null;
 
     await pool.query(
-      `INSERT INTO asistencia (empleado_id, fecha, fecha_hora_entrada, fecha_hora_salida, tipo_marcacion, estado, observacion)
-       VALUES (?, ?, ?, ?, ?, 'puntual', ?)
+      `INSERT INTO asistencia
+        (empleado_id, fecha, fecha_hora_entrada, fecha_hora_salida_manana, fecha_hora_entrada_tarde, fecha_hora_salida, tipo_marcacion, estado, observacion)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'puntual', ?)
        ON DUPLICATE KEY UPDATE
-       fecha_hora_entrada = VALUES(fecha_hora_entrada),
-       fecha_hora_salida = VALUES(fecha_hora_salida),
-       tipo_marcacion = VALUES(tipo_marcacion),
-       observacion = VALUES(observacion)`,
-      [empleado_id, fecha, fecha_hora_entrada, fecha_hora_salida, tipo_marcacion, observacion]
+        fecha_hora_entrada = VALUES(fecha_hora_entrada),
+        fecha_hora_salida_manana = VALUES(fecha_hora_salida_manana),
+        fecha_hora_entrada_tarde = VALUES(fecha_hora_entrada_tarde),
+        fecha_hora_salida = VALUES(fecha_hora_salida),
+        tipo_marcacion = VALUES(tipo_marcacion),
+        observacion = VALUES(observacion)`,
+      [empleado_id, fecha, fecha_e1, fecha_s1, fecha_e2, fecha_s2, tipo_marcacion, observacion]
     );
 
     res.json({ mensaje: 'Registro guardado correctamente' });
@@ -75,12 +86,14 @@ exports.getMiAsistencia = async (req, res) => {
     }
 
     const [rows] = await pool.query(`
-      SELECT 
+      SELECT
         a.fecha,
-        TIME_FORMAT(a.fecha_hora_entrada, '%H:%i') AS entrada,
-        TIME_FORMAT(a.fecha_hora_salida, '%H:%i') AS salida,
-        a.horas_trabajadas,
-        a.estado
+        TIME_FORMAT(a.fecha_hora_entrada, '%H:%i') AS entrada1,
+        TIME_FORMAT(a.fecha_hora_salida_manana, '%H:%i') AS salida1,
+        TIME_FORMAT(a.fecha_hora_entrada_tarde, '%H:%i') AS entrada2,
+        TIME_FORMAT(a.fecha_hora_salida, '%H:%i') AS salida2,
+        a.horas_trabajadas, a.estado,
+        DAYOFWEEK(a.fecha) AS dia_semana
       FROM asistencia a
       WHERE a.empleado_id = ?
         AND YEAR(a.fecha) = ?
@@ -90,10 +103,11 @@ exports.getMiAsistencia = async (req, res) => {
 
     const registros = rows.map(r => ({
       fecha: r.fecha,
-      entrada: r.entrada || null,
-      salida: r.salida || null,
-      horas: r.horas_trabajadas || null,
+      entrada1: r.entrada1, salida1: r.salida1,
+      entrada2: r.entrada2, salida2: r.salida2,
+      horas: r.horas_trabajadas,
       estado: r.estado ? r.estado.charAt(0).toUpperCase() + r.estado.slice(1) : null,
+      dia_semana: r.dia_semana,
     }));
 
     res.json({ registros });

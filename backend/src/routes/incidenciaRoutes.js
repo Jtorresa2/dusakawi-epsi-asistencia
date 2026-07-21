@@ -10,8 +10,9 @@ router.post("/", auth, upload.single("evidencia"), incidenciaController.crear);
 router.get("/", auth, incidenciaController.obtenerTodas);
 router.get("/:id", auth, incidenciaController.obtenerPorId);
 router.put("/:id/aprobar", auth, rol("admin", "talento_humano"), incidenciaController.aprobar);
-router.put("/:id/aprobar-con-firma", auth, rol("talento_humano"), uploadFirma.single("archivo_firmado"), incidenciaController.aprobarConFirma);
+router.put("/:id/aprobar-con-firma", auth, rol("admin", "talento_humano"), uploadFirma.single("archivo_firmado"), incidenciaController.aprobarConFirma);
 router.put("/:id/rechazar", auth, rol("admin", "talento_humano"), incidenciaController.rechazar);
+router.put("/:id/solicitar-correccion", auth, rol("admin", "talento_humano"), incidenciaController.solicitarCorreccion);
 router.delete("/:id", auth, incidenciaController.eliminar);
 
 module.exports = router;

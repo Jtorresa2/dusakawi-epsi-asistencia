@@ -46,14 +46,17 @@ export default function UsuariosPage() {
   const cargarDatos = async () => {
     try {
       setCargando(true);
-      const [resU, resR] = await Promise.all([
+      const [resU, resR, resE] = await Promise.all([
         fetch(`${API}/usuarios`, { headers }),
         fetch(`${API}/usuarios/roles`, { headers }),
+        fetch(`${API}/empleados`, { headers }),
       ]);
       const dataU = await resU.json();
       const dataR = await resR.json();
+      const dataE = await resE.json();
       setUsuarios(dataU.usuarios || []);
       setRoles(dataR.roles || []);
+      setEmpleados(dataE.empleados || dataE || []);
     } catch (err) {
       setError("Error al cargar datos");
     } finally {
@@ -279,6 +282,15 @@ export default function UsuariosPage() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={labelStyle}>Empleado asociado *</label>
+                <select value={form.empleado_id} onChange={e => setForm({ ...form, empleado_id: e.target.value })} style={inputStyle}>
+                  <option value="">— Seleccione un empleado —</option>
+                  {empleados.map(e => (
+                    <option key={e.id} value={e.id}>{e.nombre} {e.apellido} — {e.cedula}</option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <label style={labelStyle}>Usuario *</label>
                 <input value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="nombre.apellido" style={inputStyle} />

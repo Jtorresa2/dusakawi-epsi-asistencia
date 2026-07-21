@@ -19,7 +19,7 @@ const TITULOS = {
   "/horarios": "Horarios",
   "/areas": "Áreas",
   "/incidencias": "Incidencias",
-  "/indicadores": "Indicadores",
+
   "/configuracion": "Configuración",
   "/perfil": "Mi perfil",
 };

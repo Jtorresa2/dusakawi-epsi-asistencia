@@ -26,11 +26,11 @@ function calcTardanza(e1, e2) {
   let t = 0;
   if (e1) {
     const m = minDesde(e1);
-    if (m > 425) t += m - 425;
+    if (m > 430) t += m - 430;
   }
   if (e2) {
     const m = minDesde(e2);
-    if (m > 845) t += m - 845;
+    if (m > 850) t += m - 850;
   }
   return t;
 }
@@ -48,26 +48,6 @@ function determinarEstado(e1, e2, justificado) {
   const t = calcTardanza(e1, e2);
   return t > 0 ? "tardanza" : "puntual";
 }
-
-const MOCK = [
-  { id: 1, empleado: "Ana María Gómez", area: "Talento Humano", piso: 2, entrada1: "07:00", salida1: "12:00", entrada2: "14:02", salida2: "17:00", horas_extra: 0, tipo_marcacion: "huella" },
-  { id: 2, empleado: "Carlos López", area: "Sistemas", piso: 3, entrada1: "07:20", salida1: "12:00", entrada2: "14:00", salida2: "17:00", horas_extra: 0, tipo_marcacion: "facial" },
-  { id: 3, empleado: "Rosa Martínez", area: "Psicología", piso: 2, entrada1: "", salida1: "", entrada2: "", salida2: "", horas_extra: 0, tipo_marcacion: "manual" },
-  { id: 4, empleado: "Pedro Sánchez", area: "Contabilidad", piso: 1, entrada1: "07:50", salida1: "12:00", entrada2: "14:00", salida2: "17:00", horas_extra: 0, tipo_marcacion: "huella" },
-  { id: 5, empleado: "Lucía Torres", area: "Transporte", piso: 3, entrada1: "09:10", salida1: "12:00", entrada2: "14:00", salida2: "17:00", horas_extra: 0, tipo_marcacion: "tarjeta" },
-  { id: 6, empleado: "Jorge Ramírez", area: "PQR", piso: 2, entrada1: "", salida1: "", entrada2: "", salida2: "", horas_extra: 0, tipo_marcacion: "manual" },
-  { id: 7, empleado: "María Herrera", area: "Call Center", piso: 1, entrada1: "07:00", salida1: "12:00", entrada2: "14:00", salida2: "17:00", horas_extra: 1, tipo_marcacion: "facial" },
-  { id: 8, empleado: "Diego Castillo", area: "SIAU", piso: 2, entrada1: "08:35", salida1: "12:00", entrada2: "14:00", salida2: "17:00", horas_extra: 0, tipo_marcacion: "huella" },
-  { id: 9, empleado: "Sofía Vega", area: "Archivo", piso: 3, entrada1: "", salida1: "", entrada2: "", salida2: "", horas_extra: 0, tipo_marcacion: "manual" },
-  { id: 10, empleado: "Andrés Mendoza", area: "Gerencia", piso: 1, entrada1: "07:00", salida1: "12:00", entrada2: "14:00", salida2: "17:00", horas_extra: 0, tipo_marcacion: "huella" },
-  { id: 11, empleado: "Valentina Ríos", area: "Autorización", piso: 2, entrada1: "07:00", salida1: "12:00", entrada2: "14:00", salida2: "17:00", horas_extra: 0, tipo_marcacion: "facial" },
-  { id: 12, empleado: "Fernando Navarro", area: "Aseguramiento", piso: 3, entrada1: "", salida1: "", entrada2: "", salida2: "", horas_extra: 0, tipo_marcacion: "manual" },
-].map((r) => ({
-  ...r,
-  minutos_tardanza: calcTardanza(r.entrada1, r.entrada2),
-  horas_trabajadas: calcHoras(r.entrada1, r.salida1, r.entrada2, r.salida2),
-  estado: determinarEstado(r.entrada1, r.entrada2, r.id === 6 || r.id === 12),
-}));
 
 const AREAS_FALLBACK = [
   { nombre: "SIAU", piso: 1 }, { nombre: "PQR", piso: 1 }, { nombre: "Call Center", piso: 1 }, { nombre: "Aseguramiento", piso: 1 }, { nombre: "Autorización", piso: 1 }, { nombre: "Comunicación", piso: 1 }, { nombre: "Calidad", piso: 1 }, { nombre: "Jurídica", piso: 1 },
@@ -137,10 +117,13 @@ export default function AsistenciaPage() {
     try {
       setLoading(true);
       const data = await obtenerRegistros({ ...getDateParams(), area: filtroArea !== "Todas las áreas" ? filtroArea : "", piso: filtroPiso, estado: filtroEstado });
-      const rows = (data.registros || []).map((r) => ({ ...r, empleado: r.empleado || r.colaborador || "" }));
-      setRegistros(rows.length > 0 ? rows : MOCK);
+      const rows = (data.registros || []).map((r) => ({
+        ...r,
+        empleado: r.empleado || r.colaborador || "",
+      }));
+      setRegistros(rows);
     } catch {
-      setRegistros(MOCK);
+      setRegistros([]);
     } finally {
       setLoading(false);
     }
@@ -161,7 +144,7 @@ export default function AsistenciaPage() {
     setFiltroPiso("");
     setFiltroEstado("");
     setActivoCard("");
-    setRegistros(MOCK);
+    cargarRegistros();
   }
 
   function exportarExcel() {
@@ -546,9 +529,11 @@ function DetalleAsistenciaModal({ open, onClose, row }) {
   };
   const ec = badgeColors[row.estado] || { bg: "#F3F4F6", color: "#6B7280" };
 
+  const esLyM = row.dia_semana && (row.dia_semana === 1 || row.dia_semana === 2);
+  const salidaTardeEsperada = esLyM ? "18:00" : "17:00";
   const turnos = [
     { label: "Mañana", entrada: row.entrada1, salida: row.salida1, esperadoE: "07:00", esperadoS: "12:00", color: "#1B5E20", bg: "#F0FFF4" },
-    { label: "Tarde", entrada: row.entrada2, salida: row.salida2, esperadoE: "14:00", esperadoS: "18:00", color: "#D97706", bg: "#FFF7ED" },
+    { label: "Tarde", entrada: row.entrada2, salida: row.salida2, esperadoE: "14:00", esperadoS: salidaTardeEsperada, color: "#D97706", bg: "#FFF7ED" },
   ];
 
   const tipoIconMap = {

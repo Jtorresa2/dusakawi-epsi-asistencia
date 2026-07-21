@@ -21,6 +21,7 @@ app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 app.use("/api/cargos", require("./routes/cargoRoutes"));
 app.use("/api/empleados", require("./routes/empleadoRoutes"));
 app.use("/api/incidencias", require("./routes/incidenciaRoutes"));
+app.use("/api/horarios", require("./routes/horarioRoutes"));
 app.use("/api/reportes", require("./routes/reportesRoutes"));
 app.use("/api/pdf", require("./routes/pdfRoutes"));
 

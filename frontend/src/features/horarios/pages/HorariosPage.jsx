@@ -4,7 +4,8 @@ import { Clock, Save, RotateCcw, RefreshCw } from "lucide-react";
 import IconBox from "../../../shared/components/IconBox";
 import { obtenerHorarios, actualizarHorario } from "../horario.api";
 
-const CARD_IDS = [1, 2, 3, 4, 6];
+const CARD_IDS = [1, 6];
+const DIAS_ORDEN = { Lunes: 1, Martes: 2, Miércoles: 3, Jueves: 4, Viernes: 5, Sábado: 6, Domingo: 7 };
 
 export default function HorariosPage() {
   const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
@@ -19,7 +20,13 @@ export default function HorariosPage() {
     setLoading(true);
     try {
       const data = await obtenerHorarios();
-      setHorarios(data.filter((h) => CARD_IDS.includes(h.id)));
+      const filtrados = data.filter((h) => CARD_IDS.includes(h.id));
+      filtrados.forEach(h => {
+        if (h.detalles) {
+          h.detalles.sort((a, b) => (DIAS_ORDEN[a.dia_semana] || 99) - (DIAS_ORDEN[b.dia_semana] || 99));
+        }
+      });
+      setHorarios(filtrados);
     } catch {
       setHorarios([]);
     } finally {
@@ -117,22 +124,53 @@ export default function HorariosPage() {
               {esCompleta ? (
                 /* JORNADA COMPLETA — tabla read-only */
                 h.detalles?.length > 0 && (
-                  <Box sx={{ overflowX: "auto" }}>
-                    <Box sx={{ display: "grid", gridTemplateColumns: "100px 1fr 1fr 1fr 1fr", gap: 1.5, alignItems: "center" }}>
-                      <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", px: 1 }}>Día</Typography>
-                      <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", px: 1 }}>Entrada mañana</Typography>
-                      <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", px: 1 }}>Salida mañana</Typography>
-                      <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", px: 1 }}>Entrada tarde</Typography>
-                      <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", px: 1 }}>Salida tarde</Typography>
-                      {h.detalles.map((d) => (
-                        <Box key={d.id} sx={{ display: "contents" }}>
-                          <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827", px: 1 }}>{d.dia_semana}</Typography>
-                          <TextField type="time" value={d.hora_entrada_manana?.slice(0, 5) || ""} disabled slotProps={{ input: { sx: inputSx } }} />
-                          <TextField type="time" value={d.hora_salida_manana?.slice(0, 5) || ""} disabled slotProps={{ input: { sx: inputSx } }} />
-                          <TextField type="time" value={d.hora_entrada_tarde?.slice(0, 5) || ""} disabled slotProps={{ input: { sx: inputSx } }} />
-                          <TextField type="time" value={d.hora_salida_tarde?.slice(0, 5) || ""} disabled slotProps={{ input: { sx: inputSx } }} />
+                  <Box>
+                    {/* Grupo Lunes-Martes */}
+                    <Box sx={{ bgcolor: "#F0FDF4", borderRadius: "12px", p: 2, mb: 1.5 }}>
+                      <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#1B5E20", mb: 1 }}>Lunes - Martes</Typography>
+                      <Box sx={{ overflowX: "auto" }}>
+                        <Box sx={{ display: "grid", gridTemplateColumns: "100px 1fr 1fr 1fr 1fr", gap: 1.5, alignItems: "center" }}>
+                          <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", px: 1 }}>Día</Typography>
+                          <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", px: 1 }}>Entrada</Typography>
+                          <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", px: 1 }}>Salida</Typography>
+                          <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", px: 1 }}>Entrada</Typography>
+                          <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", px: 1 }}>Salida</Typography>
+                          {h.detalles.filter(d => d.dia_semana === "Lunes" || d.dia_semana === "Martes").map(d => (
+                            <Box key={d.id} sx={{ display: "contents" }}>
+                              <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827", px: 1 }}>{d.dia_semana}</Typography>
+                              <TextField type="time" value={d.hora_entrada_manana?.slice(0, 5) || ""} disabled slotProps={{ input: { sx: inputSx } }} />
+                              <TextField type="time" value={d.hora_salida_manana?.slice(0, 5) || ""} disabled slotProps={{ input: { sx: inputSx } }} />
+                              <TextField type="time" value={d.hora_entrada_tarde?.slice(0, 5) || ""} disabled slotProps={{ input: { sx: inputSx } }} />
+                              <TextField type="time" value={d.hora_salida_tarde?.slice(0, 5) || ""} disabled
+                                slotProps={{ input: { sx: { ...inputSx, "& input": { color: "#1B5E20", fontWeight: 700 } } } }} />
+                            </Box>
+                          ))}
                         </Box>
-                      ))}
+                      </Box>
+                    </Box>
+
+                    {/* Grupo Miércoles-viernes */}
+                    <Box sx={{ bgcolor: "#FFF7ED", borderRadius: "12px", p: 2 }}>
+                      <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#D97706", mb: 1 }}>Miércoles - Viernes</Typography>
+                      <Box sx={{ overflowX: "auto" }}>
+                        <Box sx={{ display: "grid", gridTemplateColumns: "100px 1fr 1fr 1fr 1fr", gap: 1.5, alignItems: "center" }}>
+                          <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", px: 1 }}>Día</Typography>
+                          <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", px: 1 }}>Entrada</Typography>
+                          <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", px: 1 }}>Salida</Typography>
+                          <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", px: 1 }}>Entrada</Typography>
+                          <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", px: 1 }}>Salida</Typography>
+                          {h.detalles.filter(d => d.dia_semana === "Miércoles" || d.dia_semana === "Jueves" || d.dia_semana === "Viernes").map(d => (
+                            <Box key={d.id} sx={{ display: "contents" }}>
+                              <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827", px: 1 }}>{d.dia_semana}</Typography>
+                              <TextField type="time" value={d.hora_entrada_manana?.slice(0, 5) || ""} disabled slotProps={{ input: { sx: inputSx } }} />
+                              <TextField type="time" value={d.hora_salida_manana?.slice(0, 5) || ""} disabled slotProps={{ input: { sx: inputSx } }} />
+                              <TextField type="time" value={d.hora_entrada_tarde?.slice(0, 5) || ""} disabled slotProps={{ input: { sx: inputSx } }} />
+                              <TextField type="time" value={d.hora_salida_tarde?.slice(0, 5) || ""} disabled
+                                slotProps={{ input: { sx: { ...inputSx, "& input": { color: "#D97706", fontWeight: 700 } } } }} />
+                            </Box>
+                          ))}
+                        </Box>
+                      </Box>
                     </Box>
                   </Box>
                 )

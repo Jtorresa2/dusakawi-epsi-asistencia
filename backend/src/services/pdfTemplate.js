@@ -223,22 +223,17 @@ function generarMembrete(res, metadata, callback) {
 
 function generarPlantillaIncidencia(doc, incidencia) {
   const PAGE_W = 595.28;
-  const PAGE_H = 841.89;
   const BODY_X = 65;
-  const CONTENT_TOP = 120;
   const FIRMA_HEIGHT = 170;
-  const FOOTER_H = 90;
-  const MAX_Y = PAGE_H - FOOTER_H - FIRMA_HEIGHT;
-
-  let y = CONTENT_TOP;
+  const MAX_Y = PAGE_H - FOOTER_HEIGHT - FIRMA_HEIGHT;
 
   doc.font("Helvetica-Bold").fontSize(12).fillColor("#1B5E20");
-  doc.text("FORMATO DE APROBACIÓN DE INCIDENCIA", BODY_X, y, { align: "center", width: PAGE_W - BODY_X * 2 });
-  y = doc.y + 8;
+  doc.text("FORMATO DE APROBACIÓN DE INCIDENCIA", { align: "center", width: PAGE_W - BODY_X * 2 });
+  doc.moveDown(0.5);
 
   doc.font("Helvetica-Bold").fontSize(10).fillColor("#111827");
-  doc.text(`ASUNTO: ${incidencia.tipo?.toUpperCase() || "—"}`, BODY_X, y);
-  y = doc.y + 5;
+  doc.text(`ASUNTO: ${incidencia.tipo?.toUpperCase() || "—"}`);
+  doc.moveDown(0.3);
 
   doc.font("Helvetica").fontSize(9).fillColor("#374151");
   const fields = [
@@ -248,18 +243,19 @@ function generarPlantillaIncidencia(doc, incidencia) {
     `Fecha:     ${incidencia.fecha ? new Date(incidencia.fecha).toLocaleDateString("es-CO") : "—"}`,
   ];
   for (const f of fields) {
-    doc.text(f, BODY_X + 10, y);
-    y = doc.y + 1;
+    doc.text(f, BODY_X + 10, doc.y);
+    doc.moveDown(0.1);
   }
-  y += 3;
+  doc.moveDown(0.3);
 
   doc.font("Helvetica-Bold").fontSize(9).fillColor("#111827");
-  doc.text("Descripción:", BODY_X, y);
-  y = doc.y + 1;
+  doc.text("Descripción:");
+  doc.moveDown(0.1);
   doc.font("Helvetica").fontSize(9).fillColor("#374151");
-  doc.text(incidencia.descripcion || "Sin descripción", BODY_X + 10, y,
-    { width: PAGE_W - BODY_X * 2 - 20, align: "justify" });
-  y = doc.y + 4;
+  doc.text(incidencia.descripcion || "Sin descripción", {
+    width: PAGE_W - BODY_X * 2 - 20, align: "justify"
+  });
+  doc.moveDown(0.3);
 
   if (incidencia.evidencia_url) {
     const evPath = path.join(__dirname, "../../", incidencia.evidencia_url.replace(/^\//, ""));
@@ -267,7 +263,7 @@ function generarPlantillaIncidencia(doc, incidencia) {
       try {
         const img = doc.openImage(evPath);
         const maxW = PAGE_W - BODY_X * 2 - 20;
-        const disponible = Math.max(0, MAX_Y - y - 20);
+        const disponible = Math.max(0, MAX_Y - doc.y - 20);
         const proporcion = img.width / img.height;
         let imgW = maxW;
         let imgH = maxW / proporcion;
@@ -276,31 +272,33 @@ function generarPlantillaIncidencia(doc, incidencia) {
           imgW = disponible * proporcion;
         }
         doc.font("Helvetica-Bold").fontSize(9).fillColor("#111827");
-        doc.text("Evidencia:", BODY_X, y);
-        y = doc.y + 2;
-        doc.image(evPath, BODY_X + 10, y, { fit: [imgW, imgH], align: "center" });
-        y = doc.y + 6;
+        doc.text("Evidencia:");
+        doc.moveDown(0.2);
+        doc.image(evPath, BODY_X + 10, doc.y, { fit: [imgW, imgH], align: "center" });
+        doc.y += imgH + 6;
       } catch {}
     }
   }
 
-  y = PAGE_H - FOOTER_H - 105;
+  const firmaY = Math.max(doc.y + 10, MAX_Y);
+  doc.y = firmaY;
   const cajetinX = BODY_X + 30;
   const cajetinW = PAGE_W - cajetinX * 2;
 
   doc.font("Helvetica-Bold").fontSize(11).fillColor("#1B5E20");
-  doc.text("FIRMA DE APROBACIÓN", cajetinX, y - 15, { align: "center", width: cajetinW });
-  y = doc.y + 25;
+  doc.text("FIRMA DE APROBACIÓN", { align: "center", width: cajetinW });
+  doc.moveDown(1.5);
 
-  doc.moveTo(cajetinX + 30, y).lineTo(cajetinX + cajetinW - 30, y).lineWidth(1).strokeColor("#111827").stroke();
-  y += 7;
+  doc.moveTo(cajetinX + 30, doc.y).lineTo(cajetinX + cajetinW - 30, doc.y).lineWidth(1).strokeColor("#111827").stroke();
+  doc.moveDown(0.5);
 
   doc.font("Helvetica-Bold").fontSize(9).fillColor("#111827");
-  doc.text("ARMANDO ENRIQUE SARMIENTO SUAREZ", cajetinX, y, { align: "center", width: cajetinW });
-  y = doc.y;
+  doc.text("ARMANDO ENRIQUE SARMIENTO SUAREZ", { align: "center", width: cajetinW });
+  doc.moveDown(0.1);
   doc.font("Helvetica").fontSize(8).fillColor("#6B7280");
-  doc.text("COORDINADOR TALENTO HUMANO", cajetinX, y += 10, { align: "center", width: cajetinW });
-  doc.text("DUSAKAWI EPSI", cajetinX, y += 9, { align: "center", width: cajetinW });
+  doc.text("COORDINADOR TALENTO HUMANO", { align: "center", width: cajetinW });
+  doc.text("DUSAKAWI EPSI", { align: "center", width: cajetinW });
 }
 
 module.exports = { generarMembrete, generarPlantillaIncidencia };
+
