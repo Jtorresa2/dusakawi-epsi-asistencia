@@ -1,14 +1,20 @@
 -- =============================================
--- PostgreSQL Schema — Dusakawi Asistencia
+-- PostgreSQL Schema + Seed — Dusakawi Asistencia
 -- =============================================
 
 BEGIN;
+
+-- =============================================
+-- SCHEMA
+-- =============================================
 
 -- 1. roles
 CREATE TABLE IF NOT EXISTS roles (
     id          SERIAL PRIMARY KEY,
     nombre      VARCHAR(100) NOT NULL,
-    descripcion VARCHAR(255)
+    descripcion VARCHAR(255),
+    permisos    JSONB,
+    creado_en   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 2. areas
@@ -16,7 +22,8 @@ CREATE TABLE IF NOT EXISTS areas (
     id          SERIAL PRIMARY KEY,
     nombre      VARCHAR(100) NOT NULL UNIQUE,
     piso        INTEGER DEFAULT 1,
-    descripcion TEXT DEFAULT ''
+    descripcion TEXT DEFAULT '',
+    creado_en   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 3. cargos
@@ -39,12 +46,14 @@ CREATE TABLE IF NOT EXISTS horarios (
 
 -- 5. horario_detalle
 CREATE TABLE IF NOT EXISTS horario_detalle (
+    id                  SERIAL,
     horario_id          INTEGER NOT NULL REFERENCES horarios(id) ON DELETE CASCADE,
     dia_semana          VARCHAR(20) NOT NULL,
     hora_entrada_manana TIME,
     hora_salida_manana  TIME,
     hora_entrada_tarde  TIME,
     hora_salida_tarde   TIME,
+    creado_en           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (horario_id, dia_semana)
 );
 
@@ -60,6 +69,10 @@ CREATE TABLE IF NOT EXISTS empleado (
     cargo_id          INTEGER REFERENCES cargos(id),
     area_id           INTEGER REFERENCES areas(id),
     horario_id        INTEGER REFERENCES horarios(id),
+    huella            TEXT,
+    foto              TEXT,
+    tarjeta_rfid      VARCHAR(50),
+    fecha_ingreso     DATE,
     activo            BOOLEAN DEFAULT TRUE,
     creado_en         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -77,7 +90,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     creado_en              TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 8. asistencia (UNIQUE empleado_id + fecha)
+-- 8. asistencia
 CREATE TABLE IF NOT EXISTS asistencia (
     id                        SERIAL PRIMARY KEY,
     empleado_id               INTEGER NOT NULL REFERENCES empleado(id),
@@ -92,6 +105,8 @@ CREATE TABLE IF NOT EXISTS asistencia (
     tipo_marcacion            VARCHAR(50),
     estado                    VARCHAR(20) NOT NULL DEFAULT 'puntual',
     observacion               TEXT,
+    dispositivo_id            VARCHAR(100),
+    creado_en                 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (empleado_id, fecha)
 );
 
@@ -115,10 +130,12 @@ CREATE TABLE IF NOT EXISTS incidencias (
 
 -- 10. configuracion
 CREATE TABLE IF NOT EXISTS configuracion (
-    id    SERIAL PRIMARY KEY,
-    clave VARCHAR(100) NOT NULL UNIQUE,
-    valor TEXT NOT NULL,
-    tipo  VARCHAR(20) NOT NULL
+    id              SERIAL PRIMARY KEY,
+    clave           VARCHAR(100) NOT NULL UNIQUE,
+    valor           TEXT NOT NULL,
+    tipo            VARCHAR(20) NOT NULL,
+    creado_en       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 11. permisos
@@ -145,13 +162,67 @@ CREATE TABLE IF NOT EXISTS reportes_historial (
 );
 
 -- =============================================
--- Seed data
+-- SEED DATA — 3 usuarios funcionales
 -- =============================================
 
-INSERT INTO roles (nombre, descripcion) VALUES
-    ('Administrador', 'Acceso total al sistema'),
-    ('Talento Humano', 'Gestión de personal y reportes'),
-    ('Empleado', 'Auto-servicio y marcación')
+-- Roles
+INSERT INTO roles (id, nombre, descripcion, permisos) VALUES
+    (1, 'Administrador', 'Acceso total al sistema', '{"reportes":true,"usuarios":true,"dashboard":true,"empleados":true,"dispositivos":true}'),
+    (2, 'Talento Humano', 'Gestión de personal y reportes', '{"reportes":true,"usuarios":false,"dashboard":true,"empleados":true,"dispositivos":false}'),
+    (3, 'Empleado', 'Auto-servicio y marcación', '{"reportes":false,"usuarios":false,"dashboard":false,"empleados":false,"dispositivos":false}')
 ON CONFLICT (id) DO NOTHING;
+SELECT setval('roles_id_seq', 3, true);
+
+-- Areas
+INSERT INTO areas (id, nombre, piso, descripcion) VALUES
+    (1, 'Sistemas', 3, 'Soporte técnico y sistemas de información'),
+    (2, 'Talento Humano', 4, 'Gestión del talento humano'),
+    (3, 'Gerencia', 5, 'Gerencia general')
+ON CONFLICT (id) DO NOTHING;
+SELECT setval('areas_id_seq', 3, true);
+
+-- Cargos
+INSERT INTO cargos (id, nombre, descripcion, estado, area_id) VALUES
+    (1, 'Gerente General', 'Dirección general de la empresa', 'activo', 3),
+    (2, 'Coordinador de Talento Humano', 'Coordinación del equipo de talento humano', 'activo', 2),
+    (3, 'Técnico de Sistemas', 'Soporte técnico y mantenimiento de sistemas', 'activo', 1)
+ON CONFLICT (id) DO NOTHING;
+SELECT setval('cargos_id_seq', 3, true);
+
+-- Horario
+INSERT INTO horarios (id, nombre, tolerancia_minutos) VALUES
+    (1, 'Administrativo', 5)
+ON CONFLICT (id) DO NOTHING;
+SELECT setval('horarios_id_seq', 1, true);
+
+-- Horario detalle (Lunes a Viernes)
+INSERT INTO horario_detalle (horario_id, dia_semana, hora_entrada_manana, hora_salida_manana, hora_entrada_tarde, hora_salida_tarde) VALUES
+    (1, 'Lunes',     '07:00', '12:00', '14:00', '18:00'),
+    (1, 'Martes',    '07:00', '12:00', '14:00', '18:00'),
+    (1, 'Miércoles', '07:00', '12:00', '14:00', '17:00'),
+    (1, 'Jueves',    '07:00', '12:00', '14:00', '17:00'),
+    (1, 'Viernes',   '07:00', '12:00', '14:00', '17:00')
+ON CONFLICT (horario_id, dia_semana) DO NOTHING;
+
+-- Empleados
+INSERT INTO empleado (id, cedula, nombre, apellido, correo, cargo_id, area_id, horario_id, tarjeta_rfid, fecha_ingreso, activo) VALUES
+    (1, '10000001', 'Carlos', 'Rodríguez', 'c.rodriguez@dusakawi.com', 1, 3, NULL, 'RFID-001', '2020-01-15', true),
+    (2, '10000002', 'María', 'López', 'm.lopez@dusakawi.com', 2, 2, 1, 'RFID-002', '2019-03-10', true),
+    (3, '1015995066', 'Juliana', 'Torres', 'torresaaronjuliana@gmail.com', 3, 1, NULL, NULL, NULL, true)
+ON CONFLICT (id) DO NOTHING;
+SELECT setval('empleado_id_seq', 3, true);
+
+-- Usuarios (con los password_hash reales de la base original)
+INSERT INTO usuarios (id, empleado_id, rol_id, username, password_hash, activo, password_reset_required) VALUES
+    (1, 1, 3, 'carlos', '$2b$10$QfVbkqSfSztAqeMBBcIOxuyeCFGxeCa/X3ErYjTvG5YSKbzM5SHvG', true, false),
+    (2, 2, 2, 'talento', '$2b$10$FnNwnu0sg.DOrspnoCm91.PVx/HHmKhXM7fUGh6i1mZQLN7JhIVR.', true, false),
+    (3, 3, 1, 'Jtorresa22', '$2b$10$UwXojDQlljyPI78khkYz8u4gWCb07lp90pXqS8wf4oqGnYzpptfGu', true, false)
+ON CONFLICT (id) DO NOTHING;
+SELECT setval('usuarios_id_seq', 3, true);
+
+-- Configuración: motor de base de datos
+INSERT INTO configuracion (clave, valor, tipo) VALUES
+    ('motor_bd', 'PostgreSQL', 'text')
+ON CONFLICT (clave) DO NOTHING;
 
 COMMIT;
