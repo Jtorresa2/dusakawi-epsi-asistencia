@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Box, Typography, Paper, Button, Chip } from "@mui/material";
-import { ChevronRight, FileText, Eye, Download } from "lucide-react";
+import { Box, Typography, Paper, Button, Chip, Dialog, DialogTitle, DialogContent, IconButton } from "@mui/material";
+import { ChevronRight, FileText, Eye, Download, X } from "lucide-react";
 import { exportarExcel } from "../../../shared/utils/exportarExcel";
 import Loading from "../../../shared/components/Loading";
 import DataTable from "../../../shared/components/DataTable";
@@ -28,6 +28,7 @@ const IND_META = [
 
 const API_FNS = { obtenerReporteAsistencia, obtenerReporteIncidencias, obtenerReporteTardanzas, obtenerReporteAusencias, obtenerReporteEmpleados, obtenerReporteMarcaciones };
 const NOMBRES = { asistencia: "Reporte de Asistencia", incidencias: "Reporte de Incidencias", tardanzas: "Reporte de Tardanzas", ausencias: "Reporte de Ausencias", empleados: "Reporte de Empleados", marcaciones: "Reporte de Marcaciones" };
+const NOMBRES_REV = Object.fromEntries(Object.entries(NOMBRES).map(([k, v]) => [v, k]));
 
 export default function ReportesPage() {
   const [tipoActivo, setTipoActivo] = useState(null);
@@ -35,6 +36,8 @@ export default function ReportesPage() {
   const [tendencia, setTendencia] = useState([]);
   const [historial, setHistorial] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [pdfPreview, setPdfPreview] = useState(null);
+  const [filtrosIniciales, setFiltrosIniciales] = useState(null);
 
   useEffect(() => {
     Promise.all([obtenerIndicadores(), obtenerTendencia(), obtenerHistorial()])
@@ -43,8 +46,10 @@ export default function ReportesPage() {
       .finally(() => setCargando(false));
   }, []);
 
-  const handlePDF = (tipo, f) => {
+  const buildPdfUrl = (tipo, f) => {
     const p = new URLSearchParams();
+    const token = localStorage.getItem("token");
+    if (token) p.append("token", token);
     if (f.fecha_desde) p.append("fecha_desde", f.fecha_desde);
     if (f.fecha_hasta) p.append("fecha_hasta", f.fecha_hasta);
     if (f.empleado_id) p.append("empleado_id", f.empleado_id);
@@ -54,36 +59,45 @@ export default function ReportesPage() {
     if (f.estado_incidencia) p.append("estado", f.estado_incidencia);
     if (f.tipo_incidencia) p.append("tipo", f.tipo_incidencia);
     if (f.estado_empleado) p.append("activo", f.estado_empleado);
-    window.open(`/api/pdf/${tipo}?${p.toString()}`, "_blank");
+    return `/api/pdf/${tipo}?${p.toString()}`;
+  };
+
+  const handlePDF = (tipo, f) => {
+    const url = buildPdfUrl(tipo, f);
+    setPdfPreview(url);
     guardarHistorial({ tipo_reporte: NOMBRES[tipo], formato: "PDF", filtros: f, total_registros: 0 }).catch(() => {});
   };
 
   const handleExcel = (tipo, registros) => {
     if (!registros?.length) return;
-    exportarExcel(registros, (NOMBRES[tipo] || tipo).replace(/\s+/g, "_"));
+    let datos = registros;
+    if (tipo === "incidencias") {
+      const ESTADO_MAPA = { pendiente: "Pendiente", aprobado: "Aprobado", rechazado: "Rechazado" };
+      datos = registros.map(r => ({
+        ID: r.id, Empleado: r.empleado, Cédula: r.cedula, Área: r.area,
+        Tipo: r.tipo, Descripción: r.descripcion, Fecha: r.fecha,
+        Estado: ESTADO_MAPA[r.estado] || r.estado, Motivo: r.motivo_rechazo || "",
+      }));
+    }
+    exportarExcel(datos, (NOMBRES[tipo] || tipo).replace(/\s+/g, "_"));
     guardarHistorial({ tipo_reporte: NOMBRES[tipo], formato: "Excel", filtros: {}, total_registros: registros.length }).catch(() => {});
   };
 
   if (cargando) return <Loading texto="Cargando centro de reportes..." />;
 
   return (
+    <>
     <Box sx={{ p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2.5 }}>
-      <Paper elevation={0} sx={{ p: 3, borderRadius: "22px", background: "linear-gradient(135deg, #1B5E20 0%, #388E3C 50%, #43A047 100%)", color: "#fff" }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Box sx={{ width: 48, height: 48, borderRadius: "14px", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}><FileText size={24} /></Box>
-          <Box>
-            <Typography sx={{ fontSize: 24, fontWeight: 700, lineHeight: 1.2 }}>Reportes</Typography>
-            <Typography sx={{ mt: 0.3, fontSize: 14, opacity: 0.85 }}>Centro de reportes e indicadores del sistema</Typography>
-          </Box>
-        </Box>
-      </Paper>
+      <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
+                Inicio / Operación / Incidencias
+      </Typography>
 
       {tipoActivo ? (
-        <ReporteView tipoReporte={tipoActivo} apiFns={API_FNS} onVolver={() => setTipoActivo(null)} onExportarPDF={handlePDF} onExportarExcel={handleExcel} />
+        <ReporteView tipoReporte={tipoActivo} apiFns={API_FNS} filtrosIniciales={filtrosIniciales} onVolver={() => { setTipoActivo(null); setFiltrosIniciales(null); }} onExportarPDF={handlePDF} onExportarExcel={handleExcel} />
       ) : (
         <>
           <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC" }}>
-            <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827", mb: 2 }}>Centro de Reportes</Typography>
+            <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827", mb: 2 }}></Typography>
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>
               {CARD_DATA.map((r) => (
                 <Paper key={r.id} elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC", display: "flex", flexDirection: "column", transition: "all .25s ease", "&:hover": { transform: "translateY(-3px)", boxShadow: "0 8px 25px rgba(0,0,0,.07)" } }}>
@@ -152,12 +166,40 @@ export default function ReportesPage() {
                 { field: "fecha_generacion", headerName: "Fecha", width: 120, valueFormatter: v => v ? new Date(v).toLocaleDateString("es-CO") : "—" },
                 { field: "fecha_generacion_hora", headerName: "Hora", width: 80, valueFormatter: v => v ? new Date(v).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" }) : "—" },
                 { field: "formato", headerName: "Formato", width: 100, renderCell: p => { const c = { PDF: { bg: "#FEE2E2", color: "#991B1B" }, Excel: { bg: "#D1FAE5", color: "#065F46" }, Pantalla: { bg: "#F3F4F6", color: "#374151" } }; const cl = c[p.value] || c.Pantalla; return <Chip label={p.value || "Pantalla"} size="small" sx={{ fontWeight: 600, fontSize: 11, background: cl.bg, color: cl.color, borderRadius: "8px" }} />; } },
-                { field: "acciones", headerName: "Acciones", width: 140, sortable: false, renderCell: () => <Box sx={{ display: "flex", gap: 0.5 }}><Chip icon={<Eye size={14} />} label="Ver" size="small" variant="outlined" sx={{ borderRadius: "8px", fontSize: 11, cursor: "pointer" }} /><Chip icon={<Download size={14} />} label="Descargar" size="small" variant="outlined" sx={{ borderRadius: "8px", fontSize: 11, cursor: "pointer" }} /></Box> },
+                { field: "acciones", headerName: "Acciones", width: 100, sortable: false, renderCell: ({ row }) => {
+                  const estiloBtn = { width: 30, height: 30, borderRadius: "8px", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all .2s ease" };
+                  const key = NOMBRES_REV[row.tipo_reporte];
+                  return (
+                    <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+                      <Box sx={{ ...estiloBtn, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }} title="Ver reporte"
+                        onClick={(e) => { e.stopPropagation(); if (key) { let filtros = row.filtros; try { filtros = typeof filtros === "string" ? JSON.parse(filtros) : filtros; } catch {} setFiltrosIniciales(filtros || {}); setTipoActivo(key); } }}>
+                        <Eye size={14} />
+                      </Box>
+                      <Box sx={{ ...estiloBtn, bgcolor: "#E8F5E9", color: "#2E7D32", "&:hover": { bgcolor: "#C8E6C9" } }} title="Descargar"
+                        onClick={(e) => { e.stopPropagation(); if (key) { let filtros = row.filtros; try { filtros = typeof filtros === "string" ? JSON.parse(filtros) : filtros; } catch {} handlePDF(key, filtros || {}); } }}>
+                        <Download size={14} />
+                      </Box>
+                    </Box>
+                  );
+                } },
               ]} entityLabel="reportes" getRowId={r => r.id} pageSize={5} />
             </Paper>
           )}
         </>
       )}
     </Box>
+
+      <Dialog open={!!pdfPreview} onClose={() => setPdfPreview(null)} maxWidth="xl" fullWidth PaperProps={{ sx: { borderRadius: "16px", height: "95vh", maxWidth: "95vw" } }}>
+        <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", py: 1.5, px: 2.5 }}>
+          <Typography sx={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>Vista previa</Typography>
+          <IconButton onClick={() => setPdfPreview(null)} sx={{ color: "#6B7280" }}><X size={20} /></IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, height: "calc(95vh - 64px)" }}>
+          {pdfPreview && (
+            <iframe src={pdfPreview} style={{ width: "100%", height: "100%", border: "none" }} title="Vista previa PDF" />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

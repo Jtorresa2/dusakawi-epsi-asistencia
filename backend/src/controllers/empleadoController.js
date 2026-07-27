@@ -30,7 +30,7 @@ exports.crear = async (req, res) => {
     res.status(201).json({ mensaje: "Empleado creado correctamente", id });
   } catch (error) {
     console.error(error);
-    if (error.code === "ER_DUP_ENTRY") {
+    if (error.code === "23505") {
       return res.status(400).json({ mensaje: "La cédula o correo ya están registrados" });
     }
     res.status(500).json({ mensaje: "Error al crear el empleado" });
@@ -53,7 +53,7 @@ exports.eliminar = async (req, res) => {
     res.json({ mensaje: "Empleado eliminado correctamente" });
   } catch (error) {
     console.error(error);
-    if (error.code === "ER_ROW_IS_REFERENCED_2") {
+    if (error.code === "23503") {
       return res.status(400).json({ mensaje: "No se puede eliminar el empleado porque tiene registros asociados" });
     }
     res.status(500).json({ mensaje: "Error al eliminar el empleado" });

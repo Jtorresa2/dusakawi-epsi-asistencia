@@ -24,11 +24,11 @@ exports.obtenerPorId = async (req, res) => {
 exports.crear = async (req, res) => {
   try {
     const { nombre, piso, descripcion } = req.body;
-    const [result] = await db.query("INSERT INTO areas (nombre, piso, descripcion) VALUES (?, ?, ?)", [nombre, piso || 1, descripcion || ""]);
-    res.status(201).json({ mensaje: "Área creada correctamente", id: result.insertId });
+    const [rows, result] = await db.query("INSERT INTO areas (nombre, piso, descripcion) VALUES (?, ?, ?) RETURNING id", [nombre, piso || 1, descripcion || ""]);
+    res.status(201).json({ mensaje: "Área creada correctamente", id: rows[0]?.id || result.insertId });
   } catch (error) {
     console.error(error);
-    if (error.code === "ER_DUP_ENTRY") return res.status(400).json({ mensaje: "El nombre del área ya existe" });
+    if (error.code === "23505") return res.status(400).json({ mensaje: "El nombre del área ya existe" });
     res.status(500).json({ mensaje: "Error al crear el área" });
   }
 };

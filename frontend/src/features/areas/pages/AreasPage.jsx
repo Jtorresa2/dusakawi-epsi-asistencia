@@ -4,9 +4,10 @@ import {
   Box, Button, Paper, TextField, Typography,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   IconButton, Chip, Dialog, DialogTitle, DialogContent, DialogActions,
-  ToggleButtonGroup, ToggleButton, Collapse,
+  Collapse, FormControl, InputLabel, Select, MenuItem,
 } from "@mui/material";
-import { Plus, Edit2, Trash2, Search, Building2, SortAsc, ArrowUpDown, Users, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, Building2, Users, ChevronDown, ChevronRight, X, Building, Layers, MapPin } from "lucide-react";
+
 import { obtenerAreas, crearArea, actualizarArea, eliminarArea, obtenerEmpleadosPorArea } from "../area.api";
 import useRol from "../../../shared/hooks/useRol";
 import ConfirmDialog from "../../../shared/components/ConfirmDialog";
@@ -118,25 +119,61 @@ export default function AreasPage() {
         )}
       </Box>
 
-      {/* SEARCH + SORT */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3, flexWrap: "wrap" }}>
-        <TextField fullWidth placeholder="Buscar área..."
-          value={buscar} onChange={(e) => setBuscar(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: <Search size={18} style={{ color: "#9CA3AF", marginRight: 10 }} />,
-              sx: { borderRadius: "10px", fontSize: 14, height: 42, bgcolor: "#F9FAFB" },
-            },
-          }}
-          sx={{ maxWidth: 360 }}
-        />
-        <ToggleButtonGroup value={orden} exclusive size="small"
-          onChange={(_, v) => v && setOrden(v)}
-          sx={{ "& .MuiToggleButton-root": { borderRadius: "8px", border: "1px solid #ECECEC", px: 2, fontSize: 12, fontWeight: 600, textTransform: "none", color: "#6B7280", "&.Mui-selected": { bgcolor: "#E8F5E9", color: "#1B5E20", borderColor: "#A5D6A7" } } }}>
-          <ToggleButton value="nombre"><SortAsc size={15} style={{ marginRight: 6 }} />A - Z</ToggleButton>
-          <ToggleButton value="piso"><ArrowUpDown size={15} style={{ marginRight: 6 }} />Por piso</ToggleButton>
-        </ToggleButtonGroup>
+      {/* TARJETAS RESUMEN */}
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2, mb: 3.5 }}>
+        {[
+          { icon: <Building size={20} />, value: areas.length, label: "Total áreas", color: "#1B5E20", bg: "#E8F5E9", onClick: () => { setBuscar(""); setOrden("nombre"); } },
+          { icon: <MapPin size={20} />, value: new Set(areas.map((a) => a.piso).filter((p) => p !== undefined && p !== null)).size, label: "Pisos distintos", color: "#1565C0", bg: "#EFF6FF", onClick: () => setOrden("piso") },
+          { icon: <Layers size={20} />, value: areas.filter((a) => a.descripcion?.trim()).length, label: "Con descripción", color: "#7C3AED", bg: "#F3E8FF", onClick: () => {} },
+        ].map((card, i) => (
+          <Paper key={i} elevation={0} onClick={card.onClick}
+            sx={{ p: 2, borderRadius: "16px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 1.5, cursor: "pointer", transition: "all .25s ease", "&:hover": { transform: "translateY(-2px)", boxShadow: "0 4px 15px rgba(0,0,0,.06)" } }}>
+            <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: card.bg, display: "flex", alignItems: "center", justifyContent: "center", color: card.color, flexShrink: 0 }}>
+              {card.icon}
+            </Box>
+            <Box>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.03em" }}>{card.label}</Typography>
+              <Typography sx={{ fontSize: 22, fontWeight: 700, color: card.color, lineHeight: 1.2 }}>{card.value}</Typography>
+            </Box>
+          </Paper>
+        ))}
       </Box>
+
+      {/* BARRA DE FILTROS */}
+      <Paper elevation={0} sx={{ borderRadius: "20px", border: "1px solid #ECECEC", p: 2.5, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 2, alignItems: "end" }}>
+          <Box sx={{ display: "grid", gap: 0.6 }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280" }}>Buscar área</Typography>
+            <TextField placeholder="Nombre o piso..."
+              value={buscar} onChange={(e) => setBuscar(e.target.value)}
+              sx={{ width: "100%", minWidth: 200 }}
+              slotProps={{
+                input: {
+                  startAdornment: <Search size={16} style={{ color: "#9CA3AF", marginRight: 6 }} />,
+                  sx: { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: "#F9FAFB" },
+                },
+              }} />
+          </Box>
+          <Box sx={{ display: "grid", gap: 0.6 }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280" }}>Piso</Typography>
+            <Select value="todos" onChange={() => {}} size="small"
+              sx={{ borderRadius: "10px", fontSize: 13, height: 40, minWidth: 120, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#ECECEC" } }}>
+              <MenuItem value="todos">Todos</MenuItem>
+              {[...new Set(areas.map((a) => a.piso).filter((p) => p !== undefined && p !== null))].sort((a, b) => a - b).map((p) => (
+                <MenuItem key={p} value={p}>Piso {p}</MenuItem>
+              ))}
+            </Select>
+          </Box>
+          <Box sx={{ display: "grid", gap: 0.6 }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280" }}>Ordenar</Typography>
+            <Select value={orden} onChange={(e) => setOrden(e.target.value)} size="small"
+              sx={{ borderRadius: "10px", fontSize: 13, height: 40, minWidth: 130, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#ECECEC" } }}>
+              <MenuItem value="nombre">A - Z</MenuItem>
+              <MenuItem value="piso">Por piso</MenuItem>
+            </Select>
+          </Box>
+        </Box>
+      </Paper>
 
       {/* TABLE */}
       <Paper elevation={0} sx={{ borderRadius: "20px", border: "1px solid #ECECEC", overflow: "hidden" }}>
@@ -173,7 +210,7 @@ export default function AreasPage() {
                         </IconButton>
                         <Building2 size={16} style={{ color: "#1B5E20" }} />
                         <Button onClick={() => navigate(`/empleados?area=${encodeURIComponent(a.nombre)}`)}
-                          sx={{ textTransform: "none", p: 0, minWidth: 0, color: "#1565C0", fontWeight: 600, fontSize: 14, "&:hover": { textDecoration: "underline" } }}>
+                          sx={{ textTransform: "none", p: 0, minWidth: 0, color: "#111827", fontWeight: 600, fontSize: 14, "&:hover": { textDecoration: "underline", color: "#1B5E20" } }}>
                           {a.nombre}
                         </Button>
                       </Box>
@@ -185,16 +222,20 @@ export default function AreasPage() {
                     <TableCell sx={{ py: 1.2, fontSize: 13, color: "#6B7280" }}>{a.descripcion || "—"}</TableCell>
                     {tieneAcciones && (
                       <TableCell sx={{ py: 1.2 }}>
-                        {puede("areas", "editar") && (
-                          <IconButton size="small" sx={{ color: "#6B7280" }} onClick={() => abrirEditar(a)}>
-                            <Edit2 size={15} />
-                          </IconButton>
-                        )}
-                        {puede("areas", "eliminar") && (
-                          <IconButton size="small" sx={{ color: "#DC2626" }} onClick={() => setConfirmDelete(a)}>
-                            <Trash2 size={15} />
-                          </IconButton>
-                        )}
+                        <Box sx={{ display: "flex", gap: 0.5 }}>
+                          {puede("areas", "editar") && (
+                            <Box onClick={() => abrirEditar(a)}
+                              sx={{ width: 32, height: 32, borderRadius: "10px", bgcolor: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center", color: "#1565C0", cursor: "pointer", transition: "all 0.2s", "&:hover": { bgcolor: "#DBEAFE" } }}>
+                              <Edit2 size={15} />
+                            </Box>
+                          )}
+                          {puede("areas", "eliminar") && (
+                            <Box onClick={() => setConfirmDelete(a)}
+                              sx={{ width: 32, height: 32, borderRadius: "10px", bgcolor: "#FEE2E2", display: "flex", alignItems: "center", justifyContent: "center", color: "#DC2626", cursor: "pointer", transition: "all 0.2s", "&:hover": { bgcolor: "#FECACA" } }}>
+                              <Trash2 size={15} />
+                            </Box>
+                          )}
+                        </Box>
                       </TableCell>
                     )}
                   </TableRow>
@@ -258,20 +299,35 @@ export default function AreasPage() {
 
       {/* MODAL CREAR/EDITAR */}
       <Dialog open={modal} onClose={() => setModal(false)} maxWidth="sm" fullWidth
-        PaperProps={{ sx: { borderRadius: "16px" } }}>
+        PaperProps={{ sx: { borderRadius: "16px", position: "relative" } }}
+        sx={{ "& .MuiPaper-root": { backgroundColor: "#F0FDF4" } }}>
         <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
           {editando ? "Editar área" : "Nueva área"}
+          <IconButton onClick={() => setModal(false)} size="small" sx={{ position: "absolute", top: 8, right: 8, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+            <X size={18} />
+          </IconButton>
         </DialogTitle>
         <DialogContent sx={{ pt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
           <TextField label="Nombre" value={form.nombre}
             onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            fullWidth slotProps={{ inputLabel: { sx: { fontSize: 13 } }, input: { sx: { borderRadius: "10px", fontSize: 14 } } }} />
-          <TextField label="Piso" type="number" value={form.piso}
-            onChange={(e) => setForm({ ...form, piso: e.target.value })}
-            fullWidth slotProps={{ inputLabel: { sx: { fontSize: 13 } }, input: { sx: { borderRadius: "10px", fontSize: 14 } } }} />
+            fullWidth slotProps={{ inputLabel: { sx: { fontSize: 13 } } }}
+            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "10px", "& fieldset": { borderColor: "#6B7280" }, "&:hover fieldset": { borderColor: "#374151" } } }} />
+          <FormControl fullWidth>
+            <InputLabel sx={{ fontSize: 13 }}>Piso</InputLabel>
+            <Select value={form.piso} label="Piso"
+              sx={{ borderRadius: "10px", fontSize: 14, "& fieldset": { borderColor: "#6B7280" }, "&:hover fieldset": { borderColor: "#374151" } }}
+              onChange={(e) => setForm({ ...form, piso: e.target.value })}>
+              <MenuItem value="1">Piso 1</MenuItem>
+              <MenuItem value="2">Piso 2</MenuItem>
+              <MenuItem value="3">Piso 3</MenuItem>
+              <MenuItem value="4">Piso 4</MenuItem>
+              <MenuItem value="5">Piso 5</MenuItem>
+            </Select>
+          </FormControl>
           <TextField label="Descripción" value={form.descripcion} multiline rows={2}
             onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-            fullWidth slotProps={{ inputLabel: { sx: { fontSize: 13 } }, input: { sx: { borderRadius: "10px", fontSize: 14 } } }} />
+            fullWidth slotProps={{ inputLabel: { sx: { fontSize: 13 } } }}
+            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "10px", "& fieldset": { borderColor: "#6B7280" }, "&:hover fieldset": { borderColor: "#374151" } } }} />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
           <Button onClick={() => setModal(false)}

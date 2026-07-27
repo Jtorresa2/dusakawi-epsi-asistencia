@@ -7,7 +7,7 @@ exports.obtenerTodos = async (req, res) => {
         hd.hora_entrada_tarde, hd.hora_salida_tarde
       FROM horarios h
       LEFT JOIN horario_detalle hd ON h.id = hd.horario_id
-      ORDER BY h.id, FIELD(hd.dia_semana, 'Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo')
+      ORDER BY h.id, CASE hd.dia_semana WHEN 'Lunes' THEN 1 WHEN 'Martes' THEN 2 WHEN 'Miércoles' THEN 3 WHEN 'Jueves' THEN 4 WHEN 'Viernes' THEN 5 WHEN 'Sábado' THEN 6 WHEN 'Domingo' THEN 7 END
     `);
     const agrupados = {};
     horarios.forEach(r => {
@@ -42,7 +42,7 @@ exports.obtenerPorId = async (req, res) => {
       FROM horarios h
       LEFT JOIN horario_detalle hd ON h.id = hd.horario_id
       WHERE h.id = ?
-      ORDER BY FIELD(hd.dia_semana, 'Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo')
+      ORDER BY CASE hd.dia_semana WHEN 'Lunes' THEN 1 WHEN 'Martes' THEN 2 WHEN 'Miércoles' THEN 3 WHEN 'Jueves' THEN 4 WHEN 'Viernes' THEN 5 WHEN 'Sábado' THEN 6 WHEN 'Domingo' THEN 7 END
     `, [id]);
     if (horarios.length === 0) return res.status(404).json({ mensaje: 'Horario no encontrado' });
     const horario = {

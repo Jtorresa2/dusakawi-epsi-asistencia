@@ -165,8 +165,7 @@ export default function ReportarIncidenciaPage() {
   if (paso === 2) {
     return (
       <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3, maxWidth: 1400, mx: "auto", width: "100%" }}>
-        <PageHeader titulo="Reportar incidencia" subtitulo="Notifica una falla biométrica o justifica tu tardanza" />
-        <StepIndicator paso={2} />
+        
         <Paper elevation={0} sx={{ p: 6, borderRadius: "20px", border: "1px solid #ECECEC", textAlign: "center", maxWidth: 520, mx: "auto", width: "100%" }}>
           <Box sx={{ width: 72, height: 72, borderRadius: "50%", bgcolor: "#D1FAE5", display: "flex", alignItems: "center", justifyContent: "center", mx: "auto", mb: 2.5 }}>
             <CheckCircle2 size={36} color="#16A34A" />
@@ -209,8 +208,9 @@ export default function ReportarIncidenciaPage() {
 
   return (
     <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3, maxWidth: 1400, mx: "auto", width: "100%" }}>
-      <PageHeader titulo="Reportar incidencia" subtitulo="Notifica una falla biométrica o justifica tu tardanza" />
-      <StepIndicator paso={1} />
+     <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
+                Inicio / Gestión / Reportar incidencia
+      </Typography>
 
       {error && (
         <Paper elevation={0} sx={{ p: 2, borderRadius: "12px", bgcolor: "#FEE2E2", display: "flex", alignItems: "center", gap: 1.5 }}>

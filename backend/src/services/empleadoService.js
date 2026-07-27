@@ -38,19 +38,32 @@ exports.obtenerPorId = async (id) => {
 
 exports.crear = async (data) => {
   const { cedula, nombre, apellido, correo, telefono, fecha_nacimiento, cargo_id, area_id, horario_id, activo } = data;
-  const [result] = await db.query(
+  const [rows, result] = await db.query(
     `INSERT INTO empleado (cedula, nombre, apellido, correo, telefono, fecha_nacimiento, cargo_id, area_id, horario_id, activo)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
     [cedula, nombre, apellido, correo, telefono, fecha_nacimiento, cargo_id || null, area_id || null, horario_id || null, activo !== undefined ? activo : 1]
   );
-  return result.insertId;
+  return rows[0]?.id || result.insertId;
 };
 
 exports.actualizar = async (id, data) => {
-  const { cedula, nombre, apellido, correo, telefono, fecha_nacimiento, cargo_id, area_id, horario_id, activo } = data;
+  const camposPermitidos = ["cedula", "nombre", "apellido", "correo", "telefono", "fecha_nacimiento", "cargo_id", "area_id", "horario_id", "activo"];
+  const sets = [];
+  const params = [];
+
+  for (const campo of camposPermitidos) {
+    if (data[campo] !== undefined) {
+      sets.push(`${campo} = ?`);
+      params.push(campo === "activo" ? data[campo] : (data[campo] ?? null));
+    }
+  }
+
+  if (sets.length === 0) return;
+
+  params.push(id);
   await db.query(
-    `UPDATE empleado SET cedula = ?, nombre = ?, apellido = ?, correo = ?, telefono = ?, fecha_nacimiento = ?, cargo_id = ?, area_id = ?, horario_id = ?, activo = ? WHERE id = ?`,
-    [cedula, nombre, apellido, correo, telefono, fecha_nacimiento, cargo_id || null, area_id || null, horario_id || null, activo !== undefined ? activo : 1, id]
+    `UPDATE empleado SET ${sets.join(", ")} WHERE id = ?`,
+    params
   );
 };
 

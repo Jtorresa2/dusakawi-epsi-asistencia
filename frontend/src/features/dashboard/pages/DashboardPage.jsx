@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Box, Paper, Typography, Button, Avatar, Chip, Grid } from "@mui/material";
 import { Clock3, CheckCircle, XCircle, AlertTriangle, Clock, FileText, User, Send, ClipboardList, MapPin, LogIn, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import * as XLSX from "xlsx";
 import DashboardHeader from "../components/DashboardHeader";
 import FilterBar from "../components/FilterBar";
 import StatCard from "../components/StatCard";
@@ -11,8 +10,9 @@ import OnTimeBarChart from "../components/OnTimeBarChart";
 import OvertimeBarChart from "../components/OvertimeBarChart";
 import SourceMarkingCard from "../components/SourceMarkingCard";
 import TodayActivity from "../components/TodayActivity";
-import PDFPreviewModal from "../../../shared/components/PDFPreviewModal";
-import { obtenerIndicadores } from "../dashboard.api";
+import ResumenPorArea from "../components/ResumenPorArea";
+
+import { obtenerIndicadores, obtenerResumenPorArea } from "../dashboard.api";
 import { obtenerHorarios } from "../../horarios/horario.api";
 import DashboardSkeleton from "../components/DashboardSkeleton";
 
@@ -93,7 +93,7 @@ function EmployeeDashboard({ usuario }) {
       {/* 4 stat cards */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" }, gap: 2.5, mb: 3 }}>
         {myCards.map((card, i) => (
-          <StatCard key={i} title={card.title} value={card.value} subtitle="" icon={card.icon} color={card.color} />
+          <StatCard key={i} title={card.title} value={card.value} subtitle="" icon={card.icon} color={card.color} onClick={() => navigate(card.path)} />
         ))}
       </Box>
 
@@ -165,53 +165,34 @@ function EmployeeDashboard({ usuario }) {
 function AdminDashboard({ usuario }) {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(MOCK);
-  const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
+  const [resumenAreas, setResumenAreas] = useState([]);
+  const [filtro, setFiltro] = useState("Hoy");
+  const fetchDashboard = async (periodo) => {
+    try {
+      setLoading(true);
+      const [res, resumen] = await Promise.all([
+        obtenerIndicadores(periodo),
+        obtenerResumenPorArea(),
+      ]);
+      setData({
+        puntualidad: res.indicadores?.puntualidad ?? MOCK.puntualidad,
+        presentes: res.indicadores?.presentes_hoy ?? MOCK.presentes,
+        ausentes: res.indicadores?.ausentes_hoy ?? MOCK.ausentes,
+        tardanzas: res.indicadores?.tardanzas_hoy ?? MOCK.tardanzas,
+        horasExtras: res.indicadores?.horas_extras_hoy ?? MOCK.horasExtras,
+        permisos: res.indicadores?.permisos_hoy ?? MOCK.permisos,
+      });
+      setResumenAreas(Array.isArray(resumen) ? resumen : []);
+    } catch {
+      setData(MOCK);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        setLoading(true);
-        const res = await obtenerIndicadores();
-        setData({
-          puntualidad: res.indicadores?.puntualidad ?? MOCK.puntualidad,
-          presentes: res.indicadores?.presentes_hoy ?? MOCK.presentes,
-          ausentes: res.indicadores?.ausentes_hoy ?? MOCK.ausentes,
-          tardanzas: res.indicadores?.tardanzas_hoy ?? MOCK.tardanzas,
-          horasExtras: res.indicadores?.horas_extras_hoy ?? MOCK.horasExtras,
-          permisos: res.indicadores?.permisos_hoy ?? MOCK.permisos,
-        });
-      } catch {
-        setData(MOCK);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDashboard();
-  }, []);
+  useEffect(() => { fetchDashboard(filtro); }, [filtro]);
 
   if (loading) return <DashboardSkeleton />;
-
-  function exportarInforme(formato) {
-    if (formato === "excel") {
-      const rows = [
-        { Métrica: "Puntualidad", Valor: `${data.puntualidad}%` },
-        { Métrica: "Presentes hoy", Valor: data.presentes },
-        { Métrica: "Ausentes hoy", Valor: data.ausentes },
-        { Métrica: "Tardanzas", Valor: data.tardanzas },
-        { Métrica: "Horas extra hoy", Valor: data.horasExtras },
-        { Métrica: "Permisos hoy", Valor: data.permisos },
-      ];
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(rows);
-      XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
-      XLSX.writeFile(wb, `Dashboard_${new Date().toISOString().split("T")[0]}.xlsx`);
-    } else if (formato === "preview") {
-      setPdfPreviewUrl("/api/pdf/dashboard?preview=1");
-    } else {
-      const params = new URLSearchParams();
-      window.open(`/api/pdf/dashboard?${params}`, "_blank");
-    }
-  }
 
   const hoyStats = {
     presentes: data.presentes,
@@ -232,7 +213,7 @@ function AdminDashboard({ usuario }) {
   return (
     <Box sx={{ p: 3 }}>
       <DashboardHeader usuario={usuario} />
-      <FilterBar onExport={exportarInforme} />
+      <FilterBar activo={filtro} onChange={setFiltro} />
 
       <Box sx={{ display: "flex", gap: 2.5, mb: 2.5 }}>
         {KPI_CARDS.map((card, i) => (
@@ -249,13 +230,10 @@ function AdminDashboard({ usuario }) {
         <Box sx={{ flex: 1, minWidth: 0 }}><SourceMarkingCard /></Box>
       </Box>
 
-      <TodayActivity />
-      <PDFPreviewModal
-        open={Boolean(pdfPreviewUrl)}
-        onClose={() => setPdfPreviewUrl(null)}
-        url={pdfPreviewUrl}
-        titulo="Vista previa - Dashboard"
-      />
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2.5 }}>
+        <Box sx={{ maxHeight: 280 }}><TodayActivity /></Box>
+        <Box sx={{ maxHeight: 280 }}><ResumenPorArea data={resumenAreas} /></Box>
+      </Box>
     </Box>
   );
 }

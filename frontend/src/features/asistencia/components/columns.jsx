@@ -1,5 +1,5 @@
-import { Box, Typography } from "@mui/material";
-import { CircleArrowOutUpRight, CircleCheckBig, Ban, Clock, Fingerprint } from "lucide-react";
+import { Box, Typography, IconButton } from "@mui/material";
+import { CircleArrowOutUpRight, CircleCheckBig, Ban, Clock, Fingerprint, Eye, Edit3, Trash2 } from "lucide-react";
 
 const badgeColors = {
   puntual: { bg: "#D1FAE5", color: "#065F46" },
@@ -28,7 +28,12 @@ function Badge({ label, bg, color }) {
   );
 }
 
-export const asistenciaColumns = ({ onJustificar, getPiso, onDetalle }) => [
+const btnBase = {
+  width: 32, height: 32, borderRadius: "8px",
+  transition: "all .2s ease",
+};
+
+export const asistenciaColumns = ({ onJustificar, getPiso, onDetalle, onEditar, onEliminar }) => [
   {
     field: "empleado",
     headerName: "Empleado",
@@ -37,7 +42,7 @@ export const asistenciaColumns = ({ onJustificar, getPiso, onDetalle }) => [
     renderCell: ({ row }) => (
       <Typography
         onClick={() => onDetalle?.(row)}
-        sx={{ fontSize: 13, fontWeight: 500, color: "#1565C0", alignSelf: "flex-start", pt: 1, cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+        sx={{ fontSize: 13, fontWeight: 500, color: "#111827", alignSelf: "flex-start", pt: 1, cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
       >
         {row.empleado}
       </Typography>
@@ -148,23 +153,48 @@ export const asistenciaColumns = ({ onJustificar, getPiso, onDetalle }) => [
   {
     field: "acciones",
     headerName: "Acciones",
-    width: 100,
+    width: 180,
     sortable: false,
     filterable: false,
-    renderCell: ({ row }) => {
-      if (row.estado !== "ausente") return null;
-      return (
-        <button
-          onClick={(e) => { e.stopPropagation(); onJustificar(row); }}
-          style={{
-            fontSize: 11, padding: "4px 10px", borderRadius: "6px",
-            border: "1px solid #3B82F6", background: "#EFF6FF",
-            color: "#1D4ED8", cursor: "pointer", fontWeight: 500,
-          }}
+    align: "center",
+    headerAlign: "center",
+    renderCell: ({ row }) => (
+      <Box display="flex" gap={0.5} alignItems="center" justifyContent="center" width="100%">
+        <IconButton
+          sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }}
+          title="Ver detalle"
+          size="small"
+          onClick={(e) => { e.stopPropagation(); onDetalle(row); }}
         >
-          Justificar
-        </button>
-      );
-    },
+          <Eye size={14} />
+        </IconButton>
+        <IconButton
+          sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }}
+          title="Editar"
+          size="small"
+          onClick={(e) => { e.stopPropagation(); onEditar?.(row); }}
+        >
+          <Edit3 size={14} />
+        </IconButton>
+        {row.estado === "ausente" && (
+          <IconButton
+            sx={{ ...btnBase, bgcolor: "#E8F5E9", color: "#2E7D32", "&:hover": { bgcolor: "#C8E6C9" } }}
+            title="Justificar"
+            size="small"
+            onClick={(e) => { e.stopPropagation(); onJustificar(row); }}
+          >
+            <Clock size={14} />
+          </IconButton>
+        )}
+        <IconButton
+          sx={{ ...btnBase, bgcolor: "#FEE2E2", color: "#DC2626", "&:hover": { bgcolor: "#FECACA" } }}
+          title="Eliminar"
+          size="small"
+          onClick={(e) => { e.stopPropagation(); onEliminar?.(row); }}
+        >
+          <Trash2 size={14} />
+        </IconButton>
+      </Box>
+    ),
   },
 ];

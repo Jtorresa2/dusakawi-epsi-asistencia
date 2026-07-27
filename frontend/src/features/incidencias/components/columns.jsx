@@ -17,11 +17,9 @@ const estadoStyles = {
   "Rechazada": { bg: "#FEE2E2", color: "#991B1B" },
 };
 
-const btnSx = {
-  width: 36, height: 36, borderRadius: "10px",
-  bgcolor: "#F8FAFC", border: "1px solid #E5E7EB",
-  color: "#6B7280",
-  "&:hover": { bgcolor: "#F3F4F6", color: "#1B5E20" },
+const btnBase = {
+  width: 36, height: 36, borderRadius: "9px",
+  transition: "all .2s ease",
 };
 
 function ChipCell({ label, styles }) {
@@ -109,13 +107,13 @@ export const incidenciaColumns = ({ onEditar, onVer, onMenuOpen }) => [
     headerAlign: "center",
     renderCell: ({ row }) => (
       <Box display="flex" gap={0.5} alignItems="center">
-        <IconButton sx={btnSx} title="Editar" onClick={(e) => { e.stopPropagation(); onEditar(row); }}>
+        <IconButton sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }} title="Editar" onClick={(e) => { e.stopPropagation(); onEditar(row); }}>
           <Edit3 size={15} />
         </IconButton>
-        <IconButton sx={btnSx} title="Ver" onClick={(e) => { e.stopPropagation(); onVer(row); }}>
+        <IconButton sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }} title="Ver" onClick={(e) => { e.stopPropagation(); onVer(row); }}>
           <Eye size={15} />
         </IconButton>
-        <IconButton sx={btnSx} title="Más opciones" onClick={(e) => { e.stopPropagation(); onMenuOpen(e, row); }}>
+        <IconButton sx={{ ...btnBase, bgcolor: "#FEF3C7", color: "#92400E", "&:hover": { bgcolor: "#FDE68A" } }} title="Más opciones" onClick={(e) => { e.stopPropagation(); onMenuOpen(e, row); }}>
           <MoreVertical size={15} />
         </IconButton>
       </Box>

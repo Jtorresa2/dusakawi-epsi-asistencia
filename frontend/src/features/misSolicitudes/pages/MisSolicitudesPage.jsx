@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Box, Paper, Typography, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
-import { Calendar, CheckCircle, XCircle, Clock, Eye, Image, FileText } from "lucide-react";
-import PageHeader from "../../../shared/components/PageHeader";
+import { Box, Paper, Typography, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from "@mui/material";
+import { Calendar, CheckCircle, XCircle, Clock, Eye, Image, FileText, X } from "lucide-react";
 
 const API = "/api";
 const TIPOS = { falla_biometrica: "Falla biométrica", tardanza_justificada: "Tardanza justificada", otro: "Otro" };
@@ -43,8 +42,10 @@ export default function MisSolicitudesPage() {
 
   return (
     <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3, maxWidth: 1400, mx: "auto", width: "100%" }}>
-      <PageHeader titulo="Mis solicitudes" subtitulo={`${incidencias.length} incidencias registradas`} />
-
+      <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
+                Inicio / Gestión / Mis solicitudes
+      </Typography>
+      
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2.5 }}>
         {KPI.map((k, i) => (
           <Paper key={i} elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 2.5 }}>
@@ -86,10 +87,10 @@ export default function MisSolicitudesPage() {
                     <Chip label={inc.estado} size="small" sx={{ borderRadius: "8px", fontSize: 11, fontWeight: 600, bgcolor: ec.bg, color: ec.color }} />
                   </TableCell>
                   <TableCell>
-                    <Button size="small" startIcon={<Eye size={14} />} onClick={() => { setSelected(inc); setOpenDetalle(true); }}
-                      sx={{ borderRadius: "8px", textTransform: "none", fontSize: 12, color: "#1565C0", minWidth: 0 }}>
-                      Ver
-                    </Button>
+                    <Box onClick={() => { setSelected(inc); setOpenDetalle(true); }}
+                      sx={{ width: 32, height: 32, borderRadius: "10px", bgcolor: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center", color: "#1565C0", cursor: "pointer", transition: "all 0.2s", "&:hover": { bgcolor: "#DBEAFE" } }}>
+                      <Eye size={15} />
+                    </Box>
                   </TableCell>
                 </TableRow>
               );
@@ -104,6 +105,9 @@ export default function MisSolicitudesPage() {
           <>
             <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
               Incidencia #{selected.id}
+              <IconButton onClick={() => setOpenDetalle(false)} size="small" sx={{ position: "absolute", top: 8, right: 8, color: "#9CA3AF", "&:hover": { bgcolor: "#F3F4F6" } }}>
+                <X size={18} />
+              </IconButton>
             </DialogTitle>
             <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Box, Paper, Typography, Button, Breadcrumbs, Link, TextField, MenuItem } from "@mui/material";
-import { ArrowLeft, ChevronRight, Search, RotateCcw, Printer, FileSpreadsheet, FileText } from "lucide-react";
+import { Box, Paper, Typography, Button, Breadcrumbs, Link, TextField, MenuItem, InputLabel } from "@mui/material";
+import { ArrowLeft, ChevronRight, Search, RotateCcw, FileSpreadsheet, FileText } from "lucide-react";
 import { obtenerEmpleados } from "../../empleados/empleado.api";
 import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
@@ -17,18 +17,22 @@ const API_MAP = {
   ausencias: "obtenerReporteAusencias", empleados: "obtenerReporteEmpleados", marcaciones: "obtenerReporteMarcaciones",
 };
 
-const TIPOS_INC = ["Accidente de trabajo","Enfermedad general","Permiso personal","Calamidad doméstica","Cita médica","Otro"];
+const TIPOS_INC = [
+  {value:"falla_biometrica",label:"Falla biométrica"},
+  {value:"tardanza_justificada",label:"Tardanza justificada"},
+  {value:"otro",label:"Otro"},
+];
 const EST_ASIS = ["puntual","tardanza","ausente","justificado"];
 const EST_INC = ["pendiente","aprobado","rechazado"];
 const EST_EMP = [{value:"1",label:"Activo"},{value:"0",label:"Inactivo"}];
 
 const FILTROS = {
-  asistencia: ["fecha_desde","fecha_hasta","empleado_id","area_id","estado"],
-  incidencias: ["fecha_desde","fecha_hasta","empleado_id","area_id","estado_incidencia","tipo_incidencia"],
-  tardanzas: ["fecha_desde","fecha_hasta","empleado_id","area_id"],
-  ausencias: ["fecha_desde","fecha_hasta","empleado_id","area_id"],
+  asistencia: ["fecha_desde","empleado_id","area_id","estado"],
+  incidencias: ["fecha_desde","empleado_id","area_id","estado_incidencia","tipo_incidencia"],
+  tardanzas: ["fecha_desde","empleado_id","area_id"],
+  ausencias: ["fecha_desde","empleado_id","area_id"],
   empleados: ["area_id","cargo_id","estado_empleado"],
-  marcaciones: ["fecha_desde","fecha_hasta","empleado_id","area_id"],
+  marcaciones: ["fecha_desde","empleado_id","area_id"],
 };
 
 const SX = { "& .MuiOutlinedInput-root": { borderRadius: "10px", background: "#fff", "& fieldset": { borderColor: "#E5E7EB" }, "&:hover fieldset": { borderColor: "#2E7D32" }, "&.Mui-focused fieldset": { borderColor: "#1B5E20" } }, "& .MuiInputLabel-root": { fontSize: 13, color: "#6B7280" }, "& .MuiInputBase-input": { fontSize: 13 } };
@@ -48,7 +52,7 @@ const COLS = {
   incidencias: [
     {field:"empleado",headerName:"Empleado",width:180},{field:"cedula",headerName:"Cédula",width:100},{field:"area",headerName:"Área",width:120},
     {field:"tipo",headerName:"Tipo",width:150},{field:"fecha",headerName:"Fecha",width:110},{field:"estado",headerName:"Estado",width:110},
-    {field:"descripcion",headerName:"Descripción",width:250},
+    {field:"descripcion",headerName:"Descripción",width:250,renderCell:p=>{const v=p.value||"";return <span title={v} style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block",width:"100%"}}>{v||"—"}</span>;}},
   ],
   tardanzas: [
     {field:"empleado",headerName:"Empleado",width:160},{field:"cedula",headerName:"Cédula",width:90},{field:"area",headerName:"Área",width:110},
@@ -94,52 +98,79 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
       <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", mb: 2 }}>
         {cols.map(c => {
           if (c === "fecha_desde") return (
-            <Box key={c} sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-              <TextField label="Desde" type="date" size="small" value={f.fecha_desde||""} onChange={e => set("fecha_desde",e.target.value)} InputLabelProps={{shrink:true}} sx={{width:150,...SX}} />
-              <TextField label="Hasta" type="date" size="small" value={f.fecha_hasta||""} onChange={e => set("fecha_hasta",e.target.value)} InputLabelProps={{shrink:true}} sx={{width:150,...SX}} />
+            <Box key={c} sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+              <Box>
+                <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Desde</InputLabel>
+                <TextField type="date" size="small" value={f.fecha_desde||""} onChange={e => set("fecha_desde",e.target.value)} sx={{width:160,...SX}} />
+              </Box>
+              <Box>
+                <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Hasta</InputLabel>
+                <TextField type="date" size="small" value={f.fecha_hasta||""} onChange={e => set("fecha_hasta",e.target.value)} sx={{width:160,...SX}} />
+              </Box>
             </Box>
           );
           if (c === "empleado_id") return (
-            <TextField key={c} select label="Empleado" size="small" value={f.empleado_id||""} onChange={e => set("empleado_id",e.target.value)} sx={{minWidth:180,...SX}}>
-              <MenuItem value="">Todos</MenuItem>
-              {(empleados||[]).map(e => <MenuItem key={e.id} value={e.id}>{e.nombre} {e.apellido}</MenuItem>)}
-            </TextField>
+            <Box key={c}>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Empleado</InputLabel>
+              <TextField select size="small" value={f.empleado_id||""} onChange={e => set("empleado_id",e.target.value)} sx={{minWidth:180,...SX}}>
+                <MenuItem value="">Todos</MenuItem>
+                {(empleados||[]).map(e => <MenuItem key={e.id} value={e.id}>{e.nombre} {e.apellido}</MenuItem>)}
+              </TextField>
+            </Box>
           );
           if (c === "area_id") return (
-            <TextField key={c} select label="Área" size="small" value={f.area_id||""} onChange={e => set("area_id",e.target.value)} sx={{minWidth:150,...SX}}>
-              <MenuItem value="">Todas</MenuItem>
-              {areas.map(a => <MenuItem key={a.id} value={a.id}>{a.nombre}</MenuItem>)}
-            </TextField>
+            <Box key={c}>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Área</InputLabel>
+              <TextField select size="small" value={f.area_id||""} onChange={e => set("area_id",e.target.value)} sx={{minWidth:150,...SX}}>
+                <MenuItem value="">Todas</MenuItem>
+                {areas.map(a => <MenuItem key={a.id} value={a.id}>{a.nombre}</MenuItem>)}
+              </TextField>
+            </Box>
           );
           if (c === "cargo_id") return (
-            <TextField key={c} select label="Cargo" size="small" value={f.cargo_id||""} onChange={e => set("cargo_id",e.target.value)} sx={{minWidth:150,...SX}}>
-              <MenuItem value="">Todos</MenuItem>
-              {cargos.map(ca => <MenuItem key={ca.id} value={ca.id}>{ca.nombre}</MenuItem>)}
-            </TextField>
+            <Box key={c}>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Cargo</InputLabel>
+              <TextField select size="small" value={f.cargo_id||""} onChange={e => set("cargo_id",e.target.value)} sx={{minWidth:150,...SX}}>
+                <MenuItem value="">Todos</MenuItem>
+                {cargos.map(ca => <MenuItem key={ca.id} value={ca.id}>{ca.nombre}</MenuItem>)}
+              </TextField>
+            </Box>
           );
           if (c === "estado") return (
-            <TextField key={c} select label="Estado" size="small" value={f.estado||""} onChange={e => set("estado",e.target.value)} sx={{minWidth:130,...SX}}>
-              <MenuItem value="">Todos</MenuItem>
-              {EST_ASIS.map(e => <MenuItem key={e} value={e}>{e}</MenuItem>)}
-            </TextField>
+            <Box key={c}>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Estado</InputLabel>
+              <TextField select size="small" value={f.estado||""} onChange={e => set("estado",e.target.value)} sx={{minWidth:130,...SX}}>
+                <MenuItem value="">Todos</MenuItem>
+                {EST_ASIS.map(e => <MenuItem key={e} value={e}>{e}</MenuItem>)}
+              </TextField>
+            </Box>
           );
           if (c === "estado_incidencia") return (
-            <TextField key={c} select label="Estado" size="small" value={f.estado_incidencia||""} onChange={e => set("estado_incidencia",e.target.value)} sx={{minWidth:130,...SX}}>
-              <MenuItem value="">Todos</MenuItem>
-              {EST_INC.map(e => <MenuItem key={e} value={e}>{e}</MenuItem>)}
-            </TextField>
+            <Box key={c}>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Estado</InputLabel>
+              <TextField select size="small" value={f.estado_incidencia||""} onChange={e => set("estado_incidencia",e.target.value)} sx={{minWidth:130,...SX}}>
+                <MenuItem value="">Todos</MenuItem>
+                {EST_INC.map(e => <MenuItem key={e} value={e}>{e}</MenuItem>)}
+              </TextField>
+            </Box>
           );
           if (c === "estado_empleado") return (
-            <TextField key={c} select label="Estado" size="small" value={f.estado_empleado||""} onChange={e => set("estado_empleado",e.target.value)} sx={{minWidth:130,...SX}}>
-              <MenuItem value="">Todos</MenuItem>
-              {EST_EMP.map(e => <MenuItem key={e.value} value={e.value}>{e.label}</MenuItem>)}
-            </TextField>
+            <Box key={c}>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Estado</InputLabel>
+              <TextField select size="small" value={f.estado_empleado||""} onChange={e => set("estado_empleado",e.target.value)} sx={{minWidth:130,...SX}}>
+                <MenuItem value="">Todos</MenuItem>
+                {EST_EMP.map(e => <MenuItem key={e.value} value={e.value}>{e.label}</MenuItem>)}
+              </TextField>
+            </Box>
           );
           if (c === "tipo_incidencia") return (
-            <TextField key={c} select label="Tipo" size="small" value={f.tipo_incidencia||""} onChange={e => set("tipo_incidencia",e.target.value)} sx={{minWidth:170,...SX}}>
-              <MenuItem value="">Todos</MenuItem>
-              {TIPOS_INC.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
-            </TextField>
+            <Box key={c}>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Tipo</InputLabel>
+              <TextField select size="small" value={f.tipo_incidencia||""} onChange={e => set("tipo_incidencia",e.target.value)} sx={{minWidth:200,...SX}}>
+                <MenuItem value="">Todos</MenuItem>
+                {TIPOS_INC.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
+              </TextField>
+            </Box>
           );
           return null;
         })}
@@ -148,7 +179,6 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
         <Button variant="contained" startIcon={<Search size={16}/>} onClick={() => onGenerar(f)} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,fontWeight:600,px:2.5,background:"#1B5E20","&:hover":{background:"#2E7D32"}}}>Generar</Button>
         <Button variant="outlined" startIcon={<FileText size={16}/>} onClick={onExportarPDF} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:"#E5E7EB",color:"#374151","&:hover":{borderColor:"#1B5E20",color:"#1B5E20"}}}>PDF</Button>
         <Button variant="outlined" startIcon={<FileSpreadsheet size={16}/>} onClick={onExportarExcel} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:"#E5E7EB",color:"#374151","&:hover":{borderColor:"#1B5E20",color:"#1B5E20"}}}>Excel</Button>
-        <Button variant="outlined" startIcon={<Printer size={16}/>} onClick={()=>window.print()} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:"#E5E7EB",color:"#374151","&:hover":{borderColor:"#1B5E20",color:"#1B5E20"}}}>Imprimir</Button>
         <Button variant="text" startIcon={<RotateCcw size={16}/>} onClick={()=>{setF({}); if(onLimpiar)onLimpiar();}} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,color:"#6B7280","&:hover":{color:"#DC2626"}}}>Limpiar</Button>
       </Box>
     </Box>
@@ -172,7 +202,7 @@ function ResultadosTable({ tipoReporte, registros, total }) {
   );
 }
 
-export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarPDF, onExportarExcel }) {
+export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarPDF, onExportarExcel, filtrosIniciales }) {
   const [registros, setRegistros] = useState(null);
   const [total, setTotal] = useState(0);
   const [cargando, setCargando] = useState(false);
@@ -180,6 +210,12 @@ export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarP
   const [empleados, setEmpleados] = useState([]);
 
   useEffect(() => { obtenerEmpleados().then(r => setEmpleados(r.empleados||r||[])).catch(()=>{}); }, []);
+
+  useEffect(() => {
+    if (filtrosIniciales && Object.keys(filtrosIniciales).length > 0) {
+      generar(filtrosIniciales);
+    }
+  }, [filtrosIniciales]);
 
   const generar = async (f) => {
     try {

@@ -1,8 +1,8 @@
 import { apiFetch } from "../../shared/api/api";
 
-export const obtenerIndicadores = () => apiFetch("/dashboard/indicadores");
-
-export const obtenerDashboard = async () => {
-  const data = await apiFetch("/dashboard/indicadores");
-  return data;
+export const obtenerIndicadores = (periodo) => {
+  const params = periodo && periodo !== "Hoy" ? `?periodo=${encodeURIComponent(periodo)}` : "";
+  return apiFetch(`/dashboard/indicadores${params}`);
 };
+
+export const obtenerResumenPorArea = () => apiFetch("/dashboard/resumen-areas");

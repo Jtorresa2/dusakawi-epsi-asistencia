@@ -3,13 +3,13 @@ import {
   ClipboardCheck,
   Users,
   Clock3,
-
   FileText,
   Settings,
-  //CalendarClock,
   TriangleAlert,
   Briefcase,
   Building2,
+  User,
+  CalendarCheck,
 } from "lucide-react";
 
 export const menuPorRol = {
@@ -65,28 +65,43 @@ export const menuPorRol = {
           icon: <ClipboardCheck size={18} />
         },
         {
+          label: "Permisos",
+          path: "/permisos",
+          icon: <CalendarCheck size={18} />
+        },
+        {
           label: "Reportes",
           path: "/reportes",
           icon: <FileText size={18} />
         }
       ]
     },
-    {
-      section: "ADMINISTRACIÓN",
-      items: [
-        {
-          label: "Usuarios",
-          path: "/usuarios",
-          icon: <Users size={18} />
-        },
-        {
-          label: "Configuración",
-          path: "/configuracion",
-          icon: <Settings size={18} />
-        }
-      ]
-    }
-  ],
+      {
+        section: "ADMINISTRACIÓN",
+        items: [
+          {
+            label: "Usuarios",
+            path: "/usuarios",
+            icon: <Users size={18} />
+          },
+          {
+            label: "Configuración",
+            path: "/configuracion",
+            icon: <Settings size={18} />
+          }
+        ]
+      },
+      {
+        section: "MI CUENTA",
+        items: [
+          {
+            label: "Mi perfil",
+            path: "/perfil",
+            icon: <User size={18} />
+          }
+        ]
+      }
+    ],
 
   talento_humano: [
     {
@@ -135,9 +150,24 @@ export const menuPorRol = {
           icon: <ClipboardCheck size={18} />
         },
         {
+          label: "Permisos",
+          path: "/permisos",
+          icon: <CalendarCheck size={18} />
+        },
+        {
           label: "Reportes",
           path: "/reportes",
           icon: <FileText size={18} />
+        }
+      ]
+    },
+    {
+      section: "MI CUENTA",
+      items: [
+        {
+          label: "Mi perfil",
+          path: "/perfil",
+          icon: <User size={18} />
         }
       ]
     }
@@ -145,19 +175,23 @@ export const menuPorRol = {
 
   empleado: [
     {
-      section: "MI ESPACIO",
+      section: "GENERAL",
       items: [
         {
           label: "Inicio",
           path: "/dashboard",
           icon: <LayoutDashboard size={18} />
         },
+      ]
+    },
+    {
+      section: "OPERACIÓN",
+      items: [
         {
           label: "Mi asistencia",
           path: "/mi-asistencia",
           icon: <ClipboardCheck size={18} />
         },
-        // Mi horario removido (no necesario para empleado)
         {
           label: "Reportar incidencia",
           path: "/reportar-incidencia",
@@ -169,6 +203,16 @@ export const menuPorRol = {
           icon: <FileText size={18} />
         },
       ]
+    },
+    {
+      section: "MI CUENTA",
+      items: [
+        {
+          label: "Mi perfil",
+          path: "/perfil",
+          icon: <User size={18} />
+        },
+      ]
     }
   ]
-};
+}

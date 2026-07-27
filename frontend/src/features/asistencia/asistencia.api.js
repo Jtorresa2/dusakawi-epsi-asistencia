@@ -23,3 +23,6 @@ export const justificarAusencia = (id, data) =>
     method: "PUT",
     body: JSON.stringify(data),
   });
+
+export const eliminarRegistro = (id) =>
+  apiFetch(`/asistencia/${id}`, { method: "DELETE" });

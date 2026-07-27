@@ -166,7 +166,7 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth
-      PaperProps={{ sx: { borderRadius: "16px", maxHeight: "95vh", overflow: "auto" } }}>
+      PaperProps={{ sx: { borderRadius: "16px", maxHeight: "95vh", overflow: "auto", bgcolor: "#F0FDF4" } }}>
       {loading ? (
         <DialogContent sx={{ py: 8, textAlign: "center", color: "#9CA3AF" }}>Cargando perfil...</DialogContent>
       ) : data ? (
@@ -213,11 +213,11 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
                   <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Datos personales</Typography>
                   {editando === "personal" ? (
                     <Box sx={{ display: "flex", gap: 0.5 }}>
-                      <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ color: "#2E7D32" }}><Save size={16} /></IconButton>
-                      <IconButton size="small" onClick={handleCancel} sx={{ color: "#DC2626" }}><X size={16} /></IconButton>
+                      <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: "#E8F5E9", color: "#2E7D32", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#C8E6C9" } }}><Save size={15} /></IconButton>
+                      <IconButton size="small" onClick={handleCancel} sx={{ bgcolor: "#FEE2E2", color: "#DC2626", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#FECACA" } }}><X size={15} /></IconButton>
                     </Box>
                   ) : (
-                    <IconButton size="small" onClick={() => handleEdit("personal")} sx={{ color: "#9CA3AF" }}><Edit2 size={16} /></IconButton>
+                    <IconButton size="small" onClick={() => handleEdit("personal")} sx={{ bgcolor: "#EFF6FF", color: "#1565C0", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#DBEAFE" } }}><Edit2 size={15} /></IconButton>
                   )}
                 </Box>
                 {personalFields.map((f) => renderField(f, data[f.key], "personal"))}
@@ -229,11 +229,11 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
                   <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Información laboral</Typography>
                   {editando === "laboral" ? (
                     <Box sx={{ display: "flex", gap: 0.5 }}>
-                      <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ color: "#2E7D32" }}><Save size={16} /></IconButton>
-                      <IconButton size="small" onClick={handleCancel} sx={{ color: "#DC2626" }}><X size={16} /></IconButton>
+                      <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: "#E8F5E9", color: "#2E7D32", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#C8E6C9" } }}><Save size={15} /></IconButton>
+                      <IconButton size="small" onClick={handleCancel} sx={{ bgcolor: "#FEE2E2", color: "#DC2626", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#FECACA" } }}><X size={15} /></IconButton>
                     </Box>
                   ) : (
-                    <IconButton size="small" onClick={() => handleEdit("laboral")} sx={{ color: "#9CA3AF" }}><Edit2 size={16} /></IconButton>
+                    <IconButton size="small" onClick={() => handleEdit("laboral")} sx={{ bgcolor: "#EFF6FF", color: "#1565C0", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#DBEAFE" } }}><Edit2 size={15} /></IconButton>
                   )}
                 </Box>
                 {editando === "laboral" ? (

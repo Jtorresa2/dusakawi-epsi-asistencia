@@ -130,11 +130,12 @@ export default function IncidenciaDetailModal({ open, onClose, incidencia, rol, 
     setAccionando(true);
     setError("");
     try {
-      await fetch(`${API}/incidencias/${incidencia.id}/rechazar`, {
+      const res = await fetch(`${API}/incidencias/${incidencia.id}/rechazar`, {
         method: "PUT",
         headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify({ motivo: observacion }),
       });
+      if (!res.ok) throw new Error("No se pudo rechazar");
       onRefresh();
       onClose();
     } catch (e) {

@@ -1,4 +1,4 @@
-import { useNavigate, Link } from "react-router-dom";
+﻿import { useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 export default function LoginPage() {
@@ -13,13 +13,8 @@ export default function LoginPage() {
   try {
     const res = await fetch("/api/auth/login", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        username: form.usuario,
-        password: form.password
-      })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: form.usuario, password: form.password })
     });
 
     const data = await res.json();
@@ -33,11 +28,17 @@ export default function LoginPage() {
     const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
     const user = { ...data.user, rol: rolesMap[data.user.rol] || data.user.rol };
     localStorage.setItem("usuario", JSON.stringify(user));
-    navigate("/dashboard");
+
+    // Si debe cambiar contrasena, redirigir
+    if (data.password_reset_required) {
+      navigate("/cambiar-password");
+    } else {
+      navigate("/dashboard");
+    }
 
   } catch (error) {
     console.error(error);
-    alert("Error de conexión con el servidor");
+    alert("Error de conexion con el servidor");
   }
 };
 
@@ -76,7 +77,7 @@ export default function LoginPage() {
           style={{ width: "120px", marginBottom: "1rem" }}
         />  
 
-        {/* Título */}
+        {/* Titulo */}
         <h1 style={{ fontSize: "32px", fontWeight: 700, color: "#1b5e20", margin: "0 0 4px" }}>
           Dusakawi EPSI
         </h1>
@@ -112,11 +113,11 @@ export default function LoginPage() {
 
           <div style={{ marginBottom: "1.5rem" }}>
             <label style={{ fontSize: "14px", fontWeight: 600, color: "#222", display: "block", marginBottom: "6px" }}>
-              Contraseña
+              Contrasena
             </label>
             <input
               type="password"
-              placeholder="Ingresa tu contraseña"
+              placeholder="Ingresa tu contrasena"
               value={form.password}
               onChange={e => setForm({ ...form, password: e.target.value })}
               onKeyDown={handleKeyDown}
@@ -142,12 +143,6 @@ export default function LoginPage() {
           >
             Acceder al sistema
           </button>
-          <p style={{ fontSize: "13px", color: "#6B7280", textAlign: "center", marginTop: "16px" }}>
-            ¿No tienes cuenta?{" "}
-            <Link to="/registro" style={{ color: "#1B5E20", fontWeight: 600, textDecoration: "none" }}>
-              Regístrate aquí
-            </Link>
-          </p>
         </div>
       </div>
 

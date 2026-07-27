@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Box, Paper, Typography, Avatar, Chip, TextField, Button, IconButton } from "@mui/material";
+import { Box, Paper, Typography, Avatar, Chip, TextField, Button, IconButton, MenuItem } from "@mui/material";
 import {
   User, Mail, Phone, Calendar, FileText, Briefcase, MapPin, Clock,
-  CheckCircle, XCircle, Edit2, Save, X, Shield, Fingerprint, Camera,
+  CheckCircle, XCircle, Edit3, Save, X, Shield, Fingerprint, Camera,
 } from "lucide-react";
 import { obtenerEmpleado, actualizarEmpleado } from "../../empleados/empleado.api";
-import PageHeader from "../../../shared/components/PageHeader";
+import { obtenerCargos } from "../../cargos/cargo.api";
+import { obtenerAreas } from "../../areas/area.api";
 
 const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const MONTHS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -24,6 +25,8 @@ export default function MiPerfilPage() {
   const [form, setForm] = useState({});
   const [guardando, setGuardando] = useState(false);
   const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [cargosList, setCargosList] = useState([]);
+  const [areasList, setAreasList] = useState([]);
 
   useEffect(() => {
     const fetchEmpleado = async () => {
@@ -36,6 +39,9 @@ export default function MiPerfilPage() {
       setLoading(false);
     };
     fetchEmpleado();
+
+    obtenerCargos().then((d) => setCargosList(Array.isArray(d) ? d : d?.cargos || [])).catch(() => {});
+    obtenerAreas().then((d) => setAreasList(Array.isArray(d) ? d : d?.areas || [])).catch(() => {});
   }, []);
 
   const data = empleado || usuario;
@@ -51,13 +57,8 @@ export default function MiPerfilPage() {
   ];
 
   const workFields = [
-    { key: "cargo", label: "Cargo", icon: <Briefcase size={16} /> },
-    { key: "area", label: "Área", icon: <MapPin size={16} /> },
-    ...(usuario.rol !== "empleado" ? [
-      { key: "fecha_ingreso", label: "Fecha de ingreso", icon: <Calendar size={16} />, type: "date" },
-      { key: "tipo_contrato", label: "Tipo de contrato", icon: <FileText size={16} /> },
-      { key: "horario", label: "Horario asignado", icon: <Clock size={16} /> },
-    ] : []),
+    { key: "cargo_id", label: "Cargo", icon: <Briefcase size={16} />, options: cargosList, optionLabel: "nombre", display: data?.cargo || "—" },
+    { key: "area_id", label: "Área", icon: <MapPin size={16} />, options: areasList, optionLabel: "nombre", display: data?.area || "—" },
   ];
 
   const statsCards = [
@@ -87,7 +88,7 @@ export default function MiPerfilPage() {
       setForm(obj);
     } else {
       const obj = {};
-      workFields.forEach((f) => { obj[f.key] = data[f.key] || ""; });
+      workFields.forEach((f) => { obj[f.key] = data[f.key] ?? ""; });
       setForm(obj);
     }
   };
@@ -138,6 +139,7 @@ export default function MiPerfilPage() {
 
   const renderField = (field, value, section) => {
     const isEditing = editando === section;
+    const isSelect = field.options?.length > 0;
     return (
       <Box key={field.key} sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: "1px solid #F3F4F6" }}>
         <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "#F9FAFB", display: "flex", alignItems: "center", justifyContent: "center", color: "#9CA3AF", flexShrink: 0 }}>
@@ -146,17 +148,37 @@ export default function MiPerfilPage() {
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", mb: 0.2 }}>{field.label}</Typography>
           {isEditing ? (
-            <TextField
-              fullWidth
-              size="small"
-              type={field.type || "text"}
-              value={form[field.key] || ""}
-              onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: 13 } }}
-            />
+            isSelect ? (
+              <TextField
+                select
+                fullWidth
+                size="small"
+                value={form[field.key] ?? ""}
+                onChange={(e) => setForm({ ...form, [field.key]: e.target.value === "" ? null : Number(e.target.value) })}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: 13 } }}
+              >
+                <MenuItem value="">
+                  <em>Sin {field.label.toLowerCase()}</em>
+                </MenuItem>
+                {field.options.map((opt) => (
+                  <MenuItem key={opt.id} value={opt.id}>
+                    {opt[field.optionLabel]}
+                  </MenuItem>
+                ))}
+              </TextField>
+            ) : (
+              <TextField
+                fullWidth
+                size="small"
+                type={field.type || "text"}
+                value={form[field.key] || ""}
+                onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: 13 } }}
+              />
+            )
           ) : (
             <Typography sx={{ fontSize: 14, fontWeight: 500, color: "#111827", wordBreak: "break-word" }}>
-              {field.type === "date" && value ? formatDate(value) : value || "—"}
+              {field.type === "date" && value ? formatDate(value) : (field.display || value || "—")}
             </Typography>
           )}
         </Box>
@@ -164,22 +186,12 @@ export default function MiPerfilPage() {
     );
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3, maxWidth: 1400, mx: "auto", width: "100%" }}>
-        <PageHeader titulo="Mi Perfil" subtitulo="Información personal y laboral" />
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <Typography sx={{ fontSize: 14, color: "#9CA3AF" }}>Cargando...</Typography>
-        </Box>
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3, maxWidth: 1400, mx: "auto", width: "100%" }}>
-      <PageHeader titulo="Mi Perfil" subtitulo="Información personal y laboral" />
-
-      {/* Header card */}
+      <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
+                Inicio / Mi cuenta / Mi perfil
+            </Typography>
       <Paper elevation={0} sx={{ p: 3, borderRadius: "20px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap" }}>
         <Box sx={{ position: "relative", "&:hover .foto-overlay": { opacity: 1 } }}>
           <Avatar
@@ -236,17 +248,23 @@ export default function MiPerfilPage() {
             <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Datos personales</Typography>
             {editando === "personal" ? (
               <Box sx={{ display: "flex", gap: 0.5 }}>
-                <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ color: "#2E7D32" }}>
-                  <Save size={16} />
+                <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: "#E8F5E9", color: "#2E7D32", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#C8E6C9" } }}>
+                  <Save size={15} />
                 </IconButton>
-                <IconButton size="small" onClick={handleCancel} sx={{ color: "#DC2626" }}>
-                  <X size={16} />
+                <IconButton size="small" onClick={handleCancel} sx={{ bgcolor: "#FEE2E2", color: "#DC2626", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#FECACA" } }}>
+                  <X size={15} />
                 </IconButton>
               </Box>
             ) : (
-              <IconButton size="small" onClick={() => handleEdit("personal")} sx={{ color: "#9CA3AF" }}>
-                <Edit2 size={16} />
-              </IconButton>
+              <Box onClick={() => handleEdit("personal")} title="Editar" sx={{
+                width: 34, height: 34, borderRadius: "9px", border: "none",
+                bgcolor: "#EFF6FF", color: "#1565C0", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all .2s", flexShrink: 0,
+                "&:hover": { bgcolor: "#DBEAFE" },
+              }}>
+                <Edit3 size={15} />
+              </Box>
             )}
           </Box>
           {personalFields.map((f) => renderField(f, data[f.key], "personal"))}
@@ -258,17 +276,23 @@ export default function MiPerfilPage() {
             <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Información laboral</Typography>
             {editando === "laboral" ? (
               <Box sx={{ display: "flex", gap: 0.5 }}>
-                <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ color: "#2E7D32" }}>
-                  <Save size={16} />
+                <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: "#E8F5E9", color: "#2E7D32", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#C8E6C9" } }}>
+                  <Save size={15} />
                 </IconButton>
-                <IconButton size="small" onClick={handleCancel} sx={{ color: "#DC2626" }}>
-                  <X size={16} />
+                <IconButton size="small" onClick={handleCancel} sx={{ bgcolor: "#FEE2E2", color: "#DC2626", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#FECACA" } }}>
+                  <X size={15} />
                 </IconButton>
               </Box>
             ) : (
-              <IconButton size="small" onClick={() => handleEdit("laboral")} sx={{ color: "#9CA3AF" }}>
-                <Edit2 size={16} />
-              </IconButton>
+              <Box onClick={() => handleEdit("laboral")} title="Editar" sx={{
+                width: 34, height: 34, borderRadius: "9px", border: "none",
+                bgcolor: "#EFF6FF", color: "#1565C0", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all .2s", flexShrink: 0,
+                "&:hover": { bgcolor: "#DBEAFE" },
+              }}>
+                <Edit3 size={15} />
+              </Box>
             )}
           </Box>
           {workFields.map((f) => renderField(f, data[f.key], "laboral"))}

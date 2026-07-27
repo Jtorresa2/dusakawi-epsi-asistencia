@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Box, Paper, Typography, Chip, Avatar, TextField } from "@mui/material";
+import { useState, useEffect, useMemo } from "react";
+import { Box, Paper, Typography, Chip, Avatar, TextField, MenuItem } from "@mui/material";
 import { Calendar, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import PageHeader from "../../../shared/components/PageHeader";
 import PageContainer from "../../../shared/components/PageContainer";
@@ -19,6 +19,7 @@ export default function MiAsistenciaPage() {
   const [empleado, setEmpleado] = useState(null);
   const [mes, setMes] = useState(new Date().getMonth() + 1);
   const [anio, setAnio] = useState(new Date().getFullYear());
+  const anios = useMemo(() => { const y = new Date().getFullYear(); return Array.from({length: y-2020+2}, (_,i)=>2020+i); }, []);
 
   const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
   const initials = (usuario.nombre || "E").split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
@@ -59,10 +60,16 @@ export default function MiAsistenciaPage() {
         return d.toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" });
       },
     },
-    { field: "entrada", headerName: "Entrada", flex: 1, minWidth: 100,
+    { field: "entrada1", headerName: "Ent. Mañana", flex: 1, minWidth: 90,
       renderCell: (params) => <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#2E7D32" }}>{params.value || "—"}</Typography>
     },
-    { field: "salida", headerName: "Salida", flex: 1, minWidth: 100,
+    { field: "salida1", headerName: "Sal. Mañana", flex: 1, minWidth: 90,
+      renderCell: (params) => <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#374151" }}>{params.value || "—"}</Typography>
+    },
+    { field: "entrada2", headerName: "Ent. Tarde", flex: 1, minWidth: 90,
+      renderCell: (params) => <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#2E7D32" }}>{params.value || "—"}</Typography>
+    },
+    { field: "salida2", headerName: "Sal. Tarde", flex: 1, minWidth: 90,
       renderCell: (params) => <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#374151" }}>{params.value || "—"}</Typography>
     },
     { field: "horas", headerName: "Horas", flex: 1, minWidth: 90,
@@ -89,21 +96,9 @@ export default function MiAsistenciaPage() {
 
   return (
     <PageContainer>
-      <PageHeader titulo="Mi asistencia" subtitulo="Consulta tus registros de asistencia" />
-
-      {/* Employee card */}
-      <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 2.5 }}>
-        <Avatar sx={{ width: 56, height: 56, bgcolor: "#E8F5E9", color: "#1B5E20", fontSize: 20, fontWeight: 700 }}>
-          {initials}
-        </Avatar>
-        <Box sx={{ flex: 1 }}>
-          <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>{usuario.nombre || "Empleado"}</Typography>
-          <Typography sx={{ fontSize: 13, color: "#6B7280", mt: 0.2 }}>
-            {(empleado?.cargo || "—")} · {(empleado?.area || "—")}
-          </Typography>
-        </Box>
-        <Chip label="Activo" size="small" sx={{ borderRadius: "8px", fontSize: 12, fontWeight: 600, bgcolor: "#D1FAE5", color: "#065F46" }} />
-      </Paper>
+     <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
+                Inicio / Operación / Mi asistencia
+      </Typography>
 
       {/* KPI cards */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" }, gap: 2.5 }}>
@@ -125,12 +120,12 @@ export default function MiAsistenciaPage() {
         <TextField size="small" label="Mes" select value={mes} onChange={(e) => setMes(Number(e.target.value))}
           sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: 13 }, minWidth: 140 }}>
           {["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"].map((m, i) => (
-            <option key={i} value={i + 1}>{m}</option>
+            <MenuItem key={i} value={i + 1}>{m}</MenuItem>
           ))}
         </TextField>
         <TextField size="small" label="Año" select value={anio} onChange={(e) => setAnio(Number(e.target.value))}
           sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: 13 }, minWidth: 110 }}>
-          {[2024, 2025, 2026].map((a) => <option key={a} value={a}>{a}</option>)}
+          {anios.map((a) => <MenuItem key={a} value={a}>{a}</MenuItem>)}
         </TextField>
       </Paper>
 

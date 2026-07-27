@@ -2,10 +2,11 @@ const db = require("../config/db");
 
 exports.obtenerTodos = async () => {
   const [rows] = await db.query(`
-    SELECT c.*, COUNT(e.id) AS empleados_count
+    SELECT c.*, a.nombre AS areas, COUNT(e.id) AS empleados_count
     FROM cargos c
+    LEFT JOIN areas a ON a.id = c.area_id
     LEFT JOIN empleado e ON e.cargo_id = c.id
-    GROUP BY c.id
+    GROUP BY c.id, c.nombre, c.descripcion, c.estado, c.creado_en, c.area_id, a.nombre
     ORDER BY c.nombre ASC
   `);
 
@@ -26,22 +27,22 @@ exports.obtenerPorId = async (id) => {
 };
 
 exports.crear = async (cargo) => {
-  const { nombre, descripcion, estado } = cargo;
+  const { nombre, descripcion, estado, area_id } = cargo;
 
-  const [result] = await db.query(
+  const [rows, result] = await db.query(
     `
     INSERT INTO cargos
-    (nombre, descripcion, estado)
-    VALUES (?, ?, ?)
+    (nombre, descripcion, estado, area_id)
+    VALUES (?, ?, ?, ?) RETURNING id
     `,
-    [nombre, descripcion, estado || "activo"]
+    [nombre, descripcion, estado || "activo", area_id || null]
   );
 
-  return result.insertId;
+  return rows[0]?.id || result.insertId;
 };
 
 exports.actualizar = async (id, cargo) => {
-  const { nombre, descripcion, estado } = cargo;
+  const { nombre, descripcion, estado, area_id } = cargo;
 
   await db.query(
     `
@@ -49,10 +50,11 @@ exports.actualizar = async (id, cargo) => {
     SET
       nombre = ?,
       descripcion = ?,
-      estado = ?
+      estado = ?,
+      area_id = ?
     WHERE id = ?
     `,
-    [nombre, descripcion, estado || "activo", id]
+    [nombre, descripcion, estado || "activo", area_id || null, id]
   );
 };
 

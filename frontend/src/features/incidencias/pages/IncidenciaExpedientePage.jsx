@@ -131,7 +131,7 @@ export default function IncidenciaExpedientePage() {
   const esAdmin = rol === "admin";
   const esTTHH = rol === "talento_humano";
   const esEmpleado = rol === "empleado";
-  const puedeGestionar = (esAdmin || esTTHH) && incidencia?.estado === "pendiente";
+  const puedeGestionar = (esAdmin || esTTHH) && (incidencia?.estado === "pendiente" || incidencia?.estado === "en_revision");
 
   const headers = { Authorization: `Bearer ${localStorage.getItem("token")}` };
 
@@ -211,13 +211,14 @@ export default function IncidenciaExpedientePage() {
   };
 
   const handleRechazar = async () => {
+    if (!observacion.trim()) return;
     setAccionando(true);
     setActionError("");
     try {
       const res = await fetch(`${API}/incidencias/${incidencia.id}/rechazar`, {
         method: "PUT",
         headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ motivo: "" }),
+        body: JSON.stringify({ motivo: observacion.trim() }),
       });
       if (!res.ok) throw new Error("No se pudo rechazar");
       handleRefresh();
@@ -613,7 +614,7 @@ export default function IncidenciaExpedientePage() {
                     Solicitar corrección
                   </Button>
                   <Button variant="contained" onClick={handleRechazar}
-                    disabled={accionando}
+                    disabled={accionando || !observacion.trim()}
                     sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, fontWeight: 600, bgcolor: "#DC2626", "&:hover": { bgcolor: "#B91C1C" }, px: 3 }}>
                     Rechazar incidencia
                   </Button>

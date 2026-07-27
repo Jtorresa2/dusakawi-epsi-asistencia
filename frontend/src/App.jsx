@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+﻿import { lazy, Suspense } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import {
   BrowserRouter as Router,
@@ -16,6 +16,7 @@ import UsuariosPage from "./features/usuarios/pages/UsuariosPage";
 import CargosPage from "./features/cargos/pages/CargosPage";
 import EmpleadosPage from "./features/empleados/pages/EmpleadosPage";
 import HorariosPage from "./features/horarios/pages/HorariosPage";
+import PermisosPage from "./features/permisos/pages/PermisosPage";
 import IncidenciasPage from "./features/incidencias/pages/IncidenciasPage";
 import IncidenciaExpedientePage from "./features/incidencias/pages/IncidenciaExpedientePage";
 import AreasPage from "./features/areas/pages/AreasPage";
@@ -24,7 +25,7 @@ import MiPerfilPage from "./features/miperfil/pages/MiPerfilPage";
 import MisSolicitudesPage from "./features/misSolicitudes/pages/MisSolicitudesPage";
 import IntegracionesPage from "./features/integraciones/pages/IntegracionesPage";
 import ReportarIncidenciaPage from "./features/reportarIncidencia/pages/ReportarIncidenciaPage";
-import RegistroPage from "./features/registro/pages/RegistroPage";
+import CambiarPasswordPage from "./features/cambiarPassword/pages/CambiarPasswordPage";
 import Layout from "./shared/components/Layout";
 import RoleRoute from "./shared/components/RoleRoute";
 import ErrorBoundary from "./shared/components/ErrorBoundary";
@@ -54,24 +55,25 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/registro" element={<RegistroPage />} />
+        <Route path="/cambiar-password" element={<CambiarPasswordPage />} />
 
         {/* General */}
         <Route path="/dashboard" element={<R roles={["admin", "talento_humano", "empleado"]}><DashboardPage /></R>} />
 
-        {/* Gestión */}
+        {/* Gestion */}
         <Route path="/empleados" element={<R roles={["admin", "talento_humano"]}><EmpleadosPage /></R>} />
         <Route path="/cargos" element={<R roles={["admin", "talento_humano"]}><CargosPage /></R>} />
         <Route path="/horarios" element={<R roles={["admin"]}><HorariosPage /></R>} />
+        <Route path="/permisos" element={<R roles={["admin", "talento_humano"]}><PermisosPage /></R>} />
         <Route path="/areas" element={<R roles={["admin", "talento_humano"]}><AreasPage /></R>} />
         <Route path="/incidencias" element={<R roles={["admin", "talento_humano"]}><IncidenciasPage /></R>} />
 <Route path="/incidencias/:id" element={<R roles={["admin", "talento_humano", "empleado"]}><IncidenciaExpedientePage /></R>} />
 
-        {/* Operación */}
+        {/* Operacion */}
         <Route path="/asistencia" element={<R roles={["admin", "talento_humano"]}><AsistenciaPage /></R>} />
         <Route path="/reportes" element={<R roles={["admin", "talento_humano"]}><ReportesPage /></R>} />
 
-        {/* Administración */}
+        {/* Administracion */}
         <Route path="/usuarios" element={<R roles={["admin"]}><UsuariosPage /></R>} />
         <Route path="/configuracion" element={<R roles={["admin"]}><ConfiguracionPage /></R>} />
         <Route path="/integraciones" element={<R roles={["admin"]}><IntegracionesPage /></R>} />
@@ -79,7 +81,7 @@ export default function App() {
         {/* Empleado */}
         <Route path="/mi-asistencia" element={<ErrorBoundary><Suspense fallback={<div style={{padding:40,textAlign:"center",color:"#9CA3AF"}}>Cargando...</div>}><R roles={["empleado"]}><MiAsistenciaPage /></R></Suspense></ErrorBoundary>} />
         <Route path="/reportar-incidencia" element={<ErrorBoundary><R roles={["empleado"]}><ReportarIncidenciaPage /></R></ErrorBoundary>} />
-        <Route path="/perfil" element={<ErrorBoundary><R roles={["empleado"]}><MiPerfilPage /></R></ErrorBoundary>} />
+        <Route path="/perfil" element={<ErrorBoundary><R roles={["admin", "talento_humano", "empleado"]}><MiPerfilPage /></R></ErrorBoundary>} />
 
         {/* Otras */}
         <Route path="/mis-solicitudes" element={<R roles={["admin", "talento_humano", "empleado"]}><MisSolicitudesPage /></R>} />

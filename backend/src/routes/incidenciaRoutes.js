@@ -7,6 +7,8 @@ const uploadFirma = require("../middlewares/uploadFirma");
 const incidenciaController = require("../controllers/incidenciaController");
 
 router.post("/", auth, upload.single("evidencia"), incidenciaController.crear);
+router.get("/stats", auth, rol("admin", "talento_humano"), incidenciaController.obtenerStats);
+router.get("/activity", auth, rol("admin", "talento_humano"), incidenciaController.obtenerActividad);
 router.get("/", auth, incidenciaController.obtenerTodas);
 router.get("/:id", auth, incidenciaController.obtenerPorId);
 router.put("/:id/aprobar", auth, rol("admin", "talento_humano"), incidenciaController.aprobar);

@@ -74,6 +74,13 @@ export default function DataTable({
         },
         "& .MuiDataGrid-virtualScroller": {
           minHeight: 200,
+          overflowX: "hidden",
+        },
+        "& .MuiDataGrid-virtualScroller::-webkit-scrollbar": {
+          display: "none",
+        },
+        "& .MuiDataGrid-main": {
+          overflow: "hidden",
         },
         ...sx,
       }}
@@ -89,6 +96,7 @@ export default function DataTable({
         onRowClick={onRowClick}
         getRowId={getRowId}
         getRowHeight={getRowHeight}
+        disableVirtualization
         localeText={{
           footerRowSelected: () => "",
           MuiTablePagination: {

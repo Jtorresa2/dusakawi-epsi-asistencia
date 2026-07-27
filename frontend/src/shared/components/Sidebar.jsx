@@ -34,19 +34,35 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
     navigate("/login");
   };
 
-  const ancho = isMobile ? (abierto ? EXPANDIDO : 0) : (abierto ? EXPANDIDO : COLAPSADO);
+  const ancho = isMobile ? EXPANDIDO : (abierto ? EXPANDIDO : COLAPSADO);
+
+  const baseStyle = {
+    background: "#1B5E20",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+    boxShadow: "8px 0 40px -4px rgba(0,0,0,.3)",
+  };
+
+  const mobileStyle = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    height: "100vh",
+    width: EXPANDIDO,
+    zIndex: 1300,
+    transform: `translateX(${abierto ? 0 : '-100%'})`,
+    transition: "transform .3s cubic-bezier(.4,0,.2,1)",
+  };
+
+  const desktopStyle = {
+    width: ancho,
+    flexShrink: 0,
+    transition: "width .3s cubic-bezier(.4,0,.2,1)",
+  };
 
   return (
-    <aside style={{
-      width: ancho,
-      background: "#1B5E20",
-      display: "flex",
-      flexDirection: "column",
-      overflow: "hidden",
-      flexShrink: 0,
-      transition: "width .3s cubic-bezier(.4,0,.2,1)",
-      boxShadow: "8px 0 40px -4px rgba(0,0,0,.3)",
-    }}>
+    <aside style={{ ...baseStyle, ...(isMobile ? mobileStyle : desktopStyle) }}>
       <div style={{
         height: 78,
         padding: abierto ? "0 20px" : "0 12px",

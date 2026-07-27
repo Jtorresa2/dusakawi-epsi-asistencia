@@ -9,13 +9,13 @@ exports.getRegistros = async (req, res) => {
         a.id, e.cedula,
         CONCAT(e.nombre, ' ', e.apellido) AS empleado,
         ar.nombre AS area, ar.piso, a.fecha,
-        TIME_FORMAT(a.fecha_hora_entrada, '%H:%i') AS entrada1,
-        TIME_FORMAT(a.fecha_hora_salida_manana, '%H:%i') AS salida1,
-        TIME_FORMAT(a.fecha_hora_entrada_tarde, '%H:%i') AS entrada2,
-        TIME_FORMAT(a.fecha_hora_salida, '%H:%i') AS salida2,
+        TO_CHAR(a.fecha_hora_entrada, 'HH24:MI') AS entrada1,
+        TO_CHAR(a.fecha_hora_salida_manana, 'HH24:MI') AS salida1,
+        TO_CHAR(a.fecha_hora_entrada_tarde, 'HH24:MI') AS entrada2,
+        TO_CHAR(a.fecha_hora_salida, 'HH24:MI') AS salida2,
         a.horas_trabajadas, a.horas_extra, a.minutos_tardanza,
         a.tipo_marcacion, a.estado, a.observacion,
-        DAYOFWEEK(a.fecha) AS dia_semana
+        EXTRACT(DOW FROM a.fecha) + 1 AS dia_semana
       FROM asistencia a
       JOIN empleado e ON a.empleado_id = e.id
       JOIN areas ar ON e.area_id = ar.id
@@ -31,7 +31,7 @@ exports.getRegistros = async (req, res) => {
       query += ` AND a.fecha = ?`;
       params.push(fecha);
     } else {
-      query += ` AND a.fecha = CURDATE()`;
+      query += ` AND a.fecha = CURRENT_DATE`;
     }
 
     if (area)   { query += ` AND ar.nombre LIKE ?`; params.push(`%${area}%`); }
@@ -60,13 +60,13 @@ exports.registrarManual = async (req, res) => {
       `INSERT INTO asistencia
         (empleado_id, fecha, fecha_hora_entrada, fecha_hora_salida_manana, fecha_hora_entrada_tarde, fecha_hora_salida, tipo_marcacion, estado, observacion)
        VALUES (?, ?, ?, ?, ?, ?, ?, 'puntual', ?)
-       ON DUPLICATE KEY UPDATE
-        fecha_hora_entrada = VALUES(fecha_hora_entrada),
-        fecha_hora_salida_manana = VALUES(fecha_hora_salida_manana),
-        fecha_hora_entrada_tarde = VALUES(fecha_hora_entrada_tarde),
-        fecha_hora_salida = VALUES(fecha_hora_salida),
-        tipo_marcacion = VALUES(tipo_marcacion),
-        observacion = VALUES(observacion)`,
+       ON CONFLICT (empleado_id, fecha) DO UPDATE SET
+        fecha_hora_entrada = EXCLUDED.fecha_hora_entrada,
+        fecha_hora_salida_manana = EXCLUDED.fecha_hora_salida_manana,
+        fecha_hora_entrada_tarde = EXCLUDED.fecha_hora_entrada_tarde,
+        fecha_hora_salida = EXCLUDED.fecha_hora_salida,
+        tipo_marcacion = EXCLUDED.tipo_marcacion,
+        observacion = EXCLUDED.observacion`,
       [empleado_id, fecha, fecha_e1, fecha_s1, fecha_e2, fecha_s2, tipo_marcacion, observacion]
     );
 
@@ -88,16 +88,16 @@ exports.getMiAsistencia = async (req, res) => {
     const [rows] = await pool.query(`
       SELECT
         a.fecha,
-        TIME_FORMAT(a.fecha_hora_entrada, '%H:%i') AS entrada1,
-        TIME_FORMAT(a.fecha_hora_salida_manana, '%H:%i') AS salida1,
-        TIME_FORMAT(a.fecha_hora_entrada_tarde, '%H:%i') AS entrada2,
-        TIME_FORMAT(a.fecha_hora_salida, '%H:%i') AS salida2,
+        TO_CHAR(a.fecha_hora_entrada, 'HH24:MI') AS entrada1,
+        TO_CHAR(a.fecha_hora_salida_manana, 'HH24:MI') AS salida1,
+        TO_CHAR(a.fecha_hora_entrada_tarde, 'HH24:MI') AS entrada2,
+        TO_CHAR(a.fecha_hora_salida, 'HH24:MI') AS salida2,
         a.horas_trabajadas, a.estado,
-        DAYOFWEEK(a.fecha) AS dia_semana
+        EXTRACT(DOW FROM a.fecha) + 1 AS dia_semana
       FROM asistencia a
       WHERE a.empleado_id = ?
-        AND YEAR(a.fecha) = ?
-        AND MONTH(a.fecha) = ?
+        AND EXTRACT(YEAR FROM a.fecha) = ?
+        AND EXTRACT(MONTH FROM a.fecha) = ?
       ORDER BY a.fecha DESC
     `, [empleado_id, anio, mes]);
 
@@ -127,6 +127,16 @@ exports.justificarAusencia = async (req, res) => {
     );
 
     res.json({ mensaje: 'Ausencia justificada correctamente' });
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
+  }
+};
+
+exports.eliminarRegistro = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM asistencia WHERE id = ?', [id]);
+    res.json({ mensaje: 'Registro eliminado correctamente' });
   } catch (err) {
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
   }

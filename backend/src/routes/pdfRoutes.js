@@ -46,14 +46,15 @@ function determinarEstado(e1, e2, justificado) {
   return calcTardanza(e1, e2) > 0 ? "tardanza" : "puntual";
 }
 
-async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado) {
+async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id) {
   let query = `
     SELECT a.id, e.cedula,
       CONCAT(e.nombre, ' ', e.apellido) AS colaborador,
       ar.nombre AS area, ar.piso, a.fecha,
-      TIME_FORMAT(a.fecha_hora_entrada, '%H:%i') AS entrada1,
-      TIME_FORMAT(a.fecha_hora_salida, '%H:%i') AS salida1,
-      NULL AS entrada2, NULL AS salida2,
+      TO_CHAR(a.fecha_hora_entrada, 'HH24:MI') AS entrada1,
+      TO_CHAR(a.fecha_hora_salida_manana, 'HH24:MI') AS salida1,
+      TO_CHAR(a.fecha_hora_entrada_tarde, 'HH24:MI') AS entrada2,
+      TO_CHAR(a.fecha_hora_salida, 'HH24:MI') AS salida2,
       a.horas_trabajadas, a.horas_extra,
       a.minutos_tardanza, a.tipo_marcacion,
       a.estado, a.observacion
@@ -65,10 +66,12 @@ async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, esta
   const params = [];
   if (fecha) { query += " AND a.fecha = ?"; params.push(fecha); }
   else if (fecha_desde && fecha_hasta) { query += " AND a.fecha >= ? AND a.fecha <= ?"; params.push(fecha_desde, fecha_hasta); }
-  else { query += " AND a.fecha = CURDATE()"; }
+  else if (fecha_desde) { query += " AND a.fecha >= ?"; params.push(fecha_desde); }
+  else if (fecha_hasta) { query += " AND a.fecha <= ?"; params.push(fecha_hasta); }
   if (area) { query += " AND ar.nombre LIKE ?"; params.push(`%${area}%`); }
   if (piso) { query += " AND ar.piso = ?"; params.push(piso); }
   if (estado) { query += " AND a.estado = ?"; params.push(estado); }
+  if (empleado_id) { query += " AND a.empleado_id = ?"; params.push(empleado_id); }
   query += " ORDER BY ar.nombre, e.nombre";
   const [rows] = await pool.query(query, params);
   return rows.map((r) => ({
@@ -79,49 +82,62 @@ async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, esta
   }));
 }
 
+const PDF_BODY_X = 65;
+
 function drawTable(doc, rows, startY) {
   let y = startY;
   const pageW = 595.28;
-  const M = 40;
-  const colW = (pageW - M * 2 - 10) / 6;
+  const contentW = pageW - PDF_BODY_X * 2 - 10;
+  const maxY = 720;
+  const hasTardanza = rows.some(r => (r.minutos_tardanza || 0) > 0);
+  const colCount = hasTardanza ? 6 : 5;
+  const colW = contentW / colCount;
   const rowH = 18;
   const headerH = 20;
-  const headers = ["Empleado", "Área", "Mañana", "Tarde", "Tardanza", "Estado"];
+  const headers = hasTardanza
+    ? ["Empleado", "Área", "Mañana", "Tarde", "Tardanza", "Estado"]
+    : ["Empleado", "Área", "Mañana", "Tarde", "Estado"];
 
-  doc.font("Helvetica-Bold").fontSize(7).fillColor("#FFFFFF");
-  doc.roundedRect(M + 5, y, pageW - M * 2 - 10, headerH, 3).fill("#1B5E20");
-  let hx = M + 8;
-  headers.forEach((h) => { doc.fillColor("#FFFFFF").text(h, hx + 3, y + 6, { width: colW - 3 }); hx += colW; });
-  y += headerH;
+  function drawHeader() {
+    doc.font("Helvetica-Bold").fontSize(7).fillColor("#FFFFFF");
+    doc.roundedRect(PDF_BODY_X, y, contentW, headerH, 3).fill("#1B5E20");
+    let hx = PDF_BODY_X + 3;
+    headers.forEach((h) => { doc.fillColor("#FFFFFF").text(h, hx + 3, y + 6, { width: colW - 3 }); hx += colW; });
+    y += headerH;
+  }
+
+  drawHeader();
   doc.fillColor("#111827").font("Helvetica").fontSize(6.5);
 
-  const badgeColors = {
-    puntual: { bg: "#D1FAE5", color: "#065F46" },
-    tardanza: { bg: "#FEF3C7", color: "#92400E" },
-    ausente: { bg: "#FEE2E2", color: "#991B1B" },
-    justificado: { bg: "#DBEAFE", color: "#1E40AF" },
-  };
-
-  rows.slice(0, 30).forEach((r, idx) => {
-    if (y > 680) return;
-    if (idx % 2 === 0) doc.rect(M + 5, y, pageW - M * 2 - 10, rowH).fill("#F9FAFB");
-    hx = M + 8;
-    const cells = [
-      r.empleado || "",
-      r.area || "",
-      r.entrada1 && r.salida1 ? `${r.entrada1}→${r.salida1}` : "—",
-      r.entrada2 && r.salida2 ? `${r.entrada2}→${r.salida2}` : "—",
-      r.minutos_tardanza > 0 ? `${r.minutos_tardanza} min` : "—",
-      r.estado || "—",
-    ];
+  rows.forEach((r, idx) => {
+    if (y + rowH > maxY) {
+      doc.addPage();
+      y = doc.y;
+      drawHeader();
+      doc.fillColor("#111827").font("Helvetica").fontSize(6.5);
+    }
+    if (idx % 2 === 0) doc.rect(PDF_BODY_X, y, contentW, rowH).fill("#F9FAFB");
+    let hx = PDF_BODY_X + 3;
+    const tardanza = r.minutos_tardanza > 0 ? `${r.minutos_tardanza} min` : null;
+    const cells = hasTardanza
+      ? [
+          r.empleado || "",
+          r.area || "",
+          r.entrada1 && r.salida1 ? `${r.entrada1}→${r.salida1}` : "—",
+          r.entrada2 && r.salida2 ? `${r.entrada2}→${r.salida2}` : "—",
+          tardanza || "—",
+          r.estado || "—",
+        ]
+      : [
+          r.empleado || "",
+          r.area || "",
+          r.entrada1 && r.salida1 ? `${r.entrada1}→${r.salida1}` : "—",
+          r.entrada2 && r.salida2 ? `${r.entrada2}→${r.salida2}` : "—",
+          r.estado || "—",
+        ];
     cells.forEach((val) => { doc.fillColor("#111827").text(val, hx + 3, y + 5, { width: colW - 3 }); hx += colW; });
     y += rowH;
   });
-
-  if (rows.length > 30) {
-    doc.fillColor("#6B7280").fontSize(7);
-    doc.text(`... y ${rows.length - 30} registros más`, M + 5, y + 5);
-  }
 }
 
 // GET /api/pdf/test
@@ -135,11 +151,11 @@ router.get("/test", (req, res) => {
   });
 });
 
-// GET /api/pdf/asistencia?fecha=&area=&piso=&estado=&fecha_desde=&fecha_hasta=
+// GET /api/pdf/asistencia?fecha=&area=&piso=&estado=&fecha_desde=&fecha_hasta=&empleado_id=
 router.get("/asistencia", async (req, res) => {
   try {
-    const { fecha, fecha_desde, fecha_hasta, area, piso, estado } = req.query;
-    const rows = await fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado);
+    const { fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id } = req.query;
+    const rows = await fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", "inline; filename=asistencia_dusakawi.pdf");
     const meta = { codigo: "GA-F-001", version: "01", emision: "01/01/2024", vigencia: "01/01/2026" };
@@ -156,7 +172,7 @@ router.get("/asistencia", async (req, res) => {
         doc.text("No hay registros para los filtros seleccionados.", { align: "center" });
       } else {
         doc.font("Helvetica").fontSize(7).fillColor("#6B7280");
-        doc.text(`Total: ${rows.length} registros`, { align: "right" });
+        doc.text(`Total: ${rows.length} registros`, PDF_BODY_X, doc.y, { align: "right", width: 465 });
         doc.moveDown(0.3);
         drawTable(doc, rows, doc.y);
       }
@@ -176,7 +192,7 @@ router.get("/incidencias", async (req, res) => {
         CONCAT(e.nombre, ' ', e.apellido) AS empleado,
         e.cedula, ar.nombre AS area,
         i.tipo, i.descripcion, i.evidencia_url,
-        DATE_FORMAT(i.created_at, '%d/%m/%Y') AS fecha,
+        TO_CHAR(i.created_at, 'DD/MM/YYYY') AS fecha,
         i.estado, i.motivo_rechazo
       FROM incidencias i
       JOIN empleado e ON i.empleado_id = e.id
@@ -205,30 +221,33 @@ router.get("/incidencias", async (req, res) => {
         doc.text("No hay registros para los filtros seleccionados.", { align: "center" });
       } else {
         doc.font("Helvetica").fontSize(7).fillColor("#6B7280");
-        doc.text(`Total: ${rows.length} registros`, { align: "right" });
+        doc.text(`Total: ${rows.length} registros`, PDF_BODY_X, doc.y, { align: "right", width: 465 });
         doc.moveDown(0.3);
-        const pageW = 595.28, M = 40;
-        const colW = (pageW - M * 2 - 10) / 6, rowH = 18, headerH = 20;
+        const pageW = 595.28, contentW = pageW - PDF_BODY_X * 2 - 10;
+        const colW = [Math.round(contentW * 0.20), Math.round(contentW * 0.13), Math.round(contentW * 0.14), Math.round(contentW * 0.30), Math.round(contentW * 0.11), Math.round(contentW * 0.12)];
+        const headerH = 20; let rowH = 18;
         let y = doc.y;
         const headers = ["Empleado", "Área", "Tipo", "Descripción", "Fecha", "Estado"];
         doc.font("Helvetica-Bold").fontSize(7).fillColor("#FFFFFF");
-        doc.roundedRect(M + 5, y, pageW - M * 2 - 10, headerH, 3).fill("#1B5E20");
-        let hx = M + 8;
-        headers.forEach((h) => { doc.fillColor("#FFFFFF").text(h, hx + 3, y + 6, { width: colW - 3 }); hx += colW; });
+        doc.roundedRect(PDF_BODY_X, y, contentW, headerH, 3).fill("#1B5E20");
+        let hx = PDF_BODY_X + 3;
+        headers.forEach((h, i) => { doc.fillColor("#FFFFFF").text(h, hx + 3, y + 6, { width: colW[i] - 3 }); hx += colW[i]; });
         y += headerH;
         doc.fillColor("#111827").font("Helvetica").fontSize(6.5);
-        rows.slice(0, 30).forEach((r, idx) => {
-          if (y > 680) return;
-          if (idx % 2 === 0) doc.rect(M + 5, y, pageW - M * 2 - 10, rowH).fill("#F9FAFB");
-          hx = M + 8;
+        rows.forEach((r, idx) => {
+          const descLines = doc.heightOfString(r.descripcion || "", { width: colW[3] - 6 });
+          const lineCount = Math.max(1, Math.ceil(descLines / (6.5 * 1.2)));
+          const rh = Math.max(rowH, lineCount * 10 + 6);
+          if (y + rh > 700) { doc.addPage(); y = PDF_BODY_Y; }
+          if (idx % 2 === 0) doc.rect(PDF_BODY_X, y, contentW, rh).fill("#F9FAFB");
+          hx = PDF_BODY_X + 3;
           const cells = [
             r.empleado || "", r.area || "", r.tipo || "",
-            (r.descripcion || "").substring(0, 40), r.fecha || "", r.estado || "",
+            r.descripcion || "", r.fecha || "", r.estado || "",
           ];
-          cells.forEach((val) => { doc.fillColor("#111827").text(val, hx + 3, y + 5, { width: colW - 3 }); hx += colW; });
-          y += rowH;
+          cells.forEach((val, i) => { doc.fillColor("#111827").text(val, hx + 3, y + 3, { width: colW[i] - 6 }); hx += colW[i]; });
+          y += rh;
         });
-        if (rows.length > 30) { doc.fillColor("#6B7280").fontSize(7); doc.text(`... y ${rows.length - 30} registros más`, M + 5, y + 5); }
       }
     });
   } catch (err) {
@@ -245,12 +264,12 @@ router.get("/dashboard", async (req, res) => {
     try {
       [asistenciaHoy] = await pool.query(`
         SELECT CONCAT(e.nombre, ' ', e.apellido) AS empleado,
-          TIME_FORMAT(a.fecha_hora_entrada, '%H:%i') AS entrada,
-          TIME_FORMAT(a.fecha_hora_salida, '%H:%i') AS salida,
+          TO_CHAR(a.fecha_hora_entrada, 'HH24:MI') AS entrada,
+          TO_CHAR(a.fecha_hora_salida, 'HH24:MI') AS salida,
           a.estado
         FROM asistencia a
         JOIN empleado e ON a.empleado_id = e.id
-        WHERE a.fecha = CURDATE()
+        WHERE a.fecha = CURRENT_DATE
         ORDER BY a.fecha_hora_entrada LIMIT 10
       `);
     } catch { asistenciaHoy = []; }
@@ -274,11 +293,11 @@ router.get("/dashboard", async (req, res) => {
         { label: "Horas extra", value: String(ind.horas_extras_hoy ?? "—") },
         { label: "Permisos", value: String(ind.permisos_hoy ?? "—") },
       ];
-      const pageW = 595.28, M = 40;
-      const kpiW = (pageW - M * 2 - 20) / 3;
+      const pageW = 595.28, contentW = pageW - PDF_BODY_X * 2 - 10;
+      const kpiW = (contentW - 10) / 3;
       kpis.forEach((k, i) => {
         const col = i % 3, row = Math.floor(i / 3);
-        const x = M + 5 + col * (kpiW + 5), y = doc.y + row * 45;
+        const x = PDF_BODY_X + col * (kpiW + 5), y = doc.y + row * 45;
         doc.roundedRect(x, y, kpiW, 38, 6).fill("#F9FAFB");
         doc.fillColor("#6B7280").font("Helvetica").fontSize(7).text(k.label, x + 10, y + 6);
         doc.fillColor("#111827").font("Helvetica-Bold").fontSize(14).text(k.value, x + 10, y + 18);
@@ -289,19 +308,19 @@ router.get("/dashboard", async (req, res) => {
         doc.font("Helvetica-Bold").fontSize(9).fillColor("#1B5E20");
         doc.text("MOVIMIENTOS DE HOY", { align: "left" });
         doc.moveDown(0.5);
-        const colW = (pageW - M * 2 - 10) / 4, rowH = 16, headerH = 18;
+        const colW = contentW / 4, rowH = 16, headerH = 18;
         let y = doc.y;
         const headers = ["Empleado", "Entrada", "Salida", "Estado"];
         doc.font("Helvetica-Bold").fontSize(7).fillColor("#FFFFFF");
-        doc.roundedRect(M + 5, y, pageW - M * 2 - 10, headerH, 3).fill("#1B5E20");
-        let hx = M + 8;
+        doc.roundedRect(PDF_BODY_X, y, contentW, headerH, 3).fill("#1B5E20");
+        let hx = PDF_BODY_X + 3;
         headers.forEach((h) => { doc.fillColor("#FFFFFF").text(h, hx + 3, y + 5, { width: colW - 3 }); hx += colW; });
         y += headerH;
         doc.fillColor("#111827").font("Helvetica").fontSize(6.5);
         asistenciaHoy.forEach((r, idx) => {
           if (y > 680) return;
-          if (idx % 2 === 0) doc.rect(M + 5, y, pageW - M * 2 - 10, rowH).fill("#F9FAFB");
-          hx = M + 8;
+          if (idx % 2 === 0) doc.rect(PDF_BODY_X, y, contentW, rowH).fill("#F9FAFB");
+          hx = PDF_BODY_X + 3;
           const cells = [
             r.empleado || "", r.entrada || "—", r.salida || "—", r.estado || "—",
           ];
@@ -321,7 +340,7 @@ router.get("/tardanzas", async (req, res) => {
   try {
     const { fecha_desde, fecha_hasta, area_id, empleado_id } = req.query;
     let q = `SELECT e.cedula, CONCAT(e.nombre,' ',e.apellido) AS colaborador, ar.nombre AS area,
-      a.fecha, TIME_FORMAT(a.fecha_hora_entrada,'%H:%i') AS entrada, a.minutos_tardanza, a.observacion
+      a.fecha, TO_CHAR(a.fecha_hora_entrada,'HH24:MI') AS entrada, a.minutos_tardanza, a.observacion
       FROM asistencia a JOIN empleado e ON a.empleado_id=e.id JOIN areas ar ON e.area_id=ar.id WHERE a.estado='tardanza'`;
     const p = [];
     if (fecha_desde) { q += " AND a.fecha>=?"; p.push(fecha_desde); }
@@ -339,18 +358,18 @@ router.get("/tardanzas", async (req, res) => {
       doc.font("Helvetica").fontSize(8).fillColor("#6B7280").text(`Período: ${fecha_desde||"—"} a ${fecha_hasta||"—"}`,{align:"center"});
       doc.moveDown(1);
       if (!rows.length) return doc.fontSize(10).fillColor("#6B7280").text("Sin registros.",{align:"center"});
-      doc.font("Helvetica").fontSize(7).fillColor("#6B7280").text(`Total: ${rows.length}`,{align:"right"}).moveDown(0.3);
-      const pw=595.28, M=40, cw=(pw-M*2-10)/6, rh=18, hh=20; let y=doc.y;
+      doc.font("Helvetica").fontSize(7).fillColor("#6B7280").text(`Total: ${rows.length}`,PDF_BODY_X,doc.y,{align:"right",width:465}).moveDown(0.3);
+      const pw=595.28, contentW=pw-PDF_BODY_X*2-10, cw=contentW/6, rh=18, hh=20; let y=doc.y;
       doc.font("Helvetica-Bold").fontSize(7).fillColor("#FFF");
-      doc.roundedRect(M+5,y,pw-M*2-10,hh,3).fill("#92400E");
-      ["Empleado","Área","Fecha","Entrada","Tardanza","Obs."].forEach((h,i)=>{doc.fillColor("#FFF").text(h,M+8+i*cw+3,y+6,{width:cw-3});});
+      doc.roundedRect(PDF_BODY_X,y,contentW,hh,3).fill("#92400E");
+      ["Empleado","Área","Fecha","Entrada","Tardanza","Obs."].forEach((h,i)=>{doc.fillColor("#FFF").text(h,PDF_BODY_X+3+i*cw+3,y+6,{width:cw-3});});
       y+=hh; doc.fillColor("#111827").font("Helvetica").fontSize(6.5);
       rows.slice(0,30).forEach((r,i)=>{
-        if(y>680)return; if(i%2===0)doc.rect(M+5,y,pw-M*2-10,rh).fill("#F9FAFB");
-        let hx=M+8; const c=[r.colaborador||"",r.area||"",r.fecha?new Date(r.fecha).toLocaleDateString("es-CO"):"—",r.entrada||"—",r.minutos_tardanza?`${r.minutos_tardanza} min`:"—",(r.observacion||"").substring(0,30)];
+        if(y>680)return; if(i%2===0)doc.rect(PDF_BODY_X,y,contentW,rh).fill("#F9FAFB");
+        let hx=PDF_BODY_X+3; const c=[r.colaborador||"",r.area||"",r.fecha?new Date(r.fecha).toLocaleDateString("es-CO"):"—",r.entrada||"—",r.minutos_tardanza?`${r.minutos_tardanza} min`:"—",(r.observacion||"").substring(0,30)];
         c.forEach(v=>{doc.fillColor("#111827").text(v,hx+3,y+5,{width:cw-3}); hx+=cw;}); y+=rh;
       });
-      if(rows.length>30)doc.fillColor("#6B7280").fontSize(7).text(`... y ${rows.length-30} más`,M+5,y+5);
+      if(rows.length>30)doc.fillColor("#6B7280").fontSize(7).text(`... y ${rows.length-30} más`,PDF_BODY_X,y+5);
     });
   } catch(e) { console.error(e); res.status(500).json({mensaje:"Error PDF",error:e.message}); }
 });
@@ -378,18 +397,18 @@ router.get("/ausencias", async (req, res) => {
       doc.font("Helvetica").fontSize(8).fillColor("#6B7280").text(`Período: ${fecha_desde||"—"} a ${fecha_hasta||"—"}`,{align:"center"});
       doc.moveDown(1);
       if (!rows.length) return doc.fontSize(10).fillColor("#6B7280").text("Sin registros.",{align:"center"});
-      doc.font("Helvetica").fontSize(7).fillColor("#6B7280").text(`Total: ${rows.length}`,{align:"right"}).moveDown(0.3);
-      const pw=595.28, M=40, cw=(pw-M*2-10)/5, rh=18, hh=20; let y=doc.y;
+      doc.font("Helvetica").fontSize(7).fillColor("#6B7280").text(`Total: ${rows.length}`,PDF_BODY_X,doc.y,{align:"right",width:465}).moveDown(0.3);
+      const pw=595.28, contentW=pw-PDF_BODY_X*2-10, cw=contentW/5, rh=18, hh=20; let y=doc.y;
       doc.font("Helvetica-Bold").fontSize(7).fillColor("#FFF");
-      doc.roundedRect(M+5,y,pw-M*2-10,hh,3).fill("#DC2626");
-      ["Empleado","Área","Fecha","Estado","Observación"].forEach((h,i)=>{doc.fillColor("#FFF").text(h,M+8+i*cw+3,y+6,{width:cw-3});});
+      doc.roundedRect(PDF_BODY_X,y,contentW,hh,3).fill("#DC2626");
+      ["Empleado","Área","Fecha","Estado","Observación"].forEach((h,i)=>{doc.fillColor("#FFF").text(h,PDF_BODY_X+3+i*cw+3,y+6,{width:cw-3});});
       y+=hh; doc.fillColor("#111827").font("Helvetica").fontSize(6.5);
       rows.slice(0,30).forEach((r,i)=>{
-        if(y>680)return; if(i%2===0)doc.rect(M+5,y,pw-M*2-10,rh).fill("#F9FAFB");
-        let hx=M+8; const c=[r.colaborador||"",r.area||"",r.fecha?new Date(r.fecha).toLocaleDateString("es-CO"):"—",r.estado||"",(r.observacion||"").substring(0,40)];
+        if(y>680)return; if(i%2===0)doc.rect(PDF_BODY_X,y,contentW,rh).fill("#F9FAFB");
+        let hx=PDF_BODY_X+3; const c=[r.colaborador||"",r.area||"",r.fecha?new Date(r.fecha).toLocaleDateString("es-CO"):"—",r.estado||"",(r.observacion||"").substring(0,40)];
         c.forEach(v=>{doc.fillColor("#111827").text(v,hx+3,y+5,{width:cw-3}); hx+=cw;}); y+=rh;
       });
-      if(rows.length>30)doc.fillColor("#6B7280").fontSize(7).text(`... y ${rows.length-30} más`,M+5,y+5);
+      if(rows.length>30)doc.fillColor("#6B7280").fontSize(7).text(`... y ${rows.length-30} más`,PDF_BODY_X,y+5);
     });
   } catch(e) { console.error(e); res.status(500).json({mensaje:"Error PDF",error:e.message}); }
 });
@@ -398,12 +417,12 @@ router.get("/ausencias", async (req, res) => {
 router.get("/empleados", async (req, res) => {
   try {
     const { area_id, cargo_id } = req.query;
-    let q = `SELECT e.cedula, e.nombre, e.apellido, e.correo, ar.nombre AS area, ca.nombre AS cargo, e.activo
+    let q = `SELECT e.cedula, e.nombre, e.apellido, e.telefono, e.correo, ar.nombre AS area, ca.nombre AS cargo, e.activo
       FROM empleado e LEFT JOIN areas ar ON e.area_id=ar.id LEFT JOIN cargos ca ON e.cargo_id=ca.id WHERE 1=1`;
     const p = [];
     if (area_id) { q += " AND e.area_id=?"; p.push(area_id); }
     if (cargo_id) { q += " AND e.cargo_id=?"; p.push(cargo_id); }
-    q += " ORDER BY e.apellido LIMIT 50";
+    q += " ORDER BY e.apellido";
     const [rows] = await pool.query(q, p);
     res.setHeader("Content-Type","application/pdf");
     res.setHeader("Content-Disposition","inline; filename=empleados.pdf");
@@ -412,18 +431,24 @@ router.get("/empleados", async (req, res) => {
       doc.font("Helvetica-Bold").fontSize(12).fillColor("#1B5E20").text("REPORTE DE EMPLEADOS",{align:"center"});
       doc.moveDown(1);
       if (!rows.length) return doc.fontSize(10).fillColor("#6B7280").text("Sin registros.",{align:"center"});
-      doc.font("Helvetica").fontSize(7).fillColor("#6B7280").text(`Total: ${rows.length}`,{align:"right"}).moveDown(0.3);
-      const pw=595.28, M=40, cw=(pw-M*2-10)/5, rh=18, hh=20; let y=doc.y;
+      doc.font("Helvetica").fontSize(7).fillColor("#6B7280").text(`Total: ${rows.length}`,PDF_BODY_X,doc.y,{align:"right",width:465}).moveDown(0.3);
+      const pw=595.28, contentW=pw-PDF_BODY_X*2-10;
+      const cw=[Math.round(contentW*0.20),Math.round(contentW*0.11),Math.round(contentW*0.13),Math.round(contentW*0.15),Math.round(contentW*0.14),Math.round(contentW*0.17),Math.round(contentW*0.10)];
+      let rh=18, hh=20; let y=doc.y;
       doc.font("Helvetica-Bold").fontSize(7).fillColor("#FFF");
-      doc.roundedRect(M+5,y,pw-M*2-10,hh,3).fill("#1B5E20");
-      ["Nombre","Cédula","Área","Cargo","Contacto"].forEach((h,i)=>{doc.fillColor("#FFF").text(h,M+8+i*cw+3,y+6,{width:cw-3});});
+      doc.roundedRect(PDF_BODY_X,y,contentW,hh,3).fill("#1B5E20");
+      const headers=["Nombre","Cédula","Teléfono","Área","Cargo","Contacto","Estado"];
+      let hx=PDF_BODY_X+3;
+      headers.forEach((h,i)=>{doc.fillColor("#FFF").text(h,hx+3,y+6,{width:cw[i]-3}); hx+=cw[i];});
       y+=hh; doc.fillColor("#111827").font("Helvetica").fontSize(6.5);
-      rows.slice(0,30).forEach((r,i)=>{
-        if(y>680)return; if(i%2===0)doc.rect(M+5,y,pw-M*2-10,rh).fill("#F9FAFB");
-        let hx=M+8; const c=[`${r.nombre||""} ${r.apellido||""}`,r.cedula||"",r.area||"—",r.cargo||"—",r.correo||""];
-        c.forEach(v=>{doc.fillColor("#111827").text(v,hx+3,y+5,{width:cw-3}); hx+=cw;}); y+=rh;
+      rows.forEach((r,i)=>{
+        if(y+rh>700){doc.addPage(); y=PDF_BODY_Y;}
+        if(i%2===0)doc.rect(PDF_BODY_X,y,contentW,rh).fill("#F9FAFB");
+        hx=PDF_BODY_X+3;
+        const c=[`${r.nombre||""} ${r.apellido||""}`,r.cedula||"",r.telefono||"—",r.area||"—",r.cargo||"—",r.correo||"",r.activo?"Activo":"Inactivo"];
+        c.forEach((v,i)=>{doc.fillColor("#111827").text(v,hx+3,y+5,{width:cw[i]-3}); hx+=cw[i];});
+        y+=rh;
       });
-      if(rows.length>30)doc.fillColor("#6B7280").fontSize(7).text(`... y ${rows.length-30} más`,M+5,y+5);
     });
   } catch(e) { console.error(e); res.status(500).json({mensaje:"Error PDF",error:e.message}); }
 });
@@ -433,8 +458,8 @@ router.get("/marcaciones", async (req, res) => {
   try {
     const { fecha_desde, fecha_hasta, empleado_id, area_id } = req.query;
     let q = `SELECT e.cedula, CONCAT(e.nombre,' ',e.apellido) AS colaborador, ar.nombre AS area,
-      a.fecha, TIME_FORMAT(a.fecha_hora_entrada,'%H:%i') AS entrada,
-      TIME_FORMAT(a.fecha_hora_salida,'%H:%i') AS salida, a.tipo_marcacion, a.estado
+      a.fecha,       TO_CHAR(a.fecha_hora_entrada,'HH24:MI') AS entrada,
+      TO_CHAR(a.fecha_hora_salida,'HH24:MI') AS salida, a.tipo_marcacion, a.estado
       FROM asistencia a JOIN empleado e ON a.empleado_id=e.id JOIN areas ar ON e.area_id=ar.id WHERE 1=1`;
     const p = [];
     if (fecha_desde) { q += " AND a.fecha>=?"; p.push(fecha_desde); }
@@ -452,18 +477,18 @@ router.get("/marcaciones", async (req, res) => {
       doc.font("Helvetica").fontSize(8).fillColor("#6B7280").text(`Período: ${fecha_desde||"—"} a ${fecha_hasta||"—"}`,{align:"center"});
       doc.moveDown(1);
       if (!rows.length) return doc.fontSize(10).fillColor("#6B7280").text("Sin registros.",{align:"center"});
-      doc.font("Helvetica").fontSize(7).fillColor("#6B7280").text(`Total: ${rows.length}`,{align:"right"}).moveDown(0.3);
-      const pw=595.28, M=40, cw=(pw-M*2-10)/6, rh=18, hh=20; let y=doc.y;
+      doc.font("Helvetica").fontSize(7).fillColor("#6B7280").text(`Total: ${rows.length}`,PDF_BODY_X,doc.y,{align:"right",width:465}).moveDown(0.3);
+      const pw=595.28, contentW=pw-PDF_BODY_X*2-10, cw=contentW/6, rh=18, hh=20; let y=doc.y;
       doc.font("Helvetica-Bold").fontSize(7).fillColor("#FFF");
-      doc.roundedRect(M+5,y,pw-M*2-10,hh,3).fill("#1565C0");
-      ["Empleado","Área","Fecha","Entrada","Salida","Tipo"].forEach((h,i)=>{doc.fillColor("#FFF").text(h,M+8+i*cw+3,y+6,{width:cw-3});});
+      doc.roundedRect(PDF_BODY_X,y,contentW,hh,3).fill("#1565C0");
+      ["Empleado","Área","Fecha","Entrada","Salida","Tipo"].forEach((h,i)=>{doc.fillColor("#FFF").text(h,PDF_BODY_X+3+i*cw+3,y+6,{width:cw-3});});
       y+=hh; doc.fillColor("#111827").font("Helvetica").fontSize(6.5);
       rows.slice(0,30).forEach((r,i)=>{
-        if(y>680)return; if(i%2===0)doc.rect(M+5,y,pw-M*2-10,rh).fill("#F9FAFB");
-        let hx=M+8; const c=[r.colaborador||"",r.area||"",r.fecha?new Date(r.fecha).toLocaleDateString("es-CO"):"—",r.entrada||"—",r.salida||"—",r.tipo_marcacion||"—"];
+        if(y>680)return; if(i%2===0)doc.rect(PDF_BODY_X,y,contentW,rh).fill("#F9FAFB");
+        let hx=PDF_BODY_X+3; const c=[r.colaborador||"",r.area||"",r.fecha?new Date(r.fecha).toLocaleDateString("es-CO"):"—",r.entrada||"—",r.salida||"—",r.tipo_marcacion||"—"];
         c.forEach(v=>{doc.fillColor("#111827").text(v,hx+3,y+5,{width:cw-3}); hx+=cw;}); y+=rh;
       });
-      if(rows.length>30)doc.fillColor("#6B7280").fontSize(7).text(`... y ${rows.length-30} más`,M+5,y+5);
+      if(rows.length>30)doc.fillColor("#6B7280").fontSize(7).text(`... y ${rows.length-30} más`,PDF_BODY_X,y+5);
     });
   } catch(e) { console.error(e); res.status(500).json({mensaje:"Error PDF",error:e.message}); }
 });
