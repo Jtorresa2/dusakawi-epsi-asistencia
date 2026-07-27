@@ -21,19 +21,12 @@ export default function PageHeader({
       }}
     >
       <Box>
-        <Typography
-          variant="h4"
-          fontWeight={700}
-          color="#1b5e20"
-        >
-          {titulo}
-        </Typography>
-
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          mt={0.5}
-        >
+        {titulo && (
+          <Typography variant="h4" fontWeight={700} color="#1b5e20">
+            {titulo}
+          </Typography>
+        )}
+        <Typography variant="body2" color="text.secondary" mt={titulo ? 0.5 : 0}>
           {subtitulo}
         </Typography>
       </Box>

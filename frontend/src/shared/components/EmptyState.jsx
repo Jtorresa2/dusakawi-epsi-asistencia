@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import InboxIcon from "@mui/icons-material/Inbox";
+import IconBox from "./IconBox";
 
 export default function EmptyState({
   mensaje = "No hay registros."
@@ -11,12 +12,9 @@ export default function EmptyState({
         textAlign: "center",
       }}
     >
-      <InboxIcon
-        sx={{
-          fontSize: 70,
-          color: "#C7C7C7",
-        }}
-      />
+      <Box display="flex" justifyContent="center" mb={2}>
+        <IconBox icon={<InboxIcon />} color="#9CA3AF" size={80} iconSize={40} />
+      </Box>
 
       <Typography
         mt={2}

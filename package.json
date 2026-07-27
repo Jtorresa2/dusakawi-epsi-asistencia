@@ -1,5 +1,7 @@
 {
-  "dependencies": {
-    "recharts": "^3.9.1"
+  "scripts": {
+    "dev": "npx concurrently -n BE,FE -c green,cyan \"cd backend && npm run dev\" \"cd frontend && npm start\"",
+    "dev:be": "cd backend && npm run dev",
+    "dev:fe": "cd frontend && npm start"
   }
 }

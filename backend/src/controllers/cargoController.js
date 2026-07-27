@@ -72,7 +72,7 @@ exports.eliminar = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    if (error.code === "ER_ROW_IS_REFERENCED_2") {
+    if (error.code === "23503") {
       return res.status(400).json({
         mensaje: "No se puede eliminar el cargo porque está asignado a uno o más empleados.",
       });
