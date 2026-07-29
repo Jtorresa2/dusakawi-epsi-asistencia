@@ -31,12 +31,38 @@ exports.getReporteMensual = async (req, res) => {
     const { mes, anio } = req.query;
     const mesConsulta  = mes  || new Date().getMonth() + 1;
     const anioConsulta = anio || new Date().getFullYear();
+
+    // Festivos del mes
+    const [festivos] = await pool.query(
+      `SELECT fecha, nombre FROM festivos WHERE activo = TRUE
+       AND EXTRACT(MONTH FROM fecha) = ? AND EXTRACT(YEAR FROM fecha) = ?`,
+      [mesConsulta, anioConsulta]
+    );
+    const festivosSet = new Set(festivos.map(f => {
+      const d = new Date(f.fecha);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }));
+    const festivosMap = Object.fromEntries(festivos.map(f => {
+      const d = new Date(f.fecha);
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      return [key, f.nombre];
+    }));
+
     const [porDia] = await pool.query(`
       SELECT fecha, COUNT(*) AS total, SUM((estado = 'puntual')::int) AS puntuales,
         SUM((estado = 'tardanza')::int) AS tardanzas, SUM((estado = 'ausente')::int) AS ausentes,
         ROUND(SUM((estado != 'ausente')::int) / COUNT(*) * 100, 1) AS porcentaje_asistencia
       FROM asistencia WHERE EXTRACT(MONTH FROM fecha) = ? AND EXTRACT(YEAR FROM fecha) = ? GROUP BY fecha ORDER BY fecha
     `, [mesConsulta, anioConsulta]);
+
+    // Marcar festivos en porDia
+    const porDiaConFestivos = porDia.map(d => {
+      const fechaStr = d.fecha instanceof Date
+        ? `${d.fecha.getFullYear()}-${String(d.fecha.getMonth()+1).padStart(2,'0')}-${String(d.fecha.getDate()).padStart(2,'0')}`
+        : d.fecha.substring(0, 10);
+      return { ...d, esFestivo: festivosSet.has(fechaStr), festivo: festivosMap[fechaStr] || null };
+    });
+
     const [porArea] = await pool.query(`
       SELECT ar.nombre AS area, ar.piso, COUNT(*) AS total,
         SUM((a.estado = 'puntual')::int) AS puntuales, SUM((a.estado = 'tardanza')::int) AS tardanzas,
@@ -45,6 +71,8 @@ exports.getReporteMensual = async (req, res) => {
       FROM asistencia a JOIN empleado e ON a.empleado_id = e.id JOIN areas ar ON e.area_id = ar.id
       WHERE EXTRACT(MONTH FROM a.fecha) = ? AND EXTRACT(YEAR FROM a.fecha) = ? GROUP BY ar.id ORDER BY ar.piso, ar.nombre
     `, [mesConsulta, anioConsulta]);
+
+    // Resumen excluyendo festivos
     const [resumen] = await pool.query(`
       SELECT COUNT(*) AS total_registros, SUM((estado = 'puntual')::int) AS puntuales,
         SUM((estado = 'tardanza')::int) AS tardanzas, SUM((estado = 'ausente')::int) AS ausentes,
@@ -53,7 +81,15 @@ exports.getReporteMensual = async (req, res) => {
         ROUND(SUM((estado = 'puntual')::int) / COUNT(*) * 100, 1) AS porcentaje_puntualidad
       FROM asistencia WHERE EXTRACT(MONTH FROM fecha) = ? AND EXTRACT(YEAR FROM fecha) = ?
     `, [mesConsulta, anioConsulta]);
-    res.json({ mes: mesConsulta, anio: anioConsulta, resumen: resumen[0], porDia, porArea });
+
+    res.json({
+      mes: mesConsulta,
+      anio: anioConsulta,
+      festivos: festivos.length,
+      resumen: { ...resumen[0], festivos: festivos.length },
+      porDia: porDiaConFestivos,
+      porArea,
+    });
   } catch (err) { res.status(500).json({ mensaje: "Error del servidor", error: err.message }); }
 };
 
@@ -65,9 +101,9 @@ exports.getIndicadores = async (req, res) => {
     const mesAnterior = mesActual === 1 ? 12 : mesActual - 1;
     const anioAnterior = mesActual === 1 ? anioActual - 1 : anioActual;
 
-    const [[{ activos }]] = await pool.query(`SELECT COUNT(*) AS activos FROM empleado WHERE activo = 1`);
+    const [[{ activos }]] = await pool.query(`SELECT COUNT(*) AS activos FROM empleado WHERE activo = TRUE`);
     const [[{ activosAnt }]] = await pool.query(
-      `SELECT COUNT(*) AS activos FROM empleado WHERE activo = 1 AND EXTRACT(YEAR FROM creado_en) = ? AND EXTRACT(MONTH FROM creado_en) = ?`,
+      `SELECT COUNT(*) AS activos FROM empleado WHERE activo = TRUE AND EXTRACT(YEAR FROM creado_en) = ? AND EXTRACT(MONTH FROM creado_en) = ?`,
       [anioAnterior, mesAnterior]
     );
 
@@ -134,7 +170,7 @@ exports.getTendencia = async (req, res) => {
 
 exports.getReporteAsistencia = async (req, res) => {
   try {
-    const { fecha_desde, fecha_hasta, empleado_id, area_id } = req.query;
+    const { fecha_desde, fecha_hasta, empleado_id, area_id, estado } = req.query;
     let query = `
       SELECT a.id, e.cedula, CONCAT(e.nombre, ' ', e.apellido) AS empleado,
         ar.nombre AS area, ar.piso, a.fecha,
@@ -150,6 +186,7 @@ exports.getReporteAsistencia = async (req, res) => {
     if (fecha_hasta) { query += ` AND a.fecha <= ?`; params.push(fecha_hasta); }
     if (empleado_id) { query += ` AND a.empleado_id = ?`; params.push(empleado_id); }
     if (area_id) { query += ` AND e.area_id = ?`; params.push(area_id); }
+    if (estado) { query += ` AND a.estado = ?`; params.push(estado); }
     query += ` ORDER BY a.fecha DESC, e.apellido`;
     const [rows] = await pool.query(query, params);
     res.json({ registros: rows, total: rows.length });
@@ -208,6 +245,10 @@ exports.getReporteAusencias = async (req, res) => {
         ar.nombre AS area, ar.piso, a.fecha, a.estado, a.observacion, a.tipo_marcacion
       FROM asistencia a JOIN empleado e ON a.empleado_id = e.id JOIN areas ar ON e.area_id = ar.id
       WHERE a.estado IN ('ausente', 'justificado')
+        AND NOT EXISTS (
+          SELECT 1 FROM permisos p
+          WHERE p.empleado_id = a.empleado_id AND a.fecha BETWEEN p.fecha_desde AND p.fecha_hasta
+        )
     `;
     const params = [];
     if (fecha_desde) { query += ` AND a.fecha >= ?`; params.push(fecha_desde); }
@@ -217,6 +258,136 @@ exports.getReporteAusencias = async (req, res) => {
     query += ` ORDER BY a.fecha DESC, e.apellido`;
     const [rows] = await pool.query(query, params);
     res.json({ registros: rows, total: rows.length });
+  } catch (err) { res.status(500).json({ mensaje: "Error del servidor", error: err.message }); }
+};
+
+exports.getReportePorEmpleado = async (req, res) => {
+  try {
+    const { empleado_id, mes, anio } = req.query;
+    if (!empleado_id) return res.status(400).json({ mensaje: "empleado_id es requerido" });
+
+    const mesConsulta  = mes  || new Date().getMonth() + 1;
+    const anioConsulta = anio || new Date().getFullYear();
+
+    // Datos del empleado
+    const [[empleado]] = await pool.query(`
+      SELECT e.id, e.cedula, e.nombre, e.apellido, ar.nombre AS area, ca.nombre AS cargo,
+        TO_CHAR(e.fecha_ingreso, 'YYYY-MM-DD') AS fecha_ingreso
+      FROM empleado e LEFT JOIN areas ar ON e.area_id = ar.id LEFT JOIN cargos ca ON e.cargo_id = ca.id
+      WHERE e.id = ?
+    `, [empleado_id]);
+
+    if (!empleado) return res.status(404).json({ mensaje: "Empleado no encontrado" });
+
+    // Días hábiles del mes
+    const diasDelMes = new Date(anioConsulta, mesConsulta, 0).getDate();
+    let diasHabiles = 0;
+    for (let d = 1; d <= diasDelMes; d++) {
+      const dia = new Date(anioConsulta, mesConsulta - 1, d);
+      if (dia.getDay() !== 0 && dia.getDay() !== 6) diasHabiles++;
+    }
+
+    // Festivos del mes
+    const [festivos] = await pool.query(
+      `SELECT COUNT(*) AS total FROM festivos
+       WHERE activo = TRUE AND EXTRACT(MONTH FROM fecha) = ? AND EXTRACT(YEAR FROM fecha) = ?
+       AND EXTRACT(DOW FROM fecha) != 0 AND EXTRACT(DOW FROM fecha) != 6`,
+      [mesConsulta, anioConsulta]
+    );
+    const totalFestivos = Number(festivos[0]?.total || 0);
+    const diasEsperados = diasHabiles - totalFestivos;
+
+    // Resumen de asistencia
+    const [[asis]] = await pool.query(`
+      SELECT
+        COUNT(*) AS total_registros,
+        SUM((estado = 'puntual')::int) AS puntuales,
+        SUM((estado = 'tardanza')::int) AS tardanzas,
+        SUM((estado = 'ausente')::int) AS ausentes,
+        SUM((estado = 'justificado')::int) AS justificados,
+        COALESCE(SUM(horas_trabajadas), 0) AS horas_trabajadas,
+        COALESCE(SUM(horas_extra), 0) AS horas_extra,
+        COALESCE(SUM(minutos_tardanza), 0) AS total_minutos_tardanza
+      FROM asistencia
+      WHERE empleado_id = ? AND EXTRACT(MONTH FROM fecha) = ? AND EXTRACT(YEAR FROM fecha) = ?
+    `, [empleado_id, mesConsulta, anioConsulta]);
+
+    const resumen = asis || { total_registros: 0, puntuales: 0, tardanzas: 0, ausentes: 0, justificados: 0, horas_trabajadas: 0, horas_extra: 0, total_minutos_tardanza: 0 };
+
+    // Permisos del mes
+    const [permisos] = await pool.query(`
+      SELECT COUNT(*) AS total,
+        COALESCE(SUM(CASE WHEN tipo IN ('completo', 'comision') THEN
+          (fecha_hasta - fecha_desde + 1) - (
+            SELECT COUNT(*) FROM generate_series(fecha_desde::date, fecha_hasta::date, '1 day') AS d
+            WHERE EXTRACT(DOW FROM d) IN (0, 6)
+          )
+        ELSE 1 END), 0) AS dias_permiso
+      FROM permisos
+      WHERE empleado_id = ? AND EXTRACT(MONTH FROM fecha_desde) = ? AND EXTRACT(YEAR FROM fecha_desde) = ?
+    `, [empleado_id, mesConsulta, anioConsulta]);
+
+    // Incidencias del mes
+    const [[incidencias]] = await pool.query(`
+      SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE estado = 'pendiente') AS pendientes
+      FROM incidencias
+      WHERE empleado_id = ? AND EXTRACT(MONTH FROM fecha) = ? AND EXTRACT(YEAR FROM fecha) = ?
+    `, [empleado_id, mesConsulta, anioConsulta]);
+
+    // Detalle por día
+    const [detalle] = await pool.query(`
+      SELECT a.fecha, a.estado,
+        TO_CHAR(a.fecha_hora_entrada, 'HH24:MI') AS entrada1,
+        TO_CHAR(a.fecha_hora_salida_manana, 'HH24:MI') AS salida1,
+        TO_CHAR(a.fecha_hora_entrada_tarde, 'HH24:MI') AS entrada2,
+        TO_CHAR(a.fecha_hora_salida, 'HH24:MI') AS salida2,
+        a.horas_trabajadas, a.horas_extra, a.minutos_tardanza, a.observacion
+      FROM asistencia a
+      WHERE a.empleado_id = ? AND EXTRACT(MONTH FROM a.fecha) = ? AND EXTRACT(YEAR FROM a.fecha) = ?
+      ORDER BY a.fecha DESC
+    `, [empleado_id, mesConsulta, anioConsulta]);
+
+    // Marcar festivos en el detalle
+    const [festivosDetalle] = await pool.query(
+      `SELECT fecha, nombre FROM festivos WHERE activo = TRUE
+       AND EXTRACT(MONTH FROM fecha) = ? AND EXTRACT(YEAR FROM fecha) = ?`,
+      [mesConsulta, anioConsulta]
+    );
+    const festivosMap = Object.fromEntries(festivosDetalle.map(f => {
+      const d = new Date(f.fecha);
+      return [`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`, f.nombre];
+    }));
+
+    const detalleConFestivos = detalle.map(d => {
+      const fechaStr = d.fecha instanceof Date
+        ? `${d.fecha.getFullYear()}-${String(d.fecha.getMonth()+1).padStart(2,'0')}-${String(d.fecha.getDate()).padStart(2,'0')}`
+        : d.fecha.substring(0, 10);
+      return { ...d, esFestivo: !!festivosMap[fechaStr], festivo: festivosMap[fechaStr] || null };
+    });
+
+    const porcentajeAsistencia = diasEsperados > 0
+      ? Math.round((Number(resumen.puntuales) / diasEsperados) * 100)
+      : 0;
+
+    res.json({
+      empleado,
+      periodo: { mes: mesConsulta, anio: anioConsulta, diasHabiles, festivos: totalFestivos, diasEsperados },
+      resumen: {
+        ...resumen,
+        puntuales: Number(resumen.puntuales),
+        tardanzas: Number(resumen.tardanzas),
+        ausentes: Number(resumen.ausentes),
+        justificados: Number(resumen.justificados),
+        horas_trabajadas: Number(resumen.horas_trabajadas),
+        horas_extra: Number(resumen.horas_extra),
+        total_minutos_tardanza: Number(resumen.total_minutos_tardanza),
+        porcentaje_asistencia: Math.round((Number(resumen.puntuales) + Number(resumen.tardanzas) + Number(resumen.justificados)) / Math.max(diasEsperados, 1) * 100),
+        porcentaje_puntualidad: porcentajeAsistencia,
+      },
+      permisos: { total: Number(permisos[0]?.total || 0), dias: Number(permisos[0]?.dias_permiso || 0) },
+      incidencias: { total: Number(incidencias?.total || 0), pendientes: Number(incidencias?.pendientes || 0) },
+      detalle: detalleConFestivos,
+    });
   } catch (err) { res.status(500).json({ mensaje: "Error del servidor", error: err.message }); }
 };
 

@@ -5,6 +5,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   IconButton, Chip, Dialog, DialogTitle, DialogContent, DialogActions,
   Collapse, FormControl, InputLabel, Select, MenuItem,
+  Snackbar, Alert,
 } from "@mui/material";
 import { Plus, Edit2, Trash2, Search, Building2, Users, ChevronDown, ChevronRight, X, Building, Layers, MapPin } from "lucide-react";
 
@@ -30,6 +31,7 @@ export default function AreasPage() {
   const [areaExpandida, setAreaExpandida] = useState(null);
   const [empleados, setEmpleados] = useState([]);
   const [cargandoEmpleados, setCargandoEmpleados] = useState(false);
+  const [snack, setSnack] = useState({ open: false, severity: "success", mensaje: "" });
 
   useEffect(() => { fetchAreas(); }, []);
 
@@ -70,8 +72,10 @@ export default function AreasPage() {
     try {
       if (editando) {
         await actualizarArea(editando.id, { ...form, piso: Number(form.piso) });
+        setSnack({ open: true, severity: "success", mensaje: "Área actualizada correctamente" });
       } else {
         await crearArea({ ...form, piso: Number(form.piso) });
+        setSnack({ open: true, severity: "success", mensaje: "Área creada correctamente" });
       }
       setModal(false);
       await fetchAreas();
@@ -84,6 +88,7 @@ export default function AreasPage() {
     try {
       await eliminarArea(confirmDelete.id);
       setConfirmDelete(null);
+      setSnack({ open: true, severity: "success", mensaje: "Área eliminada correctamente" });
       await fetchAreas();
     } catch (e) { alert(e.mensaje || "Error al eliminar"); }
   };
@@ -347,6 +352,12 @@ export default function AreasPage() {
         onConfirm={eliminar}
         onCancel={() => setConfirmDelete(null)}
       />
+
+      {/* SNACKBAR */}
+      <Snackbar open={snack.open} autoHideDuration={4000} onClose={() => setSnack(s => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+        <Alert severity={snack.severity} variant="filled" sx={{ borderRadius: "10px" }}>{snack.mensaje}</Alert>
+      </Snackbar>
     </Box>
   );
 }

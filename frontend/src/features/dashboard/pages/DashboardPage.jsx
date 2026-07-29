@@ -207,7 +207,7 @@ function AdminDashboard({ usuario }) {
     { title: "Ausentes hoy", value: String(data.ausentes), icon: <XCircle />, color: "#DC2626" },
     { title: "Tardanzas", value: String(data.tardanzas), icon: <AlertTriangle />, color: "#D97706" },
     { title: "Horas extra hoy", value: String(data.horasExtras), icon: <Clock />, color: "#7C3AED" },
-    { title: "Permisos hoy", value: String(data.permisos), icon: <FileText />, color: "#0891B2" },
+    { title: "Novedades hoy", value: String(data.permisos), icon: <FileText />, color: "#0891B2" },
   ];
 
   return (

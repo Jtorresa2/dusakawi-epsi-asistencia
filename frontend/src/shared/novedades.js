@@ -4,7 +4,7 @@ const R = {
   EMP: "empleado",
 };
 
-const PERMISOS = {
+const NOVEDADES = {
   empleados: {
     ver: [R.ADMIN, R.TH],
     crear: [R.ADMIN, R.TH],
@@ -73,9 +73,9 @@ const PERMISOS = {
 };
 
 export function puede(rol, modulo, accion = "ver") {
-  const permiso = PERMISOS[modulo]?.[accion];
+  const permiso = NOVEDADES[modulo]?.[accion];
   if (!permiso) return false;
   return permiso.includes(rol);
 }
 
-export default PERMISOS;
+export default NOVEDADES;

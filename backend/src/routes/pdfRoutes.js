@@ -46,7 +46,7 @@ function determinarEstado(e1, e2, justificado) {
   return calcTardanza(e1, e2) > 0 ? "tardanza" : "puntual";
 }
 
-async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id) {
+async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id, area_id) {
   let query = `
     SELECT a.id, e.cedula,
       CONCAT(e.nombre, ' ', e.apellido) AS colaborador,
@@ -68,7 +68,8 @@ async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, esta
   else if (fecha_desde && fecha_hasta) { query += " AND a.fecha >= ? AND a.fecha <= ?"; params.push(fecha_desde, fecha_hasta); }
   else if (fecha_desde) { query += " AND a.fecha >= ?"; params.push(fecha_desde); }
   else if (fecha_hasta) { query += " AND a.fecha <= ?"; params.push(fecha_hasta); }
-  if (area) { query += " AND ar.nombre LIKE ?"; params.push(`%${area}%`); }
+  if (area_id) { query += " AND e.area_id = ?"; params.push(area_id); }
+  else if (area) { query += " AND ar.nombre LIKE ?"; params.push(`%${area}%`); }
   if (piso) { query += " AND ar.piso = ?"; params.push(piso); }
   if (estado) { query += " AND a.estado = ?"; params.push(estado); }
   if (empleado_id) { query += " AND a.empleado_id = ?"; params.push(empleado_id); }
@@ -154,8 +155,8 @@ router.get("/test", (req, res) => {
 // GET /api/pdf/asistencia?fecha=&area=&piso=&estado=&fecha_desde=&fecha_hasta=&empleado_id=
 router.get("/asistencia", async (req, res) => {
   try {
-    const { fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id } = req.query;
-    const rows = await fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id);
+    const { fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id, area_id } = req.query;
+    const rows = await fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id, area_id);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", "inline; filename=asistencia_dusakawi.pdf");
     const meta = { codigo: "GA-F-001", version: "01", emision: "01/01/2024", vigencia: "01/01/2026" };
@@ -380,7 +381,12 @@ router.get("/ausencias", async (req, res) => {
     const { fecha_desde, fecha_hasta, area_id, empleado_id } = req.query;
     let q = `SELECT e.cedula, CONCAT(e.nombre,' ',e.apellido) AS colaborador, ar.nombre AS area,
       a.fecha, a.estado, a.observacion FROM asistencia a JOIN empleado e ON a.empleado_id=e.id
-      JOIN areas ar ON e.area_id=ar.id WHERE a.estado IN('ausente','justificado')`;
+      JOIN areas ar ON e.area_id=ar.id
+      WHERE a.estado IN('ausente','justificado')
+        AND NOT EXISTS (
+          SELECT 1 FROM permisos p
+          WHERE p.empleado_id = a.empleado_id AND a.fecha BETWEEN p.fecha_desde AND p.fecha_hasta
+        )`;
     const p = [];
     if (fecha_desde) { q += " AND a.fecha>=?"; p.push(fecha_desde); }
     if (fecha_hasta) { q += " AND a.fecha<=?"; p.push(fecha_hasta); }

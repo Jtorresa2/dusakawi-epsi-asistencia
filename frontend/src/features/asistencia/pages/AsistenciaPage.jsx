@@ -14,7 +14,7 @@ import EmptyState from "../../../shared/components/EmptyState";
 import PDFPreviewModal from "../../../shared/components/PDFPreviewModal";
 import ConfirmDialog from "../../../shared/components/ConfirmDialog";
 import { asistenciaColumns } from "../components/columns";
-import { obtenerRegistros, registrarManual, justificarAusencia, eliminarRegistro } from "../asistencia.api";
+import { obtenerRegistros, registrarManual, justificarAusencia, eliminarRegistro, actualizarRegistro } from "../asistencia.api";
 import { obtenerAreas } from "../../areas/area.api";
 
 function minDesde(hora) {
@@ -83,6 +83,7 @@ export default function AsistenciaPage() {
   const [justificarRow, setJustificarRow] = useState(null);
   const [observacion, setObservacion] = useState("");
   const [detalleRow, setDetalleRow] = useState(null);
+  const [editRow, setEditRow] = useState(null);
   const [exportAnchor, setExportAnchor] = useState(null);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
   const [activoCard, setActivoCard] = useState("");
@@ -132,7 +133,7 @@ export default function AsistenciaPage() {
     }
   }
 
-  useEffect(() => { cargarRegistros(); }, []);
+  useEffect(() => { cargarRegistros(); }, [vista, fecha, fechaDesde, fechaHasta, mes, anio, filtroArea, filtroPiso, filtroEstado]);
 
   function filtrar() { cargarRegistros(); }
 
@@ -430,7 +431,7 @@ export default function AsistenciaPage() {
             columns={asistenciaColumns({
               onJustificar: (row) => { setJustificarRow(row); setObservacion(""); },
               getPiso, onDetalle: (row) => setDetalleRow(row),
-              onEditar: (row) => setDetalleRow(row),
+              onEditar: (row) => setEditRow(row),
               onEliminar: (row) => setConfirmEliminar(row),
             })}
             loading={loading}
@@ -443,6 +444,23 @@ export default function AsistenciaPage() {
         open={Boolean(detalleRow)}
         onClose={() => setDetalleRow(null)}
         row={detalleRow}
+      />
+
+      {/* 5b. MODAL EDITAR ASISTENCIA */}
+      <EditarAsistenciaModal
+        open={Boolean(editRow)}
+        onClose={() => setEditRow(null)}
+        row={editRow}
+        onGuardar={async (data) => {
+          try {
+            await actualizarRegistro(editRow.id, data);
+            setEditRow(null);
+            setSnack({ open: true, mensaje: "Registro actualizado correctamente", severity: "success" });
+            cargarRegistros();
+          } catch (err) {
+            setSnack({ open: true, mensaje: "Error al actualizar el registro", severity: "error" });
+          }
+        }}
       />
 
       {/* 6. MODAL REGISTRO MANUAL */}
@@ -603,6 +621,129 @@ function DetalleAsistenciaModal({ open, onClose, row }) {
           <Box>
             <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase" }}>Tipo de marcación</Typography>
             <Typography sx={{ fontSize: 14, fontWeight: 500, color: "#111827", textTransform: "capitalize" }}>{row.tipo_marcacion || "—"}</Typography>
+          </Box>
+        </Box>
+      </Paper>
+    </Box>
+  );
+}
+
+// ── MODAL EDITAR ASISTENCIA ──────────────────────
+function EditarAsistenciaModal({ open, onClose, row, onGuardar }) {
+  const [form, setForm] = useState({});
+  const [guardando, setGuardando] = useState(false);
+
+  useEffect(() => {
+    if (row) {
+      setForm({
+        fecha: row.fecha || "",
+        entrada1: row.entrada1 || "",
+        salida1: row.salida1 || "",
+        entrada2: row.entrada2 || "",
+        salida2: row.salida2 || "",
+        tipo_marcacion: row.tipo_marcacion || "manual",
+        estado: row.estado || "puntual",
+        observacion: row.observacion || "",
+      });
+    }
+  }, [row]);
+
+  if (!open || !row) return null;
+
+  const inputSx = { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#ECECEC" } };
+
+  return (
+    <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
+      <Paper elevation={0} sx={{ position: "relative", borderRadius: "20px", p: 3, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+        <IconButton onClick={onClose} size="small" sx={{ position: "absolute", top: 12, right: 12, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+          <X size={18} />
+        </IconButton>
+        <Typography sx={{ fontSize: 17, fontWeight: 700, color: "#111827", mb: 2.5 }}>Editar registro de asistencia</Typography>
+
+        <Typography sx={{ fontSize: 13, color: "#6B7280", mb: 2 }}>
+          {row.empleado} — {row.area || ""} · {row.fecha || ""}
+        </Typography>
+
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Fecha</Typography>
+            <TextField type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+          </Box>
+
+          {/* TURNO MAÑANA */}
+          <Box sx={{ bgcolor: "#F0FFF4", borderRadius: "12px", p: 2 }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#1B5E20", mb: 1.5 }}>Turno mañana</Typography>
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+              <Box>
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Entrada</Typography>
+                <TextField type="time" value={form.entrada1} onChange={(e) => setForm({ ...form, entrada1: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+              </Box>
+              <Box>
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Salida</Typography>
+                <TextField type="time" value={form.salida1} onChange={(e) => setForm({ ...form, salida1: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+              </Box>
+            </Box>
+          </Box>
+
+          {/* TURNO TARDE */}
+          <Box sx={{ bgcolor: "#FFF7ED", borderRadius: "12px", p: 2 }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#D97706", mb: 1.5 }}>Turno tarde</Typography>
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+              <Box>
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Entrada</Typography>
+                <TextField type="time" value={form.entrada2} onChange={(e) => setForm({ ...form, entrada2: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+              </Box>
+              <Box>
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Salida</Typography>
+                <TextField type="time" value={form.salida2} onChange={(e) => setForm({ ...form, salida2: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+              </Box>
+            </Box>
+          </Box>
+
+          {/* ESTADO */}
+          <Box>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Estado</Typography>
+            <Select value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })} size="small" fullWidth sx={inputSx}>
+              <MenuItem value="puntual">Puntual</MenuItem>
+              <MenuItem value="tardanza">Tardanza</MenuItem>
+              <MenuItem value="ausente">Ausente</MenuItem>
+              <MenuItem value="justificado">Justificado</MenuItem>
+            </Select>
+          </Box>
+
+          {/* TIPO MARCACIÓN */}
+          <Box>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Tipo de marcación</Typography>
+            <Select value={form.tipo_marcacion} onChange={(e) => setForm({ ...form, tipo_marcacion: e.target.value })} size="small" fullWidth sx={inputSx}>
+              <MenuItem value="manual">Manual</MenuItem>
+              <MenuItem value="huella">Huella</MenuItem>
+              <MenuItem value="facial">Facial</MenuItem>
+              <MenuItem value="tarjeta">Tarjeta</MenuItem>
+            </Select>
+          </Box>
+
+          {/* OBSERVACIÓN */}
+          <Box>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Observación</Typography>
+            <TextField multiline rows={2} value={form.observacion} onChange={(e) => setForm({ ...form, observacion: e.target.value })} fullWidth slotProps={{ input: { sx: { ...inputSx, height: "auto", py: 1 } } }} />
+          </Box>
+
+          <Box display="flex" gap={1} justifyContent="flex-end" mt={1}>
+            <Button onClick={onClose} variant="outlined" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 3, color: "#6B7280", borderColor: "#ECECEC", "&:hover": { borderColor: "#1B5E20" } }}>
+              Cancelar
+            </Button>
+            <Button
+              disabled={guardando}
+              onClick={async () => {
+                setGuardando(true);
+                await onGuardar(form);
+                setGuardando(false);
+              }}
+              variant="contained"
+              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 3, bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } }}
+            >
+              {guardando ? "Guardando..." : "Guardar cambios"}
+            </Button>
           </Box>
         </Box>
       </Paper>

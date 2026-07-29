@@ -26,3 +26,9 @@ export const justificarAusencia = (id, data) =>
 
 export const eliminarRegistro = (id) =>
   apiFetch(`/asistencia/${id}`, { method: "DELETE" });
+
+export const actualizarRegistro = (id, data) =>
+  apiFetch(`/asistencia/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });

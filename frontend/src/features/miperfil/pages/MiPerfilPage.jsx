@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, Paper, Typography, Avatar, Chip, TextField, Button, IconButton, MenuItem } from "@mui/material";
+import { Box, Paper, Typography, Avatar, Chip, TextField, Button, IconButton, MenuItem, Snackbar, Alert } from "@mui/material";
 import {
   User, Mail, Phone, Calendar, FileText, Briefcase, MapPin, Clock,
   CheckCircle, XCircle, Edit3, Save, X, Shield, Fingerprint, Camera,
@@ -7,6 +7,7 @@ import {
 import { obtenerEmpleado, actualizarEmpleado } from "../../empleados/empleado.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 import { obtenerAreas } from "../../areas/area.api";
+import MisNovedades from "../components/MisNovedades";
 
 const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const MONTHS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -25,6 +26,7 @@ export default function MiPerfilPage() {
   const [form, setForm] = useState({});
   const [guardando, setGuardando] = useState(false);
   const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [snack, setSnack] = useState({ open: false, severity: "success", mensaje: "" });
   const [cargosList, setCargosList] = useState([]);
   const [areasList, setAreasList] = useState([]);
 
@@ -133,6 +135,7 @@ export default function MiPerfilPage() {
       localStorage.setItem("usuario", JSON.stringify(u));
       setUsuario(u);
       setEditando(null);
+      setSnack({ open: true, severity: "success", mensaje: "Perfil actualizado correctamente" });
     } catch {}
     setGuardando(false);
   };
@@ -188,11 +191,11 @@ export default function MiPerfilPage() {
 
 
   return (
-    <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3, maxWidth: 1400, mx: "auto", width: "100%" }}>
-      <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
+    <Box sx={{ height: { md: editando ? "auto" : "100dvh" }, overflowX: "hidden", overflowY: { xs: "auto", md: editando ? "auto" : "hidden" }, p: { xs: 2, md: 2 }, display: "flex", flexDirection: "column", gap: 2, maxWidth: "100%", width: "100%", boxSizing: "border-box" }}>
+      <Typography sx={{ fontSize: 13, color: "#9CA3AF", flexShrink: 0 }}>
                 Inicio / Mi cuenta / Mi perfil
             </Typography>
-      <Paper elevation={0} sx={{ p: 3, borderRadius: "20px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap" }}>
+      <Paper elevation={0} sx={{ p: 0, borderRadius: "20px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap", flexShrink: 0 }}>
         <Box sx={{ position: "relative", "&:hover .foto-overlay": { opacity: 1 } }}>
           <Avatar
             src={usuario.foto_url || empleado?.foto_url || ""}
@@ -240,10 +243,10 @@ export default function MiPerfilPage() {
         </Box>
       </Paper>
 
-      {/* Grid principal */}
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "4fr 3fr 3fr" }, gap: 3, alignItems: "start" }}>
-        {/* Columna 1 — Datos personales */}
-        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: "1px solid #ECECEC" }}>
+      {/* Grid principal — 50/50, llena el espacio, sin scroll */}
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 0.95fr" }, gap: 3, alignItems: "stretch", overflow: "hidden", minHeight: 0, flex: 1, width: "100%" }}>
+        {/* Columna izquierda — Datos personales */}
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: "1px solid #ECECEC", overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0 }}>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
             <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Datos personales</Typography>
             {editando === "personal" ? (
@@ -270,73 +273,91 @@ export default function MiPerfilPage() {
           {personalFields.map((f) => renderField(f, data[f.key], "personal"))}
         </Paper>
 
-        {/* Columna 2 — Información laboral */}
-        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: "1px solid #ECECEC" }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Información laboral</Typography>
-            {editando === "laboral" ? (
-              <Box sx={{ display: "flex", gap: 0.5 }}>
-                <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: "#E8F5E9", color: "#2E7D32", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#C8E6C9" } }}>
-                  <Save size={15} />
-                </IconButton>
-                <IconButton size="small" onClick={handleCancel} sx={{ bgcolor: "#FEE2E2", color: "#DC2626", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#FECACA" } }}>
-                  <X size={15} />
-                </IconButton>
-              </Box>
-            ) : (
-              <Box onClick={() => handleEdit("laboral")} title="Editar" sx={{
-                width: 34, height: 34, borderRadius: "9px", border: "none",
-                bgcolor: "#EFF6FF", color: "#1565C0", cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "all .2s", flexShrink: 0,
-                "&:hover": { bgcolor: "#DBEAFE" },
-              }}>
-                <Edit3 size={15} />
-              </Box>
-            )}
-          </Box>
-          {workFields.map((f) => renderField(f, data[f.key], "laboral"))}
-        </Paper>
+        {/* Columna derecha — grid 2×2, 1fr 1fr, sin scroll */}
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gridTemplateRows: { xs: "auto", md: "1fr 1fr" }, gap: 2, overflow: "hidden", minHeight: 0 }}>
+          {/* Info laboral */}
+          <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: "1px solid #ECECEC", display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Información laboral</Typography>
+              {editando === "laboral" ? (
+                <Box sx={{ display: "flex", gap: 0.5 }}>
+                  <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: "#E8F5E9", color: "#2E7D32", borderRadius: "8px", width: 24, height: 24, "&:hover": { bgcolor: "#C8E6C9" } }}>
+                    <Save size={12} />
+                  </IconButton>
+                  <IconButton size="small" onClick={handleCancel} sx={{ bgcolor: "#FEE2E2", color: "#DC2626", borderRadius: "8px", width: 24, height: 24, "&:hover": { bgcolor: "#FECACA" } }}>
+                    <X size={12} />
+                  </IconButton>
+                </Box>
+              ) : (
+                <Box onClick={() => handleEdit("laboral")} title="Editar" sx={{
+                  width: 26, height: 26, borderRadius: "7px", border: "none",
+                  bgcolor: "#EFF6FF", color: "#1565C0", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "all .2s", flexShrink: 0,
+                  "&:hover": { bgcolor: "#DBEAFE" },
+                }}>
+                  <Edit3 size={12} />
+                </Box>
+              )}
+            </Box>
+            {workFields.map((f) => renderField(f, data[f.key], "laboral"))}
+          </Paper>
 
-        {/* Columna 3 — Estadísticas */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {statsCards.map((card, i) => (
-            <Paper key={i} elevation={0} sx={{ p: 2, borderRadius: "16px", border: "1px solid #ECECEC" }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
-                <Box sx={{ width: 40, height: 40, borderRadius: "12px", bgcolor: card.bg, display: "flex", alignItems: "center", justifyContent: "center", color: card.color, flexShrink: 0 }}>
+          {/* Indicadores */}
+          <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: "1px solid #ECECEC", display: "flex", flexDirection: "column", gap: 1, overflow: "hidden", minHeight: 0 }}>
+            <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Indicadores</Typography>
+            {statsCards.map((card, i) => (
+              <Box key={i} sx={{ display: "flex", alignItems: "center", gap: 1, p: 1, borderRadius: "8px", bgcolor: "#F9FAFB" }}>
+                <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: card.bg, display: "flex", alignItems: "center", justifyContent: "center", color: card.color, flexShrink: 0 }}>
                   {card.icon}
                 </Box>
-                <Box>
-                  <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase" }}>{card.title}</Typography>
-                  <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>{card.value}</Typography>
+                <Box sx={{ flex: 1 }}>
+                  <Typography sx={{ fontSize: 9, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase" }}>{card.title}</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#111827", lineHeight: 1.2 }}>{card.value}</Typography>
                 </Box>
               </Box>
-              <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>{card.sub}</Typography>
+            ))}
+          </Paper>
+
+          {/* Dispositivos y seguridad */}
+          <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: "1px solid #ECECEC", display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
+            <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", mb: 1 }}>
+              Dispositivos y seguridad
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {[
+                { label: "Huella digital", icon: <Fingerprint size={14} />, status: "Registrada", color: "#16A34A", bg: "#D1FAE5" },
+                { label: "Último acceso", icon: <Shield size={14} />, status: `Hoy ${new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}`, color: "#1565C0", bg: "#E3F2FD" },
+              ].map((item, i) => (
+                <Paper key={i} elevation={0} sx={{ p: 1, borderRadius: "8px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: item.bg, display: "flex", alignItems: "center", justifyContent: "center", color: item.color, flexShrink: 0 }}>
+                    {item.icon}
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: 9, fontWeight: 600, color: "#9CA3AF" }}>{item.label}</Typography>
+                    <Typography sx={{ fontSize: 12, fontWeight: 700, color: item.color, mt: 0.1 }}>{item.status}</Typography>
+                  </Box>
+                </Paper>
+              ))}
+            </Box>
+          </Paper>
+
+          {/* Mis novedades registradas */}
+          {usuario.empleado_id ? (
+            <MisNovedades empleadoId={usuario.empleado_id} maxItems={2} sx={{ overflow: "hidden", minHeight: 0, p: 1.5, borderRadius: "14px" }} />
+          ) : (
+            <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", minHeight: 0 }}>
+              <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Sin empleado</Typography>
             </Paper>
-          ))}
+          )}
         </Box>
       </Box>
 
-      {/* Dispositivos / Seguridad */}
-      <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: "1px solid #ECECEC" }}>
-        <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", mb: 2 }}>Dispositivos y seguridad</Typography>
-        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-          {[
-            { label: "Huella digital", icon: <Fingerprint size={18} />, status: "Registrada", color: "#16A34A", bg: "#D1FAE5" },
-            { label: "Último acceso", icon: <Shield size={18} />, status: "Hoy", color: "#1565C0", bg: "#E3F2FD" },
-          ].map((item, i) => (
-            <Paper key={i} elevation={0} sx={{ p: 1.5, borderRadius: "12px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 1.5, minWidth: 180 }}>
-              <Box sx={{ width: 36, height: 36, borderRadius: "10px", bgcolor: item.bg, display: "flex", alignItems: "center", justifyContent: "center", color: item.color }}>
-                {item.icon}
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#9CA3AF" }}>{item.label}</Typography>
-                <Typography sx={{ fontSize: 14, fontWeight: 600, color: item.color }}>{item.status}</Typography>
-              </Box>
-            </Paper>
-          ))}
-        </Box>
-      </Paper>
+      {/* SNACKBAR */}
+      <Snackbar open={snack.open} autoHideDuration={4000} onClose={() => setSnack(s => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+        <Alert severity={snack.severity} variant="filled" sx={{ borderRadius: "10px" }}>{snack.mensaje}</Alert>
+      </Snackbar>
     </Box>
   );
 }

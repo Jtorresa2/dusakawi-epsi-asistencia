@@ -141,3 +141,38 @@ exports.eliminarRegistro = async (req, res) => {
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
   }
 };
+
+exports.actualizarRegistro = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { entrada1, salida1, entrada2, salida2, fecha, tipo_marcacion, estado, observacion } = req.body;
+
+    if (!fecha) {
+      return res.status(400).json({ mensaje: 'Fecha requerida' });
+    }
+
+    const fecha_e1 = entrada1 ? `${fecha} ${entrada1}:00` : null;
+    const fecha_s1 = salida1 ? `${fecha} ${salida1}:00` : null;
+    const fecha_e2 = entrada2 ? `${fecha} ${entrada2}:00` : null;
+    const fecha_s2 = salida2 ? `${fecha} ${salida2}:00` : null;
+
+    await pool.query(
+      `UPDATE asistencia SET
+        fecha = ?,
+        fecha_hora_entrada = ?,
+        fecha_hora_salida_manana = ?,
+        fecha_hora_entrada_tarde = ?,
+        fecha_hora_salida = ?,
+        tipo_marcacion = ?,
+        estado = ?,
+        observacion = ?
+      WHERE id = ?`,
+      [fecha, fecha_e1, fecha_s1, fecha_e2, fecha_s2, tipo_marcacion, estado, observacion, id]
+    );
+
+    res.json({ mensaje: 'Registro actualizado correctamente' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
+  }
+};

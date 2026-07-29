@@ -9,6 +9,7 @@ const {
   getReporteIncidencias,
   getReporteTardanzas,
   getReporteAusencias,
+  getReportePorEmpleado,
   getReporteEmpleados,
   getReporteMarcaciones,
   getHistorial,
@@ -25,6 +26,7 @@ router.get('/asistencia',  auth, getReporteAsistencia);
 router.get('/incidencias', auth, getReporteIncidencias);
 router.get('/tardanzas',   auth, getReporteTardanzas);
 router.get('/ausencias',   auth, getReporteAusencias);
+router.get('/por-empleado', auth, getReportePorEmpleado);
 router.get('/empleados',   auth, getReporteEmpleados);
 router.get('/marcaciones', auth, getReporteMarcaciones);
 

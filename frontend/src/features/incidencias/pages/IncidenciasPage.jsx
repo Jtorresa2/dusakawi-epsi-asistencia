@@ -301,7 +301,6 @@ export default function IncidenciasPage() {
                       <TableCell sx={{ display: { xs: "none", sm: "table-cell" } }}>
                         <Box sx={{ display: "flex", gap: 0.5 }} onClick={(ev) => ev.stopPropagation()}>
                           <IconButton size="small" onClick={() => navigate(`/incidencias/${inc.id}`)} sx={{ color: "#1565C0", bgcolor: "#EFF6FF", borderRadius: "8px", width: 32, height: 32 }}><Eye size={15} /></IconButton>
-                          <IconButton size="small" onClick={() => navigate(`/incidencias/${inc.id}`)} sx={{ color: "#1B5E20", bgcolor: "#E8F5E9", borderRadius: "8px", width: 32, height: 32 }}><Search size={15} /></IconButton>
                           <IconButton size="small" onClick={(ev) => { ev.stopPropagation(); const t = localStorage.getItem("token"); window.open(`/api/pdf/incidencias/${inc.id}/plantilla?token=${t}`, "_blank"); }} sx={{ color: "#7C3AED", bgcolor: "#F5F3FF", borderRadius: "8px", width: 32, height: 32 }}><Download size={15} /></IconButton>
                         </Box>
                       </TableCell>

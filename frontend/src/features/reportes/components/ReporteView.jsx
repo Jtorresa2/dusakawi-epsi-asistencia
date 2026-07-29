@@ -7,13 +7,13 @@ import { obtenerCargos } from "../../cargos/cargo.api";
 import DataTable from "../../../shared/components/DataTable";
 
 const ETIQUETAS = {
-  asistencia: "Reporte de Asistencia", incidencias: "Reporte de Incidencias", tardanzas: "Reporte de Tardanzas",
+  porEmpleado: "Reporte por Empleado", asistencia: "Reporte de Asistencia", incidencias: "Reporte de Incidencias", tardanzas: "Reporte de Tardanzas",
   ausencias: "Reporte de Ausencias", empleados: "Reporte de Empleados", marcaciones: "Reporte de Marcaciones",
 };
-const ICONOS = { asistencia: "📊", incidencias: "📄", tardanzas: "⏰", ausencias: "🚫", empleados: "👥", marcaciones: "📍" };
+const ICONOS = { porEmpleado: "👤", asistencia: "📊", incidencias: "📄", tardanzas: "⏰", ausencias: "🚫", empleados: "👥", marcaciones: "📍" };
 
 const API_MAP = {
-  asistencia: "obtenerReporteAsistencia", incidencias: "obtenerReporteIncidencias", tardanzas: "obtenerReporteTardanzas",
+  porEmpleado: "obtenerReportePorEmpleado", asistencia: "obtenerReporteAsistencia", incidencias: "obtenerReporteIncidencias", tardanzas: "obtenerReporteTardanzas",
   ausencias: "obtenerReporteAusencias", empleados: "obtenerReporteEmpleados", marcaciones: "obtenerReporteMarcaciones",
 };
 
@@ -26,8 +26,14 @@ const EST_ASIS = ["puntual","tardanza","ausente","justificado"];
 const EST_INC = ["pendiente","aprobado","rechazado"];
 const EST_EMP = [{value:"1",label:"Activo"},{value:"0",label:"Inactivo"}];
 
+const MESES = [
+  {v:1,l:"Enero"},{v:2,l:"Febrero"},{v:3,l:"Marzo"},{v:4,l:"Abril"},{v:5,l:"Mayo"},{v:6,l:"Junio"},
+  {v:7,l:"Julio"},{v:8,l:"Agosto"},{v:9,l:"Septiembre"},{v:10,l:"Octubre"},{v:11,l:"Noviembre"},{v:12,l:"Diciembre"},
+];
+
 const FILTROS = {
-  asistencia: ["fecha_desde","empleado_id","area_id","estado"],
+  porEmpleado: ["empleado_id","mes"],
+  asistencia: ["fecha_desde","area_id","estado"],
   incidencias: ["fecha_desde","empleado_id","area_id","estado_incidencia","tipo_incidencia"],
   tardanzas: ["fecha_desde","empleado_id","area_id"],
   ausencias: ["fecha_desde","empleado_id","area_id"],
@@ -113,9 +119,27 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
             <Box key={c}>
               <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Empleado</InputLabel>
               <TextField select size="small" value={f.empleado_id||""} onChange={e => set("empleado_id",e.target.value)} sx={{minWidth:180,...SX}}>
-                <MenuItem value="">Todos</MenuItem>
+                <MenuItem value="">{tipoReporte==="porEmpleado"?"Seleccione...":"Todos"}</MenuItem>
                 {(empleados||[]).map(e => <MenuItem key={e.id} value={e.id}>{e.nombre} {e.apellido}</MenuItem>)}
               </TextField>
+            </Box>
+          );
+          if (c === "mes") return (
+            <Box key={c} sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+              <Box>
+                <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Mes</InputLabel>
+                <TextField select size="small" value={f.mes??""} onChange={e=>set("mes",e.target.value?Number(e.target.value):"")} sx={{minWidth:150,...SX}}>
+                  <MenuItem value="">Todos</MenuItem>
+                  {MESES.map(m => <MenuItem key={m.v} value={m.v}>{m.l}</MenuItem>)}
+                </TextField>
+              </Box>
+              <Box>
+                <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Año</InputLabel>
+                <TextField select size="small" value={f.anio??""} onChange={e=>set("anio",e.target.value?Number(e.target.value):"")} sx={{width:110,...SX}}>
+                  <MenuItem value="">Todos</MenuItem>
+                  {Array.from({length:10},(_,i)=>new Date().getFullYear()-i).map(a => <MenuItem key={a} value={a}>{a}</MenuItem>)}
+                </TextField>
+              </Box>
             </Box>
           );
           if (c === "area_id") return (
@@ -177,7 +201,7 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
       </Box>
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
         <Button variant="contained" startIcon={<Search size={16}/>} onClick={() => onGenerar(f)} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,fontWeight:600,px:2.5,background:"#1B5E20","&:hover":{background:"#2E7D32"}}}>Generar</Button>
-        <Button variant="outlined" startIcon={<FileText size={16}/>} onClick={onExportarPDF} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:"#E5E7EB",color:"#374151","&:hover":{borderColor:"#1B5E20",color:"#1B5E20"}}}>PDF</Button>
+        <Button variant="outlined" startIcon={<FileText size={16}/>} onClick={tipoReporte==="porEmpleado"?undefined:onExportarPDF} disabled={tipoReporte==="porEmpleado"} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:"#E5E7EB",color:"#374151","&:hover":{borderColor:"#1B5E20",color:"#1B5E20"},"&.Mui-disabled":{color:"#D1D5DB",borderColor:"#E5E7EB"}}}>PDF</Button>
         <Button variant="outlined" startIcon={<FileSpreadsheet size={16}/>} onClick={onExportarExcel} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:"#E5E7EB",color:"#374151","&:hover":{borderColor:"#1B5E20",color:"#1B5E20"}}}>Excel</Button>
         <Button variant="text" startIcon={<RotateCcw size={16}/>} onClick={()=>{setF({}); if(onLimpiar)onLimpiar();}} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,color:"#6B7280","&:hover":{color:"#DC2626"}}}>Limpiar</Button>
       </Box>
@@ -202,10 +226,100 @@ function ResultadosTable({ tipoReporte, registros, total }) {
   );
 }
 
+function ResultadosPorEmpleado({ data }) {
+  if (!data?.empleado) return (
+    <Box sx={{textAlign:"center",py:4,color:"#9CA3AF"}}>
+      <Typography sx={{fontSize:14}}>Seleccione un empleado y genere el reporte.</Typography>
+    </Box>
+  );
+  const { empleado, periodo, resumen, permisos, incidencias, detalle } = data;
+  const metricas = resumen ? [
+    { label: "Días hábiles", value: periodo?.diasHabiles||0, color: "#0284C7" },
+    { label: "Festivos", value: periodo?.festivos||0, color: "#D97706" },
+    { label: "Asistencia", value: `${resumen.porcentaje_asistencia||0}%`, color: "#16A34A" },
+    { label: "Puntuales", value: resumen.puntuales||0, color: "#059669" },
+    { label: "Tardanzas", value: resumen.tardanzas||0, color: "#DC2626" },
+    { label: "Ausentes", value: resumen.ausentes||0, color: "#6B7280" },
+    { label: "Horas total", value: resumen.horas_trabajadas ? `${resumen.horas_trabajadas}h` : "0h", color: "#7C3AED" },
+    { label: "Horas extra", value: resumen.horas_extra ? `${resumen.horas_extra}h` : "—", color: "#9333EA" },
+    { label: "Novedades", value: permisos?.total||0, color: "#0891B2" },
+    { label: "Incidencias", value: incidencias?.total||0, color: "#BE123C" },
+  ] : [];
+
+  return (
+    <Box>
+      {/* Encabezado empleado */}
+      <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"center", mb:3, flexWrap:"wrap", gap:2 }}>
+        <Box>
+          <Typography sx={{ fontSize:18, fontWeight:700, color:"#111827" }}>{empleado.nombre} {empleado.apellido}</Typography>
+          <Typography sx={{ fontSize:13, color:"#6B7280" }}>
+            {empleado.cedula && <>C.C. {empleado.cedula} · </>}
+            {empleado.area}{empleado.cargo ? ` · ${empleado.cargo}` : ""}
+          </Typography>
+        </Box>
+        <Box sx={{ textAlign:"right" }}>
+          <Typography sx={{ fontSize:14, fontWeight:600, color:"#374151" }}>
+            {MESES.find(m=>m.v===periodo?.mes)?.l || "—"} {periodo?.anio || ""}
+          </Typography>
+          <Typography sx={{ fontSize:12, color:"#9CA3AF" }}>
+            {periodo?.diasEsperados || 0} días laborales
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Tarjetas de métricas */}
+      <Box sx={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(120px, 1fr))", gap:1.5, mb:3 }}>
+        {metricas.map((m,i) => (
+          <Paper key={i} elevation={0} sx={{ p:1.5, borderRadius:"12px", border:"1px solid #ECECEC", textAlign:"center" }}>
+            <Typography sx={{ fontSize:20, fontWeight:700, color:m.color }}>{m.value}</Typography>
+            <Typography sx={{ fontSize:11, color:"#9CA3AF", mt:0.5 }}>{m.label}</Typography>
+          </Paper>
+        ))}
+      </Box>
+
+      {/* Novedades - solo resumen numérico por ahora */}
+      {permisos?.total > 0 && (
+        <Box sx={{ mb:2, p:2, background:"#F0FDF4", borderRadius:"12px", border:"1px solid #BBF7D0" }}>
+          <Typography sx={{ fontSize:13, fontWeight:600, color:"#166534" }}>
+            Novedades: {permisos.total} ({permisos.dias} días hábiles)
+          </Typography>
+        </Box>
+      )}
+
+      {/* Incidencias - solo resumen numérico por ahora */}
+      {incidencias?.total > 0 && (
+        <Box sx={{ mb:2, p:2, background:"#FEF2F2", borderRadius:"12px", border:"1px solid #FECACA" }}>
+          <Typography sx={{ fontSize:13, fontWeight:600, color:"#991B1B" }}>
+            Incidencias: {incidencias.total} ({incidencias.pendientes} pendientes)
+          </Typography>
+        </Box>
+      )}
+
+      {/* Detalle diario */}
+      {detalle?.length > 0 && (
+        <Box>
+          <Typography sx={{ fontSize:14, fontWeight:600, color:"#374151", mb:1 }}>Detalle diario ({detalle.length} días)</Typography>
+          <DataTable rows={detalle} columns={[
+            {field:"fecha",headerName:"Fecha",width:100,valueFormatter:v=>new Date(v).toLocaleDateString("es-CO")},
+            {field:"entrada1",headerName:"Ent. Mañana",width:95,valueFormatter:v=>v||"—"},
+            {field:"salida1",headerName:"Sal. Mañana",width:95,valueFormatter:v=>v||"—"},
+            {field:"entrada2",headerName:"Ent. Tarde",width:90,valueFormatter:v=>v||"—"},
+            {field:"salida2",headerName:"Sal. Tarde",width:90,valueFormatter:v=>v||"—"},
+            {field:"horas_trabajadas",headerName:"Horas",width:70,valueFormatter:v=>v?`${v}h`:"—"},
+            {field:"estado",headerName:"Estado",width:90},
+            {field:"esFestivo",headerName:"Festivo",width:70,valueFormatter:v=>v?"Sí":"—"},
+          ]} entityLabel="días" getRowId={r=>r.fecha||Math.random()} pageSize={10} />
+        </Box>
+      )}
+    </Box>
+  );
+}
+
 export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarPDF, onExportarExcel, filtrosIniciales }) {
   const [registros, setRegistros] = useState(null);
   const [total, setTotal] = useState(0);
   const [cargando, setCargando] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
   const [filtros, setFiltros] = useState({});
   const [empleados, setEmpleados] = useState([]);
 
@@ -217,9 +331,11 @@ export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarP
     }
   }, [filtrosIniciales]);
 
+  const isPorEmpleado = tipoReporte === "porEmpleado";
+
   const generar = async (f) => {
     try {
-      setCargando(true); setFiltros(f);
+      setCargando(true); setErrorMsg(null); setFiltros(f);
       const fn = apiFns[API_MAP[tipoReporte]];
       if (!fn) return;
       const p = {};
@@ -232,12 +348,19 @@ export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarP
       if (f.estado_incidencia) p.estado = f.estado_incidencia;
       if (f.estado_empleado !== "" && f.estado_empleado !== undefined) p.activo = f.estado_empleado;
       if (f.tipo_incidencia) p.tipo = f.tipo_incidencia;
+      if (f.mes) p.mes = f.mes;
+      if (f.anio) p.anio = f.anio;
       const r = await fn(p);
-      setRegistros(r.registros||[]); setTotal(r.total||r.registros?.length||0);
-    } catch { setRegistros([]); setTotal(0); } finally { setCargando(false); }
+      if (isPorEmpleado) {
+        setRegistros(r); // store full response for custom rendering
+        setTotal(r.detalle?.length||0);
+      } else {
+        setRegistros(r.registros||[]); setTotal(r.total||r.registros?.length||0);
+      }
+    } catch (e) { setRegistros([]); setTotal(0); setErrorMsg(e.message); } finally { setCargando(false); }
   };
 
-  const limpiar = () => { setRegistros(null); setTotal(0); setFiltros({}); };
+  const limpiar = () => { setRegistros(null); setTotal(0); setFiltros({}); setErrorMsg(null); };
 
   return (
     <Box>
@@ -259,9 +382,17 @@ export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarP
       </Paper>
       {cargando ? (
         <Box sx={{ textAlign: "center", py: 4, color: "#9CA3AF" }}>Generando reporte...</Box>
+      ) : errorMsg ? (
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #FECACA", background:"#FEF2F2" }}>
+          <Typography sx={{ fontSize:13, color:"#991B1B" }}>Error: {errorMsg}</Typography>
+        </Paper>
       ) : registros !== null ? (
         <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC" }}>
-          <ResultadosTable tipoReporte={tipoReporte} registros={registros} total={total} />
+          {isPorEmpleado ? (
+            <ResultadosPorEmpleado data={registros} />
+          ) : (
+            <ResultadosTable tipoReporte={tipoReporte} registros={registros} total={total} />
+          )}
         </Paper>
       ) : null}
     </Box>

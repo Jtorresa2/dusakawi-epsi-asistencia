@@ -71,8 +71,9 @@ exports.login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: "Error en login" });
+    console.error("LOGIN ERROR:", error);
+    console.error("STACK:", error.stack);
+    res.status(500).json({ mensaje: "Error en login", detalle: error.message });
   }
 };
 

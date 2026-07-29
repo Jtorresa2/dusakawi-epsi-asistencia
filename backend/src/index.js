@@ -25,7 +25,8 @@ app.use("/api/horarios", require("./routes/horarioRoutes"));
 app.use("/api/reportes", require("./routes/reportesRoutes"));
 app.use("/api/pdf", require("./routes/pdfRoutes"));
 app.use("/api/config", require("./routes/configRoutes"));
-app.use("/api/permisos", require("./routes/permisosRoutes"));
+app.use("/api/novedades", require("./routes/novedadesRoutes"));
+app.use("/api/festivos", require("./routes/festivosRoutes"));
 
 // =======================
 

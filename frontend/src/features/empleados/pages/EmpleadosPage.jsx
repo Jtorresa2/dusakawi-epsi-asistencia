@@ -5,6 +5,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Avatar, Select, MenuItem, InputLabel, FormControl, Switch, FormControlLabel,
   Dialog, DialogTitle, DialogContent, DialogActions, Menu,
+  Snackbar, Alert,
 } from "@mui/material";
 import { Plus, Search, Edit3, Trash2, Eye, X, Users, UserCheck, UserX, UserRound, Filter } from "lucide-react";
 import { obtenerEmpleados, crearEmpleado, actualizarEmpleado, eliminarEmpleado } from "../empleado.api";
@@ -37,6 +38,7 @@ export default function EmpleadosPage() {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [perfilEmpleadoId, setPerfilEmpleadoId] = useState(null);
   const [masAnchor, setMasAnchor] = useState(null);
+  const [snack, setSnack] = useState({ open: false, severity: "success", mensaje: "" });
   const [areas, setAreas] = useState([]);
   const [cargos, setCargos] = useState([]);
 
@@ -118,8 +120,10 @@ export default function EmpleadosPage() {
       };
       if (editando) {
         await actualizarEmpleado(editando.id, payload);
+        setSnack({ open: true, severity: "success", mensaje: "Empleado actualizado correctamente" });
       } else {
         await crearEmpleado(payload);
+        setSnack({ open: true, severity: "success", mensaje: "Empleado creado correctamente" });
       }
       setModal(false);
       await fetchData();
@@ -132,6 +136,7 @@ export default function EmpleadosPage() {
     try {
       await eliminarEmpleado(confirmDelete.id);
       setConfirmDelete(null);
+      setSnack({ open: true, severity: "success", mensaje: "Empleado eliminado correctamente" });
       await fetchData();
     } catch (e) { alert(e.mensaje || "Error al eliminar"); }
   };
@@ -395,6 +400,12 @@ export default function EmpleadosPage() {
         onCancel={() => setConfirmDelete(null)}
         onClose={() => setConfirmDelete(null)}
       />
+
+      {/* SNACKBAR */}
+      <Snackbar open={snack.open} autoHideDuration={4000} onClose={() => setSnack(s => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+        <Alert severity={snack.severity} variant="filled" sx={{ borderRadius: "10px" }}>{snack.mensaje}</Alert>
+      </Snackbar>
 
       {/* PERFIL MODAL */}
       <EmpleadoPerfilModal

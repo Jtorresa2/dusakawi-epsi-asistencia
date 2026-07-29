@@ -5,7 +5,7 @@ export default function AttendanceStats({ data = {} }) {
     { label: "Presentes", value: data.presentes ?? 0, color: "#2E7D32" },
     { label: "Ausentes", value: data.ausentes ?? 0, color: "#DC2626" },
     { label: "Tardanzas", value: data.tardanzas ?? 0, color: "#D97706" },
-    { label: "Permisos", value: data.permisos ?? 0, color: "#0891B2" },
+    { label: "Novedades", value: data.permisos ?? 0, color: "#0891B2" },
   ];
   const total = items.reduce((s, i) => s + i.value, 0);
 

@@ -2,7 +2,7 @@ const db = require("../config/db");
 
 exports.obtenerTodos = async () => {
   const [rows] = await db.query(`
-    SELECT c.*, a.nombre AS areas, COUNT(e.id) AS empleados_count
+    SELECT c.*, a.nombre AS areas, COUNT(e.id)::int AS empleados_count
     FROM cargos c
     LEFT JOIN areas a ON a.id = c.area_id
     LEFT JOIN empleado e ON e.cargo_id = c.id

@@ -5,14 +5,20 @@ import { exportarExcel } from "../../../shared/utils/exportarExcel";
 import Loading from "../../../shared/components/Loading";
 import DataTable from "../../../shared/components/DataTable";
 import ReporteView from "../components/ReporteView";
-import { obtenerIndicadores, obtenerTendencia, obtenerReporteAsistencia, obtenerReporteIncidencias, obtenerReporteTardanzas, obtenerReporteAusencias, obtenerReporteEmpleados, obtenerReporteMarcaciones, guardarHistorial, obtenerHistorial } from "../reportes.api";
+import { obtenerIndicadores, obtenerTendencia, obtenerReporteAsistencia, obtenerReporteIncidencias, obtenerReporteTardanzas, obtenerReporteAusencias, obtenerReporteEmpleados, obtenerReporteMarcaciones, obtenerReportePorEmpleado, guardarHistorial, obtenerHistorial } from "../reportes.api";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
+const MESES = [
+  {v:1,l:"Enero"},{v:2,l:"Febrero"},{v:3,l:"Marzo"},{v:4,l:"Abril"},{v:5,l:"Mayo"},{v:6,l:"Junio"},
+  {v:7,l:"Julio"},{v:8,l:"Agosto"},{v:9,l:"Septiembre"},{v:10,l:"Octubre"},{v:11,l:"Noviembre"},{v:12,l:"Diciembre"},
+];
+
 const CARD_DATA = [
+  { id: "porEmpleado", icon: "👤", titulo: "Reporte por Empleado", desc: "Resumen mensual de asistencia, tardanzas, ausencias y horas de un empleado.", color: "#0D9488" },
   { id: "asistencia", icon: "📊", titulo: "Reporte de Asistencia", desc: "Resumen de asistencia de los empleados por fechas.", color: "#2E7D32" },
   { id: "incidencias", icon: "📄", titulo: "Reporte de Incidencias", desc: "Incidencias registradas y su estado actual.", color: "#DC2626" },
   { id: "tardanzas", icon: "⏰", titulo: "Reporte de Tardanzas", desc: "Tardanzas registradas por los empleados.", color: "#D97706" },
-  { id: "ausencias", icon: "🚫", titulo: "Reporte de Ausencias", desc: "Ausencias y permisos registrados.", color: "#0891B2" },
+  { id: "ausencias", icon: "🚫", titulo: "Reporte de Ausencias", desc: "Ausencias y novedades registradas.", color: "#0891B2" },
   { id: "empleados", icon: "👥", titulo: "Reporte de Empleados", desc: "Información general de empleados.", color: "#1565C0" },
   { id: "marcaciones", icon: "📍", titulo: "Reporte de Marcaciones", desc: "Marcaciones de entrada y salida con detalle.", color: "#7C3AED" },
 ];
@@ -26,8 +32,8 @@ const IND_META = [
   { key: "reportes_mes", icon: "📄", label: "Reportes este mes", color: "#7C3AED", bg: "#F5F3FF" },
 ];
 
-const API_FNS = { obtenerReporteAsistencia, obtenerReporteIncidencias, obtenerReporteTardanzas, obtenerReporteAusencias, obtenerReporteEmpleados, obtenerReporteMarcaciones };
-const NOMBRES = { asistencia: "Reporte de Asistencia", incidencias: "Reporte de Incidencias", tardanzas: "Reporte de Tardanzas", ausencias: "Reporte de Ausencias", empleados: "Reporte de Empleados", marcaciones: "Reporte de Marcaciones" };
+const API_FNS = { obtenerReporteAsistencia, obtenerReporteIncidencias, obtenerReporteTardanzas, obtenerReporteAusencias, obtenerReporteEmpleados, obtenerReporteMarcaciones, obtenerReportePorEmpleado };
+const NOMBRES = { porEmpleado: "Reporte por Empleado", asistencia: "Reporte de Asistencia", incidencias: "Reporte de Incidencias", tardanzas: "Reporte de Tardanzas", ausencias: "Reporte de Ausencias", empleados: "Reporte de Empleados", marcaciones: "Reporte de Marcaciones" };
 const NOMBRES_REV = Object.fromEntries(Object.entries(NOMBRES).map(([k, v]) => [v, k]));
 
 export default function ReportesPage() {
@@ -59,10 +65,13 @@ export default function ReportesPage() {
     if (f.estado_incidencia) p.append("estado", f.estado_incidencia);
     if (f.tipo_incidencia) p.append("tipo", f.tipo_incidencia);
     if (f.estado_empleado) p.append("activo", f.estado_empleado);
+    if (f.mes) p.append("mes", f.mes);
+    if (f.anio) p.append("anio", f.anio);
     return `/api/pdf/${tipo}?${p.toString()}`;
   };
 
   const handlePDF = (tipo, f) => {
+    if (tipo === "porEmpleado") return; // endpoint aún no implementado
     const url = buildPdfUrl(tipo, f);
     setPdfPreview(url);
     guardarHistorial({ tipo_reporte: NOMBRES[tipo], formato: "PDF", filtros: f, total_registros: 0 }).catch(() => {});
@@ -78,6 +87,30 @@ export default function ReportesPage() {
         Tipo: r.tipo, Descripción: r.descripcion, Fecha: r.fecha,
         Estado: ESTADO_MAPA[r.estado] || r.estado, Motivo: r.motivo_rechazo || "",
       }));
+    } else if (tipo === "porEmpleado") {
+      // Exporta el detalle diario más el resumen como primeras filas
+      const { empleado, periodo, resumen, permisos, incidencias, detalle } = registros;
+      if (detalle?.length) {
+        datos = [
+          { "": `Reporte: ${empleado?.nombre} ${empleado?.apellido || ""}`, "": "", "": "", "": "", "": "", "": "" },
+          { "": `Periodo: ${MESES.find(m=>m.v===periodo?.mes)?.l || ""} ${periodo?.anio || ""}`, "": "", "": "", "": "", "": "", "": "" },
+          { "": "", "": "", "": "", "": "", "": "", "": "" },
+          { "Días hábiles": periodo?.diasHabiles||0, "Festivos": periodo?.festivos||0, "Asistencia %": `${resumen?.porcentaje_asistencia||0}%`, "Puntuales": resumen?.puntuales||0, "Tardanzas": resumen?.tardanzas||0, "Ausentes": resumen?.ausentes||0, "Horas total": resumen?.horas_trabajadas||0, "Horas extra": resumen?.horas_extra||0, "Permisos": permisos?.total||0, "Incidencias": incidencias?.total||0 },
+          { "": "", "": "", "": "", "": "", "": "", "": "" },
+          ...detalle.map(d => ({
+            Fecha: d.fecha ? new Date(d.fecha).toLocaleDateString("es-CO") : "—",
+            "Ent. Mañana": d.entrada1||"—",
+            "Sal. Mañana": d.salida1||"—",
+            "Ent. Tarde": d.entrada2||"—",
+            "Sal. Tarde": d.salida2||"—",
+            Horas: d.horas_trabajadas ? `${d.horas_trabajadas}h` : "—",
+            Estado: d.estado||"—",
+            Festivo: d.esFestivo ? "Sí" : "No",
+          })),
+        ];
+      } else {
+        datos = [{ "": "No hay detalle diario disponible para este período." }];
+      }
     }
     exportarExcel(datos, (NOMBRES[tipo] || tipo).replace(/\s+/g, "_"));
     guardarHistorial({ tipo_reporte: NOMBRES[tipo], formato: "Excel", filtros: {}, total_registros: registros.length }).catch(() => {});

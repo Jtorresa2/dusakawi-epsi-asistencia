@@ -10,6 +10,7 @@ import {
   Building2,
   User,
   CalendarCheck,
+  CalendarDays,
 } from "lucide-react";
 
 export const menuPorRol = {
@@ -65,8 +66,8 @@ export const menuPorRol = {
           icon: <ClipboardCheck size={18} />
         },
         {
-          label: "Permisos",
-          path: "/permisos",
+          label: "Novedades Laborales",
+          path: "/novedades",
           icon: <CalendarCheck size={18} />
         },
         {
@@ -88,6 +89,11 @@ export const menuPorRol = {
             label: "Configuración",
             path: "/configuracion",
             icon: <Settings size={18} />
+          },
+          {
+            label: "Festivos",
+            path: "/festivos",
+            icon: <CalendarDays size={18} />
           }
         ]
       },
@@ -137,6 +143,11 @@ export const menuPorRol = {
           label: "Incidencias",
           path: "/incidencias",
           icon: <TriangleAlert size={18} />
+        },
+        {
+          label: "Festivos",
+          path: "/festivos",
+          icon: <CalendarDays size={18} />
         }
       ]
     },
@@ -150,8 +161,8 @@ export const menuPorRol = {
           icon: <ClipboardCheck size={18} />
         },
         {
-          label: "Permisos",
-          path: "/permisos",
+          label: "Novedades Laborales",
+          path: "/novedades",
           icon: <CalendarCheck size={18} />
         },
         {

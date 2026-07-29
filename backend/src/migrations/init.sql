@@ -145,12 +145,32 @@ CREATE TABLE IF NOT EXISTS permisos (
     fecha_desde     DATE NOT NULL,
     fecha_hasta     DATE NOT NULL,
     motivo          TEXT NOT NULL,
-    tipo            VARCHAR(20) NOT NULL DEFAULT 'completo',
+    tipo            VARCHAR(20) NOT NULL DEFAULT 'completo'
+                    CHECK (tipo IN ('completo', 'mañana', 'tarde', 'horas', 'comision')),
+    hora_desde      TIME,
+    hora_hasta      TIME,
     registrado_por  INTEGER REFERENCES usuarios(id),
+    estado          VARCHAR(20) NOT NULL DEFAULT 'aprobado'
+                    CHECK (estado IN ('pendiente', 'aprobado', 'rechazado')),
+    archivo_solicitud VARCHAR(500),
+    archivo_firmado   VARCHAR(500),
+    solicitado_por  INTEGER REFERENCES empleado(id),
+    motivo_rechazo  TEXT,
     creado_en       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 12. reportes_historial
+-- 12. festivos
+CREATE TABLE IF NOT EXISTS festivos (
+    id         SERIAL PRIMARY KEY,
+    fecha      DATE NOT NULL UNIQUE,
+    nombre     VARCHAR(200) NOT NULL,
+    tipo       VARCHAR(50) NOT NULL DEFAULT 'nacional'
+               CHECK (tipo IN ('nacional', 'regional', 'institucional')),
+    activo     BOOLEAN DEFAULT TRUE,
+    creado_en  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 13. reportes_historial
 CREATE TABLE IF NOT EXISTS reportes_historial (
     id               SERIAL PRIMARY KEY,
     tipo_reporte     VARCHAR(100) NOT NULL,
@@ -173,21 +193,60 @@ INSERT INTO roles (id, nombre, descripcion, permisos) VALUES
 ON CONFLICT (id) DO NOTHING;
 SELECT setval('roles_id_seq', 3, true);
 
--- Areas
+-- Areas (35 áreas operativas)
 INSERT INTO areas (id, nombre, piso, descripcion) VALUES
-    (1, 'Sistemas', 3, 'Soporte técnico y sistemas de información'),
-    (2, 'Talento Humano', 4, 'Gestión del talento humano'),
-    (3, 'Gerencia', 5, 'Gerencia general')
+    (1, 'SIAU', 1, 'Sistema de Información y Atención al Usuario'),
+    (2, 'PQR', 1, 'Peticiones, Quejas y Reclamos'),
+    (3, 'Call Center', 1, 'Centro de atención telefónica'),
+    (4, 'Autorizaciones', 1, 'Gestión de autorizaciones médicas'),
+    (5, 'Aseguramiento', 1, 'Gestión de aseguramiento en salud'),
+    (6, 'Psicología', 1, 'Servicios de psicología'),
+    (7, 'Recepción', 1, 'Recepción y atención al usuario'),
+    (8, 'Transporte', 1, 'Gestión de transporte de pacientes'),
+    (9, 'MIPRES', 1, 'Prescripción de medicamentos y servicios'),
+    (10, 'Portabilidad', 1, 'Gestión de portabilidad'),
+    (11, 'Referencia', 1, 'Referencia y contrarreferencia'),
+    (12, 'Auditoría de Cuentas Médicas', 2, 'Auditoría y control de cuentas médicas'),
+    (13, 'Radicación', 2, 'Radicación de documentos'),
+    (14, 'Archivo', 2, 'Gestión documental y archivo'),
+    (15, 'SARLAFT', 2, 'Sistema de Administración del Riesgo de Lavado de Activos'),
+    (16, 'Contabilidad', 3, 'Gestión contable'),
+    (17, 'Presupuesto', 3, 'Planificación y control presupuestal'),
+    (18, 'Cartera', 3, 'Gestión de cartera y cobros'),
+    (19, 'Recobro', 3, 'Recobro de servicios de salud'),
+    (20, 'Dirección Administrativa', 3, 'Dirección y coordinación administrativa'),
+    (21, 'Estadística', 3, 'Análisis y gestión estadística'),
+    (22, 'Sistemas', 3, 'Soporte y gestión tecnológica'),
+    (23, 'Tesorería', 3, 'Gestión de tesorería y pagos'),
+    (24, 'Alto Costo', 4, 'Gestión de alto costo'),
+    (25, 'Baja Complejidad', 4, 'Atención de baja complejidad'),
+    (26, 'Comunicación', 4, 'Gestión de comunicaciones institucionales'),
+    (27, 'Dirección de Riesgos', 4, 'Gestión y control de riesgos'),
+    (28, 'Mediana y Alta Complejidad', 4, 'Atención de mediana y alta complejidad'),
+    (29, 'PYM', 4, 'Promoción y Mantenimiento de la Salud'),
+    (30, 'Talento Humano', 4, 'Gestión del talento humano'),
+    (31, 'Calidad', 5, 'Gestión de calidad institucional'),
+    (32, 'Gerencia', 5, 'Dirección general de la institución'),
+    (33, 'Contratación', 5, 'Gestión de contratos y proveedores'),
+    (34, 'Control Interno', 5, 'Control interno y auditoría'),
+    (35, 'Intercultural', 5, 'Gestión intercultural indígena')
 ON CONFLICT (id) DO NOTHING;
-SELECT setval('areas_id_seq', 3, true);
+SELECT setval('areas_id_seq', 35, true);
 
--- Cargos
+-- Cargos (10 cargos)
 INSERT INTO cargos (id, nombre, descripcion, estado, area_id) VALUES
-    (1, 'Gerente General', 'Dirección general de la empresa', 'activo', 3),
-    (2, 'Coordinador de Talento Humano', 'Coordinación del equipo de talento humano', 'activo', 2),
-    (3, 'Técnico de Sistemas', 'Soporte técnico y mantenimiento de sistemas', 'activo', 1)
+    (1, 'Gerente General', 'Dirección general de la institución', 'activo', 32),
+    (2, 'Coordinador de Talento Humano', 'Coordinación del área de personal', 'activo', 30),
+    (3, 'Médico', 'Prestación de servicios médicos', 'activo', 1),
+    (4, 'Enfermero/a', 'Apoyo en servicios de salud', 'activo', NULL),
+    (5, 'Contador', 'Gestión contable y financiera', 'activo', NULL),
+    (6, 'Auxiliar Administrativo', 'Apoyo en labores administrativas', 'activo', NULL),
+    (7, 'Técnico de Sistemas', 'Soporte y mantenimiento tecnológico', 'activo', 22),
+    (8, 'Auditor', 'Auditoría y control interno', 'activo', 12),
+    (9, 'Abogado', 'Asesoría jurídica', 'activo', NULL),
+    (10, 'Psicólogo', 'Servicios de psicología', 'activo', NULL)
 ON CONFLICT (id) DO NOTHING;
-SELECT setval('cargos_id_seq', 3, true);
+SELECT setval('cargos_id_seq', 10, true);
 
 -- Horario
 INSERT INTO horarios (id, nombre, tolerancia_minutos) VALUES
@@ -206,9 +265,9 @@ ON CONFLICT (horario_id, dia_semana) DO NOTHING;
 
 -- Empleados
 INSERT INTO empleado (id, cedula, nombre, apellido, correo, cargo_id, area_id, horario_id, tarjeta_rfid, fecha_ingreso, activo) VALUES
-    (1, '10000001', 'Carlos', 'Rodríguez', 'c.rodriguez@dusakawi.com', 1, 3, NULL, 'RFID-001', '2020-01-15', true),
-    (2, '10000002', 'María', 'López', 'm.lopez@dusakawi.com', 2, 2, 1, 'RFID-002', '2019-03-10', true),
-    (3, '1015995066', 'Juliana', 'Torres', 'torresaaronjuliana@gmail.com', 3, 1, NULL, NULL, NULL, true)
+    (1, '10000001', 'Carlos', 'Rodríguez', 'c.rodriguez@dusakawi.com', 1, 32, NULL, 'RFID-001', '2020-01-15', true),
+    (2, '10000002', 'María', 'López', 'm.lopez@dusakawi.com', 2, 30, 1, 'RFID-002', '2019-03-10', true),
+    (3, '1015995066', 'Juliana', 'Torres', 'torresaaronjuliana@gmail.com', 7, 22, NULL, NULL, NULL, true)
 ON CONFLICT (id) DO NOTHING;
 SELECT setval('empleado_id_seq', 3, true);
 

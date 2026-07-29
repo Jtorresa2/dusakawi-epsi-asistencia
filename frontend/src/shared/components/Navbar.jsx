@@ -45,7 +45,7 @@ const TITULOS = {
   "/perfil": "Mi perfil",
   "/mi-asistencia": "Mi asistencia",
   "/reportar-incidencia": "Reportar incidencia",
-  "/permisos": "Permisos",
+  "/novedades": "Novedades Laborales",
   "/mis-solicitudes": "Mis solicitudes",
   "/integraciones": "Integraciones",
 };

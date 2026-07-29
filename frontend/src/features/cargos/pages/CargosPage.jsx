@@ -4,6 +4,7 @@ import {
   Box, Button, Paper, TextField, Typography, Select, MenuItem,
   Menu, MenuItem as MuiMenuItem, ListItemIcon, ListItemText, Divider,
   Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Chip,
+  Snackbar, Alert,
 } from "@mui/material";
 import {
   Search, Users, UserCheck, UserX, UserRound, Download, Plus,
@@ -59,6 +60,7 @@ export default function CargosPage() {
   const [menuCargo, setMenuCargo] = useState(null);
   const [verCargo, setVerCargo] = useState(null);
   const [openExport, setOpenExport] = useState(false);
+  const [snack, setSnack] = useState({ open: false, severity: "success", mensaje: "" });
   const { puede } = useRol();
 
   useEffect(() => { cargarCargos(); }, []);
@@ -122,8 +124,10 @@ export default function CargosPage() {
     try {
       if (cargoSeleccionado) {
         await actualizarCargo(cargoSeleccionado.id, form);
+        setSnack({ open: true, severity: "success", mensaje: "Cargo actualizado correctamente" });
       } else {
         await crearCargo(form);
+        setSnack({ open: true, severity: "success", mensaje: "Cargo creado correctamente" });
       }
       cerrarModal();
       cargarCargos();
@@ -139,6 +143,7 @@ export default function CargosPage() {
   async function duplicarCargo(cargo) {
     await crearCargo({ nombre: `${cargo.nombre} (copia)`, descripcion: cargo.descripcion, estado: cargo.estado });
     setMenuAnchor(null);
+    setSnack({ open: true, severity: "success", mensaje: "Cargo duplicado correctamente" });
     cargarCargos();
   }
 
@@ -148,6 +153,7 @@ export default function CargosPage() {
       await actualizarCargo(cargo.id, { nombre: cargo.nombre, descripcion: cargo.descripcion, estado: nuevoEstado });
     }
     setMenuAnchor(null);
+    setSnack({ open: true, severity: "success", mensaje: `Cargo ${nuevoEstado === "activo" ? "activado" : "desactivado"} correctamente` });
     cargarCargos();
   }
 
@@ -157,6 +163,7 @@ export default function CargosPage() {
     try {
       const { eliminarCargo: eliminar } = await import("../cargo.api");
       await eliminar(cargo.id);
+      setSnack({ open: true, severity: "success", mensaje: "Cargo eliminado correctamente" });
       cargarCargos();
     } catch (error) {
       console.error(error);
@@ -426,6 +433,12 @@ export default function CargosPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* SNACKBAR */}
+      <Snackbar open={snack.open} autoHideDuration={4000} onClose={() => setSnack(s => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+        <Alert severity={snack.severity} variant="filled" sx={{ borderRadius: "10px" }}>{snack.mensaje}</Alert>
+      </Snackbar>
     </Box>
   );
 }

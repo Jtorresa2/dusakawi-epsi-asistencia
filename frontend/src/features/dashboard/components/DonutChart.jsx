@@ -8,7 +8,7 @@ export default function DonutChart({ data = {} }) {
     { name: "Presentes", value: data.presentes ?? 0 },
     { name: "Ausentes", value: data.ausentes ?? 0 },
     { name: "Tardanzas", value: data.tardanzas ?? 0 },
-    { name: "Permisos", value: data.permisos ?? 0 },
+    { name: "Novedades", value: data.permisos ?? 0 },
   ];
 
   return (

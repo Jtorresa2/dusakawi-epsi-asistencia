@@ -1,4 +1,4 @@
-import { Box, Typography, IconButton } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { CircleArrowOutUpRight, CircleCheckBig, Ban, Clock, Fingerprint, Eye, Edit3, Trash2 } from "lucide-react";
 
 const badgeColors = {
@@ -29,8 +29,9 @@ function Badge({ label, bg, color }) {
 }
 
 const btnBase = {
-  width: 32, height: 32, borderRadius: "8px",
-  transition: "all .2s ease",
+  width: 32, height: 32, borderRadius: "8px", border: "none",
+  display: "flex", alignItems: "center", justifyContent: "center",
+  cursor: "pointer", flexShrink: 0, transition: "all .2s ease",
 };
 
 export const asistenciaColumns = ({ onJustificar, getPiso, onDetalle, onEditar, onEliminar }) => [
@@ -153,47 +154,44 @@ export const asistenciaColumns = ({ onJustificar, getPiso, onDetalle, onEditar, 
   {
     field: "acciones",
     headerName: "Acciones",
-    width: 180,
+    width: 160,
     sortable: false,
     filterable: false,
+    disableColumnMenu: true,
     align: "center",
     headerAlign: "center",
     renderCell: ({ row }) => (
-      <Box display="flex" gap={0.5} alignItems="center" justifyContent="center" width="100%">
-        <IconButton
+      <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+        <Box
           sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }}
           title="Ver detalle"
-          size="small"
           onClick={(e) => { e.stopPropagation(); onDetalle(row); }}
         >
-          <Eye size={14} />
-        </IconButton>
-        <IconButton
+          <Eye size={15} />
+        </Box>
+        <Box
           sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }}
           title="Editar"
-          size="small"
-          onClick={(e) => { e.stopPropagation(); onEditar?.(row); }}
+          onClick={(e) => { e.stopPropagation(); onEditar(row); }}
         >
-          <Edit3 size={14} />
-        </IconButton>
+          <Edit3 size={15} />
+        </Box>
         {row.estado === "ausente" && (
-          <IconButton
+          <Box
             sx={{ ...btnBase, bgcolor: "#E8F5E9", color: "#2E7D32", "&:hover": { bgcolor: "#C8E6C9" } }}
             title="Justificar"
-            size="small"
             onClick={(e) => { e.stopPropagation(); onJustificar(row); }}
           >
-            <Clock size={14} />
-          </IconButton>
+            <Clock size={15} />
+          </Box>
         )}
-        <IconButton
+        <Box
           sx={{ ...btnBase, bgcolor: "#FEE2E2", color: "#DC2626", "&:hover": { bgcolor: "#FECACA" } }}
           title="Eliminar"
-          size="small"
           onClick={(e) => { e.stopPropagation(); onEliminar?.(row); }}
         >
-          <Trash2 size={14} />
-        </IconButton>
+          <Trash2 size={15} />
+        </Box>
       </Box>
     ),
   },
