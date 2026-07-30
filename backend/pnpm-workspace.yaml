@@ -1,3 +1,7 @@
 allowBuilds:
+<<<<<<< HEAD
   bcrypt: set this to true or false
 onlyBuiltDependencies: '[ bcrypt ]'
+=======
+  bcrypt: true
+>>>>>>> 058693376c633312f781187f7d703bbe6850eafd
