@@ -55,3 +55,17 @@ exports.verificar = async (req, res) => {
     res.status(500).json({ mensaje: "Error del servidor", error: err.message });
   }
 };
+
+exports.generar = async (req, res) => {
+  try {
+    const { year } = req.body;
+    if (!year) return res.status(400).json({ mensaje: "Año es requerido" });
+    const resultado = await festivoService.generarNacionales(Number(year));
+    res.json({
+      mensaje: `Festivos generados: ${resultado.insertados} nuevo(s), ${resultado.existentes} ya existente(s)`,
+      ...resultado,
+    });
+  } catch (err) {
+    res.status(500).json({ mensaje: "Error del servidor", error: err.message });
+  }
+};

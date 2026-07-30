@@ -11,8 +11,8 @@ import { actualizarNovedad } from "../novedad.api";
 const fieldSx = {
   "& .MuiOutlinedInput-root": {
     borderRadius: "10px",
-    background: "#fff",
-    "& fieldset": { borderColor: "#E5E7EB" },
+    background: "transparent",
+    "& fieldset": { borderColor: "#C8E6C9" },
     "&:hover fieldset": { borderColor: "#2E7D32" },
     "&.Mui-focused fieldset": { borderColor: "#1B5E20" },
   },
@@ -118,23 +118,13 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm"
-      PaperProps={{ sx: { borderRadius: "16px", overflow: "hidden" } }}>
-      <Box sx={{ height: 4, bgcolor: tipoCfg.color }} />
-
-      <DialogTitle sx={{ pb: 0, pr: 1 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <Box>
-            <Typography sx={{ fontSize: 17, fontWeight: 700, color: "#111827" }}>
-              Editar novedad
-            </Typography>
-            <Typography sx={{ fontSize: 13, color: "#6B7280", mt: 0.3 }}>
-              {empleadoNombre}
-            </Typography>
-          </Box>
-          <IconButton onClick={onClose} size="small" sx={{ color: "#9CA3AF", mt: 0.5 }}>
-            <X size={18} />
-          </IconButton>
-        </Box>
+      PaperProps={{ sx: { borderRadius: "16px", position: "relative" } }}
+      sx={{ "& .MuiPaper-root": { backgroundColor: "#E8F5E9" } }}>
+      <DialogTitle sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>
+        Editar novedad
+        <IconButton onClick={onClose} size="small" sx={{ position: "absolute", top: 8, right: 8, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+          <X size={18} />
+        </IconButton>
       </DialogTitle>
 
       <DialogContent sx={{ pt: 2.5, pb: 1 }}>

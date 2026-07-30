@@ -34,7 +34,7 @@ const btnBase = {
   cursor: "pointer", flexShrink: 0, transition: "all .2s ease",
 };
 
-export const asistenciaColumns = ({ onJustificar, getPiso, onDetalle, onEditar, onEliminar }) => [
+export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) => [
   {
     field: "empleado",
     headerName: "Empleado",
@@ -176,15 +176,6 @@ export const asistenciaColumns = ({ onJustificar, getPiso, onDetalle, onEditar, 
         >
           <Edit3 size={15} />
         </Box>
-        {row.estado === "ausente" && (
-          <Box
-            sx={{ ...btnBase, bgcolor: "#E8F5E9", color: "#2E7D32", "&:hover": { bgcolor: "#C8E6C9" } }}
-            title="Justificar"
-            onClick={(e) => { e.stopPropagation(); onJustificar(row); }}
-          >
-            <Clock size={15} />
-          </Box>
-        )}
         <Box
           sx={{ ...btnBase, bgcolor: "#FEE2E2", color: "#DC2626", "&:hover": { bgcolor: "#FECACA" } }}
           title="Eliminar"

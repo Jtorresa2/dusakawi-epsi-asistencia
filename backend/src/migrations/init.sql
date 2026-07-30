@@ -13,8 +13,15 @@ CREATE TABLE IF NOT EXISTS roles (
     id          SERIAL PRIMARY KEY,
     nombre      VARCHAR(100) NOT NULL,
     descripcion VARCHAR(255),
-    permisos    JSONB,
     creado_en   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 1b. rol_permiso (normalización 1NF)
+CREATE TABLE IF NOT EXISTS rol_permiso (
+    rol_id  INTEGER NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    permiso VARCHAR(50) NOT NULL,
+    activo  BOOLEAN DEFAULT true,
+    PRIMARY KEY (rol_id, permiso)
 );
 
 -- 2. areas
@@ -186,12 +193,19 @@ CREATE TABLE IF NOT EXISTS reportes_historial (
 -- =============================================
 
 -- Roles
-INSERT INTO roles (id, nombre, descripcion, permisos) VALUES
-    (1, 'Administrador', 'Acceso total al sistema', '{"reportes":true,"usuarios":true,"dashboard":true,"empleados":true,"dispositivos":true}'),
-    (2, 'Talento Humano', 'Gestión de personal y reportes', '{"reportes":true,"usuarios":false,"dashboard":true,"empleados":true,"dispositivos":false}'),
-    (3, 'Empleado', 'Auto-servicio y marcación', '{"reportes":false,"usuarios":false,"dashboard":false,"empleados":false,"dispositivos":false}')
+INSERT INTO roles (id, nombre, descripcion) VALUES
+    (1, 'Administrador', 'Acceso total al sistema'),
+    (2, 'Talento Humano', 'Gestión de personal y reportes'),
+    (3, 'Empleado', 'Auto-servicio y marcación')
 ON CONFLICT (id) DO NOTHING;
 SELECT setval('roles_id_seq', 3, true);
+
+-- Rol_Permiso
+INSERT INTO rol_permiso (rol_id, permiso, activo) VALUES
+    (1, 'dashboard', true), (1, 'dispositivos', true), (1, 'empleados', true), (1, 'reportes', true), (1, 'usuarios', true),
+    (2, 'dashboard', true), (2, 'dispositivos', false), (2, 'empleados', true), (2, 'reportes', true), (2, 'usuarios', false),
+    (3, 'dashboard', false), (3, 'dispositivos', false), (3, 'empleados', false), (3, 'reportes', false), (3, 'usuarios', false)
+ON CONFLICT (rol_id, permiso) DO NOTHING;
 
 -- Areas (35 áreas operativas)
 INSERT INTO areas (id, nombre, piso, descripcion) VALUES

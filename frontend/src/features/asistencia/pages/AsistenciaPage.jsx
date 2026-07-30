@@ -14,7 +14,7 @@ import EmptyState from "../../../shared/components/EmptyState";
 import PDFPreviewModal from "../../../shared/components/PDFPreviewModal";
 import ConfirmDialog from "../../../shared/components/ConfirmDialog";
 import { asistenciaColumns } from "../components/columns";
-import { obtenerRegistros, registrarManual, justificarAusencia, eliminarRegistro, actualizarRegistro } from "../asistencia.api";
+import { obtenerRegistros, registrarManual, eliminarRegistro, actualizarRegistro } from "../asistencia.api";
 import { obtenerAreas } from "../../areas/area.api";
 
 function minDesde(hora) {
@@ -80,8 +80,6 @@ export default function AsistenciaPage() {
   const areaPisoMap = Object.fromEntries(areas.map((a) => [a.nombre, a.piso]));
   const getPiso = (areaNombre) => areaPisoMap[areaNombre];
   const [openManual, setOpenManual] = useState(false);
-  const [justificarRow, setJustificarRow] = useState(null);
-  const [observacion, setObservacion] = useState("");
   const [detalleRow, setDetalleRow] = useState(null);
   const [editRow, setEditRow] = useState(null);
   const [exportAnchor, setExportAnchor] = useState(null);
@@ -429,7 +427,7 @@ export default function AsistenciaPage() {
           <DataTable
             rows={filtrados}
             columns={asistenciaColumns({
-              onJustificar: (row) => { setJustificarRow(row); setObservacion(""); },
+
               getPiso, onDetalle: (row) => setDetalleRow(row),
               onEditar: (row) => setEditRow(row),
               onEliminar: (row) => setConfirmEliminar(row),
@@ -478,21 +476,7 @@ export default function AsistenciaPage() {
       />
 
       {/* 6. MODAL JUSTIFICAR */}
-      <JustificarModal
-        open={Boolean(justificarRow)}
-        onClose={() => setJustificarRow(null)}
-        empleado={justificarRow?.empleado}
-        observacion={observacion}
-        onChangeObservacion={setObservacion}
-        onGuardar={async () => {
-          try {
-            await justificarAusencia(justificarRow.id, { observacion });
-            setJustificarRow(null);
-            setObservacion("");
-            cargarRegistros();
-          } catch (err) { console.error(err); }
-        }}
-      />
+
 
       {/* 7. MODAL VISTA PREVIA PDF */}
       <PDFPreviewModal
@@ -883,37 +867,4 @@ function RegistroManualModal({ open, onClose, onGuardar, areas = [] }) {
   );
 }
 
-function JustificarModal({ open, onClose, empleado, observacion, onChangeObservacion, onGuardar }) {
-  if (!open) return null;
 
-  return (
-    <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-      <Paper elevation={0} sx={{ borderRadius: "20px", p: 3, width: "100%", maxWidth: 420, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2.5}>
-          <Typography sx={{ fontSize: 17, fontWeight: 700, color: "#111827" }}>Justificar ausencia</Typography>
-          <button onClick={onClose} style={{ border: "none", background: "none", fontSize: 18, cursor: "pointer", color: "#9CA3AF" }}>✕</button>
-        </Box>
-        {empleado && (
-          <Typography sx={{ fontSize: 13, color: "#6B7280", mb: 2 }}>
-            Empleado: <strong style={{ color: "#111827" }}>{empleado}</strong>
-          </Typography>
-        )}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Motivo de justificación</Typography>
-            <TextField multiline rows={4} value={observacion} onChange={(e) => onChangeObservacion(e.target.value)} placeholder="Describe el motivo de la ausencia..." fullWidth
-              slotProps={{ input: { sx: { borderRadius: "10px", fontSize: 13, py: 1, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#ECECEC" }, resize: "vertical" } } }} />
-          </Box>
-          <Box display="flex" gap={1} justifyContent="flex-end" mt={1}>
-            <Button onClick={onClose} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 3, color: "#6B7280", borderColor: "#ECECEC", "&:hover": { borderColor: "#1B5E20" } }} variant="outlined">
-              Cancelar
-            </Button>
-            <Button onClick={onGuardar} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 3, bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } }} variant="contained">
-              Justificar
-            </Button>
-          </Box>
-        </Box>
-      </Paper>
-    </Box>
-  );
-}
