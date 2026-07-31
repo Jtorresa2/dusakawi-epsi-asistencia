@@ -271,7 +271,8 @@ export default function FestivosPage() {
               <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Tipo</Typography>
               <TextField select size="small" value={editForm.tipo}
                 onChange={(e) => setEditForm({ ...editForm, tipo: e.target.value })}
-                sx={{ width: "100%", ...modalFieldSx }}>
+                sx={{ width: "100%", ...modalFieldSx }}
+                MenuProps={{ PaperProps: { sx: { bgcolor: "#E8F5E9", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } } } }}>
                 {TIPOS.map((t) => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
               </TextField>
             </Box>

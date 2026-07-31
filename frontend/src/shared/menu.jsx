@@ -30,8 +30,8 @@ export const menuPorRol = {
       section: "GESTIÓN",
       items: [
         {
-          label: "Empleados",
-          path: "/empleados",
+          label: "Personal",
+          path: "/personal",
           icon: <Users size={18} />
         },
         {
@@ -81,11 +81,6 @@ export const menuPorRol = {
         section: "ADMINISTRACIÓN",
         items: [
           {
-            label: "Usuarios",
-            path: "/usuarios",
-            icon: <Users size={18} />
-          },
-          {
             label: "Configuración",
             path: "/configuracion",
             icon: <Settings size={18} />
@@ -125,8 +120,8 @@ export const menuPorRol = {
       section: "GESTIÓN",
       items: [
         {
-          label: "Empleados",
-          path: "/empleados",
+          label: "Personal",
+          path: "/personal",
           icon: <Users size={18} />
         },
         {

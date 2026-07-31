@@ -15,15 +15,13 @@ exports.login = async (req, res) => {
           u.id,
           u.username,
           u.password_hash,
-          u.empleado_id,
           u.activo,
           u.password_reset_required,
           r.nombre AS rol,
-          e.nombre,
-          e.apellido
+          u.nombre,
+          u.apellido
       FROM usuarios u
       LEFT JOIN roles r ON u.rol_id = r.id
-      LEFT JOIN empleado e ON u.empleado_id = e.id
       WHERE u.username = ?
     `, [username]);
 
@@ -44,10 +42,39 @@ exports.login = async (req, res) => {
     }
 
     const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
+
+    // Forced password reset: refuse a normal session (403) but still issue a
+    // token so the frontend can authenticate against /auth/cambiar-password.
+    // Placed AFTER the password check on purpose: no token is ever issued
+    // without proof of the credentials, and the reset-required status is not
+    // leaked through a distinct pre-auth response code.
+    if (user.password_reset_required) {
+      const resetToken = jwt.sign(
+        {
+          id: user.id,
+          username: user.username,
+          nombre: `${user.nombre} ${user.apellido}`,
+          rol: rolesMap[user.rol] || user.rol,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "8h" }
+      );
+      return res.status(403).json({
+        mensaje: "Debe cambiar su contrasena antes de continuar",
+        password_reset_required: true,
+        token: resetToken,
+        user: {
+          id: user.id,
+          username: user.username,
+          nombre: `${user.nombre} ${user.apellido}`,
+          rol: user.rol,
+        },
+      });
+    }
+
     const token = jwt.sign(
       {
         id: user.id,
-        empleado_id: user.empleado_id,
         username: user.username,
         nombre: `${user.nombre} ${user.apellido}`,
         rol: rolesMap[user.rol] || user.rol,
@@ -64,7 +91,6 @@ exports.login = async (req, res) => {
       password_reset_required: !!user.password_reset_required,
       user: {
         id: user.id,
-        empleado_id: user.empleado_id,
         username: user.username,
         nombre: `${user.nombre} ${user.apellido}`,
         rol: user.rol,
@@ -101,10 +127,9 @@ exports.cambiarPassword = async (req, res) => {
 
     // Generar nuevo token
     const [userData] = await db.query(`
-      SELECT u.id, u.username, u.empleado_id, r.nombre AS rol, e.nombre, e.apellido
+      SELECT u.id, u.username, r.nombre AS rol, u.nombre, u.apellido
       FROM usuarios u
       LEFT JOIN roles r ON u.rol_id = r.id
-      LEFT JOIN empleado e ON u.empleado_id = e.id
       WHERE u.id = ?
     `, [usuarioId]);
 
@@ -112,7 +137,6 @@ exports.cambiarPassword = async (req, res) => {
     const token = jwt.sign(
       {
         id: userData[0].id,
-        empleado_id: userData[0].empleado_id,
         username: userData[0].username,
         nombre: `${userData[0].nombre} ${userData[0].apellido}`,
         rol: rolesMap[userData[0].rol] || userData[0].rol,
@@ -133,11 +157,10 @@ exports.perfil = async (req, res) => {
     const [rows] = await db.query(`
       SELECT
           u.id, u.username, u.password_reset_required,
-          CONCAT(e.nombre,' ',e.apellido) AS nombre,
+          CONCAT(u.nombre,' ',u.apellido) AS nombre,
           r.nombre AS rol
       FROM usuarios u
       LEFT JOIN roles r ON u.rol_id = r.id
-      LEFT JOIN empleado e ON u.empleado_id = e.id
       WHERE u.id = ?
     `, [req.user.id]);
 

@@ -737,7 +737,7 @@ function EditarAsistenciaModal({ open, onClose, row, onGuardar }) {
 
 function RegistroManualModal({ open, onClose, onGuardar, areas = [] }) {
   const [form, setForm] = useState({
-    empleado_id: "", fecha: new Date().toISOString().split("T")[0],
+    usuario_id: "", fecha: new Date().toISOString().split("T")[0],
     entrada1: "07:00", salida1: "12:00", entrada2: "14:00", salida2: "17:00",
     tipo_marcacion: "manual", observacion: "",
   });
@@ -750,7 +750,7 @@ function RegistroManualModal({ open, onClose, onGuardar, areas = [] }) {
 
   useEffect(() => {
     if (!open) return;
-    setForm({ empleado_id: "", fecha: new Date().toISOString().split("T")[0], entrada1: "07:00", salida1: "12:00", entrada2: "14:00", salida2: "17:00", tipo_marcacion: "manual", observacion: "" });
+    setForm({ usuario_id: "", fecha: new Date().toISOString().split("T")[0], entrada1: "07:00", salida1: "12:00", entrada2: "14:00", salida2: "17:00", tipo_marcacion: "manual", observacion: "" });
     setFiltroArea("Todas");
     (async () => {
       try {
@@ -786,7 +786,7 @@ function RegistroManualModal({ open, onClose, onGuardar, areas = [] }) {
               options={empleadosFiltrados}
               getOptionLabel={(e) => `${e.nombre} ${e.apellido || ""} — ${e.cedula}`}
               isOptionEqualToValue={(e, v) => e.id === v.id}
-              onChange={(_, value) => setForm({ ...form, empleado_id: value?.id || "" })}
+              onChange={(_, value) => setForm({ ...form, usuario_id: value?.id || "" })}
               noOptionsText="Sin resultados"
               renderInput={(params) => (
                 <TextField

@@ -20,6 +20,16 @@ export default function LoginPage() {
     const data = await res.json();
 
     if (!res.ok) {
+      // Forced password reset: the server refuses a normal session (403) but
+      // still returns a token, so send the user to the change-password flow.
+      if (res.status === 403 && data.password_reset_required && data.token) {
+        localStorage.setItem("token", data.token);
+        const resetUser = data.user || { username: form.usuario };
+        const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
+        localStorage.setItem("usuario", JSON.stringify({ ...resetUser, rol: rolesMap[resetUser.rol] || resetUser.rol }));
+        navigate("/cambiar-password");
+        return;
+      }
       alert(data.mensaje || "Error en login");
       return;
     }

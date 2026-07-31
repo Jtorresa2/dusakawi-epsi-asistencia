@@ -1,11 +1,11 @@
-const empleadoService = require("../services/empleadoService");
+const personalService = require("../services/personalService");
 
 exports.obtenerTodos = async (req, res) => {
   try {
     const filtros = {};
     if (req.query.area) filtros.area = req.query.area;
     if (req.query.cargo) filtros.cargo = req.query.cargo;
-    const empleados = await empleadoService.obtenerTodos(filtros);
+    const empleados = await personalService.obtenerTodos(filtros);
     res.json({ empleados });
   } catch (error) {
     console.error(error);
@@ -15,7 +15,7 @@ exports.obtenerTodos = async (req, res) => {
 
 exports.obtenerPorId = async (req, res) => {
   try {
-    const empleado = await empleadoService.obtenerPorId(req.params.id);
+    const empleado = await personalService.obtenerPorId(req.params.id);
     if (!empleado) return res.status(404).json({ mensaje: "Empleado no encontrado" });
     res.json(empleado);
   } catch (error) {
@@ -26,8 +26,16 @@ exports.obtenerPorId = async (req, res) => {
 
 exports.crear = async (req, res) => {
   try {
-    const id = await empleadoService.crear(req.body);
-    res.status(201).json({ mensaje: "Empleado creado correctamente", id });
+    // Only admin may create admin users; prevents talento_humano escalation.
+    if (req.user?.rol !== "admin" && Number(req.body.rol_id) === 1) {
+      return res.status(403).json({ mensaje: "Solo el administrador puede crear usuarios administradores" });
+    }
+
+    const result = await personalService.crear(req.body);
+    const msg = result.password
+      ? `Empleado creado correctamente. Usuario: ${result.username}, Contraseña: ${result.password}`
+      : "Empleado creado correctamente";
+    res.status(201).json({ mensaje: msg, id: result.id, password: result.password, username: result.username });
   } catch (error) {
     console.error(error);
     if (error.code === "23505") {
@@ -39,7 +47,19 @@ exports.crear = async (req, res) => {
 
 exports.actualizar = async (req, res) => {
   try {
-    await empleadoService.actualizar(req.params.id, req.body);
+    // Any authenticated user may update their own profile; admin/TH may update
+    // anyone. Keeps MiPerfilPage (PUT /api/empleados/:id) working for empleados
+    // while preserving the admin/TH management surface.
+    if (String(req.params.id) !== String(req.user?.id) && !["admin", "talento_humano"].includes(req.user?.rol)) {
+      return res.status(403).json({ mensaje: "No autorizado" });
+    }
+
+    // Only admin may change rol_id; prevents talento_humano self-escalation.
+    if (req.user?.rol !== "admin" && req.body.rol_id !== undefined) {
+      delete req.body.rol_id;
+    }
+
+    await personalService.actualizar(req.params.id, req.body);
     res.json({ mensaje: "Empleado actualizado correctamente" });
   } catch (error) {
     console.error(error);
@@ -49,7 +69,7 @@ exports.actualizar = async (req, res) => {
 
 exports.eliminar = async (req, res) => {
   try {
-    await empleadoService.eliminar(req.params.id);
+    await personalService.eliminar(req.params.id);
     res.json({ mensaje: "Empleado eliminado correctamente" });
   } catch (error) {
     console.error(error);

@@ -10,7 +10,7 @@ import {
 import DataTable from "../../../shared/components/DataTable";
 import Loading from "../../../shared/components/Loading";
 import { obtenerNovedades, crearNovedad, eliminarNovedad } from "../novedad.api";
-import { obtenerEmpleados } from "../../empleados/empleado.api";
+import { obtenerPersonal } from "../../personal/personal.api";
 import { obtenerAreas } from "../../areas/area.api";
 import NovedadDetailModal from "../components/NovedadDetailModal";
 import EditarNovedadModal from "../components/EditarNovedadModal";
@@ -41,7 +41,7 @@ export default function NovedadesPage() {
   const [areaFiltro, setAreaFiltro] = useState("Todas");
   const [busqueda, setBusqueda] = useState("");
 
-  const [form, setForm] = useState({ empleado_id: "", fecha_desde: "", fecha_hasta: "", motivo: "", tipo_novedad: "permiso", modalidad: "dia_completo", hora_desde: "", hora_hasta: "" });
+  const [form, setForm] = useState({ usuario_id: "", fecha_desde: "", fecha_hasta: "", motivo: "", tipo_novedad: "permiso", modalidad: "dia_completo", hora_desde: "", hora_hasta: "" });
   const [guardando, setGuardando] = useState(false);
   const [snack, setSnack] = useState({ open: false, msg: "", severity: "success" });
   const [novedadSeleccionada, setNovedadSeleccionada] = useState(null);
@@ -51,7 +51,7 @@ export default function NovedadesPage() {
 
   useEffect(() => {
     obtenerNovedades().then((p) => setNovedades(p.novedades || [])).catch(() => {});
-    obtenerEmpleados().then((e) => setEmpleados(e.empleados || e || [])).catch(() => {});
+    obtenerPersonal().then((e) => setEmpleados(e.empleados || e || [])).catch(() => {});
     obtenerAreas().then((a) => setAreas(Array.isArray(a) ? a : a?.areas || [])).catch(() => {});
     setLoading(false);
   }, []);
@@ -78,7 +78,7 @@ export default function NovedadesPage() {
   };
 
   const handleGuardar = async () => {
-    if (!form.empleado_id || !form.fecha_desde || !form.fecha_hasta || !form.motivo.trim()) {
+    if (!form.usuario_id || !form.fecha_desde || !form.fecha_hasta || !form.motivo.trim()) {
       setSnack({ open: true, msg: "Todos los campos son obligatorios", severity: "error" });
       return;
     }
@@ -102,7 +102,7 @@ export default function NovedadesPage() {
         open: true, severity: "success",
         msg: `Novedad registrada (${tipoLabel})${res.dias_generados ? form.tipo_novedad === "comision" ? ` — ${res.dias_generados} día(s) en comisión` : ` — ${res.dias_generados} día(s) justificado(s)` : " — el empleado marca la otra mitad normalmente"}`,
       });
-      setForm({ empleado_id: "", fecha_desde: "", fecha_hasta: "", motivo: "", tipo_novedad: "permiso", modalidad: "dia_completo", hora_desde: "", hora_hasta: "" });
+      setForm({ usuario_id: "", fecha_desde: "", fecha_hasta: "", motivo: "", tipo_novedad: "permiso", modalidad: "dia_completo", hora_desde: "", hora_hasta: "" });
       const updated = await obtenerNovedades();
       setNovedades(updated.novedades || []);
     } catch {
@@ -256,7 +256,7 @@ export default function NovedadesPage() {
           </Box>
           <Box sx={{ flex: 1, minWidth: 200 }}>
             <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Empleado</Typography>
-            <TextField select size="small" name="empleado_id" value={form.empleado_id} onChange={handleChange}
+            <TextField select size="small" name="usuario_id" value={form.usuario_id} onChange={handleChange}
               sx={{ width: "100%", ...fieldSx }}>
               <MenuItem value="">Seleccionar empleado</MenuItem>
               {empleadosFiltrados.map((emp) => (

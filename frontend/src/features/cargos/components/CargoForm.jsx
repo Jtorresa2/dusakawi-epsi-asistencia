@@ -9,6 +9,12 @@ const fieldSx = {
   },
 };
 
+const selectMenuSx = {
+  PaperProps: {
+    sx: { bgcolor: "#E8F5E9", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } },
+  },
+};
+
 export default function CargoForm({
   form,
   onChange,
@@ -37,6 +43,7 @@ export default function CargoForm({
         onChange={onChange}
         fullWidth
         sx={fieldSx}
+        MenuProps={selectMenuSx}
       >
         <MenuItem value="">
           <em>Sin área</em>
@@ -67,6 +74,7 @@ export default function CargoForm({
         onChange={onChange}
         fullWidth
         sx={fieldSx}
+        MenuProps={selectMenuSx}
       >
         <MenuItem value="activo">Activo</MenuItem>
         <MenuItem value="inactivo">Inactivo</MenuItem>

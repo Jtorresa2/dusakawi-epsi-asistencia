@@ -178,7 +178,7 @@ export default function IncidenciaExpedientePage() {
     setSubiendoFirma(true);
     setActionError("");
     try {
-      await aprobarConFirma(incidencia.id, firmaFile);
+      await aprobarConFirma(incidencia.id, firmaFile, prioridad);
       if (firmaPreviewUrl) URL.revokeObjectURL(firmaPreviewUrl);
       setFirmaModalOpen(false);
       setFirmaFile(null);

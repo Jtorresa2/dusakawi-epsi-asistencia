@@ -1,6 +1,8 @@
 -- =============================================
 -- PostgreSQL Schema + Seed — Dusakawi Asistencia
 -- =============================================
+-- Versión: Unificada (empleado mergeada en usuarios)
+-- =============================================
 
 BEGIN;
 
@@ -64,30 +66,23 @@ CREATE TABLE IF NOT EXISTS horario_detalle (
     PRIMARY KEY (horario_id, dia_semana)
 );
 
--- 6. empleado
-CREATE TABLE IF NOT EXISTS empleado (
-    id                SERIAL PRIMARY KEY,
-    cedula            VARCHAR(20) NOT NULL UNIQUE,
-    nombre            VARCHAR(100) NOT NULL,
-    apellido          VARCHAR(100) NOT NULL,
-    correo            VARCHAR(255) UNIQUE,
-    telefono          VARCHAR(50),
-    fecha_nacimiento  DATE,
-    cargo_id          INTEGER REFERENCES cargos(id),
-    area_id           INTEGER REFERENCES areas(id),
-    horario_id        INTEGER REFERENCES horarios(id),
-    huella            TEXT,
-    foto              TEXT,
-    tarjeta_rfid      VARCHAR(50),
-    fecha_ingreso     DATE,
-    activo            BOOLEAN DEFAULT TRUE,
-    creado_en         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 7. usuarios
+-- 6. usuarios (antes empleado + usuarios, ahora unificada)
 CREATE TABLE IF NOT EXISTS usuarios (
     id                     SERIAL PRIMARY KEY,
-    empleado_id            INTEGER NOT NULL REFERENCES empleado(id),
+    cedula                 VARCHAR(20) UNIQUE,
+    nombre                 VARCHAR(100) NOT NULL,
+    apellido               VARCHAR(100) NOT NULL,
+    correo                 VARCHAR(255) UNIQUE,
+    telefono               VARCHAR(50),
+    fecha_nacimiento       DATE,
+    cargo_id               INTEGER REFERENCES cargos(id),
+    area_id                INTEGER REFERENCES areas(id),
+    horario_id             INTEGER REFERENCES horarios(id),
+    huella                 TEXT,
+    foto                   TEXT,
+    tarjeta_rfid           VARCHAR(50),
+    piso                   INTEGER,
+    fecha_ingreso          DATE,
     rol_id                 INTEGER NOT NULL REFERENCES roles(id),
     username               VARCHAR(255) NOT NULL UNIQUE,
     password_hash          VARCHAR(255) NOT NULL,
@@ -97,10 +92,10 @@ CREATE TABLE IF NOT EXISTS usuarios (
     creado_en              TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 8. asistencia
+-- 7. asistencia
 CREATE TABLE IF NOT EXISTS asistencia (
     id                        SERIAL PRIMARY KEY,
-    empleado_id               INTEGER NOT NULL REFERENCES empleado(id),
+    usuario_id                INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE NO ACTION,
     fecha                     DATE NOT NULL,
     fecha_hora_entrada        TIMESTAMP,
     fecha_hora_salida_manana  TIMESTAMP,
@@ -114,13 +109,13 @@ CREATE TABLE IF NOT EXISTS asistencia (
     observacion               TEXT,
     dispositivo_id            VARCHAR(100),
     creado_en                 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (empleado_id, fecha)
+    UNIQUE (usuario_id, fecha)
 );
 
--- 9. incidencias
+-- 8. incidencias
 CREATE TABLE IF NOT EXISTS incidencias (
     id              SERIAL PRIMARY KEY,
-    empleado_id     INTEGER NOT NULL REFERENCES empleado(id),
+    usuario_id      INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE NO ACTION,
     tipo            VARCHAR(100) NOT NULL,
     descripcion     TEXT,
     evidencia_url   VARCHAR(500),
@@ -135,7 +130,7 @@ CREATE TABLE IF NOT EXISTS incidencias (
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 10. configuracion
+-- 9. configuracion
 CREATE TABLE IF NOT EXISTS configuracion (
     id              SERIAL PRIMARY KEY,
     clave           VARCHAR(100) NOT NULL UNIQUE,
@@ -145,28 +140,28 @@ CREATE TABLE IF NOT EXISTS configuracion (
     actualizado_en  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 11. permisos
+-- 10. permisos
 CREATE TABLE IF NOT EXISTS permisos (
-    id              SERIAL PRIMARY KEY,
-    empleado_id     INTEGER NOT NULL REFERENCES empleado(id),
-    fecha_desde     DATE NOT NULL,
-    fecha_hasta     DATE NOT NULL,
-    motivo          TEXT NOT NULL,
-    tipo            VARCHAR(20) NOT NULL DEFAULT 'completo'
-                    CHECK (tipo IN ('completo', 'mañana', 'tarde', 'horas', 'comision')),
-    hora_desde      TIME,
-    hora_hasta      TIME,
-    registrado_por  INTEGER REFERENCES usuarios(id),
-    estado          VARCHAR(20) NOT NULL DEFAULT 'aprobado'
-                    CHECK (estado IN ('pendiente', 'aprobado', 'rechazado')),
-    archivo_solicitud VARCHAR(500),
-    archivo_firmado   VARCHAR(500),
-    solicitado_por  INTEGER REFERENCES empleado(id),
-    motivo_rechazo  TEXT,
-    creado_en       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id                    SERIAL PRIMARY KEY,
+    usuario_id            INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE NO ACTION,
+    fecha_desde           DATE NOT NULL,
+    fecha_hasta           DATE NOT NULL,
+    motivo                TEXT NOT NULL,
+    tipo                  VARCHAR(20) NOT NULL DEFAULT 'completo'
+                          CHECK (tipo IN ('completo', 'mañana', 'tarde', 'horas', 'comision')),
+    hora_desde            TIME,
+    hora_hasta            TIME,
+    registrado_por        INTEGER REFERENCES usuarios(id),
+    estado                VARCHAR(20) NOT NULL DEFAULT 'aprobado'
+                          CHECK (estado IN ('pendiente', 'aprobado', 'rechazado')),
+    archivo_solicitud     VARCHAR(500),
+    archivo_firmado       VARCHAR(500),
+    solicitado_usuario_id INTEGER REFERENCES usuarios(id),
+    motivo_rechazo        TEXT,
+    creado_en             TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 12. festivos
+-- 11. festivos
 CREATE TABLE IF NOT EXISTS festivos (
     id         SERIAL PRIMARY KEY,
     fecha      DATE NOT NULL UNIQUE,
@@ -177,7 +172,7 @@ CREATE TABLE IF NOT EXISTS festivos (
     creado_en  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 13. reportes_historial
+-- 12. reportes_historial
 CREATE TABLE IF NOT EXISTS reportes_historial (
     id               SERIAL PRIMARY KEY,
     tipo_reporte     VARCHAR(100) NOT NULL,
@@ -202,9 +197,9 @@ SELECT setval('roles_id_seq', 3, true);
 
 -- Rol_Permiso
 INSERT INTO rol_permiso (rol_id, permiso, activo) VALUES
-    (1, 'dashboard', true), (1, 'dispositivos', true), (1, 'empleados', true), (1, 'reportes', true), (1, 'usuarios', true),
-    (2, 'dashboard', true), (2, 'dispositivos', false), (2, 'empleados', true), (2, 'reportes', true), (2, 'usuarios', false),
-    (3, 'dashboard', false), (3, 'dispositivos', false), (3, 'empleados', false), (3, 'reportes', false), (3, 'usuarios', false)
+    (1, 'dashboard', true), (1, 'dispositivos', true), (1, 'personal', true), (1, 'reportes', true), (1, 'usuarios', true),
+    (2, 'dashboard', true), (2, 'dispositivos', false), (2, 'personal', true), (2, 'reportes', true), (2, 'usuarios', false),
+    (3, 'dashboard', false), (3, 'dispositivos', false), (3, 'personal', false), (3, 'reportes', false), (3, 'usuarios', false)
 ON CONFLICT (rol_id, permiso) DO NOTHING;
 
 -- Areas (35 áreas operativas)
@@ -277,21 +272,28 @@ INSERT INTO horario_detalle (horario_id, dia_semana, hora_entrada_manana, hora_s
     (1, 'Viernes',   '07:00', '12:00', '14:00', '17:00')
 ON CONFLICT (horario_id, dia_semana) DO NOTHING;
 
--- Empleados
-INSERT INTO empleado (id, cedula, nombre, apellido, correo, cargo_id, area_id, horario_id, tarjeta_rfid, fecha_ingreso, activo) VALUES
-    (1, '10000001', 'Carlos', 'Rodríguez', 'c.rodriguez@dusakawi.com', 1, 32, NULL, 'RFID-001', '2020-01-15', true),
-    (2, '10000002', 'María', 'López', 'm.lopez@dusakawi.com', 2, 30, 1, 'RFID-002', '2019-03-10', true),
-    (3, '1015995066', 'Juliana', 'Torres', 'torresaaronjuliana@gmail.com', 7, 22, NULL, NULL, NULL, true)
+-- Usuarios (datos personales incluidos directamente, sin empleado_id)
+INSERT INTO usuarios (
+    id, rol_id, username, password_hash, activo, password_reset_required,
+    cedula, nombre, apellido, correo, cargo_id, area_id, tarjeta_rfid, fecha_ingreso
+) VALUES
+    (1, 3, 'carlos',
+     '$2b$10$QfVbkqSfSztAqeMBBcIOxuyeCFGxeCa/X3ErYjTvG5YSKbzM5SHvG',
+     true, false,
+     '10000001', 'Carlos', 'Rodríguez', 'c.rodriguez@dusakawi.com',
+     1, 32, 'RFID-001', '2020-01-15'),
+    (2, 2, 'talento',
+     '$2b$10$FnNwnu0sg.DOrspnoCm91.PVx/HHmKhXM7fUGh6i1mZQLN7JhIVR.',
+     true, false,
+     '10000002', 'María', 'López', 'm.lopez@dusakawi.com',
+     2, 30, 'RFID-002', '2019-03-10'),
+    (3, 1, 'Jtorresa22',
+     '$2b$10$UwXojDQlljyPI78khkYz8u4gWCb07lp90pXqS8wf4oqGnYzpptfGu',
+     true, false,
+     '1015995066', 'Juliana', 'Torres', 'torresaaronjuliana@gmail.com',
+     7, 22, NULL, NULL)
 ON CONFLICT (id) DO NOTHING;
-SELECT setval('empleado_id_seq', 3, true);
-
--- Usuarios (con los password_hash reales de la base original)
-INSERT INTO usuarios (id, empleado_id, rol_id, username, password_hash, activo, password_reset_required) VALUES
-    (1, 1, 3, 'carlos', '$2b$10$QfVbkqSfSztAqeMBBcIOxuyeCFGxeCa/X3ErYjTvG5YSKbzM5SHvG', true, false),
-    (2, 2, 2, 'talento', '$2b$10$FnNwnu0sg.DOrspnoCm91.PVx/HHmKhXM7fUGh6i1mZQLN7JhIVR.', true, false),
-    (3, 3, 1, 'Jtorresa22', '$2b$10$UwXojDQlljyPI78khkYz8u4gWCb07lp90pXqS8wf4oqGnYzpptfGu', true, false)
-ON CONFLICT (id) DO NOTHING;
-SELECT setval('usuarios_id_seq', 3, true);
+SELECT setval('usuarios_id_seq', COALESCE((SELECT MAX(id) FROM usuarios), 1), true);
 
 -- Configuración: motor de base de datos
 INSERT INTO configuracion (clave, valor, tipo) VALUES

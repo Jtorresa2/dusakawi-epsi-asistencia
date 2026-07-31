@@ -12,9 +12,8 @@ import LoginPage from "./features/login/pages/LoginPage";
 import DashboardPage from "./features/dashboard/pages/DashboardPage";
 import AsistenciaPage from "./features/asistencia/pages/AsistenciaPage";
 import ReportesPage from "./features/reportes/pages/ReportesPage";
-import UsuariosPage from "./features/usuarios/pages/UsuariosPage";
 import CargosPage from "./features/cargos/pages/CargosPage";
-import EmpleadosPage from "./features/empleados/pages/EmpleadosPage";
+import PersonalPage from "./features/personal/pages/PersonalPage";
 import HorariosPage from "./features/horarios/pages/HorariosPage";
 import NovedadesPage from "./features/novedades/pages/NovedadesPage";
 import IncidenciasPage from "./features/incidencias/pages/IncidenciasPage";
@@ -62,7 +61,8 @@ export default function App() {
         <Route path="/dashboard" element={<R roles={["admin", "talento_humano", "empleado"]}><DashboardPage /></R>} />
 
         {/* Gestion */}
-        <Route path="/empleados" element={<R roles={["admin", "talento_humano"]}><EmpleadosPage /></R>} />
+        <Route path="/personal" element={<R roles={["admin", "talento_humano"]}><PersonalPage /></R>} />
+        <Route path="/empleados" element={<Navigate to="/personal" replace />} />
         <Route path="/cargos" element={<R roles={["admin", "talento_humano"]}><CargosPage /></R>} />
         <Route path="/horarios" element={<R roles={["admin"]}><HorariosPage /></R>} />
         <Route path="/novedades" element={<R roles={["admin", "talento_humano"]}><NovedadesPage /></R>} />
@@ -75,7 +75,7 @@ export default function App() {
         <Route path="/reportes" element={<R roles={["admin", "talento_humano"]}><ReportesPage /></R>} />
 
         {/* Administracion */}
-        <Route path="/usuarios" element={<R roles={["admin"]}><UsuariosPage /></R>} />
+        <Route path="/usuarios" element={<Navigate to="/personal" replace />} />
         <Route path="/configuracion" element={<R roles={["admin"]}><ConfiguracionPage /></R>} />
         <Route path="/festivos" element={<R roles={["admin", "talento_humano"]}><FestivosPage /></R>} />
         <Route path="/integraciones" element={<R roles={["admin"]}><IntegracionesPage /></R>} />

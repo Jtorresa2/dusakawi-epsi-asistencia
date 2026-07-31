@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Box, Paper, Typography, Button, Breadcrumbs, Link, TextField, MenuItem, InputLabel } from "@mui/material";
 import { ArrowLeft, ChevronRight, Search, RotateCcw, FileSpreadsheet, FileText } from "lucide-react";
-import { obtenerEmpleados } from "../../empleados/empleado.api";
+import { obtenerPersonal } from "../../personal/personal.api";
 import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 import DataTable from "../../../shared/components/DataTable";
@@ -32,13 +32,13 @@ const MESES = [
 ];
 
 const FILTROS = {
-  porEmpleado: ["empleado_id","mes"],
+  porEmpleado: ["usuario_id","mes"],
   asistencia: ["fecha_desde","area_id","estado"],
-  incidencias: ["fecha_desde","empleado_id","area_id","estado_incidencia","tipo_incidencia"],
-  tardanzas: ["fecha_desde","empleado_id","area_id"],
-  ausencias: ["fecha_desde","empleado_id","area_id"],
+  incidencias: ["fecha_desde","usuario_id","area_id","estado_incidencia","tipo_incidencia"],
+  tardanzas: ["fecha_desde","usuario_id","area_id"],
+  ausencias: ["fecha_desde","usuario_id","area_id"],
   empleados: ["area_id","cargo_id","estado_empleado"],
-  marcaciones: ["fecha_desde","empleado_id","area_id"],
+  marcaciones: ["fecha_desde","usuario_id","area_id"],
 };
 
 const SX = { "& .MuiOutlinedInput-root": { borderRadius: "10px", background: "#fff", "& fieldset": { borderColor: "#E5E7EB" }, "&:hover fieldset": { borderColor: "#2E7D32" }, "&.Mui-focused fieldset": { borderColor: "#1B5E20" } }, "& .MuiInputLabel-root": { fontSize: 13, color: "#6B7280" }, "& .MuiInputBase-input": { fontSize: 13 } };
@@ -115,10 +115,10 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
               </Box>
             </Box>
           );
-          if (c === "empleado_id") return (
+          if (c === "usuario_id") return (
             <Box key={c}>
               <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Empleado</InputLabel>
-              <TextField select size="small" value={f.empleado_id||""} onChange={e => set("empleado_id",e.target.value)} sx={{minWidth:180,...SX}}>
+              <TextField select size="small" value={f.usuario_id||""} onChange={e => set("usuario_id",e.target.value)} sx={{minWidth:180,...SX}}>
                 <MenuItem value="">{tipoReporte==="porEmpleado"?"Seleccione...":"Todos"}</MenuItem>
                 {(empleados||[]).map(e => <MenuItem key={e.id} value={e.id}>{e.nombre} {e.apellido}</MenuItem>)}
               </TextField>
@@ -323,7 +323,7 @@ export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarP
   const [filtros, setFiltros] = useState({});
   const [empleados, setEmpleados] = useState([]);
 
-  useEffect(() => { obtenerEmpleados().then(r => setEmpleados(r.empleados||r||[])).catch(()=>{}); }, []);
+  useEffect(() => { obtenerPersonal().then(r => setEmpleados(r.empleados||r||[])).catch(()=>{}); }, []);
 
   useEffect(() => {
     if (filtrosIniciales && Object.keys(filtrosIniciales).length > 0) {
@@ -341,7 +341,7 @@ export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarP
       const p = {};
       if (f.fecha_desde) p.fecha_desde = f.fecha_desde;
       if (f.fecha_hasta) p.fecha_hasta = f.fecha_hasta;
-      if (f.empleado_id) p.empleado_id = f.empleado_id;
+      if (f.usuario_id || f.empleado_id) p.usuario_id = f.usuario_id || f.empleado_id;
       if (f.area_id) p.area_id = f.area_id;
       if (f.cargo_id) p.cargo_id = f.cargo_id;
       if (f.estado) p.estado = f.estado;

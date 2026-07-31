@@ -5,9 +5,9 @@ import {
 } from "@mui/material";
 import {
   User, Mail, Phone, Calendar, FileText, Briefcase, MapPin,
-  CheckCircle, XCircle, Edit2, Save, X, Camera, Shield, Fingerprint,
+  CheckCircle, XCircle, Clock, Edit2, Save, X, Camera, Shield,
 } from "lucide-react";
-import { obtenerEmpleado, actualizarEmpleado } from "../empleado.api";
+import { obtenerPersonalPorId, actualizarPersonal } from "../personal.api";
 import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 
@@ -33,9 +33,19 @@ const workFields = [
   { key: "area", label: "Área", icon: <MapPin size={16} /> },
 ];
 
-const selectSx = { borderRadius: "10px", fontSize: 14, "& fieldset": { borderColor: "#ECECEC" } };
+const infoFields = [
+  { key: "piso", label: "Piso", icon: <MapPin size={16} />, render: (v) => (v ? `Piso ${v}` : "—") },
+  { key: "rol", label: "Rol del sistema", icon: <Shield size={16} /> },
+];
 
-export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved }) {
+const selectSx = { borderRadius: "10px", fontSize: 14, "& fieldset": { borderColor: "#ECECEC" } };
+const selectMenuSx = {
+  PaperProps: {
+    sx: { bgcolor: "#E8F5E9", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } },
+  },
+};
+
+export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editando, setEditando] = useState(null);
@@ -46,10 +56,10 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
   const [cargos, setCargos] = useState([]);
 
   useEffect(() => {
-    if (!open || !empleadoId) return;
+    if (!open || !id) return;
     setLoading(true);
     Promise.all([
-      obtenerEmpleado(empleadoId),
+      obtenerPersonalPorId(id),
       obtenerAreas().catch(() => []),
       obtenerCargos().catch(() => []),
     ]).then(([emp, areasRes, cargosRes]) => {
@@ -59,7 +69,7 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
       setEditando(null);
       setForm({});
     }).catch(() => {}).finally(() => setLoading(false));
-  }, [open, empleadoId]);
+  }, [open, id]);
 
   const initials = data ? `${data.nombre || ""} ${data.apellido || ""}`.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() : "??";
 
@@ -90,12 +100,12 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
     try {
       const formData = new FormData();
       formData.append("foto", file);
-      await fetch(`/api/empleados/${empleadoId}/foto`, {
+      await fetch(`/api/empleados/${id}/foto`, {
         method: "POST",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         body: formData,
       });
-      const updated = await obtenerEmpleado(empleadoId);
+      const updated = await obtenerPersonalPorId(id);
       setData(updated);
     } catch {}
     setSubiendoFoto(false);
@@ -111,8 +121,8 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
         delete payload.area;
         delete payload.cargo;
       }
-      await actualizarEmpleado(empleadoId, payload);
-      const updated = await obtenerEmpleado(empleadoId);
+      await actualizarPersonal(id, payload);
+      const updated = await obtenerPersonalPorId(id);
       setData(updated);
       setEditando(null);
       if (onSaved) onSaved();
@@ -124,8 +134,8 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
     const nuevo = data.activo === 1 || data.activo === true ? 0 : 1;
     setGuardando(true);
     try {
-      await actualizarEmpleado(empleadoId, { activo: nuevo });
-      const updated = await obtenerEmpleado(empleadoId);
+      await actualizarPersonal(id, { activo: nuevo });
+      const updated = await obtenerPersonalPorId(id);
       setData(updated);
       if (onSaved) onSaved();
     } catch {}
@@ -160,13 +170,13 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
 
   const isActive = data?.activo === 1 || data?.activo === true;
   const statsCards = [
-    { title: "Puntualidad", value: `${data?.puntualidad ?? 96}%`, sub: "Promedio general", icon: <CheckCircle size={22} />, color: "#16A34A", bg: "#D1FAE5" },
-    { title: "Incidencias", value: String(data?.incidencias ?? 0), sub: "En el último mes", icon: <XCircle size={22} />, color: "#DC2626", bg: "#FEE2E2" },
+    { title: "Inasistencias", value: String(data?.inasistencias ?? 0), sub: "Total de ausencias registradas", icon: <XCircle size={22} />, color: "#DC2626", bg: "#FEE2E2" },
+    { title: "Llegadas tardías", value: String(data?.llegadas_tardias ?? 0), sub: "Total de retardos registrados", icon: <Clock size={22} />, color: "#D97706", bg: "#FEF3C7" },
   ];
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth
-      PaperProps={{ sx: { borderRadius: "16px", maxHeight: "95vh", overflow: "auto", bgcolor: "#F0FDF4" } }}>
+      PaperProps={{ sx: { borderRadius: "16px", maxHeight: "95vh", overflow: "auto", bgcolor: "#E8F5E9" } }}>
       {loading ? (
         <DialogContent sx={{ py: 8, textAlign: "center", color: "#9CA3AF" }}>Cargando perfil...</DialogContent>
       ) : data ? (
@@ -177,7 +187,7 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
           </DialogTitle>
           <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             {/* Header card */}
-            <Paper elevation={0} sx={{ p: 3, borderRadius: "16px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap" }}>
+            <Paper elevation={0} sx={{ p: 3, borderRadius: "16px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap", bgcolor: "#fff" }}>
               <Box sx={{ position: "relative", "&:hover .foto-overlay": { opacity: 1 } }}>
                 <Avatar src={data.foto_url || ""}
                   sx={{ width: 72, height: 72, bgcolor: "#E8F5E9", color: "#1B5E20", fontSize: 26, fontWeight: 700, cursor: "pointer" }}>
@@ -208,7 +218,7 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
             {/* Grid principal */}
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "4fr 3fr 3fr" }, gap: 3, alignItems: "start" }}>
               {/* Col 1 — Datos personales */}
-              <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC" }}>
+              <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC", bgcolor: "#fff" }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
                   <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Datos personales</Typography>
                   {editando === "personal" ? (
@@ -224,7 +234,7 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
               </Paper>
 
               {/* Col 2 — Información laboral */}
-              <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC" }}>
+              <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC", bgcolor: "#fff" }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
                   <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Información laboral</Typography>
                   {editando === "laboral" ? (
@@ -245,7 +255,7 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
                       <Box sx={{ flex: 1 }}>
                         <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", mb: 0.2 }}>Cargo</Typography>
                         <FormControl fullWidth size="small">
-                          <Select value={form.cargo_id || ""} sx={selectSx}
+                          <Select value={form.cargo_id || ""} sx={selectSx} MenuProps={selectMenuSx}
                             onChange={(e) => setForm({ ...form, cargo_id: e.target.value })}>
                             <MenuItem value=""><em>Sin cargo</em></MenuItem>
                             {cargos.filter((c) => c.estado !== "inactivo").map((c) => (
@@ -262,7 +272,7 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
                       <Box sx={{ flex: 1 }}>
                         <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", mb: 0.2 }}>Área</Typography>
                         <FormControl fullWidth size="small">
-                          <Select value={form.area_id || ""} sx={selectSx}
+                          <Select value={form.area_id || ""} sx={selectSx} MenuProps={selectMenuSx}
                             onChange={(e) => setForm({ ...form, area_id: e.target.value })}>
                             <MenuItem value=""><em>Sin área</em></MenuItem>
                             {areas.map((a) => (
@@ -274,14 +284,29 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
                     </Box>
                   </>
                 ) : (
-                  workFields.map((f) => renderField(f, data[f.key], "laboral"))
+                  <>
+                    {workFields.map((f) => renderField(f, data[f.key], "laboral"))}
+                    {infoFields.map((f) => (
+                      <Box key={f.key} sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: "1px solid #F3F4F6" }}>
+                        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "#F9FAFB", display: "flex", alignItems: "center", justifyContent: "center", color: "#9CA3AF", flexShrink: 0 }}>
+                          {f.icon}
+                        </Box>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", mb: 0.2 }}>{f.label}</Typography>
+                          <Typography sx={{ fontSize: 14, fontWeight: 500, color: "#111827", wordBreak: "break-word" }}>
+                            {f.render ? f.render(data[f.key]) : (data[f.key] || "—")}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ))}
+                  </>
                 )}
               </Paper>
 
               {/* Col 3 — Estadísticas */}
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {statsCards.map((card, i) => (
-                  <Paper key={i} elevation={0} sx={{ p: 2, borderRadius: "16px", border: "1px solid #ECECEC" }}>
+                  <Paper key={i} elevation={0} sx={{ p: 2, borderRadius: "16px", border: "1px solid #ECECEC", bgcolor: "#fff" }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
                       <Box sx={{ width: 40, height: 40, borderRadius: "12px", bgcolor: card.bg, display: "flex", alignItems: "center", justifyContent: "center", color: card.color, flexShrink: 0 }}>
                         {card.icon}

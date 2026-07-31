@@ -4,7 +4,7 @@ import { Calendar, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import PageHeader from "../../../shared/components/PageHeader";
 import PageContainer from "../../../shared/components/PageContainer";
 import DataTable from "../../../shared/components/DataTable";
-import { obtenerEmpleado } from "../../empleados/empleado.api";
+import { obtenerPersonalPorId } from "../../personal/personal.api";
 
 const ESTADO_COLORS = {
   Puntual: { bg: "#D1FAE5", color: "#065F46" },
@@ -22,14 +22,15 @@ export default function MiAsistenciaPage() {
   const anios = useMemo(() => { const y = new Date().getFullYear(); return Array.from({length: y-2020+2}, (_,i)=>2020+i); }, []);
 
   const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
+  const userId = usuario.id || usuario.empleado_id; // fallback: sesiones antiguas sin `id`
   const initials = (usuario.nombre || "E").split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 
   const headers = { Authorization: `Bearer ${localStorage.getItem("token")}` };
   const API = "/api";
 
   useEffect(() => {
-    if (usuario.empleado_id) {
-      obtenerEmpleado(usuario.empleado_id).then(setEmpleado).catch(() => {});
+    if (userId) {
+      obtenerPersonalPorId(userId).then(setEmpleado).catch(() => {});
     }
   }, []);
 

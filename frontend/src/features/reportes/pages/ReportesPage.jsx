@@ -58,7 +58,7 @@ export default function ReportesPage() {
     if (token) p.append("token", token);
     if (f.fecha_desde) p.append("fecha_desde", f.fecha_desde);
     if (f.fecha_hasta) p.append("fecha_hasta", f.fecha_hasta);
-    if (f.empleado_id) p.append("empleado_id", f.empleado_id);
+    if (f.usuario_id || f.empleado_id) p.append("usuario_id", f.usuario_id || f.empleado_id);
     if (f.area_id) p.append("area_id", f.area_id);
     if (f.cargo_id) p.append("cargo_id", f.cargo_id);
     if (f.estado) p.append("estado", f.estado);

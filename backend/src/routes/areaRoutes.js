@@ -1,12 +1,15 @@
 const { Router } = require("express");
 const router = Router();
+const auth = require("../middlewares/authMiddleware");
 const areaController = require("../controllers/areaController");
 
-router.get("/", areaController.obtenerTodos);
-router.get("/:id", areaController.obtenerPorId);
-router.post("/", areaController.crear);
-router.put("/:id", areaController.actualizar);
-router.delete("/:id", areaController.eliminar);
-router.get("/:id/empleados", areaController.obtenerEmpleadosPorArea);
+// All area routes require a valid Bearer token; the frontend (apiFetch)
+// attaches the Authorization header on every call, so no route is exempt.
+router.get("/", auth, areaController.obtenerTodos);
+router.get("/:id", auth, areaController.obtenerPorId);
+router.post("/", auth, areaController.crear);
+router.put("/:id", auth, areaController.actualizar);
+router.delete("/:id", auth, areaController.eliminar);
+router.get("/:id/empleados", auth, areaController.obtenerEmpleadosPorArea);
 
 module.exports = router;

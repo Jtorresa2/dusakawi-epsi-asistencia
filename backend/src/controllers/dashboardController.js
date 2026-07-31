@@ -39,9 +39,9 @@ exports.getIndicadores = async (req, res) => {
     // Indicadores filtrados por período
     const [indicadores] = await pool.query(`
       SELECT 
-        COUNT(DISTINCT CASE WHEN a.estado = 'puntual' OR a.estado = 'tardanza' THEN a.empleado_id END) AS presentes_hoy,
-        COUNT(DISTINCT CASE WHEN a.estado = 'ausente' THEN a.empleado_id END) AS ausentes_hoy,
-        COUNT(DISTINCT CASE WHEN a.estado = 'tardanza' THEN a.empleado_id END) AS tardanzas_hoy,
+        COUNT(DISTINCT CASE WHEN a.estado = 'puntual' OR a.estado = 'tardanza' THEN a.usuario_id END) AS presentes_hoy,
+        COUNT(DISTINCT CASE WHEN a.estado = 'ausente' THEN a.usuario_id END) AS ausentes_hoy,
+        COUNT(DISTINCT CASE WHEN a.estado = 'tardanza' THEN a.usuario_id END) AS tardanzas_hoy,
         ROUND(SUM(CASE WHEN a.estado = 'puntual' THEN 1 ELSE 0 END) / COUNT(*) * 100, 1) AS puntualidad
       FROM asistencia a
       WHERE a.fecha BETWEEN '${r.start}' AND '${r.end}'
@@ -62,11 +62,11 @@ exports.getIndicadores = async (req, res) => {
     `);
 
     const [asistenciaHoy] = await pool.query(`
-      SELECT a.id, e.nombre, e.apellido, a.fecha, a.estado,
+      SELECT a.id, u.nombre, u.apellido, a.fecha, a.estado,
         a.fecha_hora_entrada, a.fecha_hora_salida_manana, a.fecha_hora_entrada_tarde, a.fecha_hora_salida,
         a.horas_trabajadas, a.minutos_tardanza
       FROM asistencia a
-      JOIN empleado e ON a.empleado_id = e.id
+      JOIN usuarios u ON a.usuario_id = u.id
       WHERE a.fecha = CURRENT_DATE
       ORDER BY a.fecha_hora_entrada
       LIMIT 10
@@ -123,8 +123,8 @@ exports.getResumenPorArea = async (req, res) => {
         SUM(CASE WHEN a.estado = 'ausente' THEN 1 ELSE 0 END) AS ausentes,
         SUM(CASE WHEN a.estado = 'tardanza' THEN 1 ELSE 0 END) AS tardanzas
       FROM asistencia a
-      JOIN empleado e ON a.empleado_id = e.id
-      JOIN areas ar ON e.area_id = ar.id
+      JOIN usuarios u ON a.usuario_id = u.id
+      JOIN areas ar ON u.area_id = ar.id
       WHERE a.fecha = CURRENT_DATE
       GROUP BY ar.id, ar.nombre
       ORDER BY ar.nombre

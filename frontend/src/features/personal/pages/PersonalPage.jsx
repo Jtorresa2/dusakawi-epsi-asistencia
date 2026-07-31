@@ -1,0 +1,655 @@
+import { useState, useEffect, useRef } from "react";
+import {
+  Box, Paper, Typography, TextField, Button, Chip, IconButton,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Avatar, Select, MenuItem, InputLabel, FormControl, Switch, FormControlLabel,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+} from "@mui/material";
+import { Plus, Edit3, Trash2, Eye, Search, X, Users, UserCheck, UserX, Building2 } from "lucide-react";
+import {
+  obtenerPersonal, crearPersonal, actualizarPersonal, eliminarPersonal,
+  obtenerRoles, generarUsuariosMasivos,
+} from "../personal.api";
+import { obtenerAreas } from "../../areas/area.api";
+import { obtenerCargos } from "../../cargos/cargo.api";
+import PersonalPerfilModal from "../components/PersonalPerfilModal";
+
+const initialForm = {
+  cedula: "", nombre: "", apellido: "", correo: "", telefono: "", fecha_nacimiento: "",
+  area_id: "", cargo_id: "", piso: "", rol_id: "", username: "", password: "", activo: true,
+};
+
+const ESTADOS_FILTRO = ["Todos", "Activo", "Inactivo"];
+
+const ROL_BADGE = {
+  "Administrador":  { bg: "#FFF3E0", color: "#E65100" },
+  "Talento Humano": { bg: "#E8F5E9", color: "#1B5E20" },
+  "Empleado":       { bg: "#E3F2FD", color: "#0D47A1" },
+};
+
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "10px",
+    "& fieldset": { borderColor: "#6B7280" },
+    "&:hover fieldset": { borderColor: "#374151" },
+    "&.Mui-focused fieldset": { borderColor: "#1B5E20" },
+  },
+};
+
+const selectSx = {
+  borderRadius: "10px", fontSize: 14,
+  "& fieldset": { borderColor: "#6B7280" },
+  "&:hover fieldset": { borderColor: "#374151" },
+};
+
+const selectMenuSx = {
+  PaperProps: {
+    sx: { bgcolor: "#E8F5E9", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } },
+  },
+};
+
+const verdeBoton = { bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } };
+
+export default function PersonalPage() {
+  // ─── Datos ────────────────────────────────────────────────────────────────
+  const [personal, setPersonal] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [cargos, setCargos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [perfilId, setPerfilId] = useState(null);
+
+  // ─── Filtros ──────────────────────────────────────────────────────────────
+  const [busqueda, setBusqueda] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("Todos");
+  const [filtroArea, setFiltroArea] = useState("Todas");
+  const [filtroRol, setFiltroRol] = useState("Todos");
+
+  // ─── Modales / acciones ───────────────────────────────────────────────────
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [editando, setEditando] = useState(null);
+  const [guardando, setGuardando] = useState(false);
+  const [confirmEliminar, setConfirmEliminar] = useState(null);
+  const [modalGenerar, setModalGenerar] = useState(false);
+  const [generando, setGenerando] = useState(false);
+  const [resultadoGen, setResultadoGen] = useState(null);
+  const [toast, setToast] = useState(null);
+  const toastTimer = useRef(null);
+
+  const [form, setForm] = useState({ ...initialForm });
+
+  const isActive = (e) => e.activo === 1 || e.activo === true;
+  const getName = (e) => `${e.nombre} ${e.apellido}`;
+  const getInitials = (e) => `${e.nombre?.[0] || ""}${e.apellido?.[0] || ""}`.toUpperCase();
+
+  // ─── Carga de datos ───────────────────────────────────────────────────────
+  useEffect(() => {
+    cargarDatos();
+    fetchAreas();
+    fetchCargos();
+  }, []);
+
+  const cargarDatos = async () => {
+    try {
+      setCargando(true);
+      const [resPersonal, resRoles] = await Promise.all([obtenerPersonal(), obtenerRoles()]);
+      setPersonal(resPersonal.empleados || []);
+      setRoles(resRoles.roles || []);
+    } catch (err) {
+      console.error("Error al cargar personal:", err);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const fetchAreas = async () => {
+    try { setAreas((await obtenerAreas()) || []); } catch {}
+  };
+
+  const fetchCargos = async () => {
+    try { setCargos((await obtenerCargos()) || []); } catch {}
+  };
+
+  // ─── Toast ────────────────────────────────────────────────────────────────
+  const mostrarToast = (msg, tipo = "ok") => {
+    setToast({ msg, tipo });
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  };
+
+  // ─── Filtrado ─────────────────────────────────────────────────────────────
+  let filtrados = personal.filter((e) =>
+    `${e.nombre} ${e.apellido} ${e.cedula || ""} ${e.cargo || ""} ${e.area || ""} ${e.username || ""} ${e.rol || ""}`
+      .toLowerCase().includes(busqueda.toLowerCase())
+  );
+
+  if (filtroEstado !== "Todos") {
+    const activo = filtroEstado === "Activo";
+    filtrados = filtrados.filter((e) => (activo ? isActive(e) : !isActive(e)));
+  }
+  if (filtroArea !== "Todas") {
+    filtrados = filtrados.filter((e) => e.area === filtroArea);
+  }
+  if (filtroRol !== "Todos") {
+    filtrados = filtrados.filter((e) => e.rol === filtroRol);
+  }
+
+  const pendientes = personal.filter((p) => !p.username).length;
+
+  // ─── Crear / Editar ───────────────────────────────────────────────────────
+  const abrirCrear = () => {
+    setEditando(null);
+    setForm({ ...initialForm });
+    setModalAbierto(true);
+  };
+
+  const abrirEditar = (e) => {
+    setEditando(e);
+    setForm({
+      cedula: e.cedula || "",
+      nombre: e.nombre || "",
+      apellido: e.apellido || "",
+      correo: e.correo || "",
+      telefono: e.telefono || "",
+      fecha_nacimiento: e.fecha_nacimiento ? String(e.fecha_nacimiento).slice(0, 10) : "",
+      area_id: e.area_id ? String(e.area_id) : "",
+      cargo_id: e.cargo_id ? String(e.cargo_id) : "",
+      piso: e.piso ?? "",
+      rol_id: e.rol_id ? String(e.rol_id) : "",
+      username: e.username || "",
+      password: "",
+      activo: isActive(e),
+    });
+    setModalAbierto(true);
+  };
+
+  const handleGuardar = async () => {
+    if (!form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim()) {
+      return mostrarToast("Completa los campos obligatorios", "err");
+    }
+    setGuardando(true);
+    try {
+      const payload = {
+        ...form,
+        area_id: form.area_id ? Number(form.area_id) : null,
+        cargo_id: form.cargo_id ? Number(form.cargo_id) : null,
+        rol_id: form.rol_id ? Number(form.rol_id) : null,
+        piso: form.piso !== "" && form.piso !== null ? Number(form.piso) : null,
+        activo: form.activo ? 1 : 0,
+      };
+      if (editando) {
+        const res = await actualizarPersonal(editando.id, payload);
+        mostrarToast(res?.mensaje || "Colaborador actualizado correctamente", "ok");
+      } else {
+        const res = await crearPersonal(payload);
+        const extra = res?.password ? ` — Usuario: ${res.username}, Contraseña: ${res.password}` : "";
+        mostrarToast(`${res?.mensaje || "Colaborador creado correctamente"}${extra}`, "ok");
+      }
+      setModalAbierto(false);
+      await cargarDatos();
+    } catch (e) {
+      mostrarToast(e.message || "Error al guardar", "err");
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  const handleEliminar = async () => {
+    if (!confirmEliminar) return;
+    try {
+      await eliminarPersonal(confirmEliminar.id);
+      setConfirmEliminar(null);
+      mostrarToast("Colaborador eliminado correctamente", "ok");
+      await cargarDatos();
+    } catch (e) {
+      mostrarToast(e.message || "Error al eliminar", "err");
+    }
+  };
+
+  const toggleActivo = async (e) => {
+    try {
+      await actualizarPersonal(e.id, { activo: isActive(e) ? 0 : 1 });
+      await cargarDatos();
+    } catch (err) {
+      mostrarToast("Error al cambiar el estado", "err");
+    }
+  };
+
+  // ─── Generar masivos ──────────────────────────────────────────────────────
+  const handleGenerarMasivos = async () => {
+    setGenerando(true);
+    try {
+      const data = await generarUsuariosMasivos();
+      setResultadoGen(data);
+      await cargarDatos();
+    } catch (err) {
+      mostrarToast("Error al generar usuarios", "err");
+    } finally {
+      setGenerando(false);
+    }
+  };
+
+  const descargarReporte = () => {
+    if (!resultadoGen?.resultados?.length) return;
+    const filas = resultadoGen.resultados
+      .map((r) => `${r.empleado}\t${r.username}\t${r.password}\t${r.correo}\t${r.email_enviado ? "SI" : "NO"}`)
+      .join("\n");
+    const tsv = `EMPLEADO\tUSUARIO\tCONTRASENA\tCORREO\tEMAIL_ENVIADO\n${filas}`;
+    const blob = new Blob([tsv], { type: "text/tab-separated-values;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "usuarios_generados.tsv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <Box sx={{ p: 3 }}>
+      {/* ENCABEZADO */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, gap: 2, flexWrap: "wrap" }}>
+        <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Inicio / Administración / Personal</Typography>
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+          {pendientes > 0 && (
+            <Button onClick={() => setModalGenerar(true)}
+              sx={{ bgcolor: "#1b5e20", color: "#fff", borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, "&:hover": { bgcolor: "#2E7D32" } }}>
+              Generar faltantes ({pendientes})
+            </Button>
+          )}
+          <Button startIcon={<Plus size={18} />} onClick={abrirCrear}
+            sx={{ bgcolor: "#1b5e20", color: "#fff", borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, "&:hover": { bgcolor: "#2E7D32" } }}>
+            Nuevo colaborador
+          </Button>
+        </Box>
+      </Box>
+
+      {/* TARJETAS RESUMEN */}
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" }, gap: 2, mb: 3.5 }}>
+        {[
+          { icon: <Users size={20} />, value: personal.length, label: "Total colaboradores", color: "#1B5E20", bg: "#E8F5E9" },
+          { icon: <UserCheck size={20} />, value: personal.filter((e) => isActive(e)).length, label: "Activos", color: "#1565C0", bg: "#EFF6FF" },
+          { icon: <UserX size={20} />, value: personal.filter((e) => !isActive(e)).length, label: "Inactivos", color: "#DC2626", bg: "#FEE2E2" },
+          { icon: <Building2 size={20} />, value: new Set(personal.map((e) => e.area).filter(Boolean)).size, label: "Áreas distintas", color: "#7C3AED", bg: "#F3E8FF" },
+        ].map((card, i) => (
+          <Paper key={i} elevation={0}
+            sx={{ p: 2, borderRadius: "16px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: card.bg, display: "flex", alignItems: "center", justifyContent: "center", color: card.color, flexShrink: 0 }}>
+              {card.icon}
+            </Box>
+            <Box>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.03em" }}>{card.label}</Typography>
+              <Typography sx={{ fontSize: 22, fontWeight: 700, color: card.color, lineHeight: 1.2 }}>{card.value}</Typography>
+            </Box>
+          </Paper>
+        ))}
+      </Box>
+
+      {/* BARRA DE FILTROS */}
+      <Paper elevation={0} sx={{ p: 2, borderRadius: "16px", border: "1px solid #ECECEC", mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "2fr 1fr 1fr 1fr" }, gap: 1.5, alignItems: "center" }}>
+          <TextField placeholder="Buscar colaborador..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: <Search size={15} style={{ color: "#9CA3AF", marginRight: 6 }} />,
+                sx: { borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", py: 0 },
+              },
+            }} />
+          <Select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} size="small"
+            sx={{ borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#E5E7EB" } }}>
+            {ESTADOS_FILTRO.map((e) => <MenuItem key={e} value={e}>{e}</MenuItem>)}
+          </Select>
+          <Select value={filtroArea} onChange={(e) => setFiltroArea(e.target.value)} size="small"
+            sx={{ borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#E5E7EB" } }}>
+            <MenuItem value="Todas">Área</MenuItem>
+            {areas.map((a) => <MenuItem key={a.id} value={a.nombre}>{a.nombre}</MenuItem>)}
+          </Select>
+          <Select value={filtroRol} onChange={(e) => setFiltroRol(e.target.value)} size="small"
+            sx={{ borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#E5E7EB" } }}>
+            <MenuItem value="Todos">Rol</MenuItem>
+            {roles.map((r) => <MenuItem key={r.id} value={r.nombre}>{r.nombre}</MenuItem>)}
+          </Select>
+        </Box>
+      </Paper>
+
+      {/* TABLA PRINCIPAL */}
+      <Paper elevation={0} sx={{ borderRadius: "20px", border: "1px solid #ECECEC", overflow: "visible" }}>
+        <TableContainer sx={{ overflowX: "auto" }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {["", "Colaborador", "Documento", "Cargo", "Área / Piso", "Rol", "Usuario", "Último acceso", "Inas.", "Tard.", "Estado", "Acciones"].map((h) => (
+                  <TableCell key={h} sx={{
+                    fontWeight: 600, color: "#6B7280", fontSize: 12, bgcolor: "#F9FAFB", py: 1.5, whiteSpace: "nowrap",
+                    display: h === "Cargo" || h === "Área / Piso" ? { xs: "none", md: "table-cell" }
+                      : h === "Rol" || h === "Acciones" ? { xs: "none", sm: "table-cell" } : undefined,
+                  }}>
+                    {h}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {cargando ? (
+                <TableRow>
+                  <TableCell colSpan={12} align="center" sx={{ py: 6, color: "#9CA3AF", fontSize: 14 }}>Cargando...</TableCell>
+                </TableRow>
+              ) : filtrados.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={12} align="center" sx={{ py: 6, color: "#9CA3AF", fontSize: 14 }}>
+                    {busqueda ? "No se encontraron colaboradores" : "No hay colaboradores registrados"}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filtrados.map((e) => {
+                  const badge = ROL_BADGE[e.rol] || { bg: "#F3F4F6", color: "#374151" };
+                  return (
+                    <TableRow key={e.id} sx={{ "&:hover": { bgcolor: "#F9FAFB" }, transition: "background .15s" }}>
+                      <TableCell sx={{ py: 1.2 }}>
+                        <Avatar sx={{ width: 34, height: 34, bgcolor: "#E8F5E9", color: "#2E7D32", fontSize: 12, fontWeight: 700 }}>
+                          {getInitials(e) || "?"}
+                        </Avatar>
+                      </TableCell>
+                      <TableCell sx={{ py: 1.2 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <Box>
+                            <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{getName(e)}</Typography>
+                            <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>{e.correo || "—"}</Typography>
+                          </Box>
+                          <IconButton size="small" onClick={() => setPerfilId(e.id)} title="Ver perfil"
+                            sx={{ bgcolor: "#EFF6FF", color: "#1565C0", borderRadius: "6px", width: 26, height: 26, "&:hover": { bgcolor: "#DBEAFE" } }}>
+                            <Eye size={13} />
+                          </IconButton>
+                        </Box>
+                      </TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: "#4B5563", whiteSpace: "nowrap" }}>{e.cedula || "—"}</TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: "#4B5563", display: { xs: "none", md: "table-cell" } }}>{e.cargo || "—"}</TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: "#4B5563", whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
+                        {e.area || "—"}{e.piso ? ` / P${e.piso}` : ""}
+                      </TableCell>
+                      <TableCell sx={{ py: 1.2, display: { xs: "none", sm: "table-cell" } }}>
+                        <Chip label={e.rol || "Sin rol"} size="small"
+                          sx={{ height: 24, fontSize: 11, fontWeight: 600, bgcolor: badge.bg, color: badge.color }} />
+                      </TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 12, fontFamily: "monospace", color: "#374151", whiteSpace: "nowrap" }}>
+                        {e.username || "—"}
+                      </TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 12, color: "#9CA3AF", whiteSpace: "nowrap" }}>
+                        {e.ultimo_acceso ? new Date(e.ultimo_acceso).toLocaleDateString("es-CO") : "Nunca"}
+                      </TableCell>
+                      <TableCell sx={{ py: 1.2 }}>
+                        <Chip label={e.inasistencias ?? 0} size="small"
+                          sx={{ height: 24, fontSize: 11, fontWeight: 700, minWidth: 32,
+                            bgcolor: (e.inasistencias ?? 0) > 0 ? "#FEE2E2" : "#F3F4F6",
+                            color: (e.inasistencias ?? 0) > 0 ? "#DC2626" : "#9CA3AF" }} />
+                      </TableCell>
+                      <TableCell sx={{ py: 1.2 }}>
+                        <Chip label={e.llegadas_tardias ?? 0} size="small"
+                          sx={{ height: 24, fontSize: 11, fontWeight: 700, minWidth: 32,
+                            bgcolor: (e.llegadas_tardias ?? 0) > 0 ? "#FEF3C7" : "#F3F4F6",
+                            color: (e.llegadas_tardias ?? 0) > 0 ? "#92400E" : "#9CA3AF" }} />
+                      </TableCell>
+                      <TableCell sx={{ py: 1.2 }}>
+                        <Button size="small" onClick={() => toggleActivo(e)} title="Cambiar estado"
+                          sx={{ borderRadius: "20px", fontSize: 11, fontWeight: 600, minWidth: 0, px: 1.5, textTransform: "none",
+                            bgcolor: isActive(e) ? "#D1FAE5" : "#FEE2E2",
+                            color: isActive(e) ? "#065F46" : "#991B1B",
+                            "&:hover": { bgcolor: isActive(e) ? "#A7F3D0" : "#FECACA" } }}>
+                          {isActive(e) ? "Activo" : "Inactivo"}
+                        </Button>
+                      </TableCell>
+                      <TableCell sx={{ py: 1.2 }}>
+                        <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+                          <Box onClick={() => abrirEditar(e)} title="Editar" sx={{
+                            width: 34, height: 34, borderRadius: "9px",
+                            bgcolor: "#EFF6FF", color: "#1565C0", cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            transition: "all .2s", flexShrink: 0,
+                            "&:hover": { bgcolor: "#DBEAFE" },
+                          }}>
+                            <Edit3 size={15} />
+                          </Box>
+                          <Box onClick={() => setConfirmEliminar(e)} title="Eliminar" sx={{
+                            width: 34, height: 34, borderRadius: "9px",
+                            bgcolor: "#FEE2E2", color: "#DC2626", cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            transition: "all .2s", flexShrink: 0,
+                            "&:hover": { bgcolor: "#FECACA" },
+                          }}>
+                            <Trash2 size={15} />
+                          </Box>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      {/* MODAL CREAR / EDITAR */}
+      <Dialog open={modalAbierto} onClose={() => setModalAbierto(false)} maxWidth="sm" fullWidth
+        PaperProps={{ sx: { borderRadius: "16px", position: "relative" } }}
+        sx={{ "& .MuiPaper-root": { backgroundColor: "#E8F5E9" } }}>
+        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
+          {editando ? "Editar colaborador" : "Nuevo colaborador"}
+          <IconButton onClick={() => setModalAbierto(false)} size="small"
+            sx={{ position: "absolute", top: 8, right: 8, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+            <X size={18} />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            <TextField required label="Nombre *" value={form.nombre}
+              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+              slotProps={{ inputLabel: { sx: { fontSize: 13 } } }} sx={fieldSx} />
+            <TextField required label="Apellido *" value={form.apellido}
+              onChange={(e) => setForm({ ...form, apellido: e.target.value })}
+              slotProps={{ inputLabel: { sx: { fontSize: 13 } } }} sx={fieldSx} />
+          </Box>
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            <TextField required label="Cédula *" value={form.cedula}
+              onChange={(e) => setForm({ ...form, cedula: e.target.value })}
+              slotProps={{ inputLabel: { sx: { fontSize: 13 } } }} sx={fieldSx} />
+            <TextField label="Teléfono" value={form.telefono}
+              onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+              slotProps={{ inputLabel: { sx: { fontSize: 13 } } }} sx={fieldSx} />
+          </Box>
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            <TextField label="Correo electrónico" value={form.correo}
+              onChange={(e) => setForm({ ...form, correo: e.target.value })}
+              slotProps={{ inputLabel: { sx: { fontSize: 13 } } }} sx={fieldSx} />
+            <TextField label="Fecha de nacimiento" type="date" value={form.fecha_nacimiento}
+              onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })}
+              slotProps={{ inputLabel: { shrink: true, sx: { fontSize: 13 } } }} sx={fieldSx} />
+          </Box>
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            <FormControl fullWidth>
+              <InputLabel sx={{ fontSize: 13 }}>Área</InputLabel>
+              <Select value={form.area_id} label="Área" sx={selectSx} MenuProps={selectMenuSx}
+                onChange={(e) => setForm({ ...form, area_id: e.target.value })}>
+                <MenuItem value=""><em>Sin área</em></MenuItem>
+                {areas.map((a) => (
+                  <MenuItem key={a.id} value={String(a.id)}>{a.nombre}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel sx={{ fontSize: 13 }}>Cargo</InputLabel>
+              <Select value={form.cargo_id} label="Cargo" sx={selectSx} MenuProps={selectMenuSx}
+                onChange={(e) => setForm({ ...form, cargo_id: e.target.value })}>
+                <MenuItem value=""><em>Sin cargo</em></MenuItem>
+                {cargos.filter((c) => c.estado !== "inactivo").map((c) => (
+                  <MenuItem key={c.id} value={String(c.id)}>{c.nombre}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            <TextField label="Piso" type="number" value={form.piso}
+              onChange={(e) => setForm({ ...form, piso: e.target.value === "" ? "" : Number(e.target.value) })}
+              slotProps={{ inputLabel: { sx: { fontSize: 13 } }, htmlInput: { min: 1 } }} sx={fieldSx} />
+            <FormControl fullWidth>
+              <InputLabel sx={{ fontSize: 13 }}>Rol del sistema</InputLabel>
+              <Select value={form.rol_id} label="Rol del sistema" sx={selectSx} MenuProps={selectMenuSx}
+                onChange={(e) => setForm({ ...form, rol_id: e.target.value })}>
+                <MenuItem value=""><em>Sin rol</em></MenuItem>
+                {roles.map((r) => (
+                  <MenuItem key={r.id} value={String(r.id)}>{r.nombre}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            <TextField label="Usuario" value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
+              placeholder="nombre.apellido"
+              slotProps={{ inputLabel: { sx: { fontSize: 13 } } }} sx={fieldSx} />
+            <TextField label="Contraseña" type="password" value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              helperText={editando ? "Dejar vacío para no cambiar" : "Vacío = se usará la cédula"}
+              slotProps={{ inputLabel: { sx: { fontSize: 13 } }, formHelperText: { sx: { fontSize: 11 } } }} sx={fieldSx} />
+          </Box>
+          {editando && (
+            <FormControlLabel
+              control={<Switch checked={form.activo} onChange={(e) => setForm({ ...form, activo: e.target.checked })} />}
+              label="Colaborador activo"
+              sx={{ mt: 1, "& .MuiFormControlLabel-label": { fontSize: 14, fontWeight: 500, color: "#374151" } }}
+            />
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button onClick={() => setModalAbierto(false)}
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: "#6B7280" }}>Cancelar</Button>
+          <Button variant="contained" onClick={handleGuardar}
+            disabled={guardando || !form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim()}
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, ...verdeBoton }}>
+            {guardando ? "Guardando..." : editando ? "Actualizar" : "Crear"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* CONFIRMAR ELIMINAR */}
+      <Dialog open={!!confirmEliminar} onClose={() => setConfirmEliminar(null)} maxWidth="xs" fullWidth
+        PaperProps={{ sx: { borderRadius: "16px" } }}>
+        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>Eliminar colaborador?</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ fontSize: 13, color: "#6B7280" }}>
+            Se eliminará a <strong>{confirmEliminar?.nombre} {confirmEliminar?.apellido}</strong> de forma permanente. Esta acción no se puede deshacer.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button onClick={() => setConfirmEliminar(null)}
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: "#6B7280" }}>Cancelar</Button>
+          <Button variant="contained" onClick={handleEliminar}
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, bgcolor: "#DC2626", "&:hover": { bgcolor: "#B91C1C" } }}>
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* CONFIRMAR GENERAR MASIVOS */}
+      <Dialog open={modalGenerar && !resultadoGen} onClose={() => setModalGenerar(false)} maxWidth="xs" fullWidth
+        PaperProps={{ sx: { borderRadius: "16px" } }}>
+        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>Generar usuarios faltantes?</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ fontSize: 13, color: "#6B7280" }}>
+            Se crearán usuarios para <strong>{pendientes} colaboradores</strong> que aún no tienen acceso al sistema.
+            El username se genera automáticamente y la contraseña inicial es la cédula.
+          </Typography>
+          {pendientes > 0 && (
+            <Typography sx={{ fontSize: 13, color: "#6B7280", mt: 1 }}>
+              Se enviará un correo a cada colaborador si SMTP está configurado.
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button onClick={() => setModalGenerar(false)}
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: "#6B7280" }}>Cancelar</Button>
+          <Button variant="contained" onClick={handleGenerarMasivos} disabled={generando}
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, ...verdeBoton }}>
+            {generando ? "Generando..." : "Generar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* MODAL RESULTADO GENERACION */}
+      <Dialog open={!!resultadoGen} onClose={() => { setModalGenerar(false); setResultadoGen(null); }} maxWidth="sm" fullWidth
+        PaperProps={{ sx: { borderRadius: "16px" } }}>
+        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827", textAlign: "center" }}>Resultado</DialogTitle>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
+            <Paper elevation={0} sx={{ textAlign: "center", bgcolor: "#F0FDF4", borderRadius: "10px", p: 1.5, px: 3 }}>
+              <Typography sx={{ fontSize: 24, fontWeight: 700, color: "#1B5E20" }}>{resultadoGen?.creados || 0}</Typography>
+              <Typography sx={{ fontSize: 11, color: "#6B7280" }}>Creados</Typography>
+            </Paper>
+            <Paper elevation={0} sx={{ textAlign: "center", bgcolor: "#EFF6FF", borderRadius: "10px", p: 1.5, px: 3 }}>
+              <Typography sx={{ fontSize: 24, fontWeight: 700, color: "#0284C7" }}>{resultadoGen?.emails_enviados || 0}</Typography>
+              <Typography sx={{ fontSize: 11, color: "#6B7280" }}>Emails enviados</Typography>
+            </Paper>
+            <Paper elevation={0} sx={{ textAlign: "center", bgcolor: "#FEF2F2", borderRadius: "10px", p: 1.5, px: 3 }}>
+              <Typography sx={{ fontSize: 24, fontWeight: 700, color: "#DC2626" }}>{resultadoGen?.emails_fallados || 0}</Typography>
+              <Typography sx={{ fontSize: 11, color: "#6B7280" }}>Fallos</Typography>
+            </Paper>
+          </Box>
+          {resultadoGen?.resultados?.length > 0 && (
+            <TableContainer sx={{ maxHeight: 220, border: "1px solid #E5E7EB", borderRadius: "8px" }}>
+              <Table size="small" stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    {["Empleado", "Usuario", "Contrasena", "Email"].map((h) => (
+                      <TableCell key={h} sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", bgcolor: "#F9FAFB", py: 1 }}>{h}</TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {resultadoGen.resultados.map((r, i) => (
+                    <TableRow key={i} sx={{ "&:hover": { bgcolor: "#F9FAFB" } }}>
+                      <TableCell sx={{ fontSize: 11, py: 1 }}>{r.empleado}</TableCell>
+                      <TableCell sx={{ fontSize: 11, py: 1, fontFamily: "monospace" }}>{r.username}</TableCell>
+                      <TableCell sx={{ fontSize: 11, py: 1, fontFamily: "monospace" }}>{r.password}</TableCell>
+                      <TableCell sx={{ fontSize: 11, py: 1 }}>{r.email_enviado ? "OK" : r.correo || "SIN CORREO"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button variant="contained" onClick={descargarReporte} disabled={!resultadoGen?.resultados?.length}
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, ...verdeBoton }}>
+            Descargar reporte TSV
+          </Button>
+          <Button onClick={() => { setModalGenerar(false); setResultadoGen(null); }}
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: "#6B7280" }}>Cerrar</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* PERFIL MODAL */}
+      <PersonalPerfilModal
+        open={perfilId !== null}
+        id={perfilId}
+        onClose={() => { setPerfilId(null); cargarDatos(); }}
+        onSaved={() => cargarDatos()}
+      />
+
+      {/* TOAST */}
+      {toast && (
+        <Box sx={{
+          position: "fixed", bottom: 24, right: 24,
+          bgcolor: toast.tipo === "err" ? "#DC2626" : "#1B5E20",
+          color: "#fff", borderRadius: "10px", px: 2.5, py: 1.5,
+          fontSize: 13, fontWeight: 500, zIndex: 9999,
+          boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+          display: "flex", alignItems: "center", gap: 1,
+          maxWidth: 420,
+        }}>
+          {toast.tipo === "err" ? <X size={15} /> : null}
+          {toast.msg}
+        </Box>
+      )}
+    </Box>
+  );
+}

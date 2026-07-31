@@ -57,9 +57,13 @@ exports.eliminar = async (req, res) => {
 exports.obtenerEmpleadosPorArea = async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT e.*, c.nombre AS cargo FROM empleado e
-       LEFT JOIN cargos c ON e.cargo_id = c.id
-       WHERE e.area_id = ? ORDER BY e.nombre ASC`,
+      `SELECT u.id, u.cedula, u.nombre, u.apellido, u.correo, u.telefono,
+              u.fecha_nacimiento, u.cargo_id, u.area_id, u.horario_id,
+              u.piso, u.fecha_ingreso, u.activo, u.rol_id, u.creado_en,
+              c.nombre AS cargo
+       FROM usuarios u
+       LEFT JOIN cargos c ON u.cargo_id = c.id
+       WHERE u.area_id = ? ORDER BY u.nombre ASC`,
       [req.params.id]
     );
     res.json(rows);

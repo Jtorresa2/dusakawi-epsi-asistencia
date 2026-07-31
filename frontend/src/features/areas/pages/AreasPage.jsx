@@ -321,6 +321,7 @@ export default function AreasPage() {
             <InputLabel sx={{ fontSize: 13 }}>Piso</InputLabel>
             <Select value={form.piso} label="Piso"
               sx={{ borderRadius: "10px", fontSize: 14, "& fieldset": { borderColor: "#6B7280" }, "&:hover fieldset": { borderColor: "#374151" } }}
+              MenuProps={{ PaperProps: { sx: { bgcolor: "#F0FDF4", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } } } }}
               onChange={(e) => setForm({ ...form, piso: e.target.value })}>
               <MenuItem value="1">Piso 1</MenuItem>
               <MenuItem value="2">Piso 2</MenuItem>

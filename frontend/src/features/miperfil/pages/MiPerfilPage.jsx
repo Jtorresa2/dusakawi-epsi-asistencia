@@ -4,7 +4,7 @@ import {
   User, Mail, Phone, Calendar, FileText, Briefcase, MapPin, Clock,
   CheckCircle, XCircle, Edit3, Save, X, Shield, Fingerprint, Camera,
 } from "lucide-react";
-import { obtenerEmpleado, actualizarEmpleado } from "../../empleados/empleado.api";
+import { obtenerPersonalPorId, actualizarPersonal } from "../../personal/personal.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 import { obtenerAreas } from "../../areas/area.api";
 import MisNovedades from "../components/MisNovedades";
@@ -20,6 +20,7 @@ function formatDate(dateStr) {
 
 export default function MiPerfilPage() {
   const [usuario, setUsuario] = useState(JSON.parse(localStorage.getItem("usuario") || "{}"));
+  const userId = usuario.id || usuario.empleado_id; // fallback: sesiones antiguas sin `id`
   const [empleado, setEmpleado] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editando, setEditando] = useState(null);
@@ -33,8 +34,8 @@ export default function MiPerfilPage() {
   useEffect(() => {
     const fetchEmpleado = async () => {
       try {
-        if (usuario.empleado_id) {
-          const data = await obtenerEmpleado(usuario.empleado_id);
+        if (userId) {
+          const data = await obtenerPersonalPorId(userId);
           setEmpleado(data);
         }
       } catch {}
@@ -107,7 +108,7 @@ export default function MiPerfilPage() {
     try {
       const formData = new FormData();
       formData.append("foto", file);
-      const res = await fetch(`/api/empleados/${usuario.empleado_id}/foto`, {
+      const res = await fetch(`/api/empleados/${userId}/foto`, {
         method: "POST",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         body: formData,
@@ -115,7 +116,7 @@ export default function MiPerfilPage() {
       if (!res.ok) return;
       const data = await res.json();
       if (data.foto_url) {
-        const updated = await obtenerEmpleado(usuario.empleado_id);
+        const updated = await obtenerPersonalPorId(userId);
         setEmpleado(updated);
         const u = { ...usuario, foto_url: data.foto_url };
         localStorage.setItem("usuario", JSON.stringify(u));
@@ -128,8 +129,8 @@ export default function MiPerfilPage() {
   const handleSave = async () => {
     setGuardando(true);
     try {
-      await actualizarEmpleado(usuario.empleado_id, form);
-      const updated = await obtenerEmpleado(usuario.empleado_id);
+      await actualizarPersonal(userId, form);
+      const updated = await obtenerPersonalPorId(userId);
       setEmpleado(updated);
       const u = { ...usuario, ...form };
       localStorage.setItem("usuario", JSON.stringify(u));
@@ -343,8 +344,8 @@ export default function MiPerfilPage() {
           </Paper>
 
           {/* Mis novedades registradas */}
-          {usuario.empleado_id ? (
-            <MisNovedades empleadoId={usuario.empleado_id} maxItems={2} sx={{ overflow: "hidden", minHeight: 0, p: 1.5, borderRadius: "14px" }} />
+          {userId ? (
+            <MisNovedades empleadoId={userId} maxItems={2} sx={{ overflow: "hidden", minHeight: 0, p: 1.5, borderRadius: "14px" }} />
           ) : (
             <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", minHeight: 0 }}>
               <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Sin empleado</Typography>

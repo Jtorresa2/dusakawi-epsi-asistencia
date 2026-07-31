@@ -7,10 +7,10 @@ const { generarMembrete, generarPlantillaIncidencia } = require("../services/pdf
 router.get("/incidencias/:id/plantilla", async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT i.*, e.nombre AS empleado_nombre, e.cedula, ar.nombre AS area
+      `SELECT i.*, u.nombre AS empleado_nombre, u.cedula, ar.nombre AS area
        FROM incidencias i
-       LEFT JOIN empleado e ON i.empleado_id = e.id
-       LEFT JOIN areas ar ON e.area_id = ar.id
+       LEFT JOIN usuarios u ON i.usuario_id = u.id
+       LEFT JOIN areas ar ON u.area_id = ar.id
        WHERE i.id = ?`,
       [req.params.id]
     );
@@ -48,8 +48,8 @@ function determinarEstado(e1, e2, justificado) {
 
 async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id, area_id) {
   let query = `
-    SELECT a.id, e.cedula,
-      CONCAT(e.nombre, ' ', e.apellido) AS colaborador,
+    SELECT a.id, u.cedula,
+      CONCAT(u.nombre, ' ', u.apellido) AS colaborador,
       ar.nombre AS area, ar.piso, a.fecha,
       TO_CHAR(a.fecha_hora_entrada, 'HH24:MI') AS entrada1,
       TO_CHAR(a.fecha_hora_salida_manana, 'HH24:MI') AS salida1,
@@ -59,8 +59,8 @@ async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, esta
       a.minutos_tardanza, a.tipo_marcacion,
       a.estado, a.observacion
     FROM asistencia a
-    JOIN empleado e ON a.empleado_id = e.id
-    JOIN areas ar ON e.area_id = ar.id
+    JOIN usuarios u ON a.usuario_id = u.id
+    JOIN areas ar ON u.area_id = ar.id
     WHERE 1=1
   `;
   const params = [];
@@ -68,12 +68,12 @@ async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, esta
   else if (fecha_desde && fecha_hasta) { query += " AND a.fecha >= ? AND a.fecha <= ?"; params.push(fecha_desde, fecha_hasta); }
   else if (fecha_desde) { query += " AND a.fecha >= ?"; params.push(fecha_desde); }
   else if (fecha_hasta) { query += " AND a.fecha <= ?"; params.push(fecha_hasta); }
-  if (area_id) { query += " AND e.area_id = ?"; params.push(area_id); }
+  if (area_id) { query += " AND u.area_id = ?"; params.push(area_id); }
   else if (area) { query += " AND ar.nombre LIKE ?"; params.push(`%${area}%`); }
   if (piso) { query += " AND ar.piso = ?"; params.push(piso); }
   if (estado) { query += " AND a.estado = ?"; params.push(estado); }
-  if (empleado_id) { query += " AND a.empleado_id = ?"; params.push(empleado_id); }
-  query += " ORDER BY ar.nombre, e.nombre";
+  if (empleado_id) { query += " AND a.usuario_id = ?"; params.push(empleado_id); }
+  query += " ORDER BY ar.nombre, u.nombre";
   const [rows] = await pool.query(query, params);
   return rows.map((r) => ({
     ...r,
@@ -155,8 +155,9 @@ router.get("/test", (req, res) => {
 // GET /api/pdf/asistencia?fecha=&area=&piso=&estado=&fecha_desde=&fecha_hasta=&empleado_id=
 router.get("/asistencia", async (req, res) => {
   try {
-    const { fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id, area_id } = req.query;
-    const rows = await fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id, area_id);
+    const { fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id, usuario_id, area_id } = req.query;
+    const targetId = usuario_id || empleado_id; // backward compat
+    const rows = await fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado, targetId, area_id);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", "inline; filename=asistencia_dusakawi.pdf");
     const meta = { codigo: "GA-F-001", version: "01", emision: "01/01/2024", vigencia: "01/01/2026" };
@@ -190,14 +191,14 @@ router.get("/incidencias", async (req, res) => {
     const { estado, tipo } = req.query;
     let query = `
       SELECT i.id,
-        CONCAT(e.nombre, ' ', e.apellido) AS empleado,
-        e.cedula, ar.nombre AS area,
+        CONCAT(u.nombre, ' ', u.apellido) AS empleado,
+        u.cedula, ar.nombre AS area,
         i.tipo, i.descripcion, i.evidencia_url,
         TO_CHAR(i.created_at, 'DD/MM/YYYY') AS fecha,
         i.estado, i.motivo_rechazo
       FROM incidencias i
-      JOIN empleado e ON i.empleado_id = e.id
-      JOIN areas ar ON e.area_id = ar.id
+      JOIN usuarios u ON i.usuario_id = u.id
+      JOIN areas ar ON u.area_id = ar.id
       WHERE 1=1
     `;
     const params = [];
@@ -264,12 +265,12 @@ router.get("/dashboard", async (req, res) => {
     let asistenciaHoy = [];
     try {
       [asistenciaHoy] = await pool.query(`
-        SELECT CONCAT(e.nombre, ' ', e.apellido) AS empleado,
+        SELECT CONCAT(u.nombre, ' ', u.apellido) AS empleado,
           TO_CHAR(a.fecha_hora_entrada, 'HH24:MI') AS entrada,
           TO_CHAR(a.fecha_hora_salida, 'HH24:MI') AS salida,
           a.estado
         FROM asistencia a
-        JOIN empleado e ON a.empleado_id = e.id
+        JOIN usuarios u ON a.usuario_id = u.id
         WHERE a.fecha = CURRENT_DATE
         ORDER BY a.fecha_hora_entrada LIMIT 10
       `);
@@ -339,15 +340,16 @@ router.get("/dashboard", async (req, res) => {
 // GET /api/pdf/tardanzas
 router.get("/tardanzas", async (req, res) => {
   try {
-    const { fecha_desde, fecha_hasta, area_id, empleado_id } = req.query;
-    let q = `SELECT e.cedula, CONCAT(e.nombre,' ',e.apellido) AS colaborador, ar.nombre AS area,
+    const { fecha_desde, fecha_hasta, area_id, empleado_id, usuario_id } = req.query;
+    const targetId = usuario_id || empleado_id; // backward compat
+    let q = `SELECT u.cedula, CONCAT(u.nombre,' ',u.apellido) AS colaborador, ar.nombre AS area,
       a.fecha, TO_CHAR(a.fecha_hora_entrada,'HH24:MI') AS entrada, a.minutos_tardanza, a.observacion
-      FROM asistencia a JOIN empleado e ON a.empleado_id=e.id JOIN areas ar ON e.area_id=ar.id WHERE a.estado='tardanza'`;
+      FROM asistencia a JOIN usuarios u ON a.usuario_id=u.id JOIN areas ar ON u.area_id=ar.id WHERE a.estado='tardanza'`;
     const p = [];
     if (fecha_desde) { q += " AND a.fecha>=?"; p.push(fecha_desde); }
     if (fecha_hasta) { q += " AND a.fecha<=?"; p.push(fecha_hasta); }
-    if (area_id) { q += " AND e.area_id=?"; p.push(area_id); }
-    if (empleado_id) { q += " AND a.empleado_id=?"; p.push(empleado_id); }
+    if (area_id) { q += " AND u.area_id=?"; p.push(area_id); }
+    if (targetId) { q += " AND a.usuario_id=?"; p.push(targetId); }
     q += " ORDER BY a.fecha DESC LIMIT 50";
     const [rows] = await pool.query(q, p);
     res.setHeader("Content-Type","application/pdf");
@@ -378,20 +380,21 @@ router.get("/tardanzas", async (req, res) => {
 // GET /api/pdf/ausencias
 router.get("/ausencias", async (req, res) => {
   try {
-    const { fecha_desde, fecha_hasta, area_id, empleado_id } = req.query;
-    let q = `SELECT e.cedula, CONCAT(e.nombre,' ',e.apellido) AS colaborador, ar.nombre AS area,
-      a.fecha, a.estado, a.observacion FROM asistencia a JOIN empleado e ON a.empleado_id=e.id
-      JOIN areas ar ON e.area_id=ar.id
+    const { fecha_desde, fecha_hasta, area_id, empleado_id, usuario_id } = req.query;
+    const targetId = usuario_id || empleado_id; // backward compat
+    let q = `SELECT u.cedula, CONCAT(u.nombre,' ',u.apellido) AS colaborador, ar.nombre AS area,
+      a.fecha, a.estado, a.observacion FROM asistencia a JOIN usuarios u ON a.usuario_id=u.id
+      JOIN areas ar ON u.area_id=ar.id
       WHERE a.estado IN('ausente','justificado')
         AND NOT EXISTS (
           SELECT 1 FROM permisos p
-          WHERE p.empleado_id = a.empleado_id AND a.fecha BETWEEN p.fecha_desde AND p.fecha_hasta
+          WHERE p.usuario_id = a.usuario_id AND a.fecha BETWEEN p.fecha_desde AND p.fecha_hasta
         )`;
     const p = [];
     if (fecha_desde) { q += " AND a.fecha>=?"; p.push(fecha_desde); }
     if (fecha_hasta) { q += " AND a.fecha<=?"; p.push(fecha_hasta); }
-    if (area_id) { q += " AND e.area_id=?"; p.push(area_id); }
-    if (empleado_id) { q += " AND a.empleado_id=?"; p.push(empleado_id); }
+    if (area_id) { q += " AND u.area_id=?"; p.push(area_id); }
+    if (targetId) { q += " AND a.usuario_id=?"; p.push(targetId); }
     q += " ORDER BY a.fecha DESC LIMIT 50";
     const [rows] = await pool.query(q, p);
     res.setHeader("Content-Type","application/pdf");
@@ -423,12 +426,12 @@ router.get("/ausencias", async (req, res) => {
 router.get("/empleados", async (req, res) => {
   try {
     const { area_id, cargo_id } = req.query;
-    let q = `SELECT e.cedula, e.nombre, e.apellido, e.telefono, e.correo, ar.nombre AS area, ca.nombre AS cargo, e.activo
-      FROM empleado e LEFT JOIN areas ar ON e.area_id=ar.id LEFT JOIN cargos ca ON e.cargo_id=ca.id WHERE 1=1`;
+    let q = `SELECT u.cedula, u.nombre, u.apellido, u.telefono, u.correo, ar.nombre AS area, ca.nombre AS cargo, u.activo
+      FROM usuarios u LEFT JOIN areas ar ON u.area_id=ar.id LEFT JOIN cargos ca ON u.cargo_id=ca.id WHERE 1=1`;
     const p = [];
-    if (area_id) { q += " AND e.area_id=?"; p.push(area_id); }
-    if (cargo_id) { q += " AND e.cargo_id=?"; p.push(cargo_id); }
-    q += " ORDER BY e.apellido";
+    if (area_id) { q += " AND u.area_id=?"; p.push(area_id); }
+    if (cargo_id) { q += " AND u.cargo_id=?"; p.push(cargo_id); }
+    q += " ORDER BY u.apellido";
     const [rows] = await pool.query(q, p);
     res.setHeader("Content-Type","application/pdf");
     res.setHeader("Content-Disposition","inline; filename=empleados.pdf");
@@ -462,16 +465,17 @@ router.get("/empleados", async (req, res) => {
 // GET /api/pdf/marcaciones
 router.get("/marcaciones", async (req, res) => {
   try {
-    const { fecha_desde, fecha_hasta, empleado_id, area_id } = req.query;
-    let q = `SELECT e.cedula, CONCAT(e.nombre,' ',e.apellido) AS colaborador, ar.nombre AS area,
+    const { fecha_desde, fecha_hasta, empleado_id, usuario_id, area_id } = req.query;
+    const targetId = usuario_id || empleado_id; // backward compat
+    let q = `SELECT u.cedula, CONCAT(u.nombre,' ',u.apellido) AS colaborador, ar.nombre AS area,
       a.fecha,       TO_CHAR(a.fecha_hora_entrada,'HH24:MI') AS entrada,
       TO_CHAR(a.fecha_hora_salida,'HH24:MI') AS salida, a.tipo_marcacion, a.estado
-      FROM asistencia a JOIN empleado e ON a.empleado_id=e.id JOIN areas ar ON e.area_id=ar.id WHERE 1=1`;
+      FROM asistencia a JOIN usuarios u ON a.usuario_id=u.id JOIN areas ar ON u.area_id=ar.id WHERE 1=1`;
     const p = [];
     if (fecha_desde) { q += " AND a.fecha>=?"; p.push(fecha_desde); }
     if (fecha_hasta) { q += " AND a.fecha<=?"; p.push(fecha_hasta); }
-    if (empleado_id) { q += " AND a.empleado_id=?"; p.push(empleado_id); }
-    if (area_id) { q += " AND e.area_id=?"; p.push(area_id); }
+    if (targetId) { q += " AND a.usuario_id=?"; p.push(targetId); }
+    if (area_id) { q += " AND u.area_id=?"; p.push(area_id); }
     q += " ORDER BY a.fecha DESC LIMIT 50";
     const [rows] = await pool.query(q, p);
     res.setHeader("Content-Type","application/pdf");

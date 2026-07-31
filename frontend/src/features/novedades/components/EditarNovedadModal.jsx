@@ -8,6 +8,12 @@ import {
 } from "lucide-react";
 import { actualizarNovedad } from "../novedad.api";
 
+const selectMenuSx = {
+  PaperProps: {
+    sx: { bgcolor: "#E8F5E9", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } },
+  },
+};
+
 const fieldSx = {
   "& .MuiOutlinedInput-root": {
     borderRadius: "10px",
@@ -47,7 +53,7 @@ const MODALIDADES = [
 
 export default function EditarNovedadModal({ open, onClose, novedad, empleados, onSaved }) {
   const [form, setForm] = useState({
-    empleado_id: "", fecha_desde: "", fecha_hasta: "", motivo: "",
+    usuario_id: "", fecha_desde: "", fecha_hasta: "", motivo: "",
     tipo_novedad: "permiso", modalidad: "dia_completo",
     hora_desde: "", hora_hasta: "",
   });
@@ -57,7 +63,7 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
   useEffect(() => {
     if (novedad) {
       setForm({
-        empleado_id: novedad.empleado_id ?? "",
+        usuario_id: novedad.usuario_id ?? novedad.empleado_id ?? "",
         fecha_desde: novedad.fecha_desde ? new Date(novedad.fecha_desde).toISOString().split("T")[0] : "",
         fecha_hasta: novedad.fecha_hasta ? new Date(novedad.fecha_hasta).toISOString().split("T")[0] : "",
         motivo: novedad.motivo || "",
@@ -83,7 +89,7 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
   };
 
   const handleGuardar = async () => {
-    if (!form.empleado_id || !form.fecha_desde || !form.fecha_hasta || !form.motivo.trim()) {
+    if (!form.usuario_id || !form.fecha_desde || !form.fecha_hasta || !form.motivo.trim()) {
       setSnack({ open: true, msg: "Todos los campos son obligatorios", severity: "error" });
       return;
     }
@@ -132,8 +138,8 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
           {/* Empleado */}
           <Box>
             <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Empleado</Typography>
-            <TextField select size="small" name="empleado_id" value={form.empleado_id} onChange={handleChange}
-              sx={{ width: "100%", ...fieldSx }}>
+            <TextField select size="small" name="usuario_id" value={form.usuario_id} onChange={handleChange}
+              sx={{ width: "100%", ...fieldSx }} MenuProps={selectMenuSx}>
               <MenuItem value="">Seleccionar empleado</MenuItem>
               {(empleados || []).map((emp) => (
                 <MenuItem key={emp.id} value={emp.id}>
@@ -161,7 +167,7 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
           <Box>
             <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Tipo de novedad</Typography>
             <TextField select size="small" name="tipo_novedad" value={form.tipo_novedad} onChange={handleChange}
-              sx={{ width: "100%", ...fieldSx }}>
+              sx={{ width: "100%", ...fieldSx }} MenuProps={selectMenuSx}>
               {TIPOS_NOVEDAD.map((t) => (
                 <MenuItem key={t.value} value={t.value}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>{t.icon} {t.label}</Box>
@@ -175,7 +181,7 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
             <Box>
               <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Modalidad</Typography>
               <TextField select size="small" name="modalidad" value={form.modalidad} onChange={handleChange}
-                sx={{ width: "100%", ...fieldSx }}>
+                sx={{ width: "100%", ...fieldSx }} MenuProps={selectMenuSx}>
                 {MODALIDADES.map((m) => (
                   <MenuItem key={m.value} value={m.value}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>{m.icon} {m.label}</Box>
