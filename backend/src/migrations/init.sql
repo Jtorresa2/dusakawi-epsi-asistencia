@@ -10,23 +10,30 @@ BEGIN;
 
 -- 1. roles
 CREATE TABLE IF NOT EXISTS roles (
-    id          SERIAL PRIMARY KEY,
-    nombre      VARCHAR(100) NOT NULL,
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nombre      VARCHAR(100) NOT NULL UNIQUE,
     descripcion VARCHAR(255),
+    creado_en   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 1a. permisos_catalogo
+CREATE TABLE IF NOT EXISTS permisos_catalogo (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nombre      VARCHAR(50) NOT NULL UNIQUE,
+    descripcion TEXT,
     creado_en   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 1b. rol_permiso (normalización 1NF)
 CREATE TABLE IF NOT EXISTS rol_permiso (
-    rol_id  INTEGER NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-    permiso VARCHAR(50) NOT NULL,
-    activo  BOOLEAN DEFAULT true,
-    PRIMARY KEY (rol_id, permiso)
+    rol_id     UUID NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    permiso_id UUID NOT NULL REFERENCES permisos_catalogo(id) ON DELETE CASCADE,
+    PRIMARY KEY (rol_id, permiso_id)
 );
 
 -- 2. areas
 CREATE TABLE IF NOT EXISTS areas (
-    id          SERIAL PRIMARY KEY,
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre      VARCHAR(100) NOT NULL UNIQUE,
     piso        INTEGER DEFAULT 1,
     descripcion TEXT DEFAULT '',
@@ -35,17 +42,17 @@ CREATE TABLE IF NOT EXISTS areas (
 
 -- 3. cargos
 CREATE TABLE IF NOT EXISTS cargos (
-    id          SERIAL PRIMARY KEY,
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre      VARCHAR(100) NOT NULL,
     descripcion TEXT,
     estado      VARCHAR(20) DEFAULT 'activo',
     creado_en   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    area_id     INTEGER REFERENCES areas(id)
+    area_id     UUID REFERENCES areas(id)
 );
 
 -- 4. horarios
 CREATE TABLE IF NOT EXISTS horarios (
-    id                SERIAL PRIMARY KEY,
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre            VARCHAR(100) NOT NULL,
     tolerancia_minutos INTEGER DEFAULT 0,
     creado_en         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -53,8 +60,8 @@ CREATE TABLE IF NOT EXISTS horarios (
 
 -- 5. horario_detalle
 CREATE TABLE IF NOT EXISTS horario_detalle (
-    id                  SERIAL,
-    horario_id          INTEGER NOT NULL REFERENCES horarios(id) ON DELETE CASCADE,
+    id                  UUID DEFAULT gen_random_uuid(),
+    horario_id          UUID NOT NULL REFERENCES horarios(id) ON DELETE CASCADE,
     dia_semana          VARCHAR(20) NOT NULL,
     hora_entrada_manana TIME,
     hora_salida_manana  TIME,
@@ -66,16 +73,16 @@ CREATE TABLE IF NOT EXISTS horario_detalle (
 
 -- 6. empleado
 CREATE TABLE IF NOT EXISTS empleado (
-    id                SERIAL PRIMARY KEY,
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     cedula            VARCHAR(20) NOT NULL UNIQUE,
     nombre            VARCHAR(100) NOT NULL,
     apellido          VARCHAR(100) NOT NULL,
     correo            VARCHAR(255) UNIQUE,
     telefono          VARCHAR(50),
     fecha_nacimiento  DATE,
-    cargo_id          INTEGER REFERENCES cargos(id),
-    area_id           INTEGER REFERENCES areas(id),
-    horario_id        INTEGER REFERENCES horarios(id),
+    cargo_id          UUID REFERENCES cargos(id),
+    area_id           UUID REFERENCES areas(id),
+    horario_id        UUID REFERENCES horarios(id),
     huella            TEXT,
     foto              TEXT,
     tarjeta_rfid      VARCHAR(50),
@@ -86,9 +93,9 @@ CREATE TABLE IF NOT EXISTS empleado (
 
 -- 7. usuarios
 CREATE TABLE IF NOT EXISTS usuarios (
-    id                     SERIAL PRIMARY KEY,
-    empleado_id            INTEGER NOT NULL REFERENCES empleado(id),
-    rol_id                 INTEGER NOT NULL REFERENCES roles(id),
+    id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    empleado_id            UUID NOT NULL REFERENCES empleado(id),
+    rol_id                 UUID NOT NULL REFERENCES roles(id),
     username               VARCHAR(255) NOT NULL UNIQUE,
     password_hash          VARCHAR(255) NOT NULL,
     activo                 BOOLEAN DEFAULT TRUE,
@@ -99,8 +106,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
 
 -- 8. asistencia
 CREATE TABLE IF NOT EXISTS asistencia (
-    id                        SERIAL PRIMARY KEY,
-    empleado_id               INTEGER NOT NULL REFERENCES empleado(id),
+    id                        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    empleado_id               UUID NOT NULL REFERENCES empleado(id),
     fecha                     DATE NOT NULL,
     fecha_hora_entrada        TIMESTAMP,
     fecha_hora_salida_manana  TIMESTAMP,
@@ -119,8 +126,8 @@ CREATE TABLE IF NOT EXISTS asistencia (
 
 -- 9. incidencias
 CREATE TABLE IF NOT EXISTS incidencias (
-    id              SERIAL PRIMARY KEY,
-    empleado_id     INTEGER NOT NULL REFERENCES empleado(id),
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    empleado_id     UUID NOT NULL REFERENCES empleado(id),
     tipo            VARCHAR(100) NOT NULL,
     descripcion     TEXT,
     evidencia_url   VARCHAR(500),
@@ -130,14 +137,14 @@ CREATE TABLE IF NOT EXISTS incidencias (
     prioridad       VARCHAR(20),
     motivo_rechazo  TEXT,
     observacion     TEXT,
-    revisado_por    INTEGER REFERENCES usuarios(id),
+    revisado_por    UUID REFERENCES usuarios(id),
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 10. configuracion
 CREATE TABLE IF NOT EXISTS configuracion (
-    id              SERIAL PRIMARY KEY,
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     clave           VARCHAR(100) NOT NULL UNIQUE,
     valor           TEXT NOT NULL,
     tipo            VARCHAR(20) NOT NULL,
@@ -147,8 +154,8 @@ CREATE TABLE IF NOT EXISTS configuracion (
 
 -- 11. permisos
 CREATE TABLE IF NOT EXISTS permisos (
-    id              SERIAL PRIMARY KEY,
-    empleado_id     INTEGER NOT NULL REFERENCES empleado(id),
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    empleado_id     UUID NOT NULL REFERENCES empleado(id),
     fecha_desde     DATE NOT NULL,
     fecha_hasta     DATE NOT NULL,
     motivo          TEXT NOT NULL,
@@ -156,19 +163,19 @@ CREATE TABLE IF NOT EXISTS permisos (
                     CHECK (tipo IN ('completo', 'mañana', 'tarde', 'horas', 'comision')),
     hora_desde      TIME,
     hora_hasta      TIME,
-    registrado_por  INTEGER REFERENCES usuarios(id),
+    registrado_por  UUID REFERENCES usuarios(id),
     estado          VARCHAR(20) NOT NULL DEFAULT 'aprobado'
                     CHECK (estado IN ('pendiente', 'aprobado', 'rechazado')),
     archivo_solicitud VARCHAR(500),
     archivo_firmado   VARCHAR(500),
-    solicitado_por  INTEGER REFERENCES empleado(id),
+    solicitado_por  UUID REFERENCES empleado(id),
     motivo_rechazo  TEXT,
     creado_en       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 12. festivos
 CREATE TABLE IF NOT EXISTS festivos (
-    id         SERIAL PRIMARY KEY,
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     fecha      DATE NOT NULL UNIQUE,
     nombre     VARCHAR(200) NOT NULL,
     tipo       VARCHAR(50) NOT NULL DEFAULT 'nacional'
@@ -179,7 +186,7 @@ CREATE TABLE IF NOT EXISTS festivos (
 
 -- 13. reportes_historial
 CREATE TABLE IF NOT EXISTS reportes_historial (
-    id               SERIAL PRIMARY KEY,
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tipo_reporte     VARCHAR(100) NOT NULL,
     usuario_nombre   VARCHAR(255) NOT NULL,
     formato          VARCHAR(20),
@@ -189,109 +196,114 @@ CREATE TABLE IF NOT EXISTS reportes_historial (
 );
 
 -- =============================================
--- SEED DATA — 3 usuarios funcionales
+-- SEED DATA — 3
 -- =============================================
 
 -- Roles
-INSERT INTO roles (id, nombre, descripcion) VALUES
-    (1, 'Administrador', 'Acceso total al sistema'),
-    (2, 'Talento Humano', 'Gestión de personal y reportes'),
-    (3, 'Empleado', 'Auto-servicio y marcación')
-ON CONFLICT (id) DO NOTHING;
-SELECT setval('roles_id_seq', 3, true);
+INSERT INTO roles (nombre, descripcion) VALUES
+    ('Administrador', 'Acceso total al sistema'),
+    ('Talento Humano', 'Gestión de personal y reportes'),
+    ('Empleado', 'Auto-servicio y marcación')
+ON CONFLICT (nombre) DO NOTHING;
 
--- Rol_Permiso
-INSERT INTO rol_permiso (rol_id, permiso, activo) VALUES
-    (1, 'dashboard', true), (1, 'dispositivos', true), (1, 'empleados', true), (1, 'reportes', true), (1, 'usuarios', true),
-    (2, 'dashboard', true), (2, 'dispositivos', false), (2, 'empleados', true), (2, 'reportes', true), (2, 'usuarios', false),
-    (3, 'dashboard', false), (3, 'dispositivos', false), (3, 'empleados', false), (3, 'reportes', false), (3, 'usuarios', false)
-ON CONFLICT (rol_id, permiso) DO NOTHING;
+-- Permisos catálogo
+INSERT INTO permisos_catalogo (nombre, descripcion) VALUES
+    ('dashboard', 'Acceso al panel principal'),
+    ('dispositivos', 'Acceso a dispositivos'),
+    ('empleados', 'Acceso a gestión de empleados'),
+    ('reportes', 'Acceso a generación de reportes'),
+    ('usuarios', 'Acceso a gestión de usuarios')
+ON CONFLICT (nombre) DO NOTHING;
+
+-- Rol_Permiso (resuelto por nombre)
+INSERT INTO rol_permiso (rol_id, permiso_id)
+SELECT r.id, p.id
+FROM roles r
+CROSS JOIN permisos_catalogo p
+WHERE r.nombre IN ('Administrador', 'Talento Humano', 'Empleado')
+  AND p.nombre IN ('dashboard', 'dispositivos', 'empleados', 'reportes', 'usuarios')
+ON CONFLICT (rol_id, permiso_id) DO NOTHING;
 
 -- Areas (35 áreas operativas)
-INSERT INTO areas (id, nombre, piso, descripcion) VALUES
-    (1, 'SIAU', 1, 'Sistema de Información y Atención al Usuario'),
-    (2, 'PQR', 1, 'Peticiones, Quejas y Reclamos'),
-    (3, 'Call Center', 1, 'Centro de atención telefónica'),
-    (4, 'Autorizaciones', 1, 'Gestión de autorizaciones médicas'),
-    (5, 'Aseguramiento', 1, 'Gestión de aseguramiento en salud'),
-    (6, 'Psicología', 1, 'Servicios de psicología'),
-    (7, 'Recepción', 1, 'Recepción y atención al usuario'),
-    (8, 'Transporte', 1, 'Gestión de transporte de pacientes'),
-    (9, 'MIPRES', 1, 'Prescripción de medicamentos y servicios'),
-    (10, 'Portabilidad', 1, 'Gestión de portabilidad'),
-    (11, 'Referencia', 1, 'Referencia y contrarreferencia'),
-    (12, 'Auditoría de Cuentas Médicas', 2, 'Auditoría y control de cuentas médicas'),
-    (13, 'Radicación', 2, 'Radicación de documentos'),
-    (14, 'Archivo', 2, 'Gestión documental y archivo'),
-    (15, 'SARLAFT', 2, 'Sistema de Administración del Riesgo de Lavado de Activos'),
-    (16, 'Contabilidad', 3, 'Gestión contable'),
-    (17, 'Presupuesto', 3, 'Planificación y control presupuestal'),
-    (18, 'Cartera', 3, 'Gestión de cartera y cobros'),
-    (19, 'Recobro', 3, 'Recobro de servicios de salud'),
-    (20, 'Dirección Administrativa', 3, 'Dirección y coordinación administrativa'),
-    (21, 'Estadística', 3, 'Análisis y gestión estadística'),
-    (22, 'Sistemas', 3, 'Soporte y gestión tecnológica'),
-    (23, 'Tesorería', 3, 'Gestión de tesorería y pagos'),
-    (24, 'Alto Costo', 4, 'Gestión de alto costo'),
-    (25, 'Baja Complejidad', 4, 'Atención de baja complejidad'),
-    (26, 'Comunicación', 4, 'Gestión de comunicaciones institucionales'),
-    (27, 'Dirección de Riesgos', 4, 'Gestión y control de riesgos'),
-    (28, 'Mediana y Alta Complejidad', 4, 'Atención de mediana y alta complejidad'),
-    (29, 'PYM', 4, 'Promoción y Mantenimiento de la Salud'),
-    (30, 'Talento Humano', 4, 'Gestión del talento humano'),
-    (31, 'Calidad', 5, 'Gestión de calidad institucional'),
-    (32, 'Gerencia', 5, 'Dirección general de la institución'),
-    (33, 'Contratación', 5, 'Gestión de contratos y proveedores'),
-    (34, 'Control Interno', 5, 'Control interno y auditoría'),
-    (35, 'Intercultural', 5, 'Gestión intercultural indígena')
-ON CONFLICT (id) DO NOTHING;
-SELECT setval('areas_id_seq', 35, true);
+INSERT INTO areas (nombre, piso, descripcion) VALUES
+    ('SIAU', 1, 'Sistema de Información y Atención al Usuario'),
+    ('PQR', 1, 'Peticiones, Quejas y Reclamos'),
+    ('Call Center', 1, 'Centro de atención telefónica'),
+    ('Autorizaciones', 1, 'Gestión de autorizaciones médicas'),
+    ('Aseguramiento', 1, 'Gestión de aseguramiento en salud'),
+    ('Psicología', 1, 'Servicios de psicología'),
+    ('Recepción', 1, 'Recepción y atención al usuario'),
+    ('Transporte', 1, 'Gestión de transporte de pacientes'),
+    ('MIPRES', 1, 'Prescripción de medicamentos y servicios'),
+    ('Portabilidad', 1, 'Gestión de portabilidad'),
+    ('Referencia', 1, 'Referencia y contrarreferencia'),
+    ('Auditoría de Cuentas Médicas', 2, 'Auditoría y control de cuentas médicas'),
+    ('Radicación', 2, 'Radicación de documentos'),
+    ('Archivo', 2, 'Gestión documental y archivo'),
+    ('SARLAFT', 2, 'Sistema de Administración del Riesgo de Lavado de Activos'),
+    ('Contabilidad', 3, 'Gestión contable'),
+    ('Presupuesto', 3, 'Planificación y control presupuestal'),
+    ('Cartera', 3, 'Gestión de cartera y cobros'),
+    ('Recobro', 3, 'Recobro de servicios de salud'),
+    ('Dirección Administrativa', 3, 'Dirección y coordinación administrativa'),
+    ('Estadística', 3, 'Análisis y gestión estadística'),
+    ('Sistemas', 3, 'Soporte y gestión tecnológica'),
+    ('Tesorería', 3, 'Gestión de tesorería y pagos'),
+    ('Alto Costo', 4, 'Gestión de alto costo'),
+    ('Baja Complejidad', 4, 'Atención de baja complejidad'),
+    ('Comunicación', 4, 'Gestión de comunicaciones institucionales'),
+    ('Dirección de Riesgos', 4, 'Gestión y control de riesgos'),
+    ('Mediana y Alta Complejidad', 4, 'Atención de mediana y alta complejidad'),
+    ('PYM', 4, 'Promoción y Mantenimiento de la Salud'),
+    ('Talento Humano', 4, 'Gestión del talento humano'),
+    ('Calidad', 5, 'Gestión de calidad institucional'),
+    ('Gerencia', 5, 'Dirección general de la institución'),
+    ('Contratación', 5, 'Gestión de contratos y proveedores'),
+    ('Control Interno', 5, 'Control interno y auditoría'),
+    ('Intercultural', 5, 'Gestión intercultural indígena')
+ON CONFLICT (nombre) DO NOTHING;
 
 -- Cargos (10 cargos)
-INSERT INTO cargos (id, nombre, descripcion, estado, area_id) VALUES
-    (1, 'Gerente General', 'Dirección general de la institución', 'activo', 32),
-    (2, 'Coordinador de Talento Humano', 'Coordinación del área de personal', 'activo', 30),
-    (3, 'Médico', 'Prestación de servicios médicos', 'activo', 1),
-    (4, 'Enfermero/a', 'Apoyo en servicios de salud', 'activo', NULL),
-    (5, 'Contador', 'Gestión contable y financiera', 'activo', NULL),
-    (6, 'Auxiliar Administrativo', 'Apoyo en labores administrativas', 'activo', NULL),
-    (7, 'Técnico de Sistemas', 'Soporte y mantenimiento tecnológico', 'activo', 22),
-    (8, 'Auditor', 'Auditoría y control interno', 'activo', 12),
-    (9, 'Abogado', 'Asesoría jurídica', 'activo', NULL),
-    (10, 'Psicólogo', 'Servicios de psicología', 'activo', NULL)
-ON CONFLICT (id) DO NOTHING;
-SELECT setval('cargos_id_seq', 10, true);
+INSERT INTO cargos (nombre, descripcion, estado, area_id) VALUES
+    ('Gerente General', 'Dirección general de la institución', 'activo', (SELECT id FROM areas WHERE nombre = 'Gerencia')),
+    ('Coordinador de Talento Humano', 'Coordinación del área de personal', 'activo', (SELECT id FROM areas WHERE nombre = 'Talento Humano')),
+    ('Médico', 'Prestación de servicios médicos', 'activo', (SELECT id FROM areas WHERE nombre = 'SIAU')),
+    ('Enfermero/a', 'Apoyo en servicios de salud', 'activo', NULL),
+    ('Contador', 'Gestión contable y financiera', 'activo', NULL),
+    ('Auxiliar Administrativo', 'Apoyo en labores administrativas', 'activo', NULL),
+    ('Técnico de Sistemas', 'Soporte y mantenimiento tecnológico', 'activo', (SELECT id FROM areas WHERE nombre = 'Sistemas')),
+    ('Auditor', 'Auditoría y control interno', 'activo', (SELECT id FROM areas WHERE nombre = 'Auditoría de Cuentas Médicas')),
+    ('Abogado', 'Asesoría jurídica', 'activo', NULL),
+    ('Psicólogo', 'Servicios de psicología', 'activo', NULL)
+ON CONFLICT (nombre) DO NOTHING;
 
 -- Horario
-INSERT INTO horarios (id, nombre, tolerancia_minutos) VALUES
-    (1, 'Administrativo', 5)
-ON CONFLICT (id) DO NOTHING;
-SELECT setval('horarios_id_seq', 1, true);
+INSERT INTO horarios (nombre, tolerancia_minutos) VALUES
+    ('Administrativo', 5)
+ON CONFLICT (nombre) DO NOTHING;
 
 -- Horario detalle (Lunes a Viernes)
 INSERT INTO horario_detalle (horario_id, dia_semana, hora_entrada_manana, hora_salida_manana, hora_entrada_tarde, hora_salida_tarde) VALUES
-    (1, 'Lunes',     '07:00', '12:00', '14:00', '18:00'),
-    (1, 'Martes',    '07:00', '12:00', '14:00', '18:00'),
-    (1, 'Miércoles', '07:00', '12:00', '14:00', '17:00'),
-    (1, 'Jueves',    '07:00', '12:00', '14:00', '17:00'),
-    (1, 'Viernes',   '07:00', '12:00', '14:00', '17:00')
+    ((SELECT id FROM horarios WHERE nombre = 'Administrativo'), 'Lunes',     '07:00', '12:00', '14:00', '18:00'),
+    ((SELECT id FROM horarios WHERE nombre = 'Administrativo'), 'Martes',    '07:00', '12:00', '14:00', '18:00'),
+    ((SELECT id FROM horarios WHERE nombre = 'Administrativo'), 'Miércoles', '07:00', '12:00', '14:00', '17:00'),
+    ((SELECT id FROM horarios WHERE nombre = 'Administrativo'), 'Jueves',    '07:00', '12:00', '14:00', '17:00'),
+    ((SELECT id FROM horarios WHERE nombre = 'Administrativo'), 'Viernes',   '07:00', '12:00', '14:00', '17:00')
 ON CONFLICT (horario_id, dia_semana) DO NOTHING;
 
 -- Empleados
-INSERT INTO empleado (id, cedula, nombre, apellido, correo, cargo_id, area_id, horario_id, tarjeta_rfid, fecha_ingreso, activo) VALUES
-    (1, '10000001', 'Carlos', 'Rodríguez', 'c.rodriguez@dusakawi.com', 1, 32, NULL, 'RFID-001', '2020-01-15', true),
-    (2, '10000002', 'María', 'López', 'm.lopez@dusakawi.com', 2, 30, 1, 'RFID-002', '2019-03-10', true),
-    (3, '1015995066', 'Juliana', 'Torres', 'torresaaronjuliana@gmail.com', 7, 22, NULL, NULL, NULL, true)
-ON CONFLICT (id) DO NOTHING;
-SELECT setval('empleado_id_seq', 3, true);
+INSERT INTO empleado (cedula, nombre, apellido, correo, cargo_id, area_id, horario_id, tarjeta_rfid, fecha_ingreso, activo) VALUES
+    ('10000001', 'Carlos', 'Rodríguez', 'c.rodriguez@dusakawi.com', (SELECT id FROM cargos WHERE nombre = 'Gerente General'), (SELECT id FROM areas WHERE nombre = 'Gerencia'), NULL, 'RFID-001', '2020-01-15', true),
+    ('10000002', 'María', 'López', 'm.lopez@dusakawi.com', (SELECT id FROM cargos WHERE nombre = 'Coordinador de Talento Humano'), (SELECT id FROM areas WHERE nombre = 'Talento Humano'), (SELECT id FROM horarios WHERE nombre = 'Administrativo'), 'RFID-002', '2019-03-10', true),
+    ('1015995066', 'Juliana', 'Torres', 'torresaaronjuliana@gmail.com', (SELECT id FROM cargos WHERE nombre = 'Técnico de Sistemas'), (SELECT id FROM areas WHERE nombre = 'Sistemas'), NULL, NULL, NULL, true)
+ON CONFLICT (cedula) DO NOTHING;
 
 -- Usuarios (con los password_hash reales de la base original)
-INSERT INTO usuarios (id, empleado_id, rol_id, username, password_hash, activo, password_reset_required) VALUES
-    (1, 1, 3, 'carlos', '$2b$10$QfVbkqSfSztAqeMBBcIOxuyeCFGxeCa/X3ErYjTvG5YSKbzM5SHvG', true, false),
-    (2, 2, 2, 'talento', '$2b$10$FnNwnu0sg.DOrspnoCm91.PVx/HHmKhXM7fUGh6i1mZQLN7JhIVR.', true, false),
-    (3, 3, 1, 'Jtorresa22', '$2b$10$UwXojDQlljyPI78khkYz8u4gWCb07lp90pXqS8wf4oqGnYzpptfGu', true, false)
-ON CONFLICT (id) DO NOTHING;
-SELECT setval('usuarios_id_seq', 3, true);
+INSERT INTO usuarios (empleado_id, rol_id, username, password_hash, activo, password_reset_required) VALUES
+    ((SELECT id FROM empleado WHERE cedula = '10000001'), (SELECT id FROM roles WHERE nombre = 'Empleado'), 'carlos', '$2b$10$QfVbkqSfSztAqeMBBcIOxuyeCFGxeCa/X3ErYjTvG5YSKbzM5SHvG', true, false),
+    ((SELECT id FROM empleado WHERE cedula = '10000002'), (SELECT id FROM roles WHERE nombre = 'Talento Humano'), 'talento', '$2b$10$FnNwnu0sg.DOrspnoCm91.PVx/HHmKhXM7fUGh6i1mZQLN7JhIVR.', true, false),
+    ((SELECT id FROM empleado WHERE cedula = '1015995066'), (SELECT id FROM roles WHERE nombre = 'Administrador'), 'Jtorresa22', '$2b$10$UwXojDQlljyPI78khkYz8u4gWCb07lp90pXqS8wf4oqGnYzpptfGu', true, false)
+ON CONFLICT (username) DO NOTHING;
 
 -- Configuración: motor de base de datos
 INSERT INTO configuracion (clave, valor, tipo) VALUES
