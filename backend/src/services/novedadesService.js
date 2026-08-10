@@ -7,7 +7,7 @@ exports.obtenerTodos = async () => {
       uu.nombre AS empleado_nombre,
       uu.apellido AS empleado_apellido,
       u.username AS registrado_por_nombre
-    FROM permisos p
+    FROM novedades p
     LEFT JOIN usuarios uu ON uu.id = p.usuario_id
     LEFT JOIN usuarios u ON u.id = p.registrado_por
     ORDER BY p.creado_en DESC
@@ -41,7 +41,7 @@ exports.crear = async (data, usuarioId) => {
   }
 
   const [rows, result] = await db.query(
-    `INSERT INTO permisos (usuario_id, fecha_desde, fecha_hasta, motivo, tipo_novedad, tipo, hora_desde, hora_hasta, registrado_por)
+    `INSERT INTO novedades (usuario_id, fecha_desde, fecha_hasta, motivo, tipo_novedad, tipo, hora_desde, hora_hasta, registrado_por)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
     [targetId, fecha_desde, fecha_hasta, motivo, novedadVal, modalidadVal, hora_desde || null, hora_hasta || null, usuarioId || null]
   );
@@ -105,7 +105,7 @@ exports.actualizar = async (id, data, usuarioId) => {
   }
 
   await db.query(
-    `UPDATE permisos SET usuario_id = ?, fecha_desde = ?, fecha_hasta = ?, motivo = ?, tipo_novedad = ?, tipo = ?, hora_desde = ?, hora_hasta = ? WHERE id = ?`,
+    `UPDATE novedades SET usuario_id = ?, fecha_desde = ?, fecha_hasta = ?, motivo = ?, tipo_novedad = ?, tipo = ?, hora_desde = ?, hora_hasta = ? WHERE id = ?`,
     [targetId, fecha_desde, fecha_hasta, motivo, novedad, modalidadVal, hora_desde || null, hora_hasta || null, id]
   );
   return { id };
@@ -117,7 +117,7 @@ exports.obtenerPorEmpleado = async (usuarioId) => {
       p.*,
       u.nombre AS empleado_nombre,
       u.apellido AS empleado_apellido
-    FROM permisos p
+    FROM novedades p
     LEFT JOIN usuarios u ON u.id = p.usuario_id
     WHERE p.usuario_id = ?
     ORDER BY p.creado_en DESC
@@ -126,7 +126,7 @@ exports.obtenerPorEmpleado = async (usuarioId) => {
 };
 
 exports.eliminar = async (id) => {
-  await db.query(`DELETE FROM permisos WHERE id = ?`, [id]);
+  await db.query(`DELETE FROM novedades WHERE id = ?`, [id]);
   return { id };
 };
 

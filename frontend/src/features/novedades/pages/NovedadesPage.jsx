@@ -24,10 +24,10 @@ const estiloBtn = {
 const fieldSx = {
   "& .MuiOutlinedInput-root": {
     borderRadius: "10px",
-    background: "#fff",
-    "& fieldset": { borderColor: "#E5E7EB" },
-    "&:hover fieldset": { borderColor: "#2E7D32" },
-    "&.Mui-focused fieldset": { borderColor: "#1B5E20" },
+    background: "#FFFFFF",
+    "& fieldset": { borderColor: "#111827" },
+    "&:hover fieldset": { borderColor: "#111827" },
+    "&.Mui-focused fieldset": { borderColor: "#111827" },
   },
   "& .MuiInputLabel-root": { fontSize: 13, color: "#6B7280" },
   "& .MuiInputBase-input": { fontSize: 13 },
@@ -171,8 +171,8 @@ export default function NovedadesPage() {
         const t = row.tipo || "dia_completo";
         const cfg = {
           dia_completo: { label: "Día completo", color: "#1B5E20", bg: "#E8F5E9", icon: <CalendarDays size={12} /> },
-          manana: { label: "Solo mañana", color: "#92400E", bg: "#FEF3C7", icon: <Sun size={12} /> },
-          tarde: { label: "Solo tarde", color: "#6B21A8", bg: "#F3E8FF", icon: <Moon size={12} /> },
+          manana: { label: "Jornada mañana", color: "#92400E", bg: "#FEF3C7", icon: <Sun size={12} /> },
+          tarde: { label: "Jornada tarde", color: "#6B21A8", bg: "#F3E8FF", icon: <Moon size={12} /> },
           horas: { label: "Por horas", color: "#2563EB", bg: "#DBEAFE", icon: <Clock size={12} /> },
         }[t];
         return <Chip icon={cfg?.icon} label={cfg?.label || t} size="small" sx={{ fontWeight: 600, fontSize: 11, bgcolor: cfg?.bg || "#F3F4F6", color: cfg?.color || "#111827", borderRadius: "8px" }} />;
@@ -302,8 +302,8 @@ export default function NovedadesPage() {
                 sx={{ width: 160, ...fieldSx }}>
                 <MenuItem value="dia_completo"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><CalendarDays size={14} /> Día completo</Box></MenuItem>
                 <MenuItem value="horas"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><Clock size={14} /> Por horas</Box></MenuItem>
-                <MenuItem value="manana"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><Sun size={14} /> Toda la mañana</Box></MenuItem>
-                <MenuItem value="tarde"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><Moon size={14} /> Toda la tarde</Box></MenuItem>
+                <MenuItem value="manana"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><Sun size={14} />  Jornada mañana </Box></MenuItem>
+                <MenuItem value="tarde"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><Moon size={14} />  Jornada tarde </Box></MenuItem>
               </TextField>
             </Box>
           )}
@@ -326,7 +326,7 @@ export default function NovedadesPage() {
           <Box sx={{ flex: 1, minWidth: 200 }}>
             <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Motivo</Typography>
             <TextField size="small" name="motivo" value={form.motivo} onChange={handleChange}
-              placeholder="Ej: Viaje a Medellín" sx={{ width: "100%", ...fieldSx }} />
+              placeholder="Ej: Descripción" sx={{ width: "100%", ...fieldSx }} />
           </Box>
           <Box>
             <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>&nbsp;</Typography>

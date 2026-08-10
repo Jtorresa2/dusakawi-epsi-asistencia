@@ -159,7 +159,7 @@ export default function IncidenciasPage() {
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2.5 }}>
       <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
-          Inicio / Gestión / Incidencias
+          Inicio / Gestión del personal / Incidencias
       </Typography>
 
       {/* STAT CARDS */}

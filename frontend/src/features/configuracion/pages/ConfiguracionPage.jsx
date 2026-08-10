@@ -76,7 +76,7 @@ export default function ConfiguracionPage() {
     <Box sx={{ p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2.5 }}>
       {/* HEADER */}
         <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
-              Inicio / Gestión / Incidencias
+              Inicio / Gestión del sistema / Incidencias
           </Typography>
 
       {/* CENTRO DE CONFIGURACIÓN — CARDS */}
@@ -130,7 +130,7 @@ export default function ConfiguracionPage() {
       {/* ============ MODALES ============ */}
 
       {/* MODAL INFORMACIÓN INSTITUCIONAL */}
-      <Dialog open={modalActivo === "institucional"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "20px", p: 1 } }}>
+      <Dialog open={modalActivo === "institucional"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
           <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#1B5E2015", display: "flex", alignItems: "center", justifyContent: "center", color: "#1B5E20" }}><Building2 size={18} /></Box>
           <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Información institucional</Typography>
@@ -152,7 +152,7 @@ export default function ConfiguracionPage() {
       </Dialog>
 
       {/* MODAL PARÁMETROS DE ASISTENCIA */}
-      <Dialog open={modalActivo === "asistencia"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "20px", p: 1 } }}>
+      <Dialog open={modalActivo === "asistencia"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
           <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#D9770615", display: "flex", alignItems: "center", justifyContent: "center", color: "#D97706" }}><Clock size={18} /></Box>
           <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Parámetros de asistencia</Typography>
@@ -174,7 +174,7 @@ export default function ConfiguracionPage() {
       </Dialog>
 
       {/* MODAL CONTROL DE ACCESO */}
-      <Dialog open={modalActivo === "acceso"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "20px", p: 1 } }}>
+      <Dialog open={modalActivo === "acceso"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
           <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#0891B215", display: "flex", alignItems: "center", justifyContent: "center", color: "#0891B2" }}><MapPin size={18} /></Box>
           <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Control de acceso</Typography>
@@ -182,7 +182,7 @@ export default function ConfiguracionPage() {
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 2.5, display: "flex", flexDirection: "column", gap: 2 }}>
-          <Box sx={{ p: 2, borderRadius: "12px", bgcolor: "#F0FDF4", border: "1px solid #BBF7D0", mb: 1 }}>
+          <Box sx={{ p: 2, borderRadius: "12px", bgcolor: "#F9FAFB", border: "1px solid #ECECEC", mb: 1 }}>
             <Typography sx={{ fontSize: 12, color: "#166534", fontWeight: 600 }}>
               Las marcaciones únicamente pueden realizarse dentro de las instalaciones autorizadas de la empresa.
             </Typography>
@@ -199,7 +199,7 @@ export default function ConfiguracionPage() {
       </Dialog>
 
       {/* MODAL NOTIFICACIONES */}
-      <Dialog open={modalActivo === "notificaciones"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "20px", p: 1 } }}>
+      <Dialog open={modalActivo === "notificaciones"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
           <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#7C3AED15", display: "flex", alignItems: "center", justifyContent: "center", color: "#7C3AED" }}><Bell size={18} /></Box>
           <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Notificaciones</Typography>
@@ -220,7 +220,7 @@ export default function ConfiguracionPage() {
       </Dialog>
 
       {/* MODAL PLANTILLAS PDF */}
-      <Dialog open={modalActivo === "plantillas"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "20px", p: 1 } }}>
+      <Dialog open={modalActivo === "plantillas"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
           <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#1565C015", display: "flex", alignItems: "center", justifyContent: "center", color: "#1565C0" }}><FileText size={18} /></Box>
           <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Plantillas PDF</Typography>
@@ -240,7 +240,7 @@ export default function ConfiguracionPage() {
       </Dialog>
 
       {/* MODAL SEGURIDAD */}
-      <Dialog open={modalActivo === "seguridad"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "20px", p: 1 } }}>
+      <Dialog open={modalActivo === "seguridad"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
           <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#DC262615", display: "flex", alignItems: "center", justifyContent: "center", color: "#DC2626" }}><Shield size={18} /></Box>
           <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Seguridad</Typography>

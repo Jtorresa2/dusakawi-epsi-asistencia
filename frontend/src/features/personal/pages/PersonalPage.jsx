@@ -3,9 +3,9 @@ import {
   Box, Paper, Typography, TextField, Button, Chip, IconButton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Avatar, Select, MenuItem, InputLabel, FormControl, Switch, FormControlLabel,
-  Dialog, DialogTitle, DialogContent, DialogActions,
+  Dialog, DialogTitle, DialogContent, DialogActions, Divider, InputAdornment,
 } from "@mui/material";
-import { Plus, Edit3, Trash2, Eye, Search, X, Users, UserCheck, UserX, Building2 } from "lucide-react";
+import { Plus, Edit3, Trash2, Eye, Search, X, Users, UserCheck, UserX, Building2, User, Briefcase, KeyRound, RefreshCw, Layers, ShieldCheck, Clock, CalendarDays } from "lucide-react";
 import {
   obtenerPersonal, crearPersonal, actualizarPersonal, eliminarPersonal,
   obtenerRoles, generarUsuariosMasivos,
@@ -27,28 +27,59 @@ const ROL_BADGE = {
   "Empleado":       { bg: "#E3F2FD", color: "#0D47A1" },
 };
 
-const fieldSx = {
-  "& .MuiOutlinedInput-root": {
-    borderRadius: "10px",
-    "& fieldset": { borderColor: "#6B7280" },
-    "&:hover fieldset": { borderColor: "#374151" },
-    "&.Mui-focused fieldset": { borderColor: "#1B5E20" },
-  },
-};
-
-const selectSx = {
-  borderRadius: "10px", fontSize: 14,
-  "& fieldset": { borderColor: "#6B7280" },
-  "&:hover fieldset": { borderColor: "#374151" },
-};
-
 const selectMenuSx = {
   PaperProps: {
-    sx: { bgcolor: "#E8F5E9", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } },
+    sx: { bgcolor: "#FFFFFF", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } },
   },
 };
 
 const verdeBoton = { bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } };
+
+// ─── Estilos del modal premium (Nuevo/Editar colaborador) ───────────────────
+const modalFieldSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "12px",
+    bgcolor: "#FFFFFF",
+    minHeight: 40,
+    transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+    "& fieldset": { borderColor: "#D1D5DB" },
+    "&:hover fieldset": { borderColor: "#9CA3AF" },
+    "&.Mui-focused fieldset": { borderColor: "#1B5E20" },
+    "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" },
+  },
+  "& .MuiInputLabel-root": { fontSize: 13, color: "#6B7280" },
+  "& .MuiInputLabel-root.Mui-focused": { color: "#1B5E20" },
+};
+
+const modalSelectSx = {
+  borderRadius: "12px", fontSize: 14, bgcolor: "#FFFFFF", minHeight: 40,
+  transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+  "& fieldset": { borderColor: "#D1D5DB" },
+  "&:hover fieldset": { borderColor: "#9CA3AF" },
+  "&.Mui-focused fieldset": { borderColor: "#1B5E20" },
+  "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" },
+};
+
+const selectIconAdornment = {
+  "& .MuiSelect-select": { display: "flex", alignItems: "center" },
+  "& .MuiSelect-icon": { color: "#9CA3AF" },
+};
+
+const modalSeccionCard = {
+  border: "1px solid #ECECEC",
+  borderRadius: "14px",
+  bgcolor: "#FFFFFF",
+  p: 2,
+};
+
+const modalSeccionTitulo = { fontSize: 13, fontWeight: 700, color: "#111827", display: "flex", alignItems: "center", gap: 1 };
+const modalSeccionSubtitulo = { fontSize: 11, color: "#9CA3AF", mt: 0.25 };
+
+// Genera una contraseña temporal segura
+const generarPasswordTemporal = (len = 10) => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#";
+  return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+};
 
 export default function PersonalPage() {
   // ─── Datos ────────────────────────────────────────────────────────────────
@@ -77,6 +108,7 @@ export default function PersonalPage() {
   const toastTimer = useRef(null);
 
   const [form, setForm] = useState({ ...initialForm });
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const isActive = (e) => e.activo === 1 || e.activo === true;
   const getName = (e) => `${e.nombre} ${e.apellido}`;
@@ -139,7 +171,8 @@ export default function PersonalPage() {
   // ─── Crear / Editar ───────────────────────────────────────────────────────
   const abrirCrear = () => {
     setEditando(null);
-    setForm({ ...initialForm });
+    setForm({ ...initialForm, touchedCorreo: false });
+    setConfirmPassword("");
     setModalAbierto(true);
   };
 
@@ -159,13 +192,24 @@ export default function PersonalPage() {
       username: e.username || "",
       password: "",
       activo: isActive(e),
+      touchedCorreo: false,
     });
+    setConfirmPassword("");
     setModalAbierto(true);
   };
 
+  const handleGenerarPassword = () => {
+    const pwd = generarPasswordTemporal();
+    setForm((f) => ({ ...f, password: pwd }));
+    setConfirmPassword(pwd);
+  };
+
   const handleGuardar = async () => {
-    if (!form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim()) {
+    if (!form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim() || !form.correo.trim()) {
       return mostrarToast("Completa los campos obligatorios", "err");
+    }
+    if (!editando && form.password && form.password !== confirmPassword) {
+      return mostrarToast("Las contraseñas no coinciden", "err");
     }
     setGuardando(true);
     try {
@@ -179,11 +223,11 @@ export default function PersonalPage() {
       };
       if (editando) {
         const res = await actualizarPersonal(editando.id, payload);
-        mostrarToast(res?.mensaje || "Colaborador actualizado correctamente", "ok");
+        mostrarToast(res?.mensaje || "Empleado actualizado correctamente", "ok");
       } else {
         const res = await crearPersonal(payload);
         const extra = res?.password ? ` — Usuario: ${res.username}, Contraseña: ${res.password}` : "";
-        mostrarToast(`${res?.mensaje || "Colaborador creado correctamente"}${extra}`, "ok");
+        mostrarToast(`${res?.mensaje || "Empleado creado correctamente"}${extra}`, "ok");
       }
       setModalAbierto(false);
       await cargarDatos();
@@ -199,7 +243,7 @@ export default function PersonalPage() {
     try {
       await eliminarPersonal(confirmEliminar.id);
       setConfirmEliminar(null);
-      mostrarToast("Colaborador eliminado correctamente", "ok");
+      mostrarToast("Empleado eliminado correctamente", "ok");
       await cargarDatos();
     } catch (e) {
       mostrarToast(e.message || "Error al eliminar", "err");
@@ -248,7 +292,7 @@ export default function PersonalPage() {
     <Box sx={{ p: 3 }}>
       {/* ENCABEZADO */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, gap: 2, flexWrap: "wrap" }}>
-        <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Inicio / Administración / Personal</Typography>
+        <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Inicio / Gestión del personal / Personal</Typography>
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
           {pendientes > 0 && (
             <Button onClick={() => setModalGenerar(true)}
@@ -258,7 +302,7 @@ export default function PersonalPage() {
           )}
           <Button startIcon={<Plus size={18} />} onClick={abrirCrear}
             sx={{ bgcolor: "#1b5e20", color: "#fff", borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, "&:hover": { bgcolor: "#2E7D32" } }}>
-            Nuevo colaborador
+            Nuevo empleado
           </Button>
         </Box>
       </Box>
@@ -336,7 +380,7 @@ export default function PersonalPage() {
               ) : filtrados.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={12} align="center" sx={{ py: 6, color: "#9CA3AF", fontSize: 14 }}>
-                    {busqueda ? "No se encontraron colaboradores" : "No hay colaboradores registrados"}
+                    {busqueda ? "No se encontraron empleados" : "No hay empleados registrados"}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -429,103 +473,207 @@ export default function PersonalPage() {
       </Paper>
 
       {/* MODAL CREAR / EDITAR */}
-      <Dialog open={modalAbierto} onClose={() => setModalAbierto(false)} maxWidth="sm" fullWidth
-        PaperProps={{ sx: { borderRadius: "16px", position: "relative" } }}
-        sx={{ "& .MuiPaper-root": { backgroundColor: "#E8F5E9" } }}>
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
-          {editando ? "Editar colaborador" : "Nuevo colaborador"}
+      <Dialog open={modalAbierto} onClose={() => setModalAbierto(false)} maxWidth="md" fullWidth
+        PaperProps={{ sx: { borderRadius: "18px", position: "relative", boxShadow: "0 24px 70px rgba(0,0,0,0.25)", maxHeight: "92vh" } }}
+        sx={{ "& .MuiBackdrop-root": { bgcolor: "rgba(17, 24, 39, 0.5)", backdropFilter: "blur(4px)" } }}>
+        {/* HEADER FIJO */}
+        <DialogTitle sx={{ px: 3, py: 2, position: "relative", pb: 1.5 }}>
+          <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+            <Box sx={{
+              width: 40, height: 40, borderRadius: "12px", bgcolor: "#E8F5E9", color: "#1B5E20",
+              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}>
+              <User size={20} />
+            </Box>
+            <Box>
+              <Typography sx={{ fontSize: 17, fontWeight: 700, color: "#111827", lineHeight: 1.2 }}>
+                {editando ? "Editar colaborador" : "Nuevo colaborador"}
+              </Typography>
+              <Typography sx={{ fontSize: 12, color: "#6B7280", mt: 0.15 }}>
+                {editando ? "Actualiza la información del colaborador." : "Registra un nuevo empleado dentro del sistema."}
+              </Typography>
+            </Box>
+          </Box>
           <IconButton onClick={() => setModalAbierto(false)} size="small"
-            sx={{ position: "absolute", top: 8, right: 8, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+            sx={{ position: "absolute", top: 12, right: 12, color: "#9CA3AF", bgcolor: "#F3F4F6", "&:hover": { color: "#111827", bgcolor: "#E5E7EB" } }}>
             <X size={18} />
           </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ pt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-            <TextField required label="Nombre *" value={form.nombre}
-              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-              slotProps={{ inputLabel: { sx: { fontSize: 13 } } }} sx={fieldSx} />
-            <TextField required label="Apellido *" value={form.apellido}
-              onChange={(e) => setForm({ ...form, apellido: e.target.value })}
-              slotProps={{ inputLabel: { sx: { fontSize: 13 } } }} sx={fieldSx} />
+        <Divider />
+
+        {/* CUERPO SCROLLEABLE */}
+        <DialogContent sx={{ px: 3, py: 2, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.75, bgcolor: "#FCFCFD" }}>
+
+          {/* SECCIÓN 1 — INFORMACIÓN PERSONAL */}
+          <Box sx={modalSeccionCard}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
+              <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: "#E8F5E9", color: "#1B5E20", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <User size={14} />
+              </Box>
+              <Box>
+                <Typography sx={modalSeccionTitulo}>Información personal</Typography>
+                <Typography sx={modalSeccionSubtitulo}>Datos básicos del colaborador</Typography>
+              </Box>
+            </Box>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 1.5 }}>
+              <TextField required label="Nombre *" value={form.nombre}
+                onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
+              <TextField required label="Apellido *" value={form.apellido}
+                onChange={(e) => setForm({ ...form, apellido: e.target.value })}
+                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
+              <TextField required label="Cédula *" value={form.cedula}
+                onChange={(e) => setForm({ ...form, cedula: e.target.value })}
+                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
+              <TextField label="Teléfono" value={form.telefono}
+                onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
+              <TextField required label="Correo electrónico *" value={form.correo}
+                onChange={(e) => setForm({ ...form, correo: e.target.value })}
+                error={form.correo.trim() === "" && form.touchedCorreo}
+                helperText={form.correo.trim() === "" && form.touchedCorreo ? "El correo es obligatorio" : ""}
+                onBlur={() => setForm((f) => ({ ...f, touchedCorreo: true }))}
+                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } } }} sx={modalFieldSx} />
+              <TextField label="Fecha de nacimiento" type="date" value={form.fecha_nacimiento}
+                onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })}
+                slotProps={{ inputLabel: { shrink: true, sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
+            </Box>
           </Box>
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-            <TextField required label="Cédula *" value={form.cedula}
-              onChange={(e) => setForm({ ...form, cedula: e.target.value })}
-              slotProps={{ inputLabel: { sx: { fontSize: 13 } } }} sx={fieldSx} />
-            <TextField label="Teléfono" value={form.telefono}
-              onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-              slotProps={{ inputLabel: { sx: { fontSize: 13 } } }} sx={fieldSx} />
+
+          {/* SECCIÓN 2 — INFORMACIÓN LABORAL */}
+          <Box sx={modalSeccionCard}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
+              <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: "#E8F5E9", color: "#1B5E20", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Briefcase size={14} />
+              </Box>
+              <Box>
+                <Typography sx={modalSeccionTitulo}>Información laboral</Typography>
+                <Typography sx={modalSeccionSubtitulo}>Datos del puesto y asignación</Typography>
+              </Box>
+            </Box>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 1.5 }}>
+              <FormControl fullWidth>
+                <InputLabel sx={{ fontSize: 12.5, color: "#6B7280" }}>Área</InputLabel>
+                <Select value={form.area_id} label="Área" sx={{ ...modalSelectSx, ...selectIconAdornment }} MenuProps={selectMenuSx}
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Building2 size={15} style={{ color: "#9CA3AF" }} /></InputAdornment> } }}
+                  onChange={(e) => setForm({ ...form, area_id: e.target.value })}>
+                  <MenuItem value=""><em>Sin área</em></MenuItem>
+                  {areas.map((a) => (
+                    <MenuItem key={a.id} value={String(a.id)}>{a.nombre}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel sx={{ fontSize: 12.5, color: "#6B7280" }}>Cargo</InputLabel>
+                <Select value={form.cargo_id} label="Cargo" sx={{ ...modalSelectSx, ...selectIconAdornment }} MenuProps={selectMenuSx}
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Briefcase size={15} style={{ color: "#9CA3AF" }} /></InputAdornment> } }}
+                  onChange={(e) => setForm({ ...form, cargo_id: e.target.value })}>
+                  <MenuItem value=""><em>Sin cargo</em></MenuItem>
+                  {cargos.filter((c) => c.estado !== "inactivo").map((c) => (
+                    <MenuItem key={c.id} value={String(c.id)}>{c.nombre}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField label="Piso" type="number" value={form.piso}
+                onChange={(e) => setForm({ ...form, piso: e.target.value === "" ? "" : Number(e.target.value) })}
+                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, htmlInput: { min: 1 }, input: { startAdornment: <InputAdornment position="start"><Layers size={15} style={{ color: "#9CA3AF" }} /></InputAdornment> } }} sx={modalFieldSx} />
+              <FormControl fullWidth>
+                <InputLabel sx={{ fontSize: 12.5, color: "#6B7280" }}>Rol del sistema</InputLabel>
+                <Select value={form.rol_id} label="Rol del sistema" sx={{ ...modalSelectSx, ...selectIconAdornment }} MenuProps={selectMenuSx}
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><ShieldCheck size={15} style={{ color: "#9CA3AF" }} /></InputAdornment> } }}
+                  onChange={(e) => setForm({ ...form, rol_id: e.target.value })}>
+                  <MenuItem value=""><em>Sin rol</em></MenuItem>
+                  {roles.map((r) => (
+                    <MenuItem key={r.id} value={String(r.id)}>{r.nombre}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel sx={{ fontSize: 12.5, color: "#6B7280" }}>Horario asignado</InputLabel>
+                <Select value="" label="Horario asignado" disabled sx={{ ...modalSelectSx, ...selectIconAdornment }}
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Clock size={15} style={{ color: "#9CA3AF" }} /></InputAdornment> } }}>
+                  <MenuItem value=""><em>Sin asignar</em></MenuItem>
+                </Select>
+                <Typography sx={{ fontSize: 10.5, color: "#9CA3AF", mt: 0.5 }}>
+                  El horario podrá modificarse posteriormente.
+                </Typography>
+              </FormControl>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <FormControlLabel
+                  control={<Switch checked={form.activo} onChange={(e) => setForm({ ...form, activo: e.target.checked })} />}
+                  label={form.activo ? "Colaborador activo" : "Colaborador inactivo"}
+                  sx={{ "& .MuiFormControlLabel-label": { fontSize: 13.5, fontWeight: 500, color: "#374151" } }}
+                />
+              </Box>
+            </Box>
           </Box>
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-            <TextField label="Correo electrónico" value={form.correo}
-              onChange={(e) => setForm({ ...form, correo: e.target.value })}
-              slotProps={{ inputLabel: { sx: { fontSize: 13 } } }} sx={fieldSx} />
-            <TextField label="Fecha de nacimiento" type="date" value={form.fecha_nacimiento}
-              onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })}
-              slotProps={{ inputLabel: { shrink: true, sx: { fontSize: 13 } } }} sx={fieldSx} />
+
+          {/* SECCIÓN 3 — INFORMACIÓN DE ACCESO */}
+          <Box sx={modalSeccionCard}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
+              <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: "#E8F5E9", color: "#1B5E20", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <KeyRound size={14} />
+              </Box>
+              <Box>
+                <Typography sx={modalSeccionTitulo}>Información de acceso</Typography>
+                <Typography sx={modalSeccionSubtitulo}>Credenciales para ingresar al sistema</Typography>
+              </Box>
+            </Box>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 1.5 }}>
+              <TextField label="Usuario" value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                disabled={!!editando}
+                placeholder="nombre.apellido"
+                helperText={editando ? "El nombre de usuario no se puede cambiar al editar" : "Se genera automáticamente"}
+                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } } }} sx={modalFieldSx} />
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <TextField label="Contraseña temporal" type="password" value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  helperText={editando ? "Dejar vacío para no cambiar" : "Vacío = se usará la cédula"}
+                  slotProps={{
+                    inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } },
+                    input: {
+                      startAdornment: <InputAdornment position="start"><KeyRound size={15} style={{ color: "#9CA3AF" }} /></InputAdornment>,
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton size="small" onClick={handleGenerarPassword} disabled={!!editando}
+                            sx={{ color: "#1B5E20", bgcolor: "#E8F5E9", borderRadius: "8px", "&:hover": { bgcolor: "#C8E6C9" } }}
+                            title="Generar contraseña">
+                            <RefreshCw size={14} />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }} sx={modalFieldSx} />
+                {!editando && (
+                  <TextField label="Confirmar contraseña" type="password" value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    error={confirmPassword !== "" && form.password !== "" && confirmPassword !== form.password}
+                    helperText={confirmPassword !== "" && form.password !== "" && confirmPassword !== form.password ? "Las contraseñas no coinciden" : ""}
+                    slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } } }} sx={modalFieldSx} />
+                )}
+              </Box>
+            </Box>
+            {!editando && (
+              <Button startIcon={<KeyRound size={14} />} onClick={handleGenerarPassword}
+                sx={{ mt: 1.5, borderRadius: "10px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: "#1B5E20", bgcolor: "#E8F5E9", px: 2.5, py: 0.75, "&:hover": { bgcolor: "#C8E6C9" } }}>
+                Generar automáticamente
+              </Button>
+            )}
           </Box>
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel sx={{ fontSize: 13 }}>Área</InputLabel>
-              <Select value={form.area_id} label="Área" sx={selectSx} MenuProps={selectMenuSx}
-                onChange={(e) => setForm({ ...form, area_id: e.target.value })}>
-                <MenuItem value=""><em>Sin área</em></MenuItem>
-                {areas.map((a) => (
-                  <MenuItem key={a.id} value={String(a.id)}>{a.nombre}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel sx={{ fontSize: 13 }}>Cargo</InputLabel>
-              <Select value={form.cargo_id} label="Cargo" sx={selectSx} MenuProps={selectMenuSx}
-                onChange={(e) => setForm({ ...form, cargo_id: e.target.value })}>
-                <MenuItem value=""><em>Sin cargo</em></MenuItem>
-                {cargos.filter((c) => c.estado !== "inactivo").map((c) => (
-                  <MenuItem key={c.id} value={String(c.id)}>{c.nombre}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-            <TextField label="Piso" type="number" value={form.piso}
-              onChange={(e) => setForm({ ...form, piso: e.target.value === "" ? "" : Number(e.target.value) })}
-              slotProps={{ inputLabel: { sx: { fontSize: 13 } }, htmlInput: { min: 1 } }} sx={fieldSx} />
-            <FormControl fullWidth>
-              <InputLabel sx={{ fontSize: 13 }}>Rol del sistema</InputLabel>
-              <Select value={form.rol_id} label="Rol del sistema" sx={selectSx} MenuProps={selectMenuSx}
-                onChange={(e) => setForm({ ...form, rol_id: e.target.value })}>
-                <MenuItem value=""><em>Sin rol</em></MenuItem>
-                {roles.map((r) => (
-                  <MenuItem key={r.id} value={String(r.id)}>{r.nombre}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-            <TextField label="Usuario" value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-              placeholder="nombre.apellido"
-              slotProps={{ inputLabel: { sx: { fontSize: 13 } } }} sx={fieldSx} />
-            <TextField label="Contraseña" type="password" value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              helperText={editando ? "Dejar vacío para no cambiar" : "Vacío = se usará la cédula"}
-              slotProps={{ inputLabel: { sx: { fontSize: 13 } }, formHelperText: { sx: { fontSize: 11 } } }} sx={fieldSx} />
-          </Box>
-          {editando && (
-            <FormControlLabel
-              control={<Switch checked={form.activo} onChange={(e) => setForm({ ...form, activo: e.target.checked })} />}
-              label="Colaborador activo"
-              sx={{ mt: 1, "& .MuiFormControlLabel-label": { fontSize: 14, fontWeight: 500, color: "#374151" } }}
-            />
-          )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+
+        {/* FOOTER FIJO */}
+        <Divider />
+        <DialogActions sx={{ px: 3, py: 2, gap: 1.5 }}>
           <Button onClick={() => setModalAbierto(false)}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: "#6B7280" }}>Cancelar</Button>
-          <Button variant="contained" onClick={handleGuardar}
-            disabled={guardando || !form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim()}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, ...verdeBoton }}>
-            {guardando ? "Guardando..." : editando ? "Actualizar" : "Crear"}
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, fontWeight: 600, color: "#374151", bgcolor: "#FFFFFF", border: "1px solid #D1D5DB", px: 3, py: 0.75, "&:hover": { bgcolor: "#F9FAFB" } }}>
+            Cancelar
+          </Button>
+          <Button variant="contained" startIcon={<Plus size={16} />} onClick={handleGuardar}
+            disabled={guardando || !form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim() || !form.correo.trim()}
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, fontWeight: 600, px: 3.5, py: 0.75, ...verdeBoton }}>
+            {guardando ? "Guardando..." : editando ? "Actualizar colaborador" : "Crear colaborador"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -533,7 +681,7 @@ export default function PersonalPage() {
       {/* CONFIRMAR ELIMINAR */}
       <Dialog open={!!confirmEliminar} onClose={() => setConfirmEliminar(null)} maxWidth="xs" fullWidth
         PaperProps={{ sx: { borderRadius: "16px" } }}>
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>Eliminar colaborador?</DialogTitle>
+        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>Eliminar empleado?</DialogTitle>
         <DialogContent>
           <Typography sx={{ fontSize: 13, color: "#6B7280" }}>
             Se eliminará a <strong>{confirmEliminar?.nombre} {confirmEliminar?.apellido}</strong> de forma permanente. Esta acción no se puede deshacer.
@@ -555,12 +703,12 @@ export default function PersonalPage() {
         <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>Generar usuarios faltantes?</DialogTitle>
         <DialogContent>
           <Typography sx={{ fontSize: 13, color: "#6B7280" }}>
-            Se crearán usuarios para <strong>{pendientes} colaboradores</strong> que aún no tienen acceso al sistema.
+            Se crearán usuarios para <strong>{pendientes} empleados</strong> que aún no tienen acceso al sistema.
             El username se genera automáticamente y la contraseña inicial es la cédula.
           </Typography>
           {pendientes > 0 && (
             <Typography sx={{ fontSize: 13, color: "#6B7280", mt: 1 }}>
-              Se enviará un correo a cada colaborador si SMTP está configurado.
+              Se enviará un correo a cada empleado si SMTP está configurado.
             </Typography>
           )}
         </DialogContent>

@@ -9,6 +9,8 @@ import {
 import theme from "./shared/theme";
 
 import LoginPage from "./features/login/pages/LoginPage";
+import OlvideContrasenaPage from "./features/login/pages/OlvideContrasenaPage";
+import RestablecerContrasenaPage from "./features/login/pages/RestablecerContrasenaPage";
 import DashboardPage from "./features/dashboard/pages/DashboardPage";
 import AsistenciaPage from "./features/asistencia/pages/AsistenciaPage";
 import ReportesPage from "./features/reportes/pages/ReportesPage";
@@ -21,7 +23,10 @@ import IncidenciaExpedientePage from "./features/incidencias/pages/IncidenciaExp
 import AreasPage from "./features/areas/pages/AreasPage";
 import FestivosPage from "./features/festivos/pages/FestivosPage";
 import ConfiguracionPage from "./features/configuracion/pages/ConfiguracionPage";
+import RolesPage from "./features/roles/pages/RolesPage";
+import CopiasSeguridadPage from "./features/copiasSeguridad/pages/CopiasSeguridadPage";
 import MiPerfilPage from "./features/miperfil/pages/MiPerfilPage";
+import MiHorarioPage from "./features/miHorario/pages/MiHorarioPage";
 import MisSolicitudesPage from "./features/misSolicitudes/pages/MisSolicitudesPage";
 import IntegracionesPage from "./features/integraciones/pages/IntegracionesPage";
 import ReportarIncidenciaPage from "./features/reportarIncidencia/pages/ReportarIncidenciaPage";
@@ -56,6 +61,8 @@ export default function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/cambiar-password" element={<CambiarPasswordPage />} />
+        <Route path="/olvide-contrasena" element={<OlvideContrasenaPage />} />
+        <Route path="/restablecer-contrasena" element={<RestablecerContrasenaPage />} />
 
         {/* General */}
         <Route path="/dashboard" element={<R roles={["admin", "talento_humano", "empleado"]}><DashboardPage /></R>} />
@@ -64,7 +71,7 @@ export default function App() {
         <Route path="/personal" element={<R roles={["admin", "talento_humano"]}><PersonalPage /></R>} />
         <Route path="/empleados" element={<Navigate to="/personal" replace />} />
         <Route path="/cargos" element={<R roles={["admin", "talento_humano"]}><CargosPage /></R>} />
-        <Route path="/horarios" element={<R roles={["admin"]}><HorariosPage /></R>} />
+        <Route path="/horarios" element={<R roles={["admin", "talento_humano"]}><HorariosPage /></R>} />
         <Route path="/novedades" element={<R roles={["admin", "talento_humano"]}><NovedadesPage /></R>} />
         <Route path="/areas" element={<R roles={["admin", "talento_humano"]}><AreasPage /></R>} />
         <Route path="/incidencias" element={<R roles={["admin", "talento_humano"]}><IncidenciasPage /></R>} />
@@ -77,11 +84,14 @@ export default function App() {
         {/* Administracion */}
         <Route path="/usuarios" element={<Navigate to="/personal" replace />} />
         <Route path="/configuracion" element={<R roles={["admin"]}><ConfiguracionPage /></R>} />
+        <Route path="/roles" element={<R roles={["admin"]}><RolesPage /></R>} />
+        <Route path="/copias-seguridad" element={<R roles={["admin"]}><CopiasSeguridadPage /></R>} />
         <Route path="/festivos" element={<R roles={["admin", "talento_humano"]}><FestivosPage /></R>} />
         <Route path="/integraciones" element={<R roles={["admin"]}><IntegracionesPage /></R>} />
 
         {/* Empleado */}
         <Route path="/mi-asistencia" element={<ErrorBoundary><Suspense fallback={<div style={{padding:40,textAlign:"center",color:"#9CA3AF"}}>Cargando...</div>}><R roles={["empleado"]}><MiAsistenciaPage /></R></Suspense></ErrorBoundary>} />
+        <Route path="/mi-horario" element={<R roles={["admin", "talento_humano", "empleado"]}><MiHorarioPage /></R>} />
         <Route path="/reportar-incidencia" element={<ErrorBoundary><R roles={["empleado"]}><ReportarIncidenciaPage /></R></ErrorBoundary>} />
         <Route path="/perfil" element={<ErrorBoundary><R roles={["admin", "talento_humano", "empleado"]}><MiPerfilPage /></R></ErrorBoundary>} />
 

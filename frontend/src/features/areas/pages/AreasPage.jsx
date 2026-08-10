@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Box, Button, Paper, TextField, Typography,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  IconButton, Chip, Dialog, DialogTitle, DialogContent, DialogActions,
+  IconButton, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Divider,
   Collapse, FormControl, InputLabel, Select, MenuItem,
   Snackbar, Alert,
 } from "@mui/material";
@@ -113,7 +113,7 @@ export default function AreasPage() {
       {/* HEADER */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
         <Box>
-          <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Inicio / Gestión / Áreas</Typography>
+          <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Inicio / Gestión de mantenimiento / Áreas</Typography>
         </Box>
         {puede("areas", "crear") && (
           <Button variant="contained" startIcon={<Plus size={18} />}
@@ -303,44 +303,85 @@ export default function AreasPage() {
       </Collapse>
 
       {/* MODAL CREAR/EDITAR */}
-      <Dialog open={modal} onClose={() => setModal(false)} maxWidth="sm" fullWidth
-        PaperProps={{ sx: { borderRadius: "16px", position: "relative" } }}
-        sx={{ "& .MuiPaper-root": { backgroundColor: "#F0FDF4" } }}>
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
-          {editando ? "Editar área" : "Nueva área"}
-          <IconButton onClick={() => setModal(false)} size="small" sx={{ position: "absolute", top: 8, right: 8, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+      <Dialog open={modal} onClose={() => setModal(false)} maxWidth="md" fullWidth
+        PaperProps={{ sx: { borderRadius: "18px", position: "relative", boxShadow: "0 24px 70px rgba(0,0,0,0.25)", backgroundColor: "#FFFFFF", maxHeight: "94vh" } }}
+        sx={{ "& .MuiBackdrop-root": { bgcolor: "rgba(17, 24, 39, 0.5)", backdropFilter: "blur(4px)" } }}>
+        <DialogTitle sx={{ px: 3, py: 1.75, position: "relative", pb: 1.25 }}>
+          <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+            <Box sx={{ width: 38, height: 38, borderRadius: "11px", bgcolor: "#E8F5E9", color: "#1B5E20", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Building2 size={19} />
+            </Box>
+            <Box>
+              <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827", lineHeight: 1.2 }}>
+                {editando ? "Editar área" : "Nueva área"}
+              </Typography>
+              <Typography sx={{ fontSize: 11.5, color: "#6B7280", mt: 0.15 }}>
+                {editando ? "Actualiza la información del área." : "Crea una nueva área organizacional para clasificar a los colaboradores."}
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => setModal(false)} size="small" sx={{ position: "absolute", top: 11, right: 11, color: "#9CA3AF", bgcolor: "#F3F4F6", "&:hover": { color: "#111827", bgcolor: "#ECECEC" } }}>
             <X size={18} />
           </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ pt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-          <TextField label="Nombre" value={form.nombre}
-            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            fullWidth slotProps={{ inputLabel: { sx: { fontSize: 13 } } }}
-            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "10px", "& fieldset": { borderColor: "#6B7280" }, "&:hover fieldset": { borderColor: "#374151" } } }} />
-          <FormControl fullWidth>
-            <InputLabel sx={{ fontSize: 13 }}>Piso</InputLabel>
-            <Select value={form.piso} label="Piso"
-              sx={{ borderRadius: "10px", fontSize: 14, "& fieldset": { borderColor: "#6B7280" }, "&:hover fieldset": { borderColor: "#374151" } }}
-              MenuProps={{ PaperProps: { sx: { bgcolor: "#F0FDF4", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } } } }}
-              onChange={(e) => setForm({ ...form, piso: e.target.value })}>
-              <MenuItem value="1">Piso 1</MenuItem>
-              <MenuItem value="2">Piso 2</MenuItem>
-              <MenuItem value="3">Piso 3</MenuItem>
-              <MenuItem value="4">Piso 4</MenuItem>
-              <MenuItem value="5">Piso 5</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField label="Descripción" value={form.descripcion} multiline rows={2}
-            onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-            fullWidth slotProps={{ inputLabel: { sx: { fontSize: 13 } } }}
-            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "10px", "& fieldset": { borderColor: "#6B7280" }, "&:hover fieldset": { borderColor: "#374151" } } }} />
+        <Divider />
+        <DialogContent sx={{ px: 3, py: 1.75, overflowY: "auto", bgcolor: "#FFFFFF" }}>
+          <Box sx={{ border: "1px solid #ECECEC", borderRadius: "12px", bgcolor: "#FFFFFF", p: 2 }}>
+            <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: "#111827", mb: 1.25 }}>
+              Información del área
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5 }}>
+                <Box>
+                  <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5, display: "flex", alignItems: "center", gap: 0.5 }}>
+                    Nombre <span style={{ color: "#DC2626" }}>*</span>
+                  </Typography>
+                  <TextField placeholder="Ej: Recursos Humanos" value={form.nombre}
+                    onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                    fullWidth size="small"
+                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px", bgcolor: "#FFFFFF", minHeight: 40, transition: "border-color 0.2s ease, box-shadow 0.2s ease", "& fieldset": { borderColor: "#D1D5DB" }, "&:hover fieldset": { borderColor: "#9CA3AF" }, "&.Mui-focused fieldset": { borderColor: "#1B5E20" }, "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" } }, "& .MuiInputBase-input": { fontSize: 13 } }} />
+                </Box>
+                <Box>
+                  <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5, display: "flex", alignItems: "center", gap: 0.5 }}>
+                    Piso
+                  </Typography>
+                  <Select value={form.piso} fullWidth size="small"
+                    displayEmpty
+                    sx={{ borderRadius: "12px", fontSize: 13, bgcolor: "#FFFFFF", minHeight: 40, transition: "border-color 0.2s ease, box-shadow 0.2s ease", "& fieldset": { borderColor: "#D1D5DB" }, "&:hover fieldset": { borderColor: "#9CA3AF" }, "&.Mui-focused fieldset": { borderColor: "#1B5E20" }, "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" } }}
+                    MenuProps={{ PaperProps: { sx: { bgcolor: "#FFFFFF", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } } } }}
+                    onChange={(e) => setForm({ ...form, piso: e.target.value })}>
+                    <MenuItem value="" disabled><em>Selecciona un piso</em></MenuItem>
+                    <MenuItem value="1">Piso 1</MenuItem>
+                    <MenuItem value="2">Piso 2</MenuItem>
+                    <MenuItem value="3">Piso 3</MenuItem>
+                    <MenuItem value="4">Piso 4</MenuItem>
+                    <MenuItem value="5">Piso 5</MenuItem>
+                  </Select>
+                  <Typography sx={{ fontSize: 10.5, color: "#9CA3AF", mt: 0.5 }}>
+                    Selecciona el piso donde se encuentra ubicada esta área.
+                  </Typography>
+                </Box>
+              </Box>
+              <Box>
+                <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5, display: "flex", alignItems: "center", gap: 0.5 }}>
+                  Descripción
+                </Typography>
+                <TextField placeholder="Describe brevemente el propósito o funciones del área."
+                  value={form.descripcion} multiline rows={4}
+                  onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+                  fullWidth
+                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px", bgcolor: "#FFFFFF", transition: "border-color 0.2s ease, box-shadow 0.2s ease", "& fieldset": { borderColor: "#D1D5DB" }, "&:hover fieldset": { borderColor: "#9CA3AF" }, "&.Mui-focused fieldset": { borderColor: "#1B5E20" }, "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" } }, "& .MuiInputBase-input": { fontSize: 13 } }} />
+              </Box>
+            </Box>
+          </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+        <Divider />
+        <DialogActions sx={{ px: 3, py: 1.5, gap: 1.5 }}>
           <Button onClick={() => setModal(false)}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: "#6B7280" }}>Cancelar</Button>
-          <Button variant="contained" onClick={guardar} disabled={guardando || !form.nombre.trim() || !form.piso.trim()}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } }}>
-            {guardando ? "Guardando..." : editando ? "Actualizar" : "Crear"}
+            sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: "#6B7280", bgcolor: "#FFFFFF", border: "1px solid #D1D5DB", px: 3, py: 0.6, "&:hover": { bgcolor: "#F3F4F6" } }}>Cancelar</Button>
+          <Button variant="contained" startIcon={editando ? null : <Plus size={15} />} onClick={guardar} disabled={guardando || !form.nombre.trim() || !form.piso.trim()}
+            sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, px: 3.5, py: 0.6, bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } }}>
+            {guardando ? "Guardando..." : editando ? "Actualizar área" : "Crear área"}
           </Button>
         </DialogActions>
       </Dialog>

@@ -87,10 +87,16 @@ exports.obtenerPorId = async (id) => {
 // Hashes password with bcrypt
 exports.crear = async (data) => {
   const { cedula, nombre, apellido, correo, telefono, fecha_nacimiento,
-          cargo_id, area_id, piso, horario_id, activo, rol_id } = data;
+          cargo_id, area_id, piso, activo, rol_id } = data;
 
   if (!nombre || !apellido) {
     throw new Error("nombre y apellido son requeridos");
+  }
+
+  if (!correo || !String(correo).trim()) {
+    const err = new Error("El correo es obligatorio");
+    err.code = "VALIDACION";
+    throw err;
   }
 
   // Auto-generate username from nombre.apellido if not provided
@@ -113,11 +119,11 @@ exports.crear = async (data) => {
 
   const [rows] = await db.query(
     `INSERT INTO usuarios (cedula, nombre, apellido, correo, telefono, fecha_nacimiento,
-                           cargo_id, area_id, piso, horario_id, activo, rol_id,
+                           cargo_id, area_id, piso, activo, rol_id,
                            username, password_hash, password_reset_required)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1) RETURNING id`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true) RETURNING id`,
     [cedula || null, nombre, apellido, correo || null, telefono || null, fecha_nacimiento || null,
-     cargo_id || null, area_id || null, piso ?? null, horario_id || null, activo !== undefined ? activo : 1,
+     cargo_id || null, area_id || null, piso ?? null, activo !== undefined ? activo : 1,
      rol_id || null, username, hash]
   );
   const userId = rows[0].id;
@@ -126,22 +132,37 @@ exports.crear = async (data) => {
 };
 
 // Updates user fields including personal + role
+// NOTE: username is immutable here — it is only assigned on create
+// (auto-generated or explicit). Changing it on update silently breaks the
+// user's login; the UI now disables it when editing, and the backend enforces it.
 exports.actualizar = async (id, data) => {
+  if (data.correo !== undefined && (!data.correo || !String(data.correo).trim())) {
+    const err = new Error("El correo es obligatorio");
+    err.code = "VALIDACION";
+    throw err;
+  }
+
   const camposPermitidos = ["cedula", "nombre", "apellido", "correo", "telefono",
-                            "fecha_nacimiento", "cargo_id", "area_id", "piso", "horario_id",
-                            "activo", "rol_id", "username"];
+                            "fecha_nacimiento", "cargo_id", "area_id", "piso",
+                            "activo", "rol_id"];
   const sets = [];
   const params = [];
 
   for (const campo of camposPermitidos) {
     if (data[campo] !== undefined) {
       sets.push(`${campo} = ?`);
-      params.push(campo === "activo" ? data[campo] : (data[campo] ?? null));
+      // Normalize empty strings to NULL for typed columns (date/integer/role ids).
+      // The UI sends "" for untouched optional fields; PostgreSQL rejects "" for
+      // date/integer types (invalid input syntax). `?? null` alone is NOT enough
+      // because it only handles null/undefined.
+      const valor = data[campo];
+      params.push(campo === "activo" ? valor : (valor === "" ? null : valor));
     }
   }
 
-  // Handle password separately (hash it)
-  if (data.password !== undefined) {
+  // Handle password separately (hash it). Empty string means "don't change":
+  // hashing "" would silently reset the password to an empty value.
+  if (data.password !== undefined && data.password !== "") {
     const hash = await bcrypt.hash(data.password, 10);
     sets.push("password_hash = ?");
     params.push(hash);

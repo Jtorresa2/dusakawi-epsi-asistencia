@@ -46,4 +46,30 @@ async function enviarCredenciales({ email, nombre, username, password, link }) {
   }
 }
 
-module.exports = { enviarCredenciales };
+async function enviarResetPassword({ email, nombre, link }) {
+  const t = getTransporter();
+  if (!t) {
+    console.log('[EMAIL] SMTP no configurado. No se envio correo a', email);
+    return { enviado: false, motivo: 'SMTP no configurado' };
+  }
+  try {
+    await t.sendMail({
+      from: process.env.SMTP_FROM || 'noreply@dusakawiepsi.com',
+      to: email,
+      subject: 'Restablece tu contrasena - Dusakawi EPSI',
+      html: '<div style="font-family:Segoe UI,sans-serif;max-width:500px;margin:auto;padding:20px">' +
+        '<h2 style="color:#1B5E20">Hola, ' + nombre + '!</h2>' +
+        '<p>Recibimos una solicitud para restablecer tu contrasena en el sistema de asistencia <strong>Dusakawi EPSI</strong>.</p>' +
+        '<a href="' + link + '" style="display:inline-block;background:#1B5E20;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin:12px 0">Restablecer contrasena</a>' +
+        '<p style="font-size:12px;color:#6B7280">Este enlace expira en 30 minutos.</p>' +
+        '<p style="font-size:12px;color:#6B7280;margin-top:20px">Si no solicitaste esto, ignora este mensaje.</p></div>',
+    });
+    console.log('[EMAIL] Enviado a', email);
+    return { enviado: true };
+  } catch (err) {
+    console.error('[EMAIL] Error al enviar a', email, err.message);
+    return { enviado: false, motivo: err.message };
+  }
+}
+
+module.exports = { enviarCredenciales, enviarResetPassword };

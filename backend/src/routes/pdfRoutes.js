@@ -2,6 +2,7 @@ const { Router } = require("express");
 const router = Router();
 const pool = require("../config/db");
 const { generarMembrete, generarPlantillaIncidencia } = require("../services/pdfTemplate");
+const calculoHorario = require("../services/calculoHorarioService");
 
 // Plantilla individual de incidencia
 router.get("/incidencias/:id/plantilla", async (req, res) => {
@@ -40,15 +41,18 @@ function calcTardanza(e1, e2) {
   return t;
 }
 
-function determinarEstado(e1, e2, justificado) {
+function determinarEstado(e1, e2, justificado, minutosTardanza, modalidad) {
   if (justificado) return "justificado";
+  // Flexible / por_horas: el sistema solo registra la marcación, nunca
+  // genera ausencia ni tardanza por no marcar (decisión de negocio).
+  if (modalidad === "flexible" || modalidad === "por_horas") return "puntual";
   if (!e1 && !e2) return "ausente";
-  return calcTardanza(e1, e2) > 0 ? "tardanza" : "puntual";
+  return (minutosTardanza || 0) > 0 ? "tardanza" : "puntual";
 }
 
 async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id, area_id) {
   let query = `
-    SELECT a.id, u.cedula,
+    SELECT a.id, u.cedula, u.horario_id, h.modalidad,
       CONCAT(u.nombre, ' ', u.apellido) AS colaborador,
       ar.nombre AS area, ar.piso, a.fecha,
       TO_CHAR(a.fecha_hora_entrada, 'HH24:MI') AS entrada1,
@@ -61,6 +65,7 @@ async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, esta
     FROM asistencia a
     JOIN usuarios u ON a.usuario_id = u.id
     JOIN areas ar ON u.area_id = ar.id
+    LEFT JOIN horarios h ON u.horario_id = h.id
     WHERE 1=1
   `;
   const params = [];
@@ -75,11 +80,68 @@ async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, esta
   if (empleado_id) { query += " AND a.usuario_id = ?"; params.push(empleado_id); }
   query += " ORDER BY ar.nombre, u.nombre";
   const [rows] = await pool.query(query, params);
-  return rows.map((r) => ({
+
+  const pendientes = rows.filter((r) => r.minutos_tardanza == null);
+  if (pendientes.length > 0) {
+    const horarioIds = [...new Set(pendientes.map((r) => r.horario_id).filter(Boolean))];
+    if (horarioIds.length > 0) {
+      const [horarios] = await pool.query(
+        `SELECT h.id AS horario_id, h.modalidad, h.tipo_jornada,
+                h.tolerancia_minutos, h.tolerancia_salida_minutos,
+                hd.dia_semana, hd.hora_entrada_manana, hd.hora_salida_manana,
+                hd.hora_entrada_tarde, hd.hora_salida_tarde
+         FROM horarios h
+         LEFT JOIN horario_detalle hd ON h.id = hd.horario_id
+         WHERE h.id = ANY(?)`,
+        [horarioIds]
+      );
+      const porHorario = new Map();
+      horarios.forEach((h) => {
+        if (!porHorario.has(h.horario_id)) {
+          porHorario.set(h.horario_id, {
+            id: h.horario_id,
+            modalidad: h.modalidad,
+            tipo_jornada: h.tipo_jornada,
+            tolerancia_minutos: h.tolerancia_minutos,
+            tolerancia_salida_minutos: h.tolerancia_salida_minutos,
+            detalles: [],
+          });
+        }
+        if (h.dia_semana) {
+          porHorario.get(h.horario_id).detalles.push({
+            dia_semana: h.dia_semana,
+            hora_entrada_manana: h.hora_entrada_manana,
+            hora_salida_manana: h.hora_salida_manana,
+            hora_entrada_tarde: h.hora_entrada_tarde,
+            hora_salida_tarde: h.hora_salida_tarde,
+          });
+        }
+      });
+      pendientes.forEach((r) => {
+        const horario = porHorario.get(r.horario_id) || null;
+        const detalle = horario
+          ? calculoHorario.detalleParaDia(horario.detalles, calculoHorario.diaSemanaDeFecha(r.fecha))
+          : null;
+        const resultado = calculoHorario.evaluarHorario({
+          horario,
+          detalle,
+          marcaciones: { entrada1: r.entrada1, salida1: r.salida1, entrada2: r.entrada2, salida2: r.salida2 },
+        });
+        r.minutos_tardanza = resultado.minutos_tardanza;
+      });
+    } else {
+      pendientes.forEach((r) => { r.minutos_tardanza = 0; });
+    }
+  }
+
+  return rows.map(({ horario_id, modalidad, ...r }) => ({
     ...r,
     empleado: r.colaborador,
-    minutos_tardanza: r.minutos_tardanza ?? calcTardanza(r.entrada1, r.entrada2),
-    estado: r.estado || determinarEstado(r.entrada1, r.entrada2, false),
+    minutos_tardanza: r.minutos_tardanza ?? 0,
+    estado:
+      r.estado === "justificado" || r.estado === "ausente"
+        ? r.estado
+        : determinarEstado(r.entrada1, r.entrada2, false, r.minutos_tardanza ?? 0, modalidad),
   }));
 }
 
@@ -387,7 +449,7 @@ router.get("/ausencias", async (req, res) => {
       JOIN areas ar ON u.area_id=ar.id
       WHERE a.estado IN('ausente','justificado')
         AND NOT EXISTS (
-          SELECT 1 FROM permisos p
+          SELECT 1 FROM novedades p
           WHERE p.usuario_id = a.usuario_id AND a.fecha BETWEEN p.fecha_desde AND p.fecha_hasta
         )`;
     const p = [];

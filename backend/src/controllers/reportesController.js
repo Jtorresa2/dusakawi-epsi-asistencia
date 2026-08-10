@@ -251,7 +251,7 @@ exports.getReporteAusencias = async (req, res) => {
       FROM asistencia a JOIN usuarios u ON a.usuario_id = u.id JOIN areas ar ON u.area_id = ar.id
       WHERE a.estado IN ('ausente', 'justificado')
         AND NOT EXISTS (
-          SELECT 1 FROM permisos p
+          SELECT 1 FROM novedades p
           WHERE p.usuario_id = a.usuario_id AND a.fecha BETWEEN p.fecha_desde AND p.fecha_hasta
         )
     `;
@@ -329,7 +329,7 @@ exports.getReportePorEmpleado = async (req, res) => {
             WHERE EXTRACT(DOW FROM d) IN (0, 6)
           )
         ELSE 1 END), 0) AS dias_permiso
-      FROM permisos
+      FROM novedades
       WHERE usuario_id = ? AND EXTRACT(MONTH FROM fecha_desde) = ? AND EXTRACT(YEAR FROM fecha_desde) = ?
     `, [targetId, mesConsulta, anioConsulta]);
 

@@ -39,7 +39,6 @@ exports.crearUsuario = async (req, res) => {
       cargo_id: req.body.cargo_id || null,
       area_id: req.body.area_id || null,
       piso: req.body.piso ?? null,
-      horario_id: req.body.horario_id || null,
       activo: req.body.activo !== undefined ? req.body.activo : 1,
       rol_id,
       username,
@@ -170,10 +169,70 @@ exports.generarMasivos = async (req, res) => {
 
 exports.getRoles = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT id, nombre, descripcion FROM roles');
+    const [rows] = await pool.query(`
+      SELECT r.id, r.nombre, r.descripcion, COUNT(u.id) AS cantidad_usuarios
+      FROM roles r
+      LEFT JOIN usuarios u ON u.rol_id = r.id
+      GROUP BY r.id, r.nombre, r.descripcion
+      ORDER BY r.id
+    `);
     res.json({ roles: rows });
   } catch (err) {
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
+  }
+};
+
+exports.getPermisosRol = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rol] = await pool.query('SELECT id FROM roles WHERE id = ?', [id]);
+    if (!rol.length) return res.status(404).json({ mensaje: 'Rol no encontrado' });
+
+    const [rows] = await pool.query(
+      'SELECT permiso FROM rol_permiso WHERE rol_id = ? AND activo = TRUE',
+      [id]
+    );
+    res.json({ permisos: rows.map((r) => r.permiso) });
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
+  }
+};
+
+exports.updateRol = async (req, res) => {
+  const { id } = req.params;
+  const { descripcion, permisos } = req.body;
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const { rows: rol } = await client.query('SELECT id FROM roles WHERE id = $1', [id]);
+    if (!rol.length) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ mensaje: 'Rol no encontrado' });
+    }
+
+    if (descripcion !== undefined) {
+      await client.query('UPDATE roles SET descripcion = $1 WHERE id = $2', [descripcion, id]);
+    }
+
+    await client.query('DELETE FROM rol_permiso WHERE rol_id = $1', [id]);
+
+    if (Array.isArray(permisos) && permisos.length) {
+      const placeholders = permisos.map((_, i) => `($1, $${i + 2}, true)`).join(', ');
+      await client.query(
+        `INSERT INTO rol_permiso (rol_id, permiso, activo) VALUES ${placeholders}`,
+        [id, ...permisos]
+      );
+    }
+
+    await client.query('COMMIT');
+    res.json({ mensaje: 'Rol actualizado correctamente' });
+  } catch (err) {
+    try { await client.query('ROLLBACK'); } catch {}
+    res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
+  } finally {
+    client.release();
   }
 };
 

@@ -155,7 +155,7 @@ export default function IncidenciaDetailModal({ open, onClose, incidencia, rol, 
   return (
     <>
       <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth
-        PaperProps={{ sx: { borderRadius: "20px", maxHeight: "95vh", height: "95vh", overflow: "hidden" } }}>
+        PaperProps={{ sx: { borderRadius: "16px", maxHeight: "95vh", height: "95vh", overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
         {/* ─── HEADER ─── */}
         <Box sx={{ px: 3, py: 2, borderBottom: "1px solid #ECECEC", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -257,7 +257,7 @@ export default function IncidenciaDetailModal({ open, onClose, incidencia, rol, 
                 <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", mb: 1 }}>
                   Documento generado
                 </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2, bgcolor: "#F0FDF4", borderRadius: "12px", p: 2, border: "1px solid #BBF7D0" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2, bgcolor: "#F9FAFB", borderRadius: "12px", p: 2, border: "1px solid #ECECEC" }}>
                   <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: "#D1FAE5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <FileText size={20} color="#16A34A" />
                   </Box>

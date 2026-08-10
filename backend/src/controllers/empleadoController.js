@@ -38,6 +38,9 @@ exports.crear = async (req, res) => {
     res.status(201).json({ mensaje: msg, id: result.id, password: result.password, username: result.username });
   } catch (error) {
     console.error(error);
+    if (error.code === "VALIDACION") {
+      return res.status(400).json({ mensaje: error.message });
+    }
     if (error.code === "23505") {
       return res.status(400).json({ mensaje: "La cédula o correo ya están registrados" });
     }
@@ -63,6 +66,9 @@ exports.actualizar = async (req, res) => {
     res.json({ mensaje: "Empleado actualizado correctamente" });
   } catch (error) {
     console.error(error);
+    if (error.code === "VALIDACION") {
+      return res.status(400).json({ mensaje: error.message });
+    }
     res.status(500).json({ mensaje: "Error al actualizar el empleado" });
   }
 };

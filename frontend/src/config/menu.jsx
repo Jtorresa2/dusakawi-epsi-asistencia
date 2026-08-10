@@ -111,6 +111,11 @@ export const menuPorRol = {
           icon: <Users size={18} />
         },
         {
+          label: "Horarios",
+          path: "/horarios",
+          icon: <Clock3 size={18} />
+        },
+        {
           label: "Incidencias",
           path: "/incidencias",
           icon: <TriangleAlert size={18} />

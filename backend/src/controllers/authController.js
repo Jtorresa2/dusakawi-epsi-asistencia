@@ -1,6 +1,8 @@
 ﻿const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const db = require("../config/db");
+const { enviarResetPassword } = require("../services/emailService");
 
 exports.login = async (req, res) => {
   try {
@@ -123,7 +125,7 @@ exports.cambiarPassword = async (req, res) => {
     if (!valida) return res.status(400).json({ mensaje: "Contrasena actual incorrecta" });
 
     const hash = await bcrypt.hash(password_nuevo, 10);
-    await db.query("UPDATE usuarios SET password_hash = ?, password_reset_required = 0 WHERE id = ?", [hash, usuarioId]);
+    await db.query("UPDATE usuarios SET password_hash = ?, password_reset_required = false WHERE id = ?", [hash, usuarioId]);
 
     // Generar nuevo token
     const [userData] = await db.query(`
@@ -149,6 +151,99 @@ exports.cambiarPassword = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error al cambiar contrasena" });
+  }
+};
+
+exports.solicitarResetPassword = async (req, res) => {
+  try {
+    const { correo } = req.body;
+
+    if (!correo) {
+      return res.status(400).json({ mensaje: "Faltan datos" });
+    }
+
+    const mensajeGenerico = "Si el correo esta registrado, recibiras un enlace para restablecer tu contrasena";
+
+    const [rows] = await db.query(
+      "SELECT id, username, nombre, apellido, correo FROM usuarios WHERE correo = ?",
+      [correo]
+    );
+
+    // Anti-enumeracion: mismo mensaje (y mismo codigo 200) si el correo no existe.
+    if (rows.length === 0) {
+      return res.json({ mensaje: mensajeGenerico });
+    }
+
+    const usuario = rows[0];
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    // Invalida tokens previos del usuario antes de emitir uno nuevo.
+    await db.query(
+      "UPDATE password_reset_tokens SET usado = true WHERE usuario_id = ? AND usado = false",
+      [usuario.id]
+    );
+    await db.query(
+      `INSERT INTO password_reset_tokens (usuario_id, token_hash, expira_en)
+       VALUES (?, ?, now() + interval '30 minutes')`,
+      [usuario.id, tokenHash]
+    );
+
+    const link = `${process.env.FRONTEND_URL || "http://localhost:3000"}/restablecer-contrasena?token=${token}`;
+    await enviarResetPassword({
+      email: usuario.correo,
+      nombre: `${usuario.nombre} ${usuario.apellido}`,
+      link,
+    });
+
+    // Nunca se devuelve el token en la respuesta HTTP.
+    res.json({ mensaje: mensajeGenerico });
+  } catch (error) {
+    console.error("SOLICITAR RESET ERROR:", error);
+    res.status(500).json({ mensaje: "Error al solicitar restablecimiento de contrasena" });
+  }
+};
+
+exports.restablecerPassword = async (req, res) => {
+  try {
+    const { token, password_nuevo } = req.body;
+
+    if (!token || !password_nuevo) {
+      return res.status(400).json({ mensaje: "Faltan datos" });
+    }
+
+    if (password_nuevo.length < 8) {
+      return res.status(400).json({ mensaje: "La contrasena debe tener al menos 8 caracteres" });
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    const [rows] = await db.query(
+      `SELECT t.id, t.usuario_id, t.expira_en, t.usado
+       FROM password_reset_tokens t
+       WHERE t.token_hash = ?`,
+      [tokenHash]
+    );
+
+    if (rows.length === 0 || rows[0].usado) {
+      return res.status(400).json({ mensaje: "Enlace invalido o ya utilizado" });
+    }
+
+    if (new Date(rows[0].expira_en) < new Date()) {
+      return res.status(400).json({ mensaje: "El enlace ha expirado" });
+    }
+
+    const hash = await bcrypt.hash(password_nuevo, 10);
+    await db.query(
+      "UPDATE usuarios SET password_hash = ?, password_reset_required = false WHERE id = ?",
+      [hash, rows[0].usuario_id]
+    );
+    await db.query("UPDATE password_reset_tokens SET usado = true WHERE id = ?", [rows[0].id]);
+
+    res.json({ mensaje: "Contrasena restablecida exitosamente" });
+  } catch (error) {
+    console.error("RESTABLECER RESET ERROR:", error);
+    res.status(500).json({ mensaje: "Error al restablecer contrasena" });
   }
 };
 

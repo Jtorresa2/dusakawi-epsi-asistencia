@@ -9,13 +9,14 @@ import {
 import {
   Search, Users, UserCheck, UserX, UserRound, Download, Plus,
   Copy, ToggleLeft, ToggleRight, Trash2, Users as UsersIcon, X,
+  Eye, Edit3, MoreVertical,
 } from "lucide-react";
 import DataTable from "../../../shared/components/DataTable";
 import Loading from "../../../shared/components/Loading";
 import EmptyState from "../../../shared/components/EmptyState";
+import IconBox from "../../../shared/components/IconBox";
 import CargoModal from "../components/CargoModal";
 import CargoDetailModal from "../components/CargoDetailModal";
-import { cargoColumns } from "../components/columns";
 import {
   obtenerCargos,
   crearCargo,
@@ -39,6 +40,153 @@ const MOCK = [
 const ESTADOS = ["Todos", "Activo", "Inactivo"];
 const AREAS_FALLBACK = ["Todas", "SIAU", "PQR", "Call Center", "Aseguramiento", "Autorización", "Psicología", "Recepción", "Transporte", "MIPRES", "Portabilidad", "Referencia", "Auditoría de Cuentas Médicas", "Radicación", "Archivo", "SARLAFT", "Contabilidad", "Presupuesto", "Cartera", "Recobro", "Dirección Administrativa", "Estadística", "Sistemas", "Tesorería", "Alto Costo", "Baja Complejidad", "Comunicación", "Dirección de Riesgos", "Mediana y Alta Complejidad", "PYM", "Talento Humano", "Calidad", "Gerencia", "Contratación", "Control Interno", "Intercultural", "Jurídica"];
 const ORDENAR = ["Nombre A-Z", "Nombre Z-A", "Más empleados", "Menos empleados"];
+
+const btnBase = {
+  width: 32, height: 32, borderRadius: "8px", border: "none",
+  display: "flex", alignItems: "center", justifyContent: "center",
+  cursor: "pointer", flexShrink: 0, transition: "all .2s ease",
+};
+
+const cargoColumns = ({ onEditar, onVer, onMenuOpen, onNombreClick }) => [
+  {
+    field: "nombre",
+    headerName: "Cargo",
+    flex: 2,
+    minWidth: 160,
+    renderCell: ({ row }) => (
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", minWidth: 0, overflow: "hidden" }}>
+        <IconBox icon={<UserRound />} color="#2E7D32" size={36} iconSize={18} sx={{ flexShrink: 0 }} />
+        <Button
+          onClick={(e) => { e.stopPropagation(); onNombreClick?.(row); }}
+          sx={{
+            fontSize: 14, fontWeight: 600, color: "#111827", textTransform: "none",
+            p: 0, minWidth: 0, textAlign: "left", lineHeight: 1.3,
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            display: "block",
+            "&:hover": { color: "#1B5E20", bgcolor: "transparent" },
+          }}
+        >
+          {row.nombre}
+        </Button>
+      </Box>
+    ),
+  },
+  {
+    field: "areas",
+    headerName: "Área",
+    flex: 1,
+    minWidth: 100,
+    renderCell: ({ row }) => {
+      const area = row.areas || row.area;
+      const label = area && typeof area === "object" ? (area.nombre || area.name) : area;
+      return (
+        <Typography sx={{ fontSize: 13, color: "#6B7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {label || "—"}
+        </Typography>
+      );
+    },
+  },
+  {
+    field: "descripcion",
+    headerName: "Descripción",
+    flex: 1.5,
+    minWidth: 120,
+    renderCell: ({ row }) => (
+      <Typography
+        sx={{
+          fontSize: 13,
+          color: "#6B7280",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {row.descripcion || "—"}
+      </Typography>
+    ),
+  },
+  {
+    field: "empleados_count",
+    headerName: "Empleados",
+    flex: 0.5,
+    minWidth: 80,
+    align: "center",
+    headerAlign: "center",
+    renderCell: ({ row }) => (
+      <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>
+        {row.empleados_count ?? "—"}
+      </Typography>
+    ),
+  },
+  {
+    field: "estado",
+    headerName: "Estado",
+    flex: 0.5,
+    minWidth: 80,
+    align: "center",
+    headerAlign: "center",
+    renderCell: ({ row }) => {
+      const activo = row.estado !== "inactivo";
+      return (
+        <Chip
+          label={activo ? "Activo" : "Inactivo"}
+          size="small"
+          sx={{
+            height: 24,
+            fontSize: 11,
+            fontWeight: 600,
+            bgcolor: activo ? "#E8F5E9" : "#FDECEC",
+            color: activo ? "#1B5E20" : "#DC2626",
+          }}
+        />
+      );
+    },
+  },
+  {
+    field: "acciones",
+    headerName: "Acciones",
+    width: 120,
+    sortable: false,
+    filterable: false,
+    disableColumnMenu: true,
+    align: "center",
+    headerAlign: "center",
+    renderCell: ({ row }) => (
+      <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+        <Box
+          sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }}
+          title="Editar"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEditar(row);
+          }}
+        >
+          <Edit3 size={15} />
+        </Box>
+        <Box
+          sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }}
+          title="Ver"
+          onClick={(e) => {
+            e.stopPropagation();
+            onVer(row);
+          }}
+        >
+          <Eye size={15} />
+        </Box>
+        <Box
+          sx={{ ...btnBase, bgcolor: "#FEF3C7", color: "#92400E", "&:hover": { bgcolor: "#FDE68A" } }}
+          title="Más opciones"
+          onClick={(e) => {
+            e.stopPropagation();
+            onMenuOpen(e, row);
+          }}
+        >
+          <MoreVertical size={15} />
+        </Box>
+      </Box>
+    ),
+  },
+];
 
 export default function CargosPage() {
   const navigate = useNavigate();
@@ -220,7 +368,7 @@ export default function CargosPage() {
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
         <Box>
           <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
-            Inicio / Gestión / Cargos
+            Inicio / Gestión de mantenimiento / Cargos
           </Typography>
         </Box>
         <Button
@@ -389,8 +537,8 @@ export default function CargosPage() {
 
       {/* 8. MODAL EXPORTAR */}
       <Dialog open={openExport} onClose={() => setOpenExport(false)} maxWidth="md" fullWidth
-        sx={{ "& .MuiPaper-root": { backgroundColor: "#E8F5E9" } }}
-        PaperProps={{ sx: { borderRadius: "16px", position: "relative" } }}>
+        sx={{ "& .MuiPaper-root": { backgroundColor: "#FFFFFF" } }}
+        PaperProps={{ sx: { borderRadius: "16px", position: "relative", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
         <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
           Exportar cargos ({filtrados.length})
           <IconButton onClick={() => setOpenExport(false)} size="small" sx={{ position: "absolute", top: 8, right: 8, color: "#9CA3AF", "&:hover": { bgcolor: "#F3F4F6" } }}>

@@ -22,10 +22,10 @@ const estiloBtn = {
 
 const fieldSx = {
   "& .MuiOutlinedInput-root": {
-    borderRadius: "10px", background: "#fff",
-    "& fieldset": { borderColor: "#E5E7EB" },
-    "&:hover fieldset": { borderColor: "#2E7D32" },
-    "&.Mui-focused fieldset": { borderColor: "#1B5E20" },
+    borderRadius: "10px", background: "#FFFFFF",
+    "& fieldset": { borderColor: "#111827" },
+    "&:hover fieldset": { borderColor: "#111827" },
+    "&.Mui-focused fieldset": { borderColor: "#111827" },
   },
   "& .MuiInputLabel-root": { fontSize: 13, color: "#6B7280" },
   "& .MuiInputBase-input": { fontSize: 13 },
@@ -33,10 +33,10 @@ const fieldSx = {
 
 const modalFieldSx = {
   "& .MuiOutlinedInput-root": {
-    borderRadius: "10px", background: "transparent",
-    "& fieldset": { borderColor: "#C8E6C9" },
-    "&:hover fieldset": { borderColor: "#2E7D32" },
-    "&.Mui-focused fieldset": { borderColor: "#1B5E20" },
+    borderRadius: "10px", background: "#FFFFFF",
+    "& fieldset": { borderColor: "#111827" },
+    "&:hover fieldset": { borderColor: "#111827" },
+    "&.Mui-focused fieldset": { borderColor: "#111827" },
   },
   "& .MuiInputLabel-root": { fontSize: 13, color: "#6B7280" },
   "& .MuiInputBase-input": { fontSize: 13 },
@@ -171,7 +171,7 @@ export default function FestivosPage() {
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2.5 }}>
-      <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Inicio / Administración / Festivos</Typography>
+      <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Inicio / Gestión de mantenimiento / Festivos</Typography>
 
       {/* Formulario */}
       <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC" }}>
@@ -242,8 +242,8 @@ export default function FestivosPage() {
       {/* Editar festivo */}
       <Dialog open={!!dialogEditar} onClose={() => setDialogEditar(null)}
         fullWidth maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: "16px", position: "relative" } }}
-        sx={{ "& .MuiPaper-root": { backgroundColor: "#E8F5E9" } }}>
+        PaperProps={{ sx: { borderRadius: "16px", position: "relative", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}
+        sx={{ "& .MuiPaper-root": { backgroundColor: "#FFFFFF" } }}>
         <DialogTitle sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Pencil size={18} color="#2563EB" />
@@ -272,7 +272,7 @@ export default function FestivosPage() {
               <TextField select size="small" value={editForm.tipo}
                 onChange={(e) => setEditForm({ ...editForm, tipo: e.target.value })}
                 sx={{ width: "100%", ...modalFieldSx }}
-                MenuProps={{ PaperProps: { sx: { bgcolor: "#E8F5E9", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } } } }}>
+                MenuProps={{ PaperProps: { sx: { bgcolor: "#FFFFFF", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } } } }}>
                 {TIPOS.map((t) => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
               </TextField>
             </Box>

@@ -392,7 +392,7 @@ export default function IncidenciaExpedientePage() {
           {/* Documentos */}
           <SectionCard title="Documentos">
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2, bgcolor: "#F0FDF4", borderRadius: "10px", p: 2, border: "1px solid #BBF7D0" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2, bgcolor: "#F9FAFB", borderRadius: "10px", p: 2, border: "1px solid #ECECEC" }}>
                 <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "#D1FAE5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <FileText size={18} color="#16A34A" />
                 </Box>

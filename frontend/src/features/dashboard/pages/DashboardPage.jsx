@@ -13,7 +13,7 @@ import TodayActivity from "../components/TodayActivity";
 import ResumenPorArea from "../components/ResumenPorArea";
 
 import { obtenerIndicadores, obtenerResumenPorArea } from "../dashboard.api";
-import { obtenerHorarios } from "../../horarios/horario.api";
+import { obtenerMiHorario } from "../../horarios/horario.api";
 import DashboardSkeleton from "../components/DashboardSkeleton";
 
 const MOCK = {
@@ -47,31 +47,25 @@ const DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "
 function EmployeeDashboard({ usuario }) {
   const navigate = useNavigate();
   const [data] = useState(EMP_MOCK);
-  const [horarioHoy, setHorarioHoy] = useState(null);
+  const [miHorario, setMiHorario] = useState(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const horarios = await obtenerHorarios();
-        const hoy = DIAS[new Date().getDay()];
-        for (const h of horarios) {
-          const d = (h.detalles || []).find((x) => x.dia_semana === hoy);
-          if (d) {
-            setHorarioHoy({
-              entrada1: (d.hora_entrada_manana || "").slice(0, 5),
-              salida1: (d.hora_salida_manana || "").slice(0, 5),
-              entrada2: (d.hora_entrada_tarde || "").slice(0, 5),
-              salida2: (d.hora_salida_tarde || "").slice(0, 5),
-            });
-            return;
-          }
-        }
-        setHorarioHoy(null);
+        setMiHorario(await obtenerMiHorario());
       } catch {
-        setHorarioHoy(null);
+        setMiHorario({ asignado: false });
       }
     })();
   }, []);
+
+  const hoy = DIAS[new Date().getDay()];
+  const detalleHoy = miHorario?.asignado
+    ? (miHorario.horario.detalles || []).find((x) => x.dia_semana === hoy)
+    : null;
+  const horarioNombre = miHorario?.asignado ? miHorario.horario.nombre : "";
+  const esFlexible = miHorario?.asignado &&
+    (miHorario.horario.modalidad === "flexible" || miHorario.horario.tipo_jornada === "por_horas");
 
   const myCards = [
     { title: "Mi puntualidad", value: `${data.puntualidad}%`, icon: <Clock3 />, color: "#2E7D32" },
@@ -102,19 +96,35 @@ function EmployeeDashboard({ usuario }) {
         {/* Horario hoy */}
         <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: "1px solid #ECECEC" }}>
           <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", mb: 2 }}>Mi horario hoy</Typography>
-          {horarioHoy ? (
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <Box sx={{ flex: 1, textAlign: "center", p: 1.5, bgcolor: "#F0FDF4", borderRadius: "12px" }}>
-                <Typography sx={{ fontSize: 11, color: "#9CA3AF", mb: 0.5 }}>Mañana</Typography>
-                <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>{horarioHoy.entrada1} → {horarioHoy.salida1}</Typography>
+          {miHorario === null ? (
+            <Typography sx={{ fontSize: 13, color: "#9CA3AF", textAlign: "center", py: 2 }}>Cargando...</Typography>
+          ) : detalleHoy ? (
+            <>
+              <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#1B5E20", mb: 1.5 }}>Horario hoy: {horarioNombre}</Typography>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Box sx={{ flex: 1, textAlign: "center", p: 1.5, bgcolor: "#F0FDF4", borderRadius: "12px" }}>
+                  <Typography sx={{ fontSize: 11, color: "#9CA3AF", mb: 0.5 }}>Mañana</Typography>
+                  <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>{(detalleHoy.hora_entrada_manana || "").slice(0, 5)} → {(detalleHoy.hora_salida_manana || "").slice(0, 5)}</Typography>
+                </Box>
+                <Box sx={{ flex: 1, textAlign: "center", p: 1.5, bgcolor: "#EFF6FF", borderRadius: "12px" }}>
+                  <Typography sx={{ fontSize: 11, color: "#9CA3AF", mb: 0.5 }}>Tarde</Typography>
+                  <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>{(detalleHoy.hora_entrada_tarde || "").slice(0, 5)} → {(detalleHoy.hora_salida_tarde || "").slice(0, 5)}</Typography>
+                </Box>
               </Box>
-              <Box sx={{ flex: 1, textAlign: "center", p: 1.5, bgcolor: "#EFF6FF", borderRadius: "12px" }}>
-                <Typography sx={{ fontSize: 11, color: "#9CA3AF", mb: 0.5 }}>Tarde</Typography>
-                <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>{horarioHoy.entrada2} → {horarioHoy.salida2}</Typography>
-              </Box>
+            </>
+          ) : esFlexible ? (
+            <Box sx={{ textAlign: "center", py: 1.5 }}>
+              <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#D97706" }}>Horario flexible</Typography>
+              <Typography
+                onClick={() => navigate("/mi-horario")}
+                sx={{ fontSize: 13, color: "#1565C0", textDecoration: "underline", cursor: "pointer", mt: 0.5, "&:hover": { color: "#0D47A1" } }}>
+                Consulta tu horario en Mi horario
+              </Typography>
             </Box>
-          ) : (
+          ) : miHorario?.asignado ? (
             <Typography sx={{ fontSize: 14, color: "#9CA3AF", textAlign: "center", py: 2 }}>Descanso 🎉</Typography>
+          ) : (
+            <Typography sx={{ fontSize: 14, color: "#9CA3AF", textAlign: "center", py: 2 }}>Sin horario asignado</Typography>
           )}
         </Paper>
 

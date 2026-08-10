@@ -1,5 +1,6 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { menuPorRol } from "../menu";
 
 const EXPANDIDO = 260;
@@ -15,10 +16,27 @@ const scrollStyle = `
 
 export default function Sidebar({ abierto, setAbierto, isMobile }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const menuRef = useRef(null);
   const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
   const menu = menuPorRol[usuario.rol] || [];
+
+  const [seccionesAbiertas, setSeccionesAbiertas] = useState(() => {
+    const inicial = {};
+    menu.forEach((grupo) => {
+      inicial[grupo.section] = false;
+    });
+    const grupoActivo = menu.find((grupo) =>
+      grupo.items.some((item) => item.path === location.pathname)
+    );
+    if (grupoActivo) inicial[grupoActivo.section] = true;
+    return inicial;
+  });
+
+  const toggleSeccion = (section) => {
+    setSeccionesAbiertas((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -61,6 +79,88 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
     transition: "width .3s cubic-bezier(.4,0,.2,1)",
   };
 
+  const renderItem = (item) => (
+    <NavLink
+      key={item.path}
+      to={item.path}
+      onClick={() => { if (isMobile) setAbierto(false); }}
+      style={({ isActive }) => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: abierto ? "flex-start" : "center",
+        gap: 12,
+        textDecoration: "none",
+        borderRadius: 10,
+        marginBottom: 3,
+        marginLeft: abierto ? 0 : 8,
+        marginRight: abierto ? 0 : 8,
+        padding: abierto ? "10px 14px" : "10px 0",
+        color: isActive ? "#fff" : "rgba(255,255,255,.7)",
+        background: isActive ? "rgba(255,255,255,.13)" : "transparent",
+        transition: "all .2s",
+      })}
+    >
+      <div style={{ display: "flex", opacity: 0.9, flexShrink: 0 }}>{item.icon}</div>
+      {abierto && <span style={{ fontSize: 14, whiteSpace: "nowrap" }}>{item.label}</span>}
+    </NavLink>
+  );
+
+  const renderGrupo = (grupo) => {
+    if (grupo.items.length === 1 && !grupo.accordion) {
+      return (
+        <div key={grupo.section} style={{ marginBottom: 20 }}>
+          <div style={{
+            color: "rgba(255,255,255,.35)",
+            fontSize: 10, fontWeight: 700,
+            letterSpacing: "1.5px", marginBottom: 8,
+            paddingLeft: 12,
+          }}>
+            {grupo.section}
+          </div>
+          {renderItem(grupo.items[0])}
+        </div>
+      );
+    }
+
+    const abierta = !!seccionesAbiertas[grupo.section];
+
+    return (
+      <div key={grupo.section} style={{ marginBottom: 20 }}>
+        <button
+          onClick={() => toggleSeccion(grupo.section)}
+          style={{
+            width: "100%",
+            boxSizing: "border-box",
+            border: "none",
+            background: "transparent",
+            color: "rgba(255,255,255,.35)",
+            fontSize: 10, fontWeight: 700,
+            letterSpacing: "1.5px",
+            marginBottom: 8,
+            padding: "0 12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            cursor: "pointer",
+            fontFamily: "inherit",
+          }}
+        >
+          <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{grupo.section}</span>
+          {abierta ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        </button>
+        <div style={{
+          display: "grid",
+          gridTemplateRows: abierta ? "1fr" : "0fr",
+          transition: "grid-template-rows .3s ease",
+        }}>
+          <div style={{ overflow: "hidden", minHeight: 0 }}>
+            {grupo.items.map(renderItem)}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <aside style={{ ...baseStyle, ...(isMobile ? mobileStyle : desktopStyle) }}>
       <div style={{
@@ -98,45 +198,13 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
         flex: 1, overflowY: "auto", overflowX: "hidden",
         padding: abierto ? "20px 16px" : "20px 0",
       }}>
-        {menu.map((grupo) => (
-          <div key={grupo.section} style={{ marginBottom: 20 }}>
-            {abierto && (
-              <div style={{
-                color: "rgba(255,255,255,.35)",
-                fontSize: 10, fontWeight: 700,
-                letterSpacing: "1.5px", marginBottom: 8,
-                paddingLeft: 12,
-              }}>
-                {grupo.section}
+        {!abierto
+          ? menu.map((grupo) => (
+              <div key={grupo.section} style={{ marginBottom: 20 }}>
+                {grupo.items.map(renderItem)}
               </div>
-            )}
-            {grupo.items.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                onClick={() => { if (isMobile) setAbierto(false); }}
-                style={({ isActive }) => ({
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: abierto ? "flex-start" : "center",
-                  gap: 12,
-                  textDecoration: "none",
-                  borderRadius: 10,
-                  marginBottom: 3,
-                  marginLeft: abierto ? 0 : 8,
-                  marginRight: abierto ? 0 : 8,
-                  padding: abierto ? "10px 14px" : "10px 0",
-                  color: isActive ? "#fff" : "rgba(255,255,255,.7)",
-                  background: isActive ? "rgba(255,255,255,.13)" : "transparent",
-                  transition: "all .2s",
-                })}
-              >
-                <div style={{ display: "flex", opacity: 0.9, flexShrink: 0 }}>{item.icon}</div>
-                {abierto && <span style={{ fontSize: 14, whiteSpace: "nowrap" }}>{item.label}</span>}
-              </NavLink>
-            ))}
-          </div>
-        ))}
+            ))
+          : menu.map(renderGrupo)}
       </div>
 
       <div ref={menuRef} style={{

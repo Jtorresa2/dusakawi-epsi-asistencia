@@ -6,7 +6,7 @@ import {
 const TIPOS = ["Tardanza", "Permiso", "Incapacidad", "Vacaciones", "Ausencia", "Salida anticipada", "Olvido de marcación"];
 const ESTADOS = ["Pendiente", "Aprobada", "Rechazada"];
 
-const inputSx = { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#ECECEC" } };
+const inputSx = { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: "#FFFFFF", "& fieldset": { borderColor: "#111827" }, "&:hover fieldset": { borderColor: "#111827" }, "&.Mui-focused fieldset": { borderColor: "#111827" } };
 
 export default function IncidenciaModal({ open, onClose, onGuardar, incidencia }) {
   const [form, setForm] = useState({
@@ -39,7 +39,7 @@ export default function IncidenciaModal({ open, onClose, onGuardar, incidencia }
 
   return (
     <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-      <Paper elevation={0} sx={{ borderRadius: "20px", p: 3, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+      <Paper elevation={0} sx={{ borderRadius: "16px", p: 3, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", bgcolor: "#FFFFFF" }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2.5}>
           <Typography sx={{ fontSize: 17, fontWeight: 700, color: "#111827" }}>
             {incidencia ? "Editar incidencia" : "Nueva incidencia"}

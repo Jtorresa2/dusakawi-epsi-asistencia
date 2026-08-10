@@ -1,6 +1,7 @@
 const pool = require("../config/db");
 const fs = require("fs");
 const path = require("path");
+const calculoHorario = require("./calculoHorarioService");
 
 const UPLOADS_DIR = path.join(__dirname, "../../uploads");
 
@@ -69,6 +70,7 @@ exports.obtenerPorId = async (id) => {
 
 exports.obtenerAsistenciaRelacionada = async (usuarioId, fecha) => {
   try {
+    const diaSemana = calculoHorario.diaSemanaDeFecha(fecha);
     const [rows] = await pool.query(
       `SELECT
         a.fecha_hora_entrada,
@@ -76,16 +78,22 @@ exports.obtenerAsistenciaRelacionada = async (usuarioId, fecha) => {
         a.minutos_tardanza,
         a.tipo_marcacion,
         a.estado AS estado_marcacion,
-        TO_CHAR(MIN(hd.hora_entrada_manana), 'HH24:MI') AS hora_entrada_programada,
-        TO_CHAR(MIN(hd.hora_salida_manana), 'HH24:MI') AS hora_salida_programada
+        h.modalidad,
+        TO_CHAR(hd.hora_entrada_manana, 'HH24:MI') AS hora_entrada_programada,
+        TO_CHAR(hd.hora_salida_manana, 'HH24:MI') AS hora_salida_programada
        FROM asistencia a
        LEFT JOIN usuarios u ON a.usuario_id = u.id
-       LEFT JOIN horario_detalle hd ON u.horario_id = hd.horario_id
+       LEFT JOIN horarios h ON u.horario_id = h.id
+       LEFT JOIN horario_detalle hd ON h.id = hd.horario_id AND hd.dia_semana = ?
        WHERE a.usuario_id = ? AND a.fecha = ?
-       GROUP BY a.id`,
-      [usuarioId, fecha]
+       GROUP BY a.id, h.modalidad, hd.hora_entrada_manana, hd.hora_salida_manana`,
+      [diaSemana, usuarioId, fecha]
     );
-    return rows[0] || null;
+    const fila = rows[0] || null;
+    if (fila && (fila.modalidad === "flexible" || fila.modalidad === "por_horas")) {
+      fila.minutos_tardanza = 0;
+    }
+    return fila;
   } catch {
     return null;
   }

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import {
   Box, Button, Paper, TextField, Typography, Select, MenuItem, Autocomplete, Menu, Chip, IconButton,
-  InputAdornment, Snackbar, Alert,
+  InputAdornment, Snackbar, Alert, Divider,
 } from "@mui/material";
 import {
   Search, Users, UserCheck, UserX, FileText, Download, Plus, Clock, X, Filter,
-  CircleArrowOutUpRight, CircleCheckBig, Ban, Fingerprint, CalendarDays,
+  CircleArrowOutUpRight, CircleCheckBig, Ban, Fingerprint, CalendarDays, Sun, Moon, ClipboardCheck,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import DataTable from "../../../shared/components/DataTable";
@@ -271,7 +271,7 @@ export default function AsistenciaPage() {
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
         <Box>
           <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
-            Inicio / Operación / Asistencia
+            Inicio / Gestión del personal / Asistencia
           </Typography>
         </Box>
         <Button
@@ -525,7 +525,7 @@ function DetalleAsistenciaModal({ open, onClose, row }) {
   const salidaTardeEsperada = esLyM ? "18:00" : "17:00";
   const turnos = [
     { label: "Mañana", entrada: row.entrada1, salida: row.salida1, esperadoE: "07:00", esperadoS: "12:00", color: "#1B5E20", bg: "#F0FFF4" },
-    { label: "Tarde", entrada: row.entrada2, salida: row.salida2, esperadoE: "14:00", esperadoS: salidaTardeEsperada, color: "#D97706", bg: "#FFF7ED" },
+    { label: "Tarde", entrada: row.entrada2, salida: row.salida2, esperadoE: "14:00", esperadoS: salidaTardeEsperada, color: "#1B5E20", bg: "#F0FFF4" },
   ];
 
   const tipoIconMap = {
@@ -543,7 +543,10 @@ function DetalleAsistenciaModal({ open, onClose, row }) {
 
   return (
     <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-      <Paper elevation={0} sx={{ borderRadius: "20px", p: 3, width: "100%", maxWidth: 560, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+      <Paper elevation={0} sx={{ position: "relative", borderRadius: "16px", p: 3, width: "100%", maxWidth: 560, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", bgcolor: "#FFFFFF" }}>
+        <IconButton onClick={onClose} size="small" sx={{ position: "absolute", top: 12, right: 12, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+          <X size={18} />
+        </IconButton>
         <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2.5}>
           <Box>
             <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>{row.empleado}</Typography>
@@ -553,7 +556,6 @@ function DetalleAsistenciaModal({ open, onClose, row }) {
             <Typography sx={{ fontSize: 11, fontWeight: 600, px: 1.2, py: 0.4, borderRadius: "8px", bgcolor: ec.bg, color: ec.color, textTransform: "capitalize" }}>
               {row.estado}
             </Typography>
-            <button onClick={onClose} style={{ border: "none", background: "none", fontSize: 18, cursor: "pointer", color: "#9CA3AF" }}>✕</button>
           </Box>
         </Box>
 
@@ -634,11 +636,17 @@ function EditarAsistenciaModal({ open, onClose, row, onGuardar }) {
 
   if (!open || !row) return null;
 
-  const inputSx = { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#ECECEC" } };
+  const inputSx = {
+    borderRadius: "10px", fontSize: 13, height: 40, py: 0,
+    background: "#FFFFFF",
+    "& fieldset": { borderColor: "#111827" },
+    "&:hover fieldset": { borderColor: "#111827" },
+    "&.Mui-focused fieldset": { borderColor: "#111827" },
+  };
 
   return (
     <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-      <Paper elevation={0} sx={{ position: "relative", borderRadius: "20px", p: 3, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+      <Paper elevation={0} sx={{ position: "relative", borderRadius: "16px", p: 3, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", bgcolor: "#FFFFFF" }}>
         <IconButton onClick={onClose} size="small" sx={{ position: "absolute", top: 12, right: 12, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
           <X size={18} />
         </IconButton>
@@ -655,7 +663,7 @@ function EditarAsistenciaModal({ open, onClose, row, onGuardar }) {
           </Box>
 
           {/* TURNO MAÑANA */}
-          <Box sx={{ bgcolor: "#F0FFF4", borderRadius: "12px", p: 2 }}>
+          <Box sx={{ bgcolor: "#FFFFFF", borderRadius: "12px", p: 2 }}>
             <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#1B5E20", mb: 1.5 }}>Turno mañana</Typography>
             <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
               <Box>
@@ -670,8 +678,8 @@ function EditarAsistenciaModal({ open, onClose, row, onGuardar }) {
           </Box>
 
           {/* TURNO TARDE */}
-          <Box sx={{ bgcolor: "#FFF7ED", borderRadius: "12px", p: 2 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#D97706", mb: 1.5 }}>Turno tarde</Typography>
+          <Box sx={{ bgcolor: "#FFFFFF", borderRadius: "12px", p: 2 }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#1B5E20", mb: 1.5 }}>Turno tarde</Typography>
             <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
               <Box>
                 <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Entrada</Typography>
@@ -742,16 +750,10 @@ function RegistroManualModal({ open, onClose, onGuardar, areas = [] }) {
     tipo_marcacion: "manual", observacion: "",
   });
   const [empleados, setEmpleados] = useState([]);
-  const [filtroArea, setFiltroArea] = useState("Todas");
-
-  const empleadosFiltrados = filtroArea === "Todas"
-    ? empleados
-    : empleados.filter((e) => (e.area || e.area_nombre) === filtroArea);
 
   useEffect(() => {
     if (!open) return;
     setForm({ usuario_id: "", fecha: new Date().toISOString().split("T")[0], entrada1: "07:00", salida1: "12:00", entrada2: "14:00", salida2: "17:00", tipo_marcacion: "manual", observacion: "" });
-    setFiltroArea("Todas");
     (async () => {
       try {
         const token = localStorage.getItem("token");
@@ -764,103 +766,135 @@ function RegistroManualModal({ open, onClose, onGuardar, areas = [] }) {
 
   if (!open) return null;
 
-  const inputSx = { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#ECECEC" } };
+  const inputSx = {
+    borderRadius: "10px", fontSize: 13, height: 40, bgcolor: "#FFFFFF",
+    "& fieldset": { borderColor: "#111827" },
+    "&:hover fieldset": { borderColor: "#111827" },
+    "&.Mui-focused fieldset": { borderColor: "#111827" },
+  };
+
+  const labelSx = { fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.6 };
 
   return (
-    <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-      <Paper elevation={0} sx={{ position: "relative", borderRadius: "20px", p: 3, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
-        <IconButton onClick={onClose} size="small" sx={{ position: "absolute", top: 12, right: 12, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
-          <X size={18} />
-        </IconButton>
-        <Typography sx={{ fontSize: 17, fontWeight: 700, color: "#111827", mb: 2.5 }}>Registro manual</Typography>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Filtrar por área</Typography>
-            <Select value={filtroArea} onChange={(e) => setFiltroArea(e.target.value)} size="small" fullWidth sx={inputSx}>
-              {[{ nombre: "Todas" }, ...areas].map((a) => <MenuItem key={a.nombre} value={a.nombre}>{a.nombre}</MenuItem>)}
-            </Select>
+    <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(17, 24, 39, 0.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
+      <Paper elevation={0} sx={{ position: "relative", borderRadius: "16px", width: "100%", maxWidth: 760, maxHeight: "90vh", overflow: "auto", boxShadow: "0 8px 30px rgba(0,0,0,0.12)", bgcolor: "#FFFFFF" }}>
+        {/* HEADER */}
+        <Box sx={{ p: 3, pb: 2.5, pr: 6 }}>
+          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
+            <Box sx={{ width: 42, height: 42, borderRadius: "12px", bgcolor: "#E8F5E9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <ClipboardCheck size={22} color="#1B5E20" />
+            </Box>
+            <Box>
+              <Typography sx={{ fontSize: 17, fontWeight: 700, color: "#111827" }}>Registro manual</Typography>
+              <Typography sx={{ fontSize: 13, color: "#6B7280", mt: 0.5, lineHeight: 1.5 }}>
+                Registra manualmente una asistencia cuando el empleado no pudo marcar normalmente.
+              </Typography>
+            </Box>
           </Box>
-          <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Empleado</Typography>
-            <Autocomplete
-              options={empleadosFiltrados}
-              getOptionLabel={(e) => `${e.nombre} ${e.apellido || ""} — ${e.cedula}`}
-              isOptionEqualToValue={(e, v) => e.id === v.id}
-              onChange={(_, value) => setForm({ ...form, usuario_id: value?.id || "" })}
-              noOptionsText="Sin resultados"
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Buscar por nombre o cédula..."
-                  InputProps={{
-                    ...params.InputProps,
-                    startAdornment: <Search size={16} style={{ color: "#9CA3AF", marginRight: 4 }} />,
-                    sx: { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#ECECEC" } },
-                  }}
-                />
-              )}
-            />
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Fecha</Typography>
-            <TextField type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+          <IconButton onClick={onClose} size="small" sx={{ position: "absolute", top: 14, right: 14, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+            <X size={18} />
+          </IconButton>
+        </Box>
+        <Divider sx={{ borderColor: "#F3F4F6" }} />
+
+        {/* BODY */}
+        <Box sx={{ p: 3, pt: 2.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
+          {/* Fila 1: Empleado + Fecha */}
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 170px" }, gap: 2 }}>
+            <Box>
+              <Typography sx={labelSx}>Empleado</Typography>
+              <Autocomplete
+                options={empleados}
+                getOptionLabel={(e) => `${e.nombre} ${e.apellido || ""} — ${e.cedula}`}
+                isOptionEqualToValue={(e, v) => e.id === v.id}
+                onChange={(_, value) => setForm({ ...form, usuario_id: value?.id || "" })}
+                noOptionsText="Sin resultados"
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Buscar por nombre o cédula..."
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: <Search size={16} style={{ color: "#9CA3AF", marginRight: 4 }} />,
+                      sx: { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: "#FFFFFF", "& fieldset": { borderColor: "#111827" } },
+                    }}
+                  />
+                )}
+              />
+            </Box>
+            <Box>
+              <Typography sx={labelSx}>Fecha</Typography>
+              <TextField type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+            </Box>
           </Box>
 
-          {/* TURNO MAÑANA */}
-          <Box sx={{ bgcolor: "#F0FFF4", borderRadius: "12px", p: 2 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#1B5E20", mb: 1.5 }}>
-              Turno mañana
-            </Typography>
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-              <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Entrada</Typography>
-                <TextField type="time" value={form.entrada1} onChange={(e) => setForm({ ...form, entrada1: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+          {/* JORNADAS (lado a lado) */}
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+            {/* JORNADA MAÑANA */}
+            <Box sx={{ border: "1px solid #E5E7EB", borderRadius: "14px", p: 2.5, bgcolor: "#FFFFFF" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
+                <Box sx={{ width: 36, height: 36, borderRadius: "50%", bgcolor: "#E8F5E9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Sun size={17} color="#1B5E20" />
+                </Box>
+                <Box>
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Jornada mañana</Typography>
+                  <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>Primer bloque de trabajo</Typography>
+                </Box>
               </Box>
-              <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Salida</Typography>
-                <TextField type="time" value={form.salida1} onChange={(e) => setForm({ ...form, salida1: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+                <Box>
+                  <Typography sx={labelSx}>Entrada</Typography>
+                  <TextField type="time" value={form.entrada1} onChange={(e) => setForm({ ...form, entrada1: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+                </Box>
+                <Box>
+                  <Typography sx={labelSx}>Salida</Typography>
+                  <TextField type="time" value={form.salida1} onChange={(e) => setForm({ ...form, salida1: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+                </Box>
+              </Box>
+            </Box>
+
+            {/* JORNADA TARDE */}
+            <Box sx={{ border: "1px solid #E5E7EB", borderRadius: "14px", p: 2.5, bgcolor: "#FFFFFF" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
+                <Box sx={{ width: 36, height: 36, borderRadius: "50%", bgcolor: "#E8F5E9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Moon size={17} color="#1B5E20" />
+                </Box>
+                <Box>
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Jornada tarde</Typography>
+                  <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>Segundo bloque de trabajo</Typography>
+                </Box>
+              </Box>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+                <Box>
+                  <Typography sx={labelSx}>Entrada</Typography>
+                  <TextField type="time" value={form.entrada2} onChange={(e) => setForm({ ...form, entrada2: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+                </Box>
+                <Box>
+                  <Typography sx={labelSx}>Salida</Typography>
+                  <TextField type="time" value={form.salida2} onChange={(e) => setForm({ ...form, salida2: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
+                </Box>
               </Box>
             </Box>
           </Box>
 
-          {/* TURNO TARDE */}
-          <Box sx={{ bgcolor: "#FFF7ED", borderRadius: "12px", p: 2 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#D97706", mb: 1.5 }}>
-              Turno tarde
-            </Typography>
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-              <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Entrada</Typography>
-                <TextField type="time" value={form.entrada2} onChange={(e) => setForm({ ...form, entrada2: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Salida</Typography>
-                <TextField type="time" value={form.salida2} onChange={(e) => setForm({ ...form, salida2: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
-              </Box>
+          {/* OBSERVACIÓN */}
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.6 }}>
+              <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280" }}>Observación</Typography>
+              <Typography sx={{ fontSize: 11, color: "#9CA3AF" }}>Opcional</Typography>
             </Box>
+            <TextField multiline minRows={3} value={form.observacion} onChange={(e) => setForm({ ...form, observacion: e.target.value })} placeholder="Agregar una observación sobre este registro..." fullWidth slotProps={{ input: { sx: { ...inputSx, height: "auto", py: 1.5, resize: "vertical", alignItems: "flex-start" } } }} />
           </Box>
+        </Box>
 
-          <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Tipo de marcación</Typography>
-            <Select value={form.tipo_marcacion} onChange={(e) => setForm({ ...form, tipo_marcacion: e.target.value })} size="small" fullWidth sx={inputSx}>
-              <MenuItem value="manual">Manual</MenuItem>
-              <MenuItem value="huella">Huella</MenuItem>
-              <MenuItem value="facial">Facial</MenuItem>
-              <MenuItem value="tarjeta">Tarjeta</MenuItem>
-            </Select>
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Observación</Typography>
-            <TextField multiline rows={2} value={form.observacion} onChange={(e) => setForm({ ...form, observacion: e.target.value })} placeholder="Motivo del registro manual..." fullWidth slotProps={{ input: { sx: { ...inputSx, height: "auto", py: 1, resize: "vertical" } } }} />
-          </Box>
-          <Box display="flex" gap={1} justifyContent="flex-end" mt={1}>
-            <Button onClick={onClose} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 3, color: "#6B7280", borderColor: "#ECECEC", "&:hover": { borderColor: "#1B5E20" } }} variant="outlined">
-              Cancelar
-            </Button>
-            <Button onClick={() => onGuardar(form)} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 3, bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } }} variant="contained">
-              Guardar
-            </Button>
-          </Box>
+        {/* FOOTER */}
+        <Box sx={{ p: 3, pt: 2, borderTop: "1px solid #F3F4F6", display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
+          <Button onClick={onClose} variant="outlined" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 42, px: 3, color: "#6B7280", borderColor: "#D1D5DB", bgcolor: "#FFFFFF", "&:hover": { borderColor: "#9CA3AF", bgcolor: "#F9FAFB" } }}>
+            Cancelar
+          </Button>
+          <Button onClick={() => onGuardar(form)} variant="contained" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 42, px: 3.5, bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } }}>
+            Guardar registro
+          </Button>
         </Box>
       </Paper>
     </Box>

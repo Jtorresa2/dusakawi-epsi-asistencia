@@ -47,10 +47,16 @@ CREATE TABLE IF NOT EXISTS cargos (
 
 -- 4. horarios
 CREATE TABLE IF NOT EXISTS horarios (
-    id                SERIAL PRIMARY KEY,
-    nombre            VARCHAR(100) NOT NULL,
-    tolerancia_minutos INTEGER DEFAULT 0,
-    creado_en         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id                        SERIAL PRIMARY KEY,
+    nombre                    VARCHAR(100) NOT NULL,
+    tolerancia_minutos        INTEGER DEFAULT 0,
+    modalidad                 VARCHAR(20) NOT NULL DEFAULT 'estricto',
+    tipo_jornada              VARCHAR(20) NOT NULL DEFAULT 'fija',
+    descripcion               TEXT,
+    horas_esperadas           DECIMAL(4,2),
+    activo                    BOOLEAN NOT NULL DEFAULT TRUE,
+    tolerancia_salida_minutos INTEGER NOT NULL DEFAULT 0,
+    creado_en                 TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 5. horario_detalle
@@ -140,8 +146,8 @@ CREATE TABLE IF NOT EXISTS configuracion (
     actualizado_en  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 10. permisos
-CREATE TABLE IF NOT EXISTS permisos (
+-- 10. novedades
+CREATE TABLE IF NOT EXISTS novedades (
     id                    SERIAL PRIMARY KEY,
     usuario_id            INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE NO ACTION,
     fecha_desde           DATE NOT NULL,
@@ -181,6 +187,18 @@ CREATE TABLE IF NOT EXISTS reportes_historial (
     filtros          TEXT,
     total_registros  INTEGER DEFAULT 0,
     fecha_generacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 13. asignaciones_horario
+CREATE TABLE IF NOT EXISTS asignaciones_horario (
+    id               SERIAL PRIMARY KEY,
+    usuario_id       INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    horario_id       INTEGER NOT NULL REFERENCES horarios(id),
+    vigencia_desde   DATE NOT NULL DEFAULT CURRENT_DATE,
+    vigencia_hasta   DATE,
+    motivo           VARCHAR(255),
+    asignado_por     INTEGER REFERENCES usuarios(id),
+    creado_en        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =============================================
@@ -257,11 +275,18 @@ INSERT INTO cargos (id, nombre, descripcion, estado, area_id) VALUES
 ON CONFLICT (id) DO NOTHING;
 SELECT setval('cargos_id_seq', 10, true);
 
--- Horario
-INSERT INTO horarios (id, nombre, tolerancia_minutos) VALUES
-    (1, 'Administrativo', 5)
+-- Horarios (6 originales + Call Center + Operativo de Aseo del módulo Horarios)
+INSERT INTO horarios (id, nombre, tolerancia_minutos, modalidad, tipo_jornada, horas_esperadas, descripcion) VALUES
+    (1, 'Horario completo', 5, 'estricto', 'fija', NULL, NULL),
+    (2, 'Jornada Completa Viernes', 5, 'estricto', 'fija', NULL, NULL),
+    (3, 'Jornada Mañana', 5, 'estricto', 'fija', NULL, NULL),
+    (4, 'Jornada Tarde L-J', 5, 'estricto', 'fija', NULL, NULL),
+    (5, 'Jornada Tarde Viernes', 5, 'estricto', 'fija', NULL, NULL),
+    (6, 'Administrativo', 5, 'estricto', 'fija', NULL, NULL),
+    (7, 'Call Center', 0, 'flexible', 'por_horas', 6.50, 'Jornada por horas trabajadas (6h, 6.5h, nocturno 11h)'),
+    (8, 'Operativo de Aseo', 0, 'estricto', 'fija', NULL, 'Horario fijo 06:00-11:00 y 13:00-15:00')
 ON CONFLICT (id) DO NOTHING;
-SELECT setval('horarios_id_seq', 1, true);
+SELECT setval('horarios_id_seq', 8, true);
 
 -- Horario detalle (Lunes a Viernes)
 INSERT INTO horario_detalle (horario_id, dia_semana, hora_entrada_manana, hora_salida_manana, hora_entrada_tarde, hora_salida_tarde) VALUES
@@ -270,6 +295,15 @@ INSERT INTO horario_detalle (horario_id, dia_semana, hora_entrada_manana, hora_s
     (1, 'Miércoles', '07:00', '12:00', '14:00', '17:00'),
     (1, 'Jueves',    '07:00', '12:00', '14:00', '17:00'),
     (1, 'Viernes',   '07:00', '12:00', '14:00', '17:00')
+ON CONFLICT (horario_id, dia_semana) DO NOTHING;
+
+-- Horario detalle Operativo de Aseo (Lunes a Viernes — el Sábado se retiró por confirmación del cliente)
+INSERT INTO horario_detalle (horario_id, dia_semana, hora_entrada_manana, hora_salida_manana, hora_entrada_tarde, hora_salida_tarde) VALUES
+    (8, 'Lunes',     '06:00', '11:00', '13:00', '15:00'),
+    (8, 'Martes',    '06:00', '11:00', '13:00', '15:00'),
+    (8, 'Miércoles', '06:00', '11:00', '13:00', '15:00'),
+    (8, 'Jueves',    '06:00', '11:00', '13:00', '15:00'),
+    (8, 'Viernes',   '06:00', '11:00', '13:00', '15:00')
 ON CONFLICT (horario_id, dia_semana) DO NOTHING;
 
 -- Usuarios (datos personales incluidos directamente, sin empleado_id)

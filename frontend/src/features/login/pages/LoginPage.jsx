@@ -153,6 +153,19 @@ export default function LoginPage() {
           >
             Acceder al sistema
           </button>
+
+          <div style={{ textAlign: "center", marginTop: "1rem" }}>
+            <Link
+              to="/olvide-contrasena"
+              style={{
+                background: "none", border: "none", color: "#2e7d32",
+                fontSize: "13px", cursor: "pointer", textDecoration: "underline",
+                padding: "4px"
+              }}
+            >
+              ¿Olvidaste tu contrasena?
+            </Link>
+          </div>
         </div>
       </div>
 
