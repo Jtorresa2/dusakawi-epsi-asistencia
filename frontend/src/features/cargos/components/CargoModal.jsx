@@ -13,24 +13,13 @@ import {
   Select,
 } from "@mui/material";
 import { X, Briefcase, Save } from "lucide-react";
-
-const PALETA = {
-  verdeOscuro: "#1B5E20",
-  verde: "#2E7D32",
-  verdeClaro: "#E8F5E9",
-  borde: "#ECECEC",
-  bordeInput: "#D1D5DB",
-  grisClaro: "#F3F4F6",
-  gris: "#9CA3AF",
-  grisTexto: "#6B7280",
-  texto: "#111827",
-  rojo: "#DC2626",
-};
+import { COLORES } from "../../../shared/constants/colores.js";
+import { PALETA } from "../../../shared/constants/paleta.js";
 
 const fieldSx = {
   "& .MuiOutlinedInput-root": {
     borderRadius: "12px",
-    bgcolor: "#FFFFFF",
+    bgcolor: COLORES.fondoBlanco,
     minHeight: 40,
     transition: "border-color 0.2s ease, box-shadow 0.2s ease",
     "& fieldset": { borderColor: PALETA.bordeInput },
@@ -47,8 +36,8 @@ const labelSx = { fontSize: 12, fontWeight: 600, color: PALETA.grisTexto, mb: 0.
 const asterisco = <span style={{ color: PALETA.rojo }}>*</span>;
 
 const selectMenuSx = {
-  PaperProps: {
-    sx: { bgcolor: "#FFFFFF", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } },
+  slotProps: {
+    paper: { sx: { bgcolor: COLORES.fondoBlanco, "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } } },
   },
 };
 
@@ -68,8 +57,8 @@ export default function CargoModal({
       onClose={onClose}
       fullWidth
       maxWidth="md"
-      PaperProps={{
-        sx: { borderRadius: "18px", position: "relative", boxShadow: "0 24px 70px rgba(0,0,0,0.25)", backgroundColor: "#FFFFFF", maxHeight: "94vh" },
+      slotProps={{
+        paper: { sx: { borderRadius: "18px", position: "relative", boxShadow: "0 24px 70px rgba(0,0,0,0.25)", backgroundColor: COLORES.fondoBlanco, maxHeight: "94vh" } },
       }}
       sx={{ "& .MuiBackdrop-root": { bgcolor: "rgba(17, 24, 39, 0.5)", backdropFilter: "blur(4px)" } }}
     >
@@ -91,7 +80,7 @@ export default function CargoModal({
             </Typography>
           </Box>
         </Box>
-        <IconButton onClick={onClose} size="small"
+        <IconButton aria-label="Cerrar" onClick={onClose} size="small"
           sx={{ position: "absolute", top: 11, right: 11, color: PALETA.gris, bgcolor: PALETA.grisClaro, "&:hover": { color: PALETA.texto, bgcolor: PALETA.borde } }}>
           <X size={18} />
         </IconButton>
@@ -99,8 +88,8 @@ export default function CargoModal({
       <Divider />
 
       {/* CUERPO */}
-      <DialogContent sx={{ px: 3, py: 1.75, overflowY: "auto", bgcolor: "#FFFFFF" }}>
-        <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: "#FFFFFF", p: 2 }}>
+      <DialogContent sx={{ px: 3, py: 1.75, overflowY: "auto", bgcolor: COLORES.fondoBlanco }}>
+        <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: COLORES.fondoBlanco, p: 2 }}>
           <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: PALETA.texto, mb: 1.25 }}>
             Información del cargo
           </Typography>
@@ -130,7 +119,6 @@ export default function CargoModal({
                 fullWidth
                 size="small"
                 displayEmpty
-                MenuProps={selectMenuSx}
                 sx={fieldSx}
                 slotProps={{
                   input: {
@@ -138,6 +126,7 @@ export default function CargoModal({
                       <Briefcase size={15} style={{ color: PALETA.gris, marginRight: 6 }} />
                     ),
                   },
+                  menu: selectMenuSx,
                 }}
               >
                 <MenuItem value="">
@@ -164,7 +153,7 @@ export default function CargoModal({
               onChange={onChange}
               fullWidth
               size="small"
-              MenuProps={selectMenuSx}
+              slotProps={{ menu: selectMenuSx }}
               sx={{ maxWidth: 260, ...fieldSx }}
             >
               <MenuItem value="activo">Activo</MenuItem>
@@ -195,7 +184,7 @@ export default function CargoModal({
       <DialogActions sx={{ px: 3, py: 1.5, gap: 1.5 }}>
         <Button
           onClick={onClose}
-          sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: PALETA.grisTexto, bgcolor: "#FFFFFF", border: `1px solid ${PALETA.bordeInput}`, px: 3, py: 0.6, "&:hover": { bgcolor: PALETA.grisClaro } }}
+          sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: PALETA.grisTexto, bgcolor: COLORES.fondoBlanco, border: `1px solid ${PALETA.bordeInput}`, px: 3, py: 0.6, "&:hover": { bgcolor: PALETA.grisClaro } }}
         >
           Cancelar
         </Button>

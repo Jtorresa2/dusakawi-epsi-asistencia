@@ -13,21 +13,8 @@ import {
   FileText, CalendarDays, Clock, Sun, Moon, Calendar, Timer, UserCheck,
   CheckCircle, XCircle, Hourglass, Download, AlertCircle, ShieldAlert, X,
 } from "lucide-react";
-
-const PALETA = {
-  verdeOscuro: "#1B5E20",
-  verde: "#2E7D32",
-  verdeClaro: "#E8F5E9",
-  borde: "#ECECEC",
-  grisClaro: "#F3F4F6",
-  gris: "#9CA3AF",
-  grisTexto: "#6B7280",
-  texto: "#111827",
-  rojo: "#DC2626",
-  rojoBg: "#FDECEC",
-  amber: "#92400E",
-  amberBg: "#FEF3C7",
-};
+import { COLORES } from "../../../shared/constants/colores.js";
+import { PALETA } from "../../../shared/constants/paleta.js";
 
 const tipoNovedadConfig = {
   permiso: { label: "Permiso" },
@@ -48,7 +35,7 @@ const modalidadConfig = {
 const estadoWorkflowMap = {
   aprobado: { label: "Aprobado", color: PALETA.verdeOscuro, bg: PALETA.verdeClaro, icon: <CheckCircle size={13} /> },
   pendiente: { label: "Pendiente", color: PALETA.amber, bg: PALETA.amberBg, icon: <Hourglass size={13} /> },
-  rechazado: { label: "Rechazado", color: PALETA.rojo, bg: PALETA.rojoBg, icon: <XCircle size={13} /> },
+  rechazado: { label: "Rechazado", color: PALETA.rojo, bg: COLORES.dangerFondo, icon: <XCircle size={13} /> },
 };
 
 function obtenerEstado(novedad) {
@@ -110,7 +97,7 @@ function formatFecha(fecha) {
 const infoCardSx = {
   border: `1px solid ${PALETA.borde}`,
   borderRadius: "14px",
-  bgcolor: "#FFFFFF",
+  bgcolor: COLORES.fondoBlanco,
   p: 1.5,
   transition: "all 0.2s ease",
   "&:hover": { borderColor: PALETA.gris, boxShadow: "0 4px 14px rgba(0,0,0,0.06)" },
@@ -150,19 +137,21 @@ export default function NovedadDetailModal({ open, onClose, novedad }) {
       fullWidth
       maxWidth="md"
       transitionDuration={200}
-      PaperProps={{
-        sx: {
-          borderRadius: "18px",
-          position: "relative",
-          boxShadow: "0 24px 70px rgba(0,0,0,0.25)",
-          backgroundColor: "#FFFFFF",
-          overflow: "hidden",
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: "18px",
+            position: "relative",
+            boxShadow: "0 24px 70px rgba(0,0,0,0.25)",
+            backgroundColor: COLORES.fondoBlanco,
+            overflow: "hidden",
+          },
         },
       }}
       sx={{ "& .MuiBackdrop-root": { bgcolor: "rgba(17, 24, 39, 0.5)", backdropFilter: "blur(4px)" } }}
     >
       {/* HEADER */}
-      <DialogTitle sx={{ px: 3, py: 2, pr: 7, bgcolor: "#FFFFFF" }}>
+      <DialogTitle sx={{ px: 3, py: 2, pr: 7, bgcolor: COLORES.fondoBlanco }}>
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
           <Box sx={{ flex: "1 1 200px", minWidth: 0 }}>
             <Typography sx={{ fontSize: 17, fontWeight: 700, color: PALETA.texto, lineHeight: 1.25 }}>
@@ -184,7 +173,7 @@ export default function NovedadDetailModal({ open, onClose, novedad }) {
       <Divider />
 
       {/* FILA 1 — Tipo / Modalidad / Días hábiles / Jornada */}
-      <DialogContent sx={{ px: 3, py: 1.5, bgcolor: "#FFFFFF" }}>
+      <DialogContent sx={{ px: 3, py: 1.5, bgcolor: COLORES.fondoBlanco }}>
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "1fr 1fr 1fr 1fr" }, gap: 1.25 }}>
           <InfoCard icon={<FileText size={14} />} label="Tipo" valor={tipoCfg.label} />
           <InfoCard icon={durCfg.icon} label="Modalidad" valor={durCfg.label} />
@@ -194,7 +183,7 @@ export default function NovedadDetailModal({ open, onClose, novedad }) {
       </DialogContent>
 
       {/* FILA 2 — Fecha inicio / Fecha fin / Duración */}
-      <DialogContent sx={{ px: 3, py: 0.5, bgcolor: "#FFFFFF" }}>
+      <DialogContent sx={{ px: 3, py: 0.5, bgcolor: COLORES.fondoBlanco }}>
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 1.25 }}>
           <InfoCard icon={<Calendar size={14} />} label="Fecha inicio" valor={formatFecha(novedad.fecha_desde)} />
           <InfoCard icon={<Calendar size={14} />} label="Fecha fin" valor={formatFecha(novedad.fecha_hasta)} />
@@ -203,7 +192,7 @@ export default function NovedadDetailModal({ open, onClose, novedad }) {
       </DialogContent>
 
       {/* FILA 3 — Motivo (ancho completo) */}
-      <DialogContent sx={{ px: 3, py: 0.5, bgcolor: "#FFFFFF" }}>
+      <DialogContent sx={{ px: 3, py: 0.5, bgcolor: COLORES.fondoBlanco }}>
         <Box sx={infoCardSx}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.4 }}>
             <FileText size={14} style={{ color: PALETA.gris }} />
@@ -214,7 +203,7 @@ export default function NovedadDetailModal({ open, onClose, novedad }) {
       </DialogContent>
 
       {/* FILA 4 — Información del registro */}
-      <DialogContent sx={{ px: 3, py: 1, bgcolor: "#FFFFFF" }}>
+      <DialogContent sx={{ px: 3, py: 1, bgcolor: COLORES.fondoBlanco }}>
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: nombreSolicitante ? "1fr 1fr 1fr" : "1fr 1fr" }, gap: 1.25 }}>
           <InfoCard icon={<UserCheck size={14} />} label="Registrado por" valor={novedad.registrado_por_nombre || "—"} />
           <InfoCard icon={<Clock size={14} />} label="Fecha de registro" valor={formatFecha(novedad.creado_en)} />
@@ -226,7 +215,7 @@ export default function NovedadDetailModal({ open, onClose, novedad }) {
 
       {/* ADJUNTOS (solo si existen) */}
       {tieneAdjuntos && (
-        <DialogContent sx={{ px: 3, py: 1, pb: 2, bgcolor: "#FFFFFF" }}>
+        <DialogContent sx={{ px: 3, py: 1, pb: 2, bgcolor: COLORES.fondoBlanco }}>
           <Box sx={infoCardSx}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.75 }}>
               <Download size={14} style={{ color: PALETA.gris }} />
@@ -235,13 +224,13 @@ export default function NovedadDetailModal({ open, onClose, novedad }) {
             <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
               {novedad.archivo_solicitud && (
                 <Link href={novedad.archivo_solicitud} target="_blank" underline="hover"
-                  sx={{ fontSize: 12.5, fontWeight: 600, color: "#1565C0", cursor: "pointer" }}>
+                  sx={{ fontSize: 12.5, fontWeight: 600, color: COLORES.primarioOscuro, cursor: "pointer" }}>
                   Ver solicitud
                 </Link>
               )}
               {novedad.archivo_firmado && (
                 <Link href={novedad.archivo_firmado} target="_blank" underline="hover"
-                  sx={{ fontSize: 12.5, fontWeight: 600, color: "#1565C0", cursor: "pointer" }}>
+                  sx={{ fontSize: 12.5, fontWeight: 600, color: COLORES.primarioOscuro, cursor: "pointer" }}>
                   Ver respuesta firmada
                 </Link>
               )}

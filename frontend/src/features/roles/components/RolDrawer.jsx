@@ -7,6 +7,7 @@ import {
 import { Close } from "@mui/icons-material";
 import { MODULOS_PERMISOS, ACCIONES } from "../config/modulosPermisos";
 import { obtenerPermisosRol, guardarRol } from "../roles.api";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const ACCION_LABELS = {
   ver: "Ver",
@@ -17,7 +18,7 @@ const ACCION_LABELS = {
   exportar: "Exportar",
 };
 
-const verdeBoton = { bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } };
+const verdeBoton = { bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } };
 
 export default function RolDrawer({ open, rol, onClose, onSuccess, onError }) {
   const [tab, setTab] = useState(0);
@@ -98,10 +99,10 @@ export default function RolDrawer({ open, rol, onClose, onSuccess, onError }) {
 
   const campoInfo = (label, value) => (
     <Box>
-      <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.03em", mb: 0.5 }}>
+      <Typography sx={{ fontSize: 11, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", letterSpacing: "0.03em", mb: 0.5 }}>
         {label}
       </Typography>
-      <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{value}</Typography>
+      <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>{value}</Typography>
     </Box>
   );
 
@@ -110,29 +111,31 @@ export default function RolDrawer({ open, rol, onClose, onSuccess, onError }) {
       anchor="right"
       open={open}
       onClose={onClose}
-      PaperProps={{
-        sx: {
-          width: { xs: "100%", sm: 640 },
-          borderLeft: "1px solid #ECECEC",
-          borderRadius: 0,
-          background: "#fff",
+      slotProps={{
+        backdrop: { sx: { bgcolor: "rgba(17,24,39,0.12)" } },
+        paper: {
+          sx: {
+            width: { xs: "100%", sm: 640 },
+            borderLeft: `1px solid ${COLORES.grisContorno}`,
+            borderRadius: 0,
+            background: COLORES.fondoBlanco,
+          },
         },
       }}
-      slotProps={{ backdrop: { sx: { bgcolor: "rgba(17,24,39,0.12)" } } }}
     >
       {/* HEADER */}
-      <Box sx={{ px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #ECECEC" }}>
+      <Box sx={{ px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${COLORES.grisContorno}` }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>{rol?.nombre || "Rol"}</Typography>
-          <Chip label="Activo" size="small" sx={{ height: 20, fontSize: 11, fontWeight: 600, bgcolor: "#D1FAE5", color: "#065F46" }} />
+          <Typography sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario }}>{rol?.nombre || "Rol"}</Typography>
+          <Chip label="Activo" size="small" sx={{ height: 20, fontSize: 11, fontWeight: 600, bgcolor: COLORES.successFondo, color: COLORES.verdeTexto }} />
         </Box>
-        <IconButton onClick={onClose} size="small" sx={{ color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+        <IconButton aria-label="Cerrar" onClick={onClose} size="small" sx={{ color: COLORES.textoSuave, "&:hover": { color: COLORES.textoTerciario, bgcolor: COLORES.fondoGris2 } }}>
           <Close />
         </IconButton>
       </Box>
 
       {/* TABS */}
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ px: 2, borderBottom: "1px solid #ECECEC", minHeight: 44, "& .MuiTab-root": { textTransform: "none", fontSize: 13, fontWeight: 600, minHeight: 44, color: "#6B7280" }, "& .Mui-selected": { color: "#1B5E20" }, "& .MuiTabs-indicator": { bgcolor: "#1B5E20" } }}>
+      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ px: 2, borderBottom: `1px solid ${COLORES.grisContorno}`, minHeight: 44, "& .MuiTab-root": { textTransform: "none", fontSize: 13, fontWeight: 600, minHeight: 44, color: COLORES.textoTerciario }, "& .Mui-selected": { color: COLORES.primarioOscuro }, "& .MuiTabs-indicator": { bgcolor: COLORES.primarioOscuro } }}>
         <Tab label="Información General" />
         <Tab label="Permisos" />
       </Tabs>
@@ -156,9 +159,9 @@ export default function RolDrawer({ open, rol, onClose, onSuccess, onError }) {
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "10px",
-                "& fieldset": { borderColor: "#6B7280" },
-                "&:hover fieldset": { borderColor: "#374151" },
-                "&.Mui-focused fieldset": { borderColor: "#1B5E20" },
+                "& fieldset": { borderColor: COLORES.textoTerciario },
+                "&:hover fieldset": { borderColor: COLORES.textoSecundario },
+                "&.Mui-focused fieldset": { borderColor: COLORES.primarioOscuro },
               },
             }}
           />
@@ -167,16 +170,16 @@ export default function RolDrawer({ open, rol, onClose, onSuccess, onError }) {
         <Box sx={{ p: 3 }}>
           {cargando ? (
             <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress size={28} sx={{ color: "#1B5E20" }} />
+              <CircularProgress size={28} sx={{ color: COLORES.primarioOscuro }} />
             </Box>
           ) : (
-            <TableContainer sx={{ border: "1px solid #ECECEC", borderRadius: "12px", overflowX: "auto" }}>
+            <TableContainer sx={{ border: `1px solid ${COLORES.grisContorno}`, borderRadius: "12px", overflowX: "auto" }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", bgcolor: "#F9FAFB", py: 1 }}>Módulo</TableCell>
+                    <TableCell sx={{ fontSize: 11, fontWeight: 600, color: COLORES.textoTerciario, bgcolor: COLORES.fondoGris, py: 1 }}>Módulo</TableCell>
                     {ACCIONES.map((a) => (
-                      <TableCell key={a} align="center" sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", bgcolor: "#F9FAFB", py: 1, whiteSpace: "nowrap" }}>
+                      <TableCell key={a} align="center" sx={{ fontSize: 11, fontWeight: 600, color: COLORES.textoTerciario, bgcolor: COLORES.fondoGris, py: 1, whiteSpace: "nowrap" }}>
                         {ACCION_LABELS[a]}
                       </TableCell>
                     ))}
@@ -186,8 +189,8 @@ export default function RolDrawer({ open, rol, onClose, onSuccess, onError }) {
                   {MODULOS_PERMISOS.map((seccion) => (
                     <TableRow key={seccion.id} sx={{ "& > td": { borderBottom: "none", p: 0 }, "&:last-child td": { pb: 0 } }}>
                       <TableCell colSpan={1 + ACCIONES.length} sx={{ p: 0 }}>
-                        <Box sx={{ bgcolor: "#F9FAFB", px: 1.5, py: 0.75, display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid #ECECEC" }}>
-                          <Typography sx={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+                        <Box sx={{ bgcolor: COLORES.fondoGris, px: 1.5, py: 0.75, display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${COLORES.grisContorno}` }}>
+                          <Typography sx={{ fontSize: 11, fontWeight: 700, color: COLORES.textoSuave, textTransform: "uppercase", letterSpacing: "0.03em" }}>
                             {seccion.titulo}
                           </Typography>
                           <FormControlLabel
@@ -196,29 +199,29 @@ export default function RolDrawer({ open, rol, onClose, onSuccess, onError }) {
                                 size="small"
                                 checked={seccionCompleta(seccion)}
                                 onChange={() => toggleSeccion(seccion)}
-                                sx={{ p: 0.5, color: "#9CA3AF", "&.Mui-checked": { color: "#1B5E20" } }}
+                                sx={{ p: 0.5, color: COLORES.textoSuave, "&.Mui-checked": { color: COLORES.primarioOscuro } }}
                               />
                             }
-                            label={<Typography sx={{ fontSize: 11, color: "#9CA3AF" }}>Todo</Typography>}
+                            label={<Typography sx={{ fontSize: 11, color: COLORES.textoSuave }}>Todo</Typography>}
                             sx={{ m: 0 }}
                           />
                         </Box>
                         <Table size="small" sx={{ width: "100%" }}>
                           <TableBody>
                             {seccion.modulos.map((m) => (
-                              <TableRow key={m.clave} sx={{ "&:hover": { bgcolor: "#F9FAFB" } }}>
-                                <TableCell sx={{ fontSize: 13, color: "#374151", borderBottom: "1px solid #F3F4F6", py: 0.5, pl: 1.5 }}>{m.nombre}</TableCell>
+                              <TableRow key={m.clave} sx={{ "&:hover": { bgcolor: COLORES.fondoGris } }}>
+                                <TableCell sx={{ fontSize: 13, color: COLORES.textoSecundario, borderBottom: `1px solid ${COLORES.fondoGris2}`, py: 0.5, pl: 1.5 }}>{m.nombre}</TableCell>
                                 {ACCIONES.map((a) => {
                                   const clave = `${m.clave}.${a}`;
                                   const marcado = permisos.has(clave);
                                   return (
-                                    <TableCell key={a} align="center" sx={{ borderBottom: "1px solid #F3F4F6", py: 0.5 }}>
+                                    <TableCell key={a} align="center" sx={{ borderBottom: `1px solid ${COLORES.fondoGris2}`, py: 0.5 }}>
                                       <Tooltip title={marcado ? "Quitar" : "Marcar"}>
                                         <Checkbox
                                           size="small"
                                           checked={marcado}
                                           onChange={() => togglePermiso(clave)}
-                                          sx={{ p: 0.75, color: "#D1D5DB", "&.Mui-checked": { color: "#1B5E20" } }}
+                                          sx={{ p: 0.75, color: COLORES.borde2, "&.Mui-checked": { color: COLORES.primarioOscuro } }}
                                         />
                                       </Tooltip>
                                     </TableCell>
@@ -238,12 +241,12 @@ export default function RolDrawer({ open, rol, onClose, onSuccess, onError }) {
         </Box>
       )}
 
-      <Divider sx={{ borderColor: "#ECECEC", mt: "auto" }} />
+      <Divider sx={{ borderColor: COLORES.grisContorno, mt: "auto" }} />
 
       {/* FOOTER */}
-      <Box sx={{ px: 3, py: 2, display: "flex", justifyContent: "flex-end", gap: 1.5, background: "#FCFDFC" }}>
+      <Box sx={{ px: 3, py: 2, display: "flex", justifyContent: "flex-end", gap: 1.5, background: COLORES.fondoGris }}>
         <Button onClick={onClose} disabled={guardando}
-          sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: "#6B7280", borderColor: "#D1D5DB" }} variant="outlined">
+          sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: COLORES.textoTerciario, borderColor: COLORES.borde2 }} variant="outlined">
           Cancelar
         </Button>
         <Button variant="contained" onClick={handleGuardar} disabled={guardando}

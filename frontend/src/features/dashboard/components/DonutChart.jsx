@@ -1,7 +1,8 @@
 import { Paper, Typography, Box } from "@mui/material";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { COLORES } from "../../../shared/constants/colores.js";
 
-const COLORS = ["#2E7D32", "#DC2626", "#D97706", "#0891B2"];
+const COLORS = [COLORES.primario, COLORES.danger, COLORES.warning, COLORES.verdeTexto];
 
 export default function DonutChart({ data = {} }) {
   const items = [
@@ -13,11 +14,11 @@ export default function DonutChart({ data = {} }) {
 
   return (
     <Paper elevation={0} sx={{
-      p: 3, borderRadius: "20px", border: "1px solid #ECECEC",
+      p: 3, borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`,
       height: 320,
       display: "flex", flexDirection: "column", justifyContent: "space-between",
     }}>
-      <Typography sx={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
+      <Typography sx={{ fontSize: 15, fontWeight: 600, color: COLORES.textoPrimario }}>
         Estadísticas de asistencia
       </Typography>
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, flex: 1, alignItems: "center" }}>
@@ -32,12 +33,12 @@ export default function DonutChart({ data = {} }) {
         </Box>
         <Box>
           {items.map((item, i) => (
-            <Box key={item.name} display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 0.5 }}>
-              <Box display="flex" alignItems="center" gap={0.6}>
+            <Box key={item.name} sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
                 <Box sx={{ width: 8, height: 8, borderRadius: "3px", bgcolor: COLORS[i], flexShrink: 0 }} />
-                <Typography sx={{ fontSize: 11, color: "#6B7280", whiteSpace: "nowrap" }}>{item.name}</Typography>
+                <Typography sx={{ fontSize: 11, color: COLORES.textoTerciario, whiteSpace: "nowrap" }}>{item.name}</Typography>
               </Box>
-              <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#111827" }}>{item.value}</Typography>
+              <Typography sx={{ fontSize: 11, fontWeight: 600, color: COLORES.textoPrimario }}>{item.value}</Typography>
             </Box>
           ))}
         </Box>

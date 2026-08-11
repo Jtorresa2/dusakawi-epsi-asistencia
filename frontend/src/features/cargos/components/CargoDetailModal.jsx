@@ -10,17 +10,8 @@ import {
   UserRound, Building2, Users, CalendarDays, Clock,
   FileText, X,
 } from "lucide-react";
-
-const PALETA = {
-  verdeOscuro: "#1B5E20",
-  verde: "#2E7D32",
-  verdeClaro: "#E8F5E9",
-  borde: "#ECECEC",
-  gris: "#9CA3AF",
-  grisTexto: "#6B7280",
-  texto: "#111827",
-  rojo: "#DC2626",
-};
+import { COLORES } from "../../../shared/constants/colores.js";
+import { PALETA } from "../../../shared/constants/paleta.js";
 
 const fmtFecha = (f) => {
   if (!f) return "—";
@@ -34,7 +25,7 @@ const fmtFecha = (f) => {
 const infoCardSx = {
   border: `1px solid ${PALETA.borde}`,
   borderRadius: "14px",
-  bgcolor: "#FFFFFF",
+  bgcolor: COLORES.fondoBlanco,
   p: 1.5,
 };
 
@@ -52,19 +43,21 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
       onClose={onClose}
       fullWidth
       maxWidth="md"
-      PaperProps={{
-        sx: {
-          borderRadius: "18px",
-          position: "relative",
-          boxShadow: "0 24px 70px rgba(0,0,0,0.25)",
-          backgroundColor: "#FFFFFF",
-          overflow: "hidden",
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: "18px",
+            position: "relative",
+            boxShadow: "0 24px 70px rgba(0,0,0,0.25)",
+            backgroundColor: COLORES.fondoBlanco,
+            overflow: "hidden",
+          },
         },
       }}
       sx={{ "& .MuiBackdrop-root": { bgcolor: "rgba(17, 24, 39, 0.5)", backdropFilter: "blur(4px)" } }}
     >
       {/* HEADER */}
-      <DialogContent sx={{ px: 3, py: 2, bgcolor: "#FFFFFF" }}>
+      <DialogContent sx={{ px: 3, py: 2, bgcolor: COLORES.fondoBlanco }}>
         <Box sx={{ display: "flex", gap: 1.75, alignItems: "center" }}>
           <Box sx={{ width: 44, height: 44, borderRadius: "13px", bgcolor: PALETA.verdeClaro, color: PALETA.verdeOscuro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <UserRound size={21} />
@@ -79,7 +72,7 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
             </Typography>
           </Box>
         </Box>
-        <IconButton onClick={onClose} size="small"
+        <IconButton aria-label="Cerrar" onClick={onClose} size="small"
           sx={{ position: "absolute", top: 12, right: 12, color: PALETA.gris, bgcolor: PALETA.grisClaro, "&:hover": { color: PALETA.texto, bgcolor: PALETA.borde } }}>
           <X size={18} />
         </IconButton>
@@ -87,7 +80,7 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
       <Divider />
 
       {/* RESUMEN */}
-      <DialogContent sx={{ px: 3, py: 1.5, bgcolor: "#FFFFFF" }}>
+      <DialogContent sx={{ px: 3, py: 1.5, bgcolor: COLORES.fondoBlanco }}>
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.25 }}>
           <Box sx={infoCardSx}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.4 }}>
@@ -130,7 +123,7 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
       </DialogContent>
 
       {/* INFORMACIÓN */}
-      <DialogContent sx={{ px: 3, py: 0.5, bgcolor: "#FFFFFF" }}>
+      <DialogContent sx={{ px: 3, py: 0.5, bgcolor: COLORES.fondoBlanco }}>
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 1.25 }}>
           <Box sx={infoCardSx}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>

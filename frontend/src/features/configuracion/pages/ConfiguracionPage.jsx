@@ -8,14 +8,15 @@ import {
 } from "lucide-react";
 import Loading from "../../../shared/components/Loading";
 import { obtenerConfig, actualizarConfig, respaldarBD } from "../config.api";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const CARD_DATA = [
-  { id: "institucional", icon: <Building2 size={22} />, titulo: "Información institucional", desc: "Nombre de la empresa, NIT, dirección, teléfono y correo institucional.", color: "#1B5E20" },
-  { id: "asistencia", icon: <Clock size={22} />, titulo: "Parámetros de asistencia", desc: "Tolerancia, horas extra, formato de hora y marcaciones fuera del horario.", color: "#D97706" },
-  { id: "acceso", icon: <MapPin size={22} />, titulo: "Control de acceso", desc: "Geocerca autorizada, radio permitido, validación GPS y reconocimiento biométrico.", color: "#0891B2" },
-  { id: "notificaciones", icon: <Bell size={22} />, titulo: "Notificaciones", desc: "Correos automáticos, incidencias, aprobaciones, rechazos y tardanzas acumuladas.", color: "#7C3AED" },
-  { id: "plantillas", icon: <FileText size={22} />, titulo: "Plantillas PDF", desc: "Encabezado, pie de página, logo institucional y firma para documentos.", color: "#1565C0" },
-  { id: "seguridad", icon: <Shield size={22} />, titulo: "Seguridad", desc: "Contraseña, tiempo de sesión y autenticación del sistema.", color: "#DC2626" },
+  { id: "institucional", icon: <Building2 size={22} />, titulo: "Información institucional", desc: "Nombre de la empresa, NIT, dirección, teléfono y correo institucional.", color: COLORES.primarioOscuro },
+  { id: "asistencia", icon: <Clock size={22} />, titulo: "Parámetros de asistencia", desc: "Tolerancia, horas extra, formato de hora y marcaciones fuera del horario.", color: COLORES.warning },
+  { id: "acceso", icon: <MapPin size={22} />, titulo: "Control de acceso", desc: "Geocerca autorizada, radio permitido, validación GPS y reconocimiento biométrico.", color: COLORES.verdeTexto },
+  { id: "notificaciones", icon: <Bell size={22} />, titulo: "Notificaciones", desc: "Correos automáticos, incidencias, aprobaciones, rechazos y tardanzas acumuladas.", color: COLORES.primario },
+  { id: "plantillas", icon: <FileText size={22} />, titulo: "Plantillas PDF", desc: "Encabezado, pie de página, logo institucional y firma para documentos.", color: COLORES.primarioOscuro },
+  { id: "seguridad", icon: <Shield size={22} />, titulo: "Seguridad", desc: "Contraseña, tiempo de sesión y autenticación del sistema.", color: COLORES.danger },
 ];
 
 const SISTEMA_ITEMS = [
@@ -75,22 +76,22 @@ export default function ConfiguracionPage() {
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2.5 }}>
       {/* HEADER */}
-        <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
+        <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>
               Inicio / Gestión del sistema / Incidencias
           </Typography>
 
       {/* CENTRO DE CONFIGURACIÓN — CARDS */}
-      <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC" }}>
-        <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827", mb: 2 }}></Typography>
+      <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}` }}>
+        <Typography sx={{ fontSize: 18, fontWeight: 700, color: COLORES.textoPrimario, mb: 2 }}></Typography>
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>
           {CARD_DATA.map((r) => (
-            <Paper key={r.id} elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC", display: "flex", flexDirection: "column", transition: "all .25s ease", "&:hover": { transform: "translateY(-3px)", boxShadow: "0 8px 25px rgba(0,0,0,.07)" } }}>
+            <Paper key={r.id} elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", flexDirection: "column", transition: "all .25s ease", "&:hover": { transform: "translateY(-3px)", boxShadow: "0 8px 25px rgba(0,0,0,.07)" } }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
                 <Box sx={{ width: 40, height: 40, borderRadius: "12px", background: `${r.color}15`, display: "flex", alignItems: "center", justifyContent: "center", color: r.color }}>{r.icon}</Box>
-                <Typography sx={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>{r.titulo}</Typography>
+                <Typography sx={{ fontSize: 15, fontWeight: 700, color: COLORES.textoPrimario }}>{r.titulo}</Typography>
               </Box>
-              <Typography sx={{ fontSize: 12, color: "#6B7280", mb: 2, lineHeight: 1.5, flex: 1, minHeight: 36 }}>{r.desc}</Typography>
-              <Button variant="contained" onClick={() => abrirModal(r.id)} sx={{ borderRadius: "10px", textTransform: "none", fontSize: 12, fontWeight: 600, py: 1, background: r.color, "&:hover": { background: "#1B5E20" } }}>
+              <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, mb: 2, lineHeight: 1.5, flex: 1, minHeight: 36 }}>{r.desc}</Typography>
+              <Button variant="contained" onClick={() => abrirModal(r.id)} sx={{ borderRadius: "10px", textTransform: "none", fontSize: 12, fontWeight: 600, py: 1, background: r.color, "&:hover": { background: COLORES.primarioOscuro } }}>
                 {r.id === "plantillas" ? "Personalizar" : r.id === "asistencia" ? "Configurar" : "Administrar"}
               </Button>
             </Paper>
@@ -99,21 +100,21 @@ export default function ConfiguracionPage() {
       </Paper>
 
       {/* ESTADO DEL SISTEMA */}
-      <Paper elevation={0} sx={{ p: 2, borderRadius: "16px", border: "1px solid #ECECEC" }}>
-        <Typography sx={{ fontSize: 15, fontWeight: 700, color: "#111827", mb: 1.5 }}>Estado del sistema</Typography>
+      <Paper elevation={0} sx={{ p: 2, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}` }}>
+        <Typography sx={{ fontSize: 15, fontWeight: 700, color: COLORES.textoPrimario, mb: 1.5 }}>Estado del sistema</Typography>
         <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
           {SISTEMA_ITEMS.map((item) => {
             const valor = config[item.key];
             const esServidor = item.key === "estado_servidor";
             const display = esServidor ? (valor || "Activo") : (valor || "—");
             return (
-              <Box key={item.key} sx={{ flex: "1 1 160px", minWidth: 140, p: 1.5, borderRadius: "14px", border: "1px solid #ECECEC", background: "#fff", display: "flex", alignItems: "center", gap: 1.5, "&:hover": { boxShadow: "0 4px 12px rgba(0,0,0,.06)" } }}>
-                <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#F0FDF4", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>{item.icon}</Box>
+              <Box key={item.key} sx={{ flex: "1 1 160px", minWidth: 140, p: 1.5, borderRadius: "14px", border: `1px solid ${COLORES.grisContorno}`, background: COLORES.fondoBlanco, display: "flex", alignItems: "center", gap: 1.5, "&:hover": { boxShadow: "0 4px 12px rgba(0,0,0,.06)" } }}>
+                <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: COLORES.successClaro, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>{item.icon}</Box>
                 <Box sx={{ minWidth: 0 }}>
-                  <Box sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.03em", mb: 0.3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.label}</Box>
+                  <Box sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", letterSpacing: "0.03em", mb: 0.3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.label}</Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    {esServidor && <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#16A34A", flexShrink: 0 }} />}
-                    <Box sx={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>{display}</Box>
+                    {esServidor && <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: COLORES.success, flexShrink: 0 }} />}
+                    <Box sx={{ fontSize: 13, fontWeight: 600, color: COLORES.textoPrimario }}>{display}</Box>
                   </Box>
                 </Box>
               </Box>
@@ -130,11 +131,11 @@ export default function ConfiguracionPage() {
       {/* ============ MODALES ============ */}
 
       {/* MODAL INFORMACIÓN INSTITUCIONAL */}
-      <Dialog open={modalActivo === "institucional"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
+      <Dialog open={modalActivo === "institucional"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } } }}>
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#1B5E2015", display: "flex", alignItems: "center", justifyContent: "center", color: "#1B5E20" }}><Building2 size={18} /></Box>
-          <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Información institucional</Typography>
-          <IconButton onClick={() => setModalActivo(null)} sx={{ ml: "auto", color: "#9CA3AF" }}><X size={20} /></IconButton>
+          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: COLORES.primarioOscuro + "15", display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.primarioOscuro }}><Building2 size={18} /></Box>
+          <Typography sx={{ fontSize: 18, fontWeight: 700, color: COLORES.textoPrimario }}>Información institucional</Typography>
+          <IconButton aria-label="Cerrar" onClick={() => setModalActivo(null)} sx={{ ml: "auto", color: COLORES.textoSuave }}><X size={20} /></IconButton>
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 2.5, display: "flex", flexDirection: "column", gap: 2 }}>
@@ -146,17 +147,17 @@ export default function ConfiguracionPage() {
           <TextField label="Zona horaria" value={formData.zona_horaria || ""} onChange={(e) => handleChange("zona_horaria", e.target.value)} fullWidth slotProps={{ inputLabel: { sx: { fontSize: 13 } }, input: { sx: { borderRadius: "10px", fontSize: 14 } } }} />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setModalActivo(null)} sx={{ borderRadius: "10px", textTransform: "none", color: "#6B7280" }}>Cancelar</Button>
-          <Button variant="contained" startIcon={<Save size={16} />} onClick={guardarSeccion} disabled={guardando} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } }}>{guardando ? "Guardando..." : "Guardar cambios"}</Button>
+          <Button onClick={() => setModalActivo(null)} sx={{ borderRadius: "10px", textTransform: "none", color: COLORES.textoTerciario }}>Cancelar</Button>
+          <Button variant="contained" startIcon={<Save size={16} />} onClick={guardarSeccion} disabled={guardando} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } }}>{guardando ? "Guardando..." : "Guardar cambios"}</Button>
         </DialogActions>
       </Dialog>
 
       {/* MODAL PARÁMETROS DE ASISTENCIA */}
-      <Dialog open={modalActivo === "asistencia"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
+      <Dialog open={modalActivo === "asistencia"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } } }}>
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#D9770615", display: "flex", alignItems: "center", justifyContent: "center", color: "#D97706" }}><Clock size={18} /></Box>
-          <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Parámetros de asistencia</Typography>
-          <IconButton onClick={() => setModalActivo(null)} sx={{ ml: "auto", color: "#9CA3AF" }}><X size={20} /></IconButton>
+          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: COLORES.warning + "15", display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.warning }}><Clock size={18} /></Box>
+          <Typography sx={{ fontSize: 18, fontWeight: 700, color: COLORES.textoPrimario }}>Parámetros de asistencia</Typography>
+          <IconButton aria-label="Cerrar" onClick={() => setModalActivo(null)} sx={{ ml: "auto", color: COLORES.textoSuave }}><X size={20} /></IconButton>
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 2.5, display: "flex", flexDirection: "column", gap: 2 }}>
@@ -168,22 +169,22 @@ export default function ConfiguracionPage() {
           <FormControlLabel control={<Switch checked={formData.validacion_salida_obligatoria === true} onChange={(e) => handleChange("validacion_salida_obligatoria", e.target.checked)} />} label={<Typography sx={{ fontSize: 13, fontWeight: 500 }}>Validación obligatoria de salida</Typography>} sx={{ mx: 0 }} />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setModalActivo(null)} sx={{ borderRadius: "10px", textTransform: "none", color: "#6B7280" }}>Cancelar</Button>
-          <Button variant="contained" startIcon={<Save size={16} />} onClick={guardarSeccion} disabled={guardando} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, bgcolor: "#D97706", "&:hover": { bgcolor: "#B45309" } }}>{guardando ? "Guardando..." : "Guardar cambios"}</Button>
+          <Button onClick={() => setModalActivo(null)} sx={{ borderRadius: "10px", textTransform: "none", color: COLORES.textoTerciario }}>Cancelar</Button>
+          <Button variant="contained" startIcon={<Save size={16} />} onClick={guardarSeccion} disabled={guardando} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, bgcolor: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioOscuro } }}>{guardando ? "Guardando..." : "Guardar cambios"}</Button>
         </DialogActions>
       </Dialog>
 
       {/* MODAL CONTROL DE ACCESO */}
-      <Dialog open={modalActivo === "acceso"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
+      <Dialog open={modalActivo === "acceso"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } } }}>
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#0891B215", display: "flex", alignItems: "center", justifyContent: "center", color: "#0891B2" }}><MapPin size={18} /></Box>
-          <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Control de acceso</Typography>
-          <IconButton onClick={() => setModalActivo(null)} sx={{ ml: "auto", color: "#9CA3AF" }}><X size={20} /></IconButton>
+          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: COLORES.verdeTexto + "15", display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.verdeTexto }}><MapPin size={18} /></Box>
+          <Typography sx={{ fontSize: 18, fontWeight: 700, color: COLORES.textoPrimario }}>Control de acceso</Typography>
+          <IconButton aria-label="Cerrar" onClick={() => setModalActivo(null)} sx={{ ml: "auto", color: COLORES.textoSuave }}><X size={20} /></IconButton>
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 2.5, display: "flex", flexDirection: "column", gap: 2 }}>
-          <Box sx={{ p: 2, borderRadius: "12px", bgcolor: "#F9FAFB", border: "1px solid #ECECEC", mb: 1 }}>
-            <Typography sx={{ fontSize: 12, color: "#166534", fontWeight: 600 }}>
+          <Box sx={{ p: 2, borderRadius: "12px", bgcolor: COLORES.fondoGris, border: `1px solid ${COLORES.grisContorno}`, mb: 1 }}>
+            <Typography sx={{ fontSize: 12, color: COLORES.primarioOscuro, fontWeight: 600 }}>
               Las marcaciones únicamente pueden realizarse dentro de las instalaciones autorizadas de la empresa.
             </Typography>
           </Box>
@@ -193,17 +194,17 @@ export default function ConfiguracionPage() {
           <FormControlLabel control={<Switch checked={formData.estado_control_acceso === true} onChange={(e) => handleChange("estado_control_acceso", e.target.checked)} />} label={<Typography sx={{ fontSize: 13, fontWeight: 500 }}>Control de acceso activo</Typography>} sx={{ mx: 0 }} />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setModalActivo(null)} sx={{ borderRadius: "10px", textTransform: "none", color: "#6B7280" }}>Cancelar</Button>
-          <Button variant="contained" startIcon={<Save size={16} />} onClick={guardarSeccion} disabled={guardando} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, bgcolor: "#0891B2", "&:hover": { bgcolor: "#0E7490" } }}>{guardando ? "Guardando..." : "Guardar cambios"}</Button>
+          <Button onClick={() => setModalActivo(null)} sx={{ borderRadius: "10px", textTransform: "none", color: COLORES.textoTerciario }}>Cancelar</Button>
+          <Button variant="contained" startIcon={<Save size={16} />} onClick={guardarSeccion} disabled={guardando} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, bgcolor: COLORES.verdeTexto, "&:hover": { bgcolor: COLORES.verdeTexto } }}>{guardando ? "Guardando..." : "Guardar cambios"}</Button>
         </DialogActions>
       </Dialog>
 
       {/* MODAL NOTIFICACIONES */}
-      <Dialog open={modalActivo === "notificaciones"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
+      <Dialog open={modalActivo === "notificaciones"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } } }}>
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#7C3AED15", display: "flex", alignItems: "center", justifyContent: "center", color: "#7C3AED" }}><Bell size={18} /></Box>
-          <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Notificaciones</Typography>
-          <IconButton onClick={() => setModalActivo(null)} sx={{ ml: "auto", color: "#9CA3AF" }}><X size={20} /></IconButton>
+          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: COLORES.primario + "15", display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.primario }}><Bell size={18} /></Box>
+          <Typography sx={{ fontSize: 18, fontWeight: 700, color: COLORES.textoPrimario }}>Notificaciones</Typography>
+          <IconButton aria-label="Cerrar" onClick={() => setModalActivo(null)} sx={{ ml: "auto", color: COLORES.textoSuave }}><X size={20} /></IconButton>
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 2.5, display: "flex", flexDirection: "column", gap: 1 }}>
@@ -214,37 +215,37 @@ export default function ConfiguracionPage() {
           <FormControlLabel control={<Switch checked={formData.recordatorios_marcacion === true} onChange={(e) => handleChange("recordatorios_marcacion", e.target.checked)} />} label={<Typography sx={{ fontSize: 13, fontWeight: 500 }}>Recordatorios de marcación</Typography>} sx={{ mx: 0 }} />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setModalActivo(null)} sx={{ borderRadius: "10px", textTransform: "none", color: "#6B7280" }}>Cancelar</Button>
-          <Button variant="contained" startIcon={<Save size={16} />} onClick={guardarSeccion} disabled={guardando} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, bgcolor: "#7C3AED", "&:hover": { bgcolor: "#6D28D9" } }}>{guardando ? "Guardando..." : "Guardar cambios"}</Button>
+          <Button onClick={() => setModalActivo(null)} sx={{ borderRadius: "10px", textTransform: "none", color: COLORES.textoTerciario }}>Cancelar</Button>
+          <Button variant="contained" startIcon={<Save size={16} />} onClick={guardarSeccion} disabled={guardando} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, bgcolor: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioOscuro } }}>{guardando ? "Guardando..." : "Guardar cambios"}</Button>
         </DialogActions>
       </Dialog>
 
       {/* MODAL PLANTILLAS PDF */}
-      <Dialog open={modalActivo === "plantillas"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
+      <Dialog open={modalActivo === "plantillas"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } } }}>
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#1565C015", display: "flex", alignItems: "center", justifyContent: "center", color: "#1565C0" }}><FileText size={18} /></Box>
-          <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Plantillas PDF</Typography>
-          <IconButton onClick={() => setModalActivo(null)} sx={{ ml: "auto", color: "#9CA3AF" }}><X size={20} /></IconButton>
+          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: COLORES.primarioOscuro + "15", display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.primarioOscuro }}><FileText size={18} /></Box>
+          <Typography sx={{ fontSize: 18, fontWeight: 700, color: COLORES.textoPrimario }}>Plantillas PDF</Typography>
+          <IconButton aria-label="Cerrar" onClick={() => setModalActivo(null)} sx={{ ml: "auto", color: COLORES.textoSuave }}><X size={20} /></IconButton>
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 2.5, display: "flex", flexDirection: "column", gap: 2 }}>
           <TextField label="Encabezado del documento" value={formData.encabezado_documento || ""} onChange={(e) => handleChange("encabezado_documento", e.target.value)} fullWidth multiline rows={2} slotProps={{ inputLabel: { sx: { fontSize: 13 } }, input: { sx: { borderRadius: "10px", fontSize: 14 } } }} />
           <TextField label="Pie de página" value={formData.pie_pagina || ""} onChange={(e) => handleChange("pie_pagina", e.target.value)} fullWidth multiline rows={2} slotProps={{ inputLabel: { sx: { fontSize: 13 } }, input: { sx: { borderRadius: "10px", fontSize: 14 } } }} />
-          <TextField label="Color institucional (hex)" value={formData.color_institucional || "#1B5E20"} onChange={(e) => handleChange("color_institucional", e.target.value)} fullWidth slotProps={{ inputLabel: { sx: { fontSize: 13 } }, input: { sx: { borderRadius: "10px", fontSize: 14 } } }} helperText="Ej: #1B5E20" />
-          <Typography sx={{ fontSize: 13, color: "#6B7280", fontStyle: "italic" }}>La personalización del logo y la firma estará disponible próximamente.</Typography>
+          <TextField label="Color institucional (hex)" value={formData.color_institucional || COLORES.primarioOscuro} onChange={(e) => handleChange("color_institucional", e.target.value)} fullWidth slotProps={{ inputLabel: { sx: { fontSize: 13 } }, input: { sx: { borderRadius: "10px", fontSize: 14 } } }} helperText={`Ej: ${COLORES.primarioOscuro}`} />
+          <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario, fontStyle: "italic" }}>La personalización del logo y la firma estará disponible próximamente.</Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setModalActivo(null)} sx={{ borderRadius: "10px", textTransform: "none", color: "#6B7280" }}>Cancelar</Button>
-          <Button variant="contained" startIcon={<Save size={16} />} onClick={guardarSeccion} disabled={guardando} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, bgcolor: "#1565C0", "&:hover": { bgcolor: "#0D47A1" } }}>{guardando ? "Guardando..." : "Guardar cambios"}</Button>
+          <Button onClick={() => setModalActivo(null)} sx={{ borderRadius: "10px", textTransform: "none", color: COLORES.textoTerciario }}>Cancelar</Button>
+          <Button variant="contained" startIcon={<Save size={16} />} onClick={guardarSeccion} disabled={guardando} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primarioOscuro } }}>{guardando ? "Guardando..." : "Guardar cambios"}</Button>
         </DialogActions>
       </Dialog>
 
       {/* MODAL SEGURIDAD */}
-      <Dialog open={modalActivo === "seguridad"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
+      <Dialog open={modalActivo === "seguridad"} onClose={() => setModalActivo(null)} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: "16px", p: 1, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } } }}>
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#DC262615", display: "flex", alignItems: "center", justifyContent: "center", color: "#DC2626" }}><Shield size={18} /></Box>
-          <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>Seguridad</Typography>
-          <IconButton onClick={() => setModalActivo(null)} sx={{ ml: "auto", color: "#9CA3AF" }}><X size={20} /></IconButton>
+          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: COLORES.danger + "15", display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.danger }}><Shield size={18} /></Box>
+          <Typography sx={{ fontSize: 18, fontWeight: 700, color: COLORES.textoPrimario }}>Seguridad</Typography>
+          <IconButton aria-label="Cerrar" onClick={() => setModalActivo(null)} sx={{ ml: "auto", color: COLORES.textoSuave }}><X size={20} /></IconButton>
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 2.5, display: "flex", flexDirection: "column", gap: 2 }}>
@@ -253,8 +254,8 @@ export default function ConfiguracionPage() {
           <FormControlLabel control={<Switch checked={formData.autenticacion_dos_pasos === true} onChange={(e) => handleChange("autenticacion_dos_pasos", e.target.checked)} />} label={<Typography sx={{ fontSize: 13, fontWeight: 500 }}>Autenticación en dos pasos</Typography>} sx={{ mx: 0 }} />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setModalActivo(null)} sx={{ borderRadius: "10px", textTransform: "none", color: "#6B7280" }}>Cancelar</Button>
-          <Button variant="contained" startIcon={<Save size={16} />} onClick={guardarSeccion} disabled={guardando} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, bgcolor: "#DC2626", "&:hover": { bgcolor: "#B91C1C" } }}>{guardando ? "Guardando..." : "Guardar cambios"}</Button>
+          <Button onClick={() => setModalActivo(null)} sx={{ borderRadius: "10px", textTransform: "none", color: COLORES.textoTerciario }}>Cancelar</Button>
+          <Button variant="contained" startIcon={<Save size={16} />} onClick={guardarSeccion} disabled={guardando} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, bgcolor: COLORES.danger, "&:hover": { bgcolor: COLORES.dangerOscuro2 } }}>{guardando ? "Guardando..." : "Guardar cambios"}</Button>
         </DialogActions>
       </Dialog>
     </Box>

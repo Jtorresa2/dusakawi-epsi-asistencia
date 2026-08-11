@@ -5,6 +5,7 @@ import { obtenerPersonal } from "../../personal/personal.api";
 import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 import DataTable from "../../../shared/components/DataTable";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const ETIQUETAS = {
   porEmpleado: "Reporte por Empleado", asistencia: "Reporte de Asistencia", incidencias: "Reporte de Incidencias", tardanzas: "Reporte de Tardanzas",
@@ -41,7 +42,7 @@ const FILTROS = {
   marcaciones: ["fecha_desde","usuario_id","area_id"],
 };
 
-const SX = { "& .MuiOutlinedInput-root": { borderRadius: "10px", background: "#fff", "& fieldset": { borderColor: "#E5E7EB" }, "&:hover fieldset": { borderColor: "#2E7D32" }, "&.Mui-focused fieldset": { borderColor: "#1B5E20" } }, "& .MuiInputLabel-root": { fontSize: 13, color: "#6B7280" }, "& .MuiInputBase-input": { fontSize: 13 } };
+const SX = { "& .MuiOutlinedInput-root": { borderRadius: "10px", background: COLORES.fondoBlanco, "& fieldset": { borderColor: COLORES.borde }, "&:hover fieldset": { borderColor: COLORES.primario }, "&.Mui-focused fieldset": { borderColor: COLORES.primarioOscuro } }, "& .MuiInputLabel-root": { fontSize: 13, color: COLORES.textoTerciario }, "& .MuiInputBase-input": { fontSize: 13 } };
 
 const fm = (v) => v || "—";
 
@@ -106,18 +107,18 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
           if (c === "fecha_desde") return (
             <Box key={c} sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
               <Box>
-                <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Desde</InputLabel>
+                <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Desde</InputLabel>
                 <TextField type="date" size="small" value={f.fecha_desde||""} onChange={e => set("fecha_desde",e.target.value)} sx={{width:160,...SX}} />
               </Box>
               <Box>
-                <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Hasta</InputLabel>
+                <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Hasta</InputLabel>
                 <TextField type="date" size="small" value={f.fecha_hasta||""} onChange={e => set("fecha_hasta",e.target.value)} sx={{width:160,...SX}} />
               </Box>
             </Box>
           );
           if (c === "usuario_id") return (
             <Box key={c}>
-              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Empleado</InputLabel>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Empleado</InputLabel>
               <TextField select size="small" value={f.usuario_id||""} onChange={e => set("usuario_id",e.target.value)} sx={{minWidth:180,...SX}}>
                 <MenuItem value="">{tipoReporte==="porEmpleado"?"Seleccione...":"Todos"}</MenuItem>
                 {(empleados||[]).map(e => <MenuItem key={e.id} value={e.id}>{e.nombre} {e.apellido}</MenuItem>)}
@@ -127,14 +128,14 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
           if (c === "mes") return (
             <Box key={c} sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
               <Box>
-                <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Mes</InputLabel>
+                <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Mes</InputLabel>
                 <TextField select size="small" value={f.mes??""} onChange={e=>set("mes",e.target.value?Number(e.target.value):"")} sx={{minWidth:150,...SX}}>
                   <MenuItem value="">Todos</MenuItem>
                   {MESES.map(m => <MenuItem key={m.v} value={m.v}>{m.l}</MenuItem>)}
                 </TextField>
               </Box>
               <Box>
-                <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Año</InputLabel>
+                <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Año</InputLabel>
                 <TextField select size="small" value={f.anio??""} onChange={e=>set("anio",e.target.value?Number(e.target.value):"")} sx={{width:110,...SX}}>
                   <MenuItem value="">Todos</MenuItem>
                   {Array.from({length:10},(_,i)=>new Date().getFullYear()-i).map(a => <MenuItem key={a} value={a}>{a}</MenuItem>)}
@@ -144,7 +145,7 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
           );
           if (c === "area_id") return (
             <Box key={c}>
-              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Área</InputLabel>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Área</InputLabel>
               <TextField select size="small" value={f.area_id||""} onChange={e => set("area_id",e.target.value)} sx={{minWidth:150,...SX}}>
                 <MenuItem value="">Todas</MenuItem>
                 {areas.map(a => <MenuItem key={a.id} value={a.id}>{a.nombre}</MenuItem>)}
@@ -153,7 +154,7 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
           );
           if (c === "cargo_id") return (
             <Box key={c}>
-              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Cargo</InputLabel>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Cargo</InputLabel>
               <TextField select size="small" value={f.cargo_id||""} onChange={e => set("cargo_id",e.target.value)} sx={{minWidth:150,...SX}}>
                 <MenuItem value="">Todos</MenuItem>
                 {cargos.map(ca => <MenuItem key={ca.id} value={ca.id}>{ca.nombre}</MenuItem>)}
@@ -162,7 +163,7 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
           );
           if (c === "estado") return (
             <Box key={c}>
-              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Estado</InputLabel>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Estado</InputLabel>
               <TextField select size="small" value={f.estado||""} onChange={e => set("estado",e.target.value)} sx={{minWidth:130,...SX}}>
                 <MenuItem value="">Todos</MenuItem>
                 {EST_ASIS.map(e => <MenuItem key={e} value={e}>{e}</MenuItem>)}
@@ -171,7 +172,7 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
           );
           if (c === "estado_incidencia") return (
             <Box key={c}>
-              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Estado</InputLabel>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Estado</InputLabel>
               <TextField select size="small" value={f.estado_incidencia||""} onChange={e => set("estado_incidencia",e.target.value)} sx={{minWidth:130,...SX}}>
                 <MenuItem value="">Todos</MenuItem>
                 {EST_INC.map(e => <MenuItem key={e} value={e}>{e}</MenuItem>)}
@@ -180,7 +181,7 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
           );
           if (c === "estado_empleado") return (
             <Box key={c}>
-              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Estado</InputLabel>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Estado</InputLabel>
               <TextField select size="small" value={f.estado_empleado||""} onChange={e => set("estado_empleado",e.target.value)} sx={{minWidth:130,...SX}}>
                 <MenuItem value="">Todos</MenuItem>
                 {EST_EMP.map(e => <MenuItem key={e.value} value={e.value}>{e.label}</MenuItem>)}
@@ -189,7 +190,7 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
           );
           if (c === "tipo_incidencia") return (
             <Box key={c}>
-              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5 }}>Tipo</InputLabel>
+              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Tipo</InputLabel>
               <TextField select size="small" value={f.tipo_incidencia||""} onChange={e => set("tipo_incidencia",e.target.value)} sx={{minWidth:200,...SX}}>
                 <MenuItem value="">Todos</MenuItem>
                 {TIPOS_INC.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
@@ -200,10 +201,10 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
         })}
       </Box>
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-        <Button variant="contained" startIcon={<Search size={16}/>} onClick={() => onGenerar(f)} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,fontWeight:600,px:2.5,background:"#1B5E20","&:hover":{background:"#2E7D32"}}}>Generar</Button>
-        <Button variant="outlined" startIcon={<FileText size={16}/>} onClick={tipoReporte==="porEmpleado"?undefined:onExportarPDF} disabled={tipoReporte==="porEmpleado"} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:"#E5E7EB",color:"#374151","&:hover":{borderColor:"#1B5E20",color:"#1B5E20"},"&.Mui-disabled":{color:"#D1D5DB",borderColor:"#E5E7EB"}}}>PDF</Button>
-        <Button variant="outlined" startIcon={<FileSpreadsheet size={16}/>} onClick={onExportarExcel} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:"#E5E7EB",color:"#374151","&:hover":{borderColor:"#1B5E20",color:"#1B5E20"}}}>Excel</Button>
-        <Button variant="text" startIcon={<RotateCcw size={16}/>} onClick={()=>{setF({}); if(onLimpiar)onLimpiar();}} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,color:"#6B7280","&:hover":{color:"#DC2626"}}}>Limpiar</Button>
+        <Button variant="contained" startIcon={<Search size={16}/>} onClick={() => onGenerar(f)} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,fontWeight:600,px:2.5,background:COLORES.primarioOscuro,"&:hover":{background:COLORES.primario}}}>Generar</Button>
+        <Button variant="outlined" startIcon={<FileText size={16}/>} onClick={tipoReporte==="porEmpleado"?undefined:onExportarPDF} disabled={tipoReporte==="porEmpleado"} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:COLORES.borde,color:COLORES.textoSecundario,"&:hover":{borderColor:COLORES.primarioOscuro,color:COLORES.primarioOscuro},"&.Mui-disabled":{color:COLORES.borde2,borderColor:COLORES.borde}}}>PDF</Button>
+        <Button variant="outlined" startIcon={<FileSpreadsheet size={16}/>} onClick={onExportarExcel} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:COLORES.borde,color:COLORES.textoSecundario,"&:hover":{borderColor:COLORES.primarioOscuro,color:COLORES.primarioOscuro}}}>Excel</Button>
+        <Button variant="text" startIcon={<RotateCcw size={16}/>} onClick={()=>{setF({}); if(onLimpiar)onLimpiar();}} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,color:COLORES.textoTerciario,"&:hover":{color:COLORES.danger}}}>Limpiar</Button>
       </Box>
     </Box>
   );
@@ -211,15 +212,15 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
 
 function ResultadosTable({ tipoReporte, registros, total }) {
   if (!registros?.length) return (
-    <Box sx={{textAlign:"center",py:4,color:"#9CA3AF"}}>
+    <Box sx={{textAlign:"center",py:4,color:COLORES.textoSuave}}>
       <Typography sx={{fontSize:14}}>No hay registros para los filtros seleccionados.</Typography>
     </Box>
   );
   return (
     <Box>
       <Box sx={{display:"flex",justifyContent:"space-between",alignItems:"center",mb:1}}>
-        <Typography sx={{fontSize:14,fontWeight:600,color:"#374151"}}>Resultados</Typography>
-        <Typography sx={{fontSize:12,color:"#9CA3AF"}}>{total||registros.length} {tipoReporte==="empleados"?"empleados":"registros"}</Typography>
+        <Typography sx={{fontSize:14,fontWeight:600,color:COLORES.textoSecundario}}>Resultados</Typography>
+        <Typography sx={{fontSize:12,color:COLORES.textoSuave}}>{total||registros.length} {tipoReporte==="empleados"?"empleados":"registros"}</Typography>
       </Box>
       <DataTable rows={registros} columns={COLS[tipoReporte]||[]} entityLabel={tipoReporte==="empleados"?"empleados":"registros"} getRowId={r=>r.id||r.cedula||Math.random()} pageSize={10} />
     </Box>
@@ -228,22 +229,22 @@ function ResultadosTable({ tipoReporte, registros, total }) {
 
 function ResultadosPorEmpleado({ data }) {
   if (!data?.empleado) return (
-    <Box sx={{textAlign:"center",py:4,color:"#9CA3AF"}}>
+    <Box sx={{textAlign:"center",py:4,color:COLORES.textoSuave}}>
       <Typography sx={{fontSize:14}}>Seleccione un empleado y genere el reporte.</Typography>
     </Box>
   );
   const { empleado, periodo, resumen, permisos, incidencias, detalle } = data;
   const metricas = resumen ? [
-    { label: "Días hábiles", value: periodo?.diasHabiles||0, color: "#0284C7" },
-    { label: "Festivos", value: periodo?.festivos||0, color: "#D97706" },
-    { label: "Asistencia", value: `${resumen.porcentaje_asistencia||0}%`, color: "#16A34A" },
-    { label: "Puntuales", value: resumen.puntuales||0, color: "#059669" },
-    { label: "Tardanzas", value: resumen.tardanzas||0, color: "#DC2626" },
-    { label: "Ausentes", value: resumen.ausentes||0, color: "#6B7280" },
-    { label: "Horas total", value: resumen.horas_trabajadas ? `${resumen.horas_trabajadas}h` : "0h", color: "#7C3AED" },
-    { label: "Horas extra", value: resumen.horas_extra ? `${resumen.horas_extra}h` : "—", color: "#9333EA" },
-    { label: "Novedades", value: permisos?.total||0, color: "#0891B2" },
-    { label: "Incidencias", value: incidencias?.total||0, color: "#BE123C" },
+    { label: "Días hábiles", value: periodo?.diasHabiles||0, color: COLORES.verdeTexto },
+    { label: "Festivos", value: periodo?.festivos||0, color: COLORES.warningOscuro },
+    { label: "Asistencia", value: `${resumen.porcentaje_asistencia||0}%`, color: COLORES.verdeTexto },
+    { label: "Puntuales", value: resumen.puntuales||0, color: COLORES.verdeTexto },
+    { label: "Tardanzas", value: resumen.tardanzas||0, color: COLORES.danger },
+    { label: "Ausentes", value: resumen.ausentes||0, color: COLORES.textoTerciario },
+    { label: "Horas total", value: resumen.horas_trabajadas ? `${resumen.horas_trabajadas}h` : "0h", color: COLORES.primario },
+    { label: "Horas extra", value: resumen.horas_extra ? `${resumen.horas_extra}h` : "—", color: COLORES.primario },
+    { label: "Novedades", value: permisos?.total||0, color: COLORES.verdeTexto },
+    { label: "Incidencias", value: incidencias?.total||0, color: COLORES.danger },
   ] : [];
 
   return (
@@ -251,17 +252,17 @@ function ResultadosPorEmpleado({ data }) {
       {/* Encabezado empleado */}
       <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"center", mb:3, flexWrap:"wrap", gap:2 }}>
         <Box>
-          <Typography sx={{ fontSize:18, fontWeight:700, color:"#111827" }}>{empleado.nombre} {empleado.apellido}</Typography>
-          <Typography sx={{ fontSize:13, color:"#6B7280" }}>
+          <Typography sx={{ fontSize:18, fontWeight:700, color:COLORES.textoPrimario }}>{empleado.nombre} {empleado.apellido}</Typography>
+          <Typography sx={{ fontSize:13, color:COLORES.textoTerciario }}>
             {empleado.cedula && <>C.C. {empleado.cedula} · </>}
             {empleado.area}{empleado.cargo ? ` · ${empleado.cargo}` : ""}
           </Typography>
         </Box>
         <Box sx={{ textAlign:"right" }}>
-          <Typography sx={{ fontSize:14, fontWeight:600, color:"#374151" }}>
+          <Typography sx={{ fontSize:14, fontWeight:600, color:COLORES.textoSecundario }}>
             {MESES.find(m=>m.v===periodo?.mes)?.l || "—"} {periodo?.anio || ""}
           </Typography>
-          <Typography sx={{ fontSize:12, color:"#9CA3AF" }}>
+          <Typography sx={{ fontSize:12, color:COLORES.textoSuave }}>
             {periodo?.diasEsperados || 0} días laborales
           </Typography>
         </Box>
@@ -270,17 +271,17 @@ function ResultadosPorEmpleado({ data }) {
       {/* Tarjetas de métricas */}
       <Box sx={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(120px, 1fr))", gap:1.5, mb:3 }}>
         {metricas.map((m,i) => (
-          <Paper key={i} elevation={0} sx={{ p:1.5, borderRadius:"12px", border:"1px solid #ECECEC", textAlign:"center" }}>
+          <Paper key={i} elevation={0} sx={{ p:1.5, borderRadius:"12px", border:`1px solid ${COLORES.grisContorno}`, textAlign:"center" }}>
             <Typography sx={{ fontSize:20, fontWeight:700, color:m.color }}>{m.value}</Typography>
-            <Typography sx={{ fontSize:11, color:"#9CA3AF", mt:0.5 }}>{m.label}</Typography>
+            <Typography sx={{ fontSize:11, color:COLORES.textoSuave, mt:0.5 }}>{m.label}</Typography>
           </Paper>
         ))}
       </Box>
 
       {/* Novedades - solo resumen numérico por ahora */}
       {permisos?.total > 0 && (
-        <Box sx={{ mb:2, p:2, background:"#F0FDF4", borderRadius:"12px", border:"1px solid #BBF7D0" }}>
-          <Typography sx={{ fontSize:13, fontWeight:600, color:"#166534" }}>
+        <Box sx={{ mb:2, p:2, background:COLORES.successClaro, borderRadius:"12px", border:`1px solid ${COLORES.successFondo}` }}>
+          <Typography sx={{ fontSize:13, fontWeight:600, color:COLORES.primarioOscuro }}>
             Novedades: {permisos.total} ({permisos.dias} días hábiles)
           </Typography>
         </Box>
@@ -288,8 +289,8 @@ function ResultadosPorEmpleado({ data }) {
 
       {/* Incidencias - solo resumen numérico por ahora */}
       {incidencias?.total > 0 && (
-        <Box sx={{ mb:2, p:2, background:"#FEF2F2", borderRadius:"12px", border:"1px solid #FECACA" }}>
-          <Typography sx={{ fontSize:13, fontWeight:600, color:"#991B1B" }}>
+        <Box sx={{ mb:2, p:2, background:COLORES.dangerFondo2, borderRadius:"12px", border:`1px solid ${COLORES.dangerBorde}` }}>
+          <Typography sx={{ fontSize:13, fontWeight:600, color:COLORES.dangerOscuro }}>
             Incidencias: {incidencias.total} ({incidencias.pendientes} pendientes)
           </Typography>
         </Box>
@@ -298,7 +299,7 @@ function ResultadosPorEmpleado({ data }) {
       {/* Detalle diario */}
       {detalle?.length > 0 && (
         <Box>
-          <Typography sx={{ fontSize:14, fontWeight:600, color:"#374151", mb:1 }}>Detalle diario ({detalle.length} días)</Typography>
+          <Typography sx={{ fontSize:14, fontWeight:600, color:COLORES.textoSecundario, mb:1 }}>Detalle diario ({detalle.length} días)</Typography>
           <DataTable rows={detalle} columns={[
             {field:"fecha",headerName:"Fecha",width:100,valueFormatter:v=>new Date(v).toLocaleDateString("es-CO")},
             {field:"entrada1",headerName:"Ent. Mañana",width:95,valueFormatter:v=>v||"—"},
@@ -364,30 +365,30 @@ export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarP
 
   return (
     <Box>
-      <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC", mb: 2 }}>
+      <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, mb: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-          <Button onClick={onVolver} sx={{ minWidth: 0, p: 0.5, borderRadius: "8px", color: "#6B7280" }}><ArrowLeft size={18} /></Button>
-          <Breadcrumbs separator={<ChevronRight size={14} />} sx={{ fontSize: 12, color: "#9CA3AF" }}>
+          <Button onClick={onVolver} sx={{ minWidth: 0, p: 0.5, borderRadius: "8px", color: COLORES.textoTerciario }}><ArrowLeft size={18} /></Button>
+          <Breadcrumbs separator={<ChevronRight size={14} />} sx={{ fontSize: 12, color: COLORES.textoSuave }}>
             <Link underline="hover" color="inherit" sx={{ cursor: "pointer" }} onClick={onVolver}>Inicio</Link>
             <Link underline="hover" color="inherit" sx={{ cursor: "pointer" }} onClick={onVolver}>Operación</Link>
             <Link underline="hover" color="inherit" sx={{ cursor: "pointer" }} onClick={onVolver}>Reportes</Link>
-            <Typography sx={{ fontSize: 12, color: "#111827", fontWeight: 600 }}>{ETIQUETAS[tipoReporte]}</Typography>
+            <Typography sx={{ fontSize: 12, color: COLORES.textoPrimario, fontWeight: 600 }}>{ETIQUETAS[tipoReporte]}</Typography>
           </Breadcrumbs>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: "#F0FDF4", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{ICONOS[tipoReporte]}</Box>
-          <Typography sx={{ fontSize: 17, fontWeight: 700, color: "#111827" }}>{ETIQUETAS[tipoReporte]}</Typography>
+          <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: COLORES.successClaro, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{ICONOS[tipoReporte]}</Box>
+          <Typography sx={{ fontSize: 17, fontWeight: 700, color: COLORES.textoPrimario }}>{ETIQUETAS[tipoReporte]}</Typography>
         </Box>
         <FiltrosReporte tipoReporte={tipoReporte} empleados={empleados} onGenerar={generar} onExportarPDF={() => onExportarPDF?.(tipoReporte, filtros)} onExportarExcel={() => onExportarExcel?.(tipoReporte, registros)} onLimpiar={limpiar} />
       </Paper>
       {cargando ? (
-        <Box sx={{ textAlign: "center", py: 4, color: "#9CA3AF" }}>Generando reporte...</Box>
+        <Box sx={{ textAlign: "center", py: 4, color: COLORES.textoSuave }}>Generando reporte...</Box>
       ) : errorMsg ? (
-        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #FECACA", background:"#FEF2F2" }}>
-          <Typography sx={{ fontSize:13, color:"#991B1B" }}>Error: {errorMsg}</Typography>
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: `1px solid ${COLORES.dangerBorde}`, background:COLORES.dangerFondo2 }}>
+          <Typography sx={{ fontSize:13, color:COLORES.dangerOscuro }}>Error: {errorMsg}</Typography>
         </Paper>
       ) : registros !== null ? (
-        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC" }}>
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}` }}>
           {isPorEmpleado ? (
             <ResultadosPorEmpleado data={registros} />
           ) : (

@@ -1,20 +1,21 @@
 import { Box, Typography, Chip, IconButton } from "@mui/material";
 import { Edit3, Eye, MoreVertical } from "lucide-react";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const tipoStyles = {
-  "Tardanza": { bg: "#FEF3C7", color: "#92400E" },
-  "Permiso": { bg: "#DBEAFE", color: "#1E40AF" },
-  "Incapacidad": { bg: "#EDE9FE", color: "#5B21B6" },
-  "Vacaciones": { bg: "#D1FAE5", color: "#065F46" },
-  "Ausencia": { bg: "#FEE2E2", color: "#991B1B" },
-  "Salida anticipada": { bg: "#F5E6D3", color: "#78350F" },
-  "Olvido de marcación": { bg: "#F3F4F6", color: "#4B5563" },
+  "Tardanza": { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+  "Permiso": { bg: COLORES.primarioClaro2, color: COLORES.primarioOscuro },
+  "Incapacidad": { bg: COLORES.primarioClaro, color: COLORES.primarioOscuro },
+  "Vacaciones": { bg: COLORES.successFondo, color: COLORES.verdeTexto },
+  "Ausencia": { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
+  "Salida anticipada": { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+  "Olvido de marcación": { bg: COLORES.fondoGris2, color: COLORES.textoMuted },
 };
 
 const estadoStyles = {
-  "Pendiente": { bg: "#FEF3C7", color: "#92400E" },
-  "Aprobada": { bg: "#D1FAE5", color: "#065F46" },
-  "Rechazada": { bg: "#FEE2E2", color: "#991B1B" },
+  "Pendiente": { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+  "Aprobada": { bg: COLORES.successFondo, color: COLORES.verdeTexto },
+  "Rechazada": { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
 };
 
 const btnBase = {
@@ -23,7 +24,7 @@ const btnBase = {
 };
 
 function ChipCell({ label, styles }) {
-  const s = styles?.[label] || { bg: "#F3F4F6", color: "#6B7280" };
+  const s = styles?.[label] || { bg: COLORES.fondoGris2, color: COLORES.textoTerciario };
   return (
     <Chip
       label={label}
@@ -44,10 +45,10 @@ export const incidenciaColumns = ({ onEditar, onVer, onMenuOpen }) => [
     minWidth: 240,
     renderCell: ({ row }) => (
       <Box sx={{ alignSelf: "flex-start", pt: 1 }}>
-        <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#111827", lineHeight: 1.3 }}>
+        <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.textoPrimario, lineHeight: 1.3 }}>
           {row.empleado}
         </Typography>
-        <Typography sx={{ fontSize: 11, color: "#9CA3AF", mt: 0.2 }}>
+        <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, mt: 0.2 }}>
           {row.cargo}
         </Typography>
       </Box>
@@ -64,13 +65,13 @@ export const incidenciaColumns = ({ onEditar, onVer, onMenuOpen }) => [
     headerName: "Fecha",
     width: 110,
     renderCell: ({ value }) => {
-      if (!value) return <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>—</Typography>;
+      if (!value) return <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>—</Typography>;
       try {
         const d = new Date(value + (value.includes("T") ? "" : "T00:00:00"));
         const f = d.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" });
-        return <Typography sx={{ fontSize: 12, color: "#374151" }}>{f}</Typography>;
+        return <Typography sx={{ fontSize: 12, color: COLORES.textoSecundario }}>{f}</Typography>;
       } catch {
-        return <Typography sx={{ fontSize: 12, color: "#374151" }}>{value}</Typography>;
+        return <Typography sx={{ fontSize: 12, color: COLORES.textoSecundario }}>{value}</Typography>;
       }
     },
   },
@@ -87,10 +88,10 @@ export const incidenciaColumns = ({ onEditar, onVer, onMenuOpen }) => [
     minWidth: 180,
     renderCell: ({ row }) => (
       <Box sx={{ alignSelf: "flex-start", pt: 1 }}>
-        <Typography sx={{ fontSize: 13, fontWeight: 500, color: "#111827", lineHeight: 1.3 }}>
+        <Typography sx={{ fontSize: 13, fontWeight: 500, color: COLORES.textoPrimario, lineHeight: 1.3 }}>
           {row.responsable || "—"}
         </Typography>
-        <Typography sx={{ fontSize: 11, color: "#9CA3AF", mt: 0.2 }}>
+        <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, mt: 0.2 }}>
           {row.responsable_cargo || ""}
         </Typography>
       </Box>
@@ -106,14 +107,14 @@ export const incidenciaColumns = ({ onEditar, onVer, onMenuOpen }) => [
     align: "center",
     headerAlign: "center",
     renderCell: ({ row }) => (
-      <Box display="flex" gap={0.5} alignItems="center">
-        <IconButton sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }} title="Editar" onClick={(e) => { e.stopPropagation(); onEditar(row); }}>
+      <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+        <IconButton sx={{ ...btnBase, bgcolor: COLORES.primarioClaro, color: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioClaro2 } }} title="Editar" onClick={(e) => { e.stopPropagation(); onEditar(row); }}>
           <Edit3 size={15} />
         </IconButton>
-        <IconButton sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }} title="Ver" onClick={(e) => { e.stopPropagation(); onVer(row); }}>
+        <IconButton sx={{ ...btnBase, bgcolor: COLORES.primarioClaro, color: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioClaro2 } }} title="Ver" onClick={(e) => { e.stopPropagation(); onVer(row); }}>
           <Eye size={15} />
         </IconButton>
-        <IconButton sx={{ ...btnBase, bgcolor: "#FEF3C7", color: "#92400E", "&:hover": { bgcolor: "#FDE68A" } }} title="Más opciones" onClick={(e) => { e.stopPropagation(); onMenuOpen(e, row); }}>
+        <IconButton sx={{ ...btnBase, bgcolor: COLORES.primarioClaro, color: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioClaro2 } }} title="Más opciones" onClick={(e) => { e.stopPropagation(); onMenuOpen(e, row); }}>
           <MoreVertical size={15} />
         </IconButton>
       </Box>

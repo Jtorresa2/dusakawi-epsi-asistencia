@@ -1,4 +1,5 @@
 import { Box, Typography, Button } from "@mui/material";
+import { COLORES } from "../constants/colores.js";
 
 export default function PageHeader({
   titulo,
@@ -10,7 +11,7 @@ export default function PageHeader({
   return (
     <Box
       sx={{
-        background: "#fff",
+        background: COLORES.fondoBlanco,
         borderRadius: 3,
         p: 3,
         mb: 3,
@@ -22,7 +23,7 @@ export default function PageHeader({
     >
       <Box>
         {titulo && (
-          <Typography variant="h4" fontWeight={700} color="#1b5e20">
+          <Typography variant="h4" fontWeight={700} color={COLORES.primarioOscuro}>
             {titulo}
           </Typography>
         )}
@@ -40,9 +41,9 @@ export default function PageHeader({
             borderRadius: 2,
             px: 3,
             py: 1.2,
-            background: "#2e7d32",
+            background: COLORES.primario,
             "&:hover": {
-              background: "#1b5e20",
+              background: COLORES.primarioOscuro,
             },
           }}
         >

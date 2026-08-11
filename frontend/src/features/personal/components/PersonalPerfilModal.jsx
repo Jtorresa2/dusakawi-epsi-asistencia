@@ -12,6 +12,7 @@ import { obtenerPersonalPorId, actualizarPersonal } from "../personal.api";
 import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 import { obtenerHorarios, asignarHorario, desasignarHorario } from "../../horarios/horario.api";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const MONTHS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -40,10 +41,10 @@ const infoFields = [
   { key: "rol", label: "Rol del sistema", icon: <Shield size={16} /> },
 ];
 
-const selectSx = { borderRadius: "10px", fontSize: 14, background: "#FFFFFF", "& fieldset": { borderColor: "#111827" }, "&:hover fieldset": { borderColor: "#111827" }, "&.Mui-focused fieldset": { borderColor: "#111827" } };
+const selectSx = { borderRadius: "10px", fontSize: 14, background: COLORES.fondoBlanco, "& fieldset": { borderColor: COLORES.textoPrimario }, "&:hover fieldset": { borderColor: COLORES.textoPrimario }, "&.Mui-focused fieldset": { borderColor: COLORES.textoPrimario } };
 const selectMenuSx = {
-  PaperProps: {
-    sx: { bgcolor: "#FFFFFF", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } },
+  slotProps: {
+    paper: { sx: { bgcolor: COLORES.fondoBlanco, "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } } },
   },
 };
 
@@ -168,21 +169,21 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
   const renderField = (field, value, section) => {
     const isEditing = editando === section;
     return (
-      <Box key={field.key} sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: "1px solid #D9EFDB" }}>
-        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "#DCF5E4", display: "flex", alignItems: "center", justifyContent: "center", color: "#1B5E20", flexShrink: 0 }}>
+      <Box key={field.key} sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: `1px solid ${COLORES.verdeVariante2}` }}>
+        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: COLORES.verdeVariante1, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.primarioOscuro, flexShrink: 0 }}>
           {field.icon}
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", mb: 0.2 }}>{field.label}</Typography>
+          <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoTerciario, textTransform: "uppercase", mb: 0.2 }}>{field.label}</Typography>
           {isEditing ? (
             <TextField
               fullWidth size="small" type={field.type || "text"}
               value={form[field.key] || ""}
               onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: 13, background: "#FFFFFF", "& fieldset": { borderColor: "#111827" }, "&:hover fieldset": { borderColor: "#111827" }, "&.Mui-focused fieldset": { borderColor: "#111827" } } }}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: 13, background: COLORES.fondoBlanco, "& fieldset": { borderColor: COLORES.textoPrimario }, "&:hover fieldset": { borderColor: COLORES.textoPrimario }, "&.Mui-focused fieldset": { borderColor: COLORES.textoPrimario } } }}
             />
           ) : (
-            <Typography sx={{ fontSize: 14, fontWeight: 500, color: "#111827", wordBreak: "break-word" }}>
+            <Typography sx={{ fontSize: 14, fontWeight: 500, color: COLORES.textoPrimario, wordBreak: "break-word" }}>
               {field.type === "date" && value ? formatDate(value) : value || "—"}
             </Typography>
           )}
@@ -194,47 +195,47 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
   const isActive = data?.activo === 1 || data?.activo === true;
   const horarioNombre = horarios.find((h) => String(h.id) === String(data?.horario_id))?.nombre;
   const statsCards = [
-    { title: "Inasistencias", value: String(data?.inasistencias ?? 0), sub: "Total de ausencias registradas", icon: <XCircle size={22} />, color: "#DC2626", bg: "#FEE2E2" },
-    { title: "Llegadas tardías", value: String(data?.llegadas_tardias ?? 0), sub: "Total de retardos registrados", icon: <Clock size={22} />, color: "#D97706", bg: "#FEF3C7" },
+    { title: "Inasistencias", value: String(data?.inasistencias ?? 0), sub: "Total de ausencias registradas", icon: <XCircle size={22} />, color: COLORES.danger, bg: COLORES.dangerFondo },
+    { title: "Llegadas tardías", value: String(data?.llegadas_tardias ?? 0), sub: "Total de retardos registrados", icon: <Clock size={22} />, color: COLORES.warningOscuro, bg: COLORES.warningFondo },
   ];
 
   return (
     <>
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth
-  sx={{ "& .MuiPaper-root": { backgroundColor: "#FFFFFF" } }}
-  PaperProps={{ sx: { position: "relative", borderRadius: "16px", maxHeight: "95vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } }}>
+  sx={{ "& .MuiPaper-root": { backgroundColor: COLORES.fondoBlanco } }}
+  slotProps={{ paper: { sx: { position: "relative", borderRadius: "16px", maxHeight: "95vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } } }}>
       {loading ? (
-        <DialogContent sx={{ py: 8, textAlign: "center", color: "#9CA3AF" }}>Cargando perfil...</DialogContent>
+        <DialogContent sx={{ py: 8, textAlign: "center", color: COLORES.textoSuave }}>Cargando perfil...</DialogContent>
       ) : data ? (
         <>
-          <IconButton onClick={onClose} size="small" sx={{ position: "absolute", top: 12, right: 12, zIndex: 2, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+          <IconButton aria-label="Cerrar" onClick={onClose} size="small" sx={{ position: "absolute", top: 12, right: 12, zIndex: 2, color: COLORES.textoSuave, "&:hover": { color: COLORES.textoTerciario, bgcolor: COLORES.fondoGris2 } }}>
             <X size={18} />
           </IconButton>
-          <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             Perfil de {data.nombre} {data.apellido}
           </DialogTitle>
           <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             {/* Header card */}
-            <Paper elevation={0} sx={{ p: 3, borderRadius: "16px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap", bgcolor: "#F9FAFB" }}>
+            <Paper elevation={0} sx={{ p: 3, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap", bgcolor: COLORES.fondoGris }}>
               <Box sx={{ position: "relative", "&:hover .foto-overlay": { opacity: 1 } }}>
                 <Avatar src={data.foto_url || ""}
-                  sx={{ width: 72, height: 72, bgcolor: "#E8F5E9", color: "#1B5E20", fontSize: 26, fontWeight: 700, cursor: "pointer" }}>
+                  sx={{ width: 72, height: 72, bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro, fontSize: 26, fontWeight: 700, cursor: "pointer" }}>
                   {initials}
                 </Avatar>
                 <Box className="foto-overlay" onClick={() => document.getElementById("perfil-foto-input")?.click()}
-                  sx={{ position: "absolute", inset: 0, borderRadius: "50%", bgcolor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", opacity: 0, transition: "opacity 0.2s", cursor: "pointer" }}>
+                  sx={{ position: "absolute", inset: 0, borderRadius: "50%", bgcolor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.fondoBlanco, opacity: 0, transition: "opacity 0.2s", cursor: "pointer" }}>
                   {subiendoFoto ? <Typography sx={{ fontSize: 10, fontWeight: 600 }}>...</Typography> : <Camera size={20} />}
                 </Box>
                 <input id="perfil-foto-input" type="file" hidden accept="image/*" onChange={handleFotoChange} />
               </Box>
               <Box sx={{ flex: 1, minWidth: 200 }}>
-                <Typography sx={{ fontSize: 22, fontWeight: 700, color: "#111827" }}>{data.nombre} {data.apellido}</Typography>
-                <Typography sx={{ fontSize: 14, color: "#6B7280", mt: 0.3 }}>{data.cargo || "—"} · {data.area || "—"}</Typography>
-                <Typography sx={{ fontSize: 13, color: "#9CA3AF", mt: 0.3 }}>{data.correo || ""}</Typography>
+                <Typography sx={{ fontSize: 22, fontWeight: 700, color: COLORES.textoPrimario }}>{data.nombre} {data.apellido}</Typography>
+                <Typography sx={{ fontSize: 14, color: COLORES.textoTerciario, mt: 0.3 }}>{data.cargo || "—"} · {data.area || "—"}</Typography>
+                <Typography sx={{ fontSize: 13, color: COLORES.textoSuave, mt: 0.3 }}>{data.correo || ""}</Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <Chip label={isActive ? "Activo" : "Inactivo"} size="small"
-                  sx={{ fontWeight: 600, borderRadius: "8px", bgcolor: isActive ? "#E8F5E9" : "#FEE2E2", color: isActive ? "#2E7D32" : "#DC2626", fontSize: 12 }} />
+                  sx={{ fontWeight: 600, borderRadius: "8px", bgcolor: isActive ? COLORES.primarioClaro : COLORES.dangerFondo, color: isActive ? COLORES.primario : COLORES.danger, fontSize: 12 }} />
                 <FormControlLabel
                   control={<Switch checked={isActive} onChange={handleToggleEstado} disabled={guardando} size="small" />}
                   label=""
@@ -246,44 +247,44 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
             {/* Grid principal */}
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "4fr 3fr 3fr" }, gap: 3, alignItems: "start" }}>
               {/* Col 1 — Datos personales */}
-              <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC", bgcolor: "#F9FAFB" }}>
+              <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, bgcolor: COLORES.fondoGris }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-                  <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Datos personales</Typography>
+                  <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.textoTerciario, textTransform: "uppercase" }}>Datos personales</Typography>
                   {editando === "personal" ? (
                     <Box sx={{ display: "flex", gap: 0.5 }}>
-                      <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: "#E8F5E9", color: "#2E7D32", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#C8E6C9" } }}><Save size={15} /></IconButton>
-                      <IconButton size="small" onClick={handleCancel} sx={{ bgcolor: "#FEE2E2", color: "#DC2626", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#FECACA" } }}><X size={15} /></IconButton>
+                      <IconButton aria-label="Guardar cambios" size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: COLORES.primarioClaro, color: COLORES.primario, borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}><Save size={15} /></IconButton>
+                      <IconButton aria-label="Cancelar edición" size="small" onClick={handleCancel} sx={{ bgcolor: COLORES.dangerFondo, color: COLORES.danger, borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: COLORES.dangerBorde } }}><X size={15} /></IconButton>
                     </Box>
                   ) : (
-                    <IconButton size="small" onClick={() => handleEdit("personal")} sx={{ bgcolor: "#EFF6FF", color: "#1565C0", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#DBEAFE" } }}><Edit2 size={15} /></IconButton>
+                    <IconButton aria-label="Editar datos personales" size="small" onClick={() => handleEdit("personal")} sx={{ bgcolor: COLORES.primarioClaro, color: COLORES.primario, borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}><Edit2 size={15} /></IconButton>
                   )}
                 </Box>
                 {personalFields.map((f) => renderField(f, data[f.key], "personal"))}
               </Paper>
 
               {/* Col 2 — Información laboral */}
-              <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: "1px solid #ECECEC", bgcolor: "#F9FAFB" }}>
+              <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, bgcolor: COLORES.fondoGris }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-                  <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Información laboral</Typography>
+                  <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.textoTerciario, textTransform: "uppercase" }}>Información laboral</Typography>
                   {editando === "laboral" ? (
                     <Box sx={{ display: "flex", gap: 0.5 }}>
-                      <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: "#E8F5E9", color: "#2E7D32", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#C8E6C9" } }}><Save size={15} /></IconButton>
-                      <IconButton size="small" onClick={handleCancel} sx={{ bgcolor: "#FEE2E2", color: "#DC2626", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#FECACA" } }}><X size={15} /></IconButton>
+                      <IconButton aria-label="Guardar cambios" size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: COLORES.primarioClaro, color: COLORES.primario, borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}><Save size={15} /></IconButton>
+                      <IconButton aria-label="Cancelar edición" size="small" onClick={handleCancel} sx={{ bgcolor: COLORES.dangerFondo, color: COLORES.danger, borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: COLORES.dangerBorde } }}><X size={15} /></IconButton>
                     </Box>
                   ) : (
-                    <IconButton size="small" onClick={() => handleEdit("laboral")} sx={{ bgcolor: "#EFF6FF", color: "#1565C0", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#DBEAFE" } }}><Edit2 size={15} /></IconButton>
+                    <IconButton aria-label="Editar datos laborales" size="small" onClick={() => handleEdit("laboral")} sx={{ bgcolor: COLORES.primarioClaro, color: COLORES.primario, borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}><Edit2 size={15} /></IconButton>
                   )}
                 </Box>
                 {editando === "laboral" ? (
                   <>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: "1px solid #D9EFDB" }}>
-                      <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "#DCF5E4", display: "flex", alignItems: "center", justifyContent: "center", color: "#1B5E20", flexShrink: 0 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: `1px solid ${COLORES.verdeVariante2}` }}>
+                      <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: COLORES.verdeVariante1, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.primarioOscuro, flexShrink: 0 }}>
                         <Briefcase size={16} />
                       </Box>
                       <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", mb: 0.2 }}>Cargo</Typography>
+                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoTerciario, textTransform: "uppercase", mb: 0.2 }}>Cargo</Typography>
                         <FormControl fullWidth size="small">
-                          <Select value={form.cargo_id || ""} sx={selectSx} MenuProps={selectMenuSx}
+                          <Select value={form.cargo_id || ""} sx={selectSx} slotProps={{ menu: selectMenuSx }}
                             onChange={(e) => setForm({ ...form, cargo_id: e.target.value })}>
                             <MenuItem value=""><em>Sin cargo</em></MenuItem>
                             {cargos.filter((c) => c.estado !== "inactivo").map((c) => (
@@ -293,14 +294,14 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
                         </FormControl>
                       </Box>
                     </Box>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: "1px solid #D9EFDB" }}>
-                      <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "#DCF5E4", display: "flex", alignItems: "center", justifyContent: "center", color: "#1B5E20", flexShrink: 0 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: `1px solid ${COLORES.verdeVariante2}` }}>
+                      <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: COLORES.verdeVariante1, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.primarioOscuro, flexShrink: 0 }}>
                         <MapPin size={16} />
                       </Box>
                       <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", mb: 0.2 }}>Área</Typography>
+                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoTerciario, textTransform: "uppercase", mb: 0.2 }}>Área</Typography>
                         <FormControl fullWidth size="small">
-                          <Select value={form.area_id || ""} sx={selectSx} MenuProps={selectMenuSx}
+                          <Select value={form.area_id || ""} sx={selectSx} slotProps={{ menu: selectMenuSx }}
                             onChange={(e) => setForm({ ...form, area_id: e.target.value })}>
                             <MenuItem value=""><em>Sin área</em></MenuItem>
                             {areas.map((a) => (
@@ -310,14 +311,14 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
                         </FormControl>
                       </Box>
                     </Box>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: "1px solid #D9EFDB" }}>
-                      <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "#DCF5E4", display: "flex", alignItems: "center", justifyContent: "center", color: "#1B5E20", flexShrink: 0 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: `1px solid ${COLORES.verdeVariante2}` }}>
+                      <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: COLORES.verdeVariante1, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.primarioOscuro, flexShrink: 0 }}>
                         <Clock size={16} />
                       </Box>
                       <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", mb: 0.2 }}>Horario</Typography>
+                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoTerciario, textTransform: "uppercase", mb: 0.2 }}>Horario</Typography>
                         <FormControl fullWidth size="small">
-                          <Select value={form.horario_id || ""} sx={selectSx} MenuProps={selectMenuSx}
+                          <Select value={form.horario_id || ""} sx={selectSx} slotProps={{ menu: selectMenuSx }}
                             onChange={(e) => setForm({ ...form, horario_id: e.target.value })}>
                             <MenuItem value=""><em>Sin horario</em></MenuItem>
                             {horarios.map((h) => (
@@ -332,25 +333,25 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
                   <>
                     {workFields.map((f) => renderField(f, data[f.key], "laboral"))}
                     {infoFields.map((f) => (
-                      <Box key={f.key} sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: "1px solid #D9EFDB" }}>
-                        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "#DCF5E4", display: "flex", alignItems: "center", justifyContent: "center", color: "#1B5E20", flexShrink: 0 }}>
+                      <Box key={f.key} sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: `1px solid ${COLORES.verdeVariante2}` }}>
+                        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: COLORES.verdeVariante1, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.primarioOscuro, flexShrink: 0 }}>
                           {f.icon}
                         </Box>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", mb: 0.2 }}>{f.label}</Typography>
-                          <Typography sx={{ fontSize: 14, fontWeight: 500, color: "#111827", wordBreak: "break-word" }}>
+                          <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", mb: 0.2 }}>{f.label}</Typography>
+                          <Typography sx={{ fontSize: 14, fontWeight: 500, color: COLORES.textoPrimario, wordBreak: "break-word" }}>
                             {f.render ? f.render(data[f.key]) : (data[f.key] || "—")}
                           </Typography>
                         </Box>
                       </Box>
                     ))}
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: "1px solid #D9EFDB" }}>
-                      <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "#DCF5E4", display: "flex", alignItems: "center", justifyContent: "center", color: "#1B5E20", flexShrink: 0 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: `1px solid ${COLORES.verdeVariante2}` }}>
+                      <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: COLORES.verdeVariante1, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.primarioOscuro, flexShrink: 0 }}>
                         <Clock size={16} />
                       </Box>
                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", mb: 0.2 }}>Horario</Typography>
-                        <Typography sx={{ fontSize: 14, fontWeight: 500, color: "#111827", wordBreak: "break-word" }}>
+                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", mb: 0.2 }}>Horario</Typography>
+                        <Typography sx={{ fontSize: 14, fontWeight: 500, color: COLORES.textoPrimario, wordBreak: "break-word" }}>
                           {horarioNombre || "—"}
                         </Typography>
                       </Box>
@@ -362,17 +363,17 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
               {/* Col 3 — Estadísticas */}
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {statsCards.map((card, i) => (
-                  <Paper key={i} elevation={0} sx={{ p: 2, borderRadius: "16px", border: "1px solid #ECECEC", bgcolor: "#F9FAFB" }}>
+                  <Paper key={i} elevation={0} sx={{ p: 2, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, bgcolor: COLORES.fondoGris }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
                       <Box sx={{ width: 40, height: 40, borderRadius: "12px", bgcolor: card.bg, display: "flex", alignItems: "center", justifyContent: "center", color: card.color, flexShrink: 0 }}>
                         {card.icon}
                       </Box>
                       <Box>
-                        <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase" }}>{card.title}</Typography>
-                        <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>{card.value}</Typography>
+                        <Typography sx={{ fontSize: 11, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase" }}>{card.title}</Typography>
+                        <Typography sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario }}>{card.value}</Typography>
                       </Box>
                     </Box>
-                    <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>{card.sub}</Typography>
+                    <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>{card.sub}</Typography>
                   </Paper>
                 ))}
               </Box>
@@ -380,7 +381,7 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
           </DialogContent>
         </>
       ) : (
-        <DialogContent sx={{ padding: 8, textAlign: "center", color: "#9CA3AF" }}>No se pudo cargar el perfil</DialogContent>
+        <DialogContent sx={{ padding: 8, textAlign: "center", color: COLORES.textoSuave }}>No se pudo cargar el perfil</DialogContent>
       )}
       </Dialog>
 

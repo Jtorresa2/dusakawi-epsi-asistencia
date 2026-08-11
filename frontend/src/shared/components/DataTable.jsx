@@ -1,5 +1,6 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { Box } from "@mui/material";
+import { COLORES } from "../constants/colores.js";
 
 export default function DataTable({
   rows = [],
@@ -24,8 +25,8 @@ export default function DataTable({
           fontFamily: "'Inter', 'Segoe UI', sans-serif",
         },
         "& .MuiDataGrid-columnHeaders": {
-          backgroundColor: "#F9FAFB",
-          borderBottom: "1px solid #ECECEC",
+          backgroundColor: COLORES.fondoGris,
+          borderBottom: `1px solid ${COLORES.grisContorno}`,
           minHeight: "48px!important",
           maxHeight: "48px!important",
         },
@@ -37,27 +38,27 @@ export default function DataTable({
         "& .MuiDataGrid-columnHeaderTitle": {
           fontWeight: 600,
           fontSize: 12,
-          color: "#6B7280",
+          color: COLORES.textoTerciario,
           letterSpacing: "0.03em",
           textTransform: "uppercase",
         },
         "& .MuiDataGrid-cell": {
-          borderBottom: "1px solid #F3F4F6",
+          borderBottom: `1px solid ${COLORES.fondoGris2}`,
           py: 1.2,
           display: "flex",
           alignItems: "center",
           overflow: "visible",
         },
         "& .MuiDataGrid-row:hover": {
-          backgroundColor: "#F0FFF4",
+          backgroundColor: COLORES.successClaro,
         },
         "& .MuiDataGrid-footerContainer": {
-          borderTop: "1px solid #ECECEC",
+          borderTop: `1px solid ${COLORES.grisContorno}`,
           minHeight: "56px",
         },
         "& .MuiTablePagination-root": {
           fontSize: 13,
-          color: "#6B7280",
+          color: COLORES.textoTerciario,
         },
         "& .MuiTablePagination-spacer": {
           display: "none",
@@ -68,7 +69,7 @@ export default function DataTable({
         },
         "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
           fontSize: 13,
-          color: "#6B7280",
+          color: COLORES.textoTerciario,
           fontWeight: 500,
           margin: 0,
         },
@@ -78,6 +79,25 @@ export default function DataTable({
         },
         "& .MuiDataGrid-virtualScroller::-webkit-scrollbar": {
           display: "none",
+        },
+        "& .MuiDataGrid-scrollbar": {
+          scrollbarWidth: "thin",
+          scrollbarColor: `${COLORES.acento} ${COLORES.primarioClaro}`,
+        },
+        "& .MuiDataGrid-scrollbar::-webkit-scrollbar": {
+          width: 8,
+          height: 8,
+        },
+        "& .MuiDataGrid-scrollbar::-webkit-scrollbar-track": {
+          background: COLORES.primarioClaro,
+          borderRadius: 4,
+        },
+        "& .MuiDataGrid-scrollbar::-webkit-scrollbar-thumb": {
+          background: COLORES.acento,
+          borderRadius: 4,
+        },
+        "& .MuiDataGrid-scrollbar::-webkit-scrollbar-thumb:hover": {
+          background: COLORES.acento,
         },
         "& .MuiDataGrid-main": {
           overflow: "hidden",
@@ -92,7 +112,7 @@ export default function DataTable({
         autoHeight={autoHeight}
         checkboxSelection={checkboxSelection}
         disableRowSelectionOnClick
-        pageSizeOptions={[5, 10, 20, 50]}
+        pageSizeOptions={[5, 10, 15, 20, 50]}
         onRowClick={onRowClick}
         getRowId={getRowId}
         getRowHeight={getRowHeight}

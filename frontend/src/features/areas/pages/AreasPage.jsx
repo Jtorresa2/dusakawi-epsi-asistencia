@@ -12,6 +12,7 @@ import { Plus, Edit2, Trash2, Search, Building2, Users, ChevronDown, ChevronRigh
 import { obtenerAreas, crearArea, actualizarArea, eliminarArea, obtenerEmpleadosPorArea } from "../area.api";
 import useRol from "../../../shared/hooks/useRol";
 import ConfirmDialog from "../../../shared/components/ConfirmDialog";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const initialForm = { nombre: "", piso: "", descripcion: "" };
 
@@ -113,12 +114,12 @@ export default function AreasPage() {
       {/* HEADER */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
         <Box>
-          <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Inicio / Gestión de mantenimiento / Áreas</Typography>
+          <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>Inicio / Gestión de mantenimiento / Áreas</Typography>
         </Box>
         {puede("areas", "crear") && (
           <Button variant="contained" startIcon={<Plus size={18} />}
             onClick={abrirCrear}
-            sx={{ bgcolor: "#1B5E20", borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, "&:hover": { bgcolor: "#2E7D32" } }}>
+            sx={{ bgcolor: COLORES.primarioOscuro, borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, "&:hover": { bgcolor: COLORES.primario } }}>
             Nueva área
           </Button>
         )}
@@ -127,17 +128,17 @@ export default function AreasPage() {
       {/* TARJETAS RESUMEN */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2, mb: 3.5 }}>
         {[
-          { icon: <Building size={20} />, value: areas.length, label: "Total áreas", color: "#1B5E20", bg: "#E8F5E9", onClick: () => { setBuscar(""); setOrden("nombre"); } },
-          { icon: <MapPin size={20} />, value: new Set(areas.map((a) => a.piso).filter((p) => p !== undefined && p !== null)).size, label: "Pisos distintos", color: "#1565C0", bg: "#EFF6FF", onClick: () => setOrden("piso") },
-          { icon: <Layers size={20} />, value: areas.filter((a) => a.descripcion?.trim()).length, label: "Con descripción", color: "#7C3AED", bg: "#F3E8FF", onClick: () => {} },
+          { icon: <Building size={20} />, value: areas.length, label: "Total áreas", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro, onClick: () => { setBuscar(""); setOrden("nombre"); } },
+          { icon: <MapPin size={20} />, value: new Set(areas.map((a) => a.piso).filter((p) => p !== undefined && p !== null)).size, label: "Pisos distintos", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro, onClick: () => setOrden("piso") },
+          { icon: <Layers size={20} />, value: areas.filter((a) => a.descripcion?.trim()).length, label: "Con descripción", color: COLORES.primario, bg: COLORES.primarioClaro, onClick: () => {} },
         ].map((card, i) => (
           <Paper key={i} elevation={0} onClick={card.onClick}
-            sx={{ p: 2, borderRadius: "16px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 1.5, cursor: "pointer", transition: "all .25s ease", "&:hover": { transform: "translateY(-2px)", boxShadow: "0 4px 15px rgba(0,0,0,.06)" } }}>
+            sx={{ p: 2, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", alignItems: "center", gap: 1.5, cursor: "pointer", transition: "all .25s ease", "&:hover": { transform: "translateY(-2px)", boxShadow: "0 4px 15px rgba(0,0,0,.06)" } }}>
             <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: card.bg, display: "flex", alignItems: "center", justifyContent: "center", color: card.color, flexShrink: 0 }}>
               {card.icon}
             </Box>
             <Box>
-              <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.03em" }}>{card.label}</Typography>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", letterSpacing: "0.03em" }}>{card.label}</Typography>
               <Typography sx={{ fontSize: 22, fontWeight: 700, color: card.color, lineHeight: 1.2 }}>{card.value}</Typography>
             </Box>
           </Paper>
@@ -145,24 +146,24 @@ export default function AreasPage() {
       </Box>
 
       {/* BARRA DE FILTROS */}
-      <Paper elevation={0} sx={{ borderRadius: "20px", border: "1px solid #ECECEC", p: 2.5, mb: 3 }}>
-        <Box sx={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 2, alignItems: "end" }}>
+      <Paper elevation={0} sx={{ borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`, p: 2.5, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr auto auto" }, gap: 2, alignItems: "end" }}>
           <Box sx={{ display: "grid", gap: 0.6 }}>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280" }}>Buscar área</Typography>
-            <TextField placeholder="Nombre o piso..."
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario }}>Buscar área</Typography>
+            <TextField aria-label="Buscar área" placeholder="Nombre o piso..."
               value={buscar} onChange={(e) => setBuscar(e.target.value)}
               sx={{ width: "100%", minWidth: 200 }}
               slotProps={{
                 input: {
-                  startAdornment: <Search size={16} style={{ color: "#9CA3AF", marginRight: 6 }} />,
-                  sx: { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: "#F9FAFB" },
+                  startAdornment: <Search size={16} style={{ color: COLORES.textoSuave, marginRight: 6 }} />,
+                  sx: { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: COLORES.fondoGris },
                 },
               }} />
           </Box>
           <Box sx={{ display: "grid", gap: 0.6 }}>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280" }}>Piso</Typography>
-            <Select value="todos" onChange={() => {}} size="small"
-              sx={{ borderRadius: "10px", fontSize: 13, height: 40, minWidth: 120, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#ECECEC" } }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario }}>Piso</Typography>
+            <Select aria-label="Piso" value="todos" onChange={() => {}} size="small"
+              sx={{ borderRadius: "10px", fontSize: 13, height: 40, minWidth: 120, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.grisContorno } }}>
               <MenuItem value="todos">Todos</MenuItem>
               {[...new Set(areas.map((a) => a.piso).filter((p) => p !== undefined && p !== null))].sort((a, b) => a - b).map((p) => (
                 <MenuItem key={p} value={p}>Piso {p}</MenuItem>
@@ -170,9 +171,9 @@ export default function AreasPage() {
             </Select>
           </Box>
           <Box sx={{ display: "grid", gap: 0.6 }}>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280" }}>Ordenar</Typography>
-            <Select value={orden} onChange={(e) => setOrden(e.target.value)} size="small"
-              sx={{ borderRadius: "10px", fontSize: 13, height: 40, minWidth: 130, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#ECECEC" } }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario }}>Ordenar</Typography>
+            <Select aria-label="Ordenar" value={orden} onChange={(e) => setOrden(e.target.value)} size="small"
+              sx={{ borderRadius: "10px", fontSize: 13, height: 40, minWidth: 130, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.grisContorno } }}>
               <MenuItem value="nombre">A - Z</MenuItem>
               <MenuItem value="piso">Por piso</MenuItem>
             </Select>
@@ -181,13 +182,13 @@ export default function AreasPage() {
       </Paper>
 
       {/* TABLE */}
-      <Paper elevation={0} sx={{ borderRadius: "20px", border: "1px solid #ECECEC", overflow: "hidden" }}>
+      <Paper elevation={0} sx={{ borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`, overflow: "hidden" }}>
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
                 {["Nombre", "Piso", "Descripción", ...(tieneAcciones ? ["Acciones"] : [])].map((h) => (
-                  <TableCell key={h} sx={{ fontWeight: 600, color: "#6B7280", fontSize: 12, bgcolor: "#F9FAFB", py: 1.5 }}>
+                  <TableCell key={h} sx={{ fontWeight: 600, color: COLORES.textoTerciario, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.5 }}>
                     {h}
                   </TableCell>
                 ))}
@@ -196,47 +197,47 @@ export default function AreasPage() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={tieneAcciones ? 4 : 3} align="center" sx={{ py: 6, color: "#9CA3AF", fontSize: 14 }}>Cargando...</TableCell>
+                  <TableCell colSpan={tieneAcciones ? 4 : 3} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>Cargando...</TableCell>
                 </TableRow>
               ) : filtrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={tieneAcciones ? 4 : 3} align="center" sx={{ py: 6, color: "#9CA3AF", fontSize: 14 }}>
+                  <TableCell colSpan={tieneAcciones ? 4 : 3} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>
                     {buscar ? "No se encontraron áreas" : "No hay áreas registradas"}
                   </TableCell>
                 </TableRow>
 ) : (
                 filtrados.map((a) => (
-                  <TableRow key={a.id} sx={{ "&:hover": { bgcolor: "#F9FAFB" }, transition: "background .15s" }}>
-                    <TableCell sx={{ py: 1.2, fontSize: 14, fontWeight: 600, color: "#111827" }}>
+                  <TableRow key={a.id} sx={{ "&:hover": { bgcolor: COLORES.fondoGris }, transition: "background .15s" }}>
+                    <TableCell sx={{ py: 1.2, fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <IconButton size="small" onClick={() => toggleEmpleados(a)}
-                          sx={{ borderRadius: "6px", color: "#6B7280", p: 0.3 }}>
+                        <IconButton aria-label="Mostrar empleados" size="small" onClick={() => toggleEmpleados(a)}
+                          sx={{ borderRadius: "6px", color: COLORES.textoTerciario, p: 0.3 }}>
                           {areaExpandida?.id === a.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                         </IconButton>
-                        <Building2 size={16} style={{ color: "#1B5E20" }} />
+                        <Building2 size={16} style={{ color: COLORES.primarioOscuro }} />
                         <Button onClick={() => navigate(`/empleados?area=${encodeURIComponent(a.nombre)}`)}
-                          sx={{ textTransform: "none", p: 0, minWidth: 0, color: "#111827", fontWeight: 600, fontSize: 14, "&:hover": { textDecoration: "underline", color: "#1B5E20" } }}>
+                          sx={{ textTransform: "none", p: 0, minWidth: 0, color: COLORES.textoPrimario, fontWeight: 600, fontSize: 14, "&:hover": { textDecoration: "underline", color: COLORES.primarioOscuro } }}>
                           {a.nombre}
                         </Button>
                       </Box>
                     </TableCell>
                     <TableCell sx={{ py: 1.2 }}>
                       <Chip label={`Piso ${a.piso}`} size="small"
-                        sx={{ height: 24, fontSize: 11, fontWeight: 600, bgcolor: "#E8F5E9", color: "#2E7D32" }} />
+                        sx={{ height: 24, fontSize: 11, fontWeight: 600, bgcolor: COLORES.primarioClaro, color: COLORES.primario }} />
                     </TableCell>
-                    <TableCell sx={{ py: 1.2, fontSize: 13, color: "#6B7280" }}>{a.descripcion || "—"}</TableCell>
+                    <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoTerciario }}>{a.descripcion || "—"}</TableCell>
                     {tieneAcciones && (
                       <TableCell sx={{ py: 1.2 }}>
                         <Box sx={{ display: "flex", gap: 0.5 }}>
                           {puede("areas", "editar") && (
                             <Box onClick={() => abrirEditar(a)}
-                              sx={{ width: 32, height: 32, borderRadius: "10px", bgcolor: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center", color: "#1565C0", cursor: "pointer", transition: "all 0.2s", "&:hover": { bgcolor: "#DBEAFE" } }}>
+                              sx={{ width: 32, height: 32, borderRadius: "10px", bgcolor: COLORES.primarioClaro, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.primario, cursor: "pointer", transition: "all 0.2s", "&:hover": { bgcolor: COLORES.primarioClaro2 } }}>
                               <Edit2 size={15} />
                             </Box>
                           )}
                           {puede("areas", "eliminar") && (
                             <Box onClick={() => setConfirmDelete(a)}
-                              sx={{ width: 32, height: 32, borderRadius: "10px", bgcolor: "#FEE2E2", display: "flex", alignItems: "center", justifyContent: "center", color: "#DC2626", cursor: "pointer", transition: "all 0.2s", "&:hover": { bgcolor: "#FECACA" } }}>
+                              sx={{ width: 32, height: 32, borderRadius: "10px", bgcolor: COLORES.dangerFondo, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.danger, cursor: "pointer", transition: "all 0.2s", "&:hover": { bgcolor: COLORES.dangerBorde } }}>
                               <Trash2 size={15} />
                             </Box>
                           )}
@@ -253,13 +254,13 @@ export default function AreasPage() {
 
       {/* EMPLEADOS DEL ÁREA */}
       <Collapse in={areaExpandida !== null}>
-        <Paper elevation={0} sx={{ mt: 2, borderRadius: "16px", border: "1px solid #ECECEC", overflow: "hidden" }}>
-          <Box sx={{ px: 2.5, py: 1.5, bgcolor: "#F9FAFB", borderBottom: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 1 }}>
-            <Users size={16} style={{ color: "#1B5E20" }} />
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>
+        <Paper elevation={0} sx={{ mt: 2, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, overflow: "hidden" }}>
+          <Box sx={{ px: 2.5, py: 1.5, bgcolor: COLORES.fondoGris, borderBottom: `1px solid ${COLORES.grisContorno}`, display: "flex", alignItems: "center", gap: 1 }}>
+            <Users size={16} style={{ color: COLORES.primarioOscuro }} />
+            <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.textoPrimario }}>
               Empleados de {areaExpandida?.nombre || ""}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: "#9CA3AF", ml: 1 }}>
+            <Typography sx={{ fontSize: 12, color: COLORES.textoSuave, ml: 1 }}>
               ({empleados.length} registros)
             </Typography>
           </Box>
@@ -268,7 +269,7 @@ export default function AreasPage() {
               <TableHead>
                 <TableRow>
                   {["Nombre", "Cédula", "Cargo", "Estado", "Teléfono", "Email"].map((h) => (
-                    <TableCell key={h} sx={{ fontWeight: 600, color: "#6B7280", fontSize: 11, py: 1 }}>
+                    <TableCell key={h} sx={{ fontWeight: 600, color: COLORES.textoTerciario, fontSize: 11, py: 1 }}>
                       {h}
                     </TableCell>
                   ))}
@@ -276,23 +277,23 @@ export default function AreasPage() {
               </TableHead>
               <TableBody>
                 {cargandoEmpleados ? (
-                  <TableRow><TableCell colSpan={6} align="center" sx={{ py: 4, color: "#9CA3AF" }}>Cargando empleados...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} align="center" sx={{ py: 4, color: COLORES.textoSuave }}>Cargando empleados...</TableCell></TableRow>
                 ) : empleados.length === 0 ? (
-                  <TableRow><TableCell colSpan={6} align="center" sx={{ py: 4, color: "#9CA3AF" }}>No hay empleados en esta área</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} align="center" sx={{ py: 4, color: COLORES.textoSuave }}>No hay empleados en esta área</TableCell></TableRow>
                 ) : (
                   empleados.map((emp) => (
-                    <TableRow key={emp.id} sx={{ "&:hover": { bgcolor: "#F9FAFB" } }}>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, fontWeight: 500, color: "#111827" }}>
+                    <TableRow key={emp.id} sx={{ "&:hover": { bgcolor: COLORES.fondoGris } }}>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, fontWeight: 500, color: COLORES.textoPrimario }}>
                         {emp.nombre} {emp.apellido}
                       </TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: "#6B7280" }}>{emp.cedula}</TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: "#6B7280" }}>{emp.cargo}</TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoTerciario }}>{emp.cedula}</TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoTerciario }}>{emp.cargo}</TableCell>
                       <TableCell sx={{ py: 1.2 }}>
                         <Chip label={emp.estado === "activo" ? "Activo" : "Inactivo"} size="small"
-                          sx={{ height: 22, fontSize: 11, fontWeight: 600, bgcolor: emp.estado === "activo" ? "#D1FAE5" : "#FEE2E2", color: emp.estado === "activo" ? "#065F46" : "#991B1B" }} />
+                          sx={{ height: 22, fontSize: 11, fontWeight: 600, bgcolor: emp.estado === "activo" ? COLORES.successFondo : COLORES.dangerFondo, color: emp.estado === "activo" ? COLORES.verdeTexto : COLORES.dangerOscuro }} />
                       </TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: "#6B7280" }}>{emp.telefono || "—"}</TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: "#6B7280" }}>{emp.email || "—"}</TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoTerciario }}>{emp.telefono || "—"}</TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoTerciario }}>{emp.email || "—"}</TableCell>
                     </TableRow>
                   ))
                 )}
@@ -304,51 +305,51 @@ export default function AreasPage() {
 
       {/* MODAL CREAR/EDITAR */}
       <Dialog open={modal} onClose={() => setModal(false)} maxWidth="md" fullWidth
-        PaperProps={{ sx: { borderRadius: "18px", position: "relative", boxShadow: "0 24px 70px rgba(0,0,0,0.25)", backgroundColor: "#FFFFFF", maxHeight: "94vh" } }}
+        slotProps={{ paper: { sx: { borderRadius: "18px", position: "relative", boxShadow: "0 24px 70px rgba(0,0,0,0.25)", backgroundColor: COLORES.fondoBlanco, maxHeight: "94vh" } } }}
         sx={{ "& .MuiBackdrop-root": { bgcolor: "rgba(17, 24, 39, 0.5)", backdropFilter: "blur(4px)" } }}>
         <DialogTitle sx={{ px: 3, py: 1.75, position: "relative", pb: 1.25 }}>
           <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
-            <Box sx={{ width: 38, height: 38, borderRadius: "11px", bgcolor: "#E8F5E9", color: "#1B5E20", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Box sx={{ width: 38, height: 38, borderRadius: "11px", bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <Building2 size={19} />
             </Box>
             <Box>
-              <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827", lineHeight: 1.2 }}>
+              <Typography sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario, lineHeight: 1.2 }}>
                 {editando ? "Editar área" : "Nueva área"}
               </Typography>
-              <Typography sx={{ fontSize: 11.5, color: "#6B7280", mt: 0.15 }}>
+              <Typography sx={{ fontSize: 11.5, color: COLORES.textoTerciario, mt: 0.15 }}>
                 {editando ? "Actualiza la información del área." : "Crea una nueva área organizacional para clasificar a los colaboradores."}
               </Typography>
             </Box>
           </Box>
-          <IconButton onClick={() => setModal(false)} size="small" sx={{ position: "absolute", top: 11, right: 11, color: "#9CA3AF", bgcolor: "#F3F4F6", "&:hover": { color: "#111827", bgcolor: "#ECECEC" } }}>
+          <IconButton aria-label="Cerrar" onClick={() => setModal(false)} size="small" sx={{ position: "absolute", top: 11, right: 11, color: COLORES.textoSuave, bgcolor: COLORES.fondoGris2, "&:hover": { color: COLORES.textoPrimario, bgcolor: COLORES.grisContorno } }}>
             <X size={18} />
           </IconButton>
         </DialogTitle>
         <Divider />
-        <DialogContent sx={{ px: 3, py: 1.75, overflowY: "auto", bgcolor: "#FFFFFF" }}>
-          <Box sx={{ border: "1px solid #ECECEC", borderRadius: "12px", bgcolor: "#FFFFFF", p: 2 }}>
-            <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: "#111827", mb: 1.25 }}>
+        <DialogContent sx={{ px: 3, py: 1.75, overflowY: "auto", bgcolor: COLORES.fondoBlanco }}>
+          <Box sx={{ border: `1px solid ${COLORES.grisContorno}`, borderRadius: "12px", bgcolor: COLORES.fondoBlanco, p: 2 }}>
+            <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: COLORES.textoPrimario, mb: 1.25 }}>
               Información del área
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5 }}>
                 <Box>
-                  <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5, display: "flex", alignItems: "center", gap: 0.5 }}>
-                    Nombre <span style={{ color: "#DC2626" }}>*</span>
+                  <Typography sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5, display: "flex", alignItems: "center", gap: 0.5 }}>
+                    Nombre <span style={{ color: COLORES.danger }}>*</span>
                   </Typography>
                   <TextField placeholder="Ej: Recursos Humanos" value={form.nombre}
                     onChange={(e) => setForm({ ...form, nombre: e.target.value })}
                     fullWidth size="small"
-                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px", bgcolor: "#FFFFFF", minHeight: 40, transition: "border-color 0.2s ease, box-shadow 0.2s ease", "& fieldset": { borderColor: "#D1D5DB" }, "&:hover fieldset": { borderColor: "#9CA3AF" }, "&.Mui-focused fieldset": { borderColor: "#1B5E20" }, "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" } }, "& .MuiInputBase-input": { fontSize: 13 } }} />
+                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px", bgcolor: COLORES.fondoBlanco, minHeight: 40, transition: "border-color 0.2s ease, box-shadow 0.2s ease", "& fieldset": { borderColor: COLORES.borde2 }, "&:hover fieldset": { borderColor: COLORES.textoSuave }, "&.Mui-focused fieldset": { borderColor: COLORES.primarioOscuro }, "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" } }, "& .MuiInputBase-input": { fontSize: 13 } }} />
                 </Box>
                 <Box>
-                  <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5, display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <Typography sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5, display: "flex", alignItems: "center", gap: 0.5 }}>
                     Piso
                   </Typography>
                   <Select value={form.piso} fullWidth size="small"
                     displayEmpty
-                    sx={{ borderRadius: "12px", fontSize: 13, bgcolor: "#FFFFFF", minHeight: 40, transition: "border-color 0.2s ease, box-shadow 0.2s ease", "& fieldset": { borderColor: "#D1D5DB" }, "&:hover fieldset": { borderColor: "#9CA3AF" }, "&.Mui-focused fieldset": { borderColor: "#1B5E20" }, "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" } }}
-                    MenuProps={{ PaperProps: { sx: { bgcolor: "#FFFFFF", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } } } }}
+                    sx={{ borderRadius: "12px", fontSize: 13, bgcolor: COLORES.fondoBlanco, minHeight: 40, transition: "border-color 0.2s ease, box-shadow 0.2s ease", "& fieldset": { borderColor: COLORES.borde2 }, "&:hover fieldset": { borderColor: COLORES.textoSuave }, "&.Mui-focused fieldset": { borderColor: COLORES.primarioOscuro }, "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" } }}
+                    slotProps={{ menu: { slotProps: { paper: { sx: { bgcolor: COLORES.fondoBlanco, "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } } } } } }}
                     onChange={(e) => setForm({ ...form, piso: e.target.value })}>
                     <MenuItem value="" disabled><em>Selecciona un piso</em></MenuItem>
                     <MenuItem value="1">Piso 1</MenuItem>
@@ -357,20 +358,20 @@ export default function AreasPage() {
                     <MenuItem value="4">Piso 4</MenuItem>
                     <MenuItem value="5">Piso 5</MenuItem>
                   </Select>
-                  <Typography sx={{ fontSize: 10.5, color: "#9CA3AF", mt: 0.5 }}>
+                  <Typography sx={{ fontSize: 10.5, color: COLORES.textoSuave, mt: 0.5 }}>
                     Selecciona el piso donde se encuentra ubicada esta área.
                   </Typography>
                 </Box>
               </Box>
               <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.5, display: "flex", alignItems: "center", gap: 0.5 }}>
+                <Typography sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5, display: "flex", alignItems: "center", gap: 0.5 }}>
                   Descripción
                 </Typography>
                 <TextField placeholder="Describe brevemente el propósito o funciones del área."
                   value={form.descripcion} multiline rows={4}
                   onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
                   fullWidth
-                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px", bgcolor: "#FFFFFF", transition: "border-color 0.2s ease, box-shadow 0.2s ease", "& fieldset": { borderColor: "#D1D5DB" }, "&:hover fieldset": { borderColor: "#9CA3AF" }, "&.Mui-focused fieldset": { borderColor: "#1B5E20" }, "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" } }, "& .MuiInputBase-input": { fontSize: 13 } }} />
+                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px", bgcolor: COLORES.fondoBlanco, transition: "border-color 0.2s ease, box-shadow 0.2s ease", "& fieldset": { borderColor: COLORES.borde2 }, "&:hover fieldset": { borderColor: COLORES.textoSuave }, "&.Mui-focused fieldset": { borderColor: COLORES.primarioOscuro }, "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" } }, "& .MuiInputBase-input": { fontSize: 13 } }} />
               </Box>
             </Box>
           </Box>
@@ -378,9 +379,9 @@ export default function AreasPage() {
         <Divider />
         <DialogActions sx={{ px: 3, py: 1.5, gap: 1.5 }}>
           <Button onClick={() => setModal(false)}
-            sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: "#6B7280", bgcolor: "#FFFFFF", border: "1px solid #D1D5DB", px: 3, py: 0.6, "&:hover": { bgcolor: "#F3F4F6" } }}>Cancelar</Button>
+            sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: COLORES.textoTerciario, bgcolor: COLORES.fondoBlanco, border: `1px solid ${COLORES.borde2}`, px: 3, py: 0.6, "&:hover": { bgcolor: COLORES.fondoGris2 } }}>Cancelar</Button>
           <Button variant="contained" startIcon={editando ? null : <Plus size={15} />} onClick={guardar} disabled={guardando || !form.nombre.trim() || !form.piso.trim()}
-            sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, px: 3.5, py: 0.6, bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } }}>
+            sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, px: 3.5, py: 0.6, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } }}>
             {guardando ? "Guardando..." : editando ? "Actualizar área" : "Crear área"}
           </Button>
         </DialogActions>

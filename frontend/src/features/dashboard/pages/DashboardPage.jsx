@@ -15,6 +15,7 @@ import ResumenPorArea from "../components/ResumenPorArea";
 import { obtenerIndicadores, obtenerResumenPorArea } from "../dashboard.api";
 import { obtenerMiHorario } from "../../horarios/horario.api";
 import DashboardSkeleton from "../components/DashboardSkeleton";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const MOCK = {
   puntualidad: 96,
@@ -68,16 +69,16 @@ function EmployeeDashboard({ usuario }) {
     (miHorario.horario.modalidad === "flexible" || miHorario.horario.tipo_jornada === "por_horas");
 
   const myCards = [
-    { title: "Mi puntualidad", value: `${data.puntualidad}%`, icon: <Clock3 />, color: "#2E7D32" },
-    { title: "Horas hoy", value: `${data.horas_hoy}h`, icon: <Clock />, color: "#1565C0" },
-    { title: "Estado hoy", value: data.estado_hoy, icon: <CheckCircle />, color: "#16A34A" },
-    { title: "Tardanzas del mes", value: String(data.tardanzas_mes), icon: <AlertTriangle />, color: "#D97706" },
+    { title: "Mi puntualidad", value: `${data.puntualidad}%`, icon: <Clock3 />, color: COLORES.primario },
+    { title: "Horas hoy", value: `${data.horas_hoy}h`, icon: <Clock />, color: COLORES.primarioOscuro },
+    { title: "Estado hoy", value: data.estado_hoy, icon: <CheckCircle />, color: COLORES.verdeTexto },
+    { title: "Tardanzas del mes", value: String(data.tardanzas_mes), icon: <AlertTriangle />, color: COLORES.warningOscuro },
   ];
 
   const quickActions = [
-    { label: "Reportar incidencia", icon: <AlertTriangle size={28} />, path: "/reportar-incidencia", color: "#DC2626" },
-    { label: "Mi perfil", icon: <User size={28} />, path: "/perfil", color: "#1565C0" },
-    { label: "Mis solicitudes", icon: <ClipboardList size={28} />, path: "/mis-solicitudes", color: "#7C3AED" },
+    { label: "Reportar incidencia", icon: <AlertTriangle size={28} />, path: "/reportar-incidencia", color: COLORES.danger },
+    { label: "Mi perfil", icon: <User size={28} />, path: "/perfil", color: COLORES.primarioOscuro },
+    { label: "Mis solicitudes", icon: <ClipboardList size={28} />, path: "/mis-solicitudes", color: COLORES.primario },
   ];
 
   return (
@@ -94,74 +95,74 @@ function EmployeeDashboard({ usuario }) {
       {/* Bottom row: horario + quick actions + timeline */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1.5fr" }, gap: 2.5, mb: 3 }}>
         {/* Horario hoy */}
-        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: "1px solid #ECECEC" }}>
-          <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", mb: 2 }}>Mi horario hoy</Typography>
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}` }}>
+          <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.textoTerciario, mb: 2 }}>Mi horario hoy</Typography>
           {miHorario === null ? (
-            <Typography sx={{ fontSize: 13, color: "#9CA3AF", textAlign: "center", py: 2 }}>Cargando...</Typography>
+            <Typography sx={{ fontSize: 13, color: COLORES.textoSuave, textAlign: "center", py: 2 }}>Cargando...</Typography>
           ) : detalleHoy ? (
             <>
-              <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#1B5E20", mb: 1.5 }}>Horario hoy: {horarioNombre}</Typography>
+              <Typography sx={{ fontSize: 13, fontWeight: 700, color: COLORES.primarioOscuro, mb: 1.5 }}>Horario hoy: {horarioNombre}</Typography>
               <Box sx={{ display: "flex", gap: 2 }}>
-                <Box sx={{ flex: 1, textAlign: "center", p: 1.5, bgcolor: "#F0FDF4", borderRadius: "12px" }}>
-                  <Typography sx={{ fontSize: 11, color: "#9CA3AF", mb: 0.5 }}>Mañana</Typography>
-                  <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>{(detalleHoy.hora_entrada_manana || "").slice(0, 5)} → {(detalleHoy.hora_salida_manana || "").slice(0, 5)}</Typography>
+                <Box sx={{ flex: 1, textAlign: "center", p: 1.5, bgcolor: COLORES.successClaro, borderRadius: "12px" }}>
+                  <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, mb: 0.5 }}>Mañana</Typography>
+                  <Typography sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario }}>{(detalleHoy.hora_entrada_manana || "").slice(0, 5)} → {(detalleHoy.hora_salida_manana || "").slice(0, 5)}</Typography>
                 </Box>
-                <Box sx={{ flex: 1, textAlign: "center", p: 1.5, bgcolor: "#EFF6FF", borderRadius: "12px" }}>
-                  <Typography sx={{ fontSize: 11, color: "#9CA3AF", mb: 0.5 }}>Tarde</Typography>
-                  <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>{(detalleHoy.hora_entrada_tarde || "").slice(0, 5)} → {(detalleHoy.hora_salida_tarde || "").slice(0, 5)}</Typography>
+                <Box sx={{ flex: 1, textAlign: "center", p: 1.5, bgcolor: COLORES.primarioClaro, borderRadius: "12px" }}>
+                  <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, mb: 0.5 }}>Tarde</Typography>
+                  <Typography sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario }}>{(detalleHoy.hora_entrada_tarde || "").slice(0, 5)} → {(detalleHoy.hora_salida_tarde || "").slice(0, 5)}</Typography>
                 </Box>
               </Box>
             </>
           ) : esFlexible ? (
             <Box sx={{ textAlign: "center", py: 1.5 }}>
-              <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#D97706" }}>Horario flexible</Typography>
+              <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.warningOscuro }}>Horario flexible</Typography>
               <Typography
                 onClick={() => navigate("/mi-horario")}
-                sx={{ fontSize: 13, color: "#1565C0", textDecoration: "underline", cursor: "pointer", mt: 0.5, "&:hover": { color: "#0D47A1" } }}>
+                sx={{ fontSize: 13, color: COLORES.primarioOscuro, textDecoration: "underline", cursor: "pointer", mt: 0.5, "&:hover": { color: COLORES.primarioOscuro } }}>
                 Consulta tu horario en Mi horario
               </Typography>
             </Box>
           ) : miHorario?.asignado ? (
-            <Typography sx={{ fontSize: 14, color: "#9CA3AF", textAlign: "center", py: 2 }}>Descanso 🎉</Typography>
+            <Typography sx={{ fontSize: 14, color: COLORES.textoSuave, textAlign: "center", py: 2 }}>Descanso 🎉</Typography>
           ) : (
-            <Typography sx={{ fontSize: 14, color: "#9CA3AF", textAlign: "center", py: 2 }}>Sin horario asignado</Typography>
+            <Typography sx={{ fontSize: 14, color: COLORES.textoSuave, textAlign: "center", py: 2 }}>Sin horario asignado</Typography>
           )}
         </Paper>
 
         {/* Acciones rápidas */}
-        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: "1px solid #ECECEC" }}>
-          <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", mb: 1.5 }}>Acciones rápidas</Typography>
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}` }}>
+          <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.textoTerciario, mb: 1.5 }}>Acciones rápidas</Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
             {quickActions.map((a) => (
               <Paper
                 key={a.label}
                 elevation={0}
                 onClick={() => navigate(a.path)}
-                sx={{ p: 1.5, borderRadius: "14px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 2, cursor: "pointer", transition: "all 0.2s", "&:hover": { borderColor: a.color, bgcolor: "#F9FAFB" } }}
+                sx={{ p: 1.5, borderRadius: "14px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", alignItems: "center", gap: 2, cursor: "pointer", transition: "all 0.2s", "&:hover": { borderColor: a.color, bgcolor: COLORES.fondoGris } }}
               >
                 <Box sx={{ width: 42, height: 42, borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: `${a.color}15`, color: a.color }}>{a.icon}</Box>
-                <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{a.label}</Typography>
+                <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>{a.label}</Typography>
               </Paper>
             ))}
           </Box>
         </Paper>
 
         {/* Timeline últimas marcaciones */}
-        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: "1px solid #ECECEC" }}>
-          <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", mb: 2 }}>Últimas marcaciones</Typography>
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}` }}>
+          <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.textoTerciario, mb: 2 }}>Últimas marcaciones</Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {(data.marcaciones || []).slice(0, 5).map((m, i) => (
               <Box key={i} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: m.tipo === "Entrada" ? "#2E7D32" : "#DC2626" }} />
-                  {i < 4 && <Box sx={{ width: 1, height: 24, bgcolor: "#E5E7EB" }} />}
+                  <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: m.tipo === "Entrada" ? COLORES.primario : COLORES.danger }} />
+                  {i < 4 && <Box sx={{ width: 1, height: 24, bgcolor: COLORES.borde }} />}
                 </Box>
                 <Box sx={{ flex: 1, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <Box>
-                    <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{m.tipo}</Typography>
-                    <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>{m.origen}</Typography>
+                    <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>{m.tipo}</Typography>
+                    <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>{m.origen}</Typography>
                   </Box>
-                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>{m.hora}</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: COLORES.textoPrimario }}>{m.hora}</Typography>
                 </Box>
               </Box>
             ))}
@@ -212,12 +213,12 @@ function AdminDashboard({ usuario }) {
   };
 
   const KPI_CARDS = [
-    { title: "Puntualidad", value: `${data.puntualidad}%`, icon: <Clock3 />, color: "#2E7D32" },
-    { title: "Presentes hoy", value: String(data.presentes), icon: <CheckCircle />, color: "#1565C0" },
-    { title: "Ausentes hoy", value: String(data.ausentes), icon: <XCircle />, color: "#DC2626" },
-    { title: "Tardanzas", value: String(data.tardanzas), icon: <AlertTriangle />, color: "#D97706" },
-    { title: "Horas extra hoy", value: String(data.horasExtras), icon: <Clock />, color: "#7C3AED" },
-    { title: "Novedades hoy", value: String(data.permisos), icon: <FileText />, color: "#0891B2" },
+    { title: "Puntualidad", value: `${data.puntualidad}%`, icon: <Clock3 />, color: COLORES.primario },
+    { title: "Presentes hoy", value: String(data.presentes), icon: <CheckCircle />, color: COLORES.primarioOscuro },
+    { title: "Ausentes hoy", value: String(data.ausentes), icon: <XCircle />, color: COLORES.danger },
+    { title: "Tardanzas", value: String(data.tardanzas), icon: <AlertTriangle />, color: COLORES.warningOscuro },
+    { title: "Horas extra hoy", value: String(data.horasExtras), icon: <Clock />, color: COLORES.primario },
+    { title: "Novedades hoy", value: String(data.permisos), icon: <FileText />, color: COLORES.verdeTexto },
   ];
 
   return (
@@ -225,7 +226,7 @@ function AdminDashboard({ usuario }) {
       <DashboardHeader usuario={usuario} />
       <FilterBar activo={filtro} onChange={setFiltro} />
 
-      <Box sx={{ display: "flex", gap: 2.5, mb: 2.5 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(3, 1fr)", xl: "repeat(6, 1fr)" }, gap: 2.5, mb: 2.5 }}>
         {KPI_CARDS.map((card, i) => (
           <Box key={i} sx={{ flex: 1, minWidth: 0 }}>
             <StatCard title={card.title} value={card.value} subtitle="Hoy" icon={card.icon} color={card.color} />
@@ -233,7 +234,7 @@ function AdminDashboard({ usuario }) {
         ))}
       </Box>
 
-      <Box sx={{ display: "flex", gap: 2.5, mb: 2.5 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "repeat(4, 1fr)" }, gap: 2.5, mb: 2.5 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}><DonutChart data={hoyStats} /></Box>
         <Box sx={{ flex: 1, minWidth: 0 }}><OnTimeBarChart data={data} /></Box>
         <Box sx={{ flex: 1, minWidth: 0 }}><OvertimeBarChart data={data} /></Box>

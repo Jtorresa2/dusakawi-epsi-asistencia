@@ -8,6 +8,7 @@ import { obtenerPersonalPorId, actualizarPersonal } from "../../personal/persona
 import { obtenerCargos } from "../../cargos/cargo.api";
 import { obtenerAreas } from "../../areas/area.api";
 import MisNovedades from "../components/MisNovedades";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const MONTHS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -70,16 +71,16 @@ export default function MiPerfilPage() {
       value: `${data?.puntualidad ?? 96}%`,
       sub: "Promedio general",
       icon: <CheckCircle size={22} />,
-      color: "#16A34A",
-      bg: "#D1FAE5",
+      color: COLORES.verdeTexto,
+      bg: COLORES.successFondo,
     },
     {
       title: "Incidencias",
       value: String(data?.incidencias ?? 0),
       sub: "En el último mes",
       icon: <XCircle size={22} />,
-      color: "#DC2626",
-      bg: "#FEE2E2",
+      color: COLORES.danger,
+      bg: COLORES.dangerFondo,
     },
   ];
 
@@ -145,12 +146,12 @@ export default function MiPerfilPage() {
     const isEditing = editando === section;
     const isSelect = field.options?.length > 0;
     return (
-      <Box key={field.key} sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: "1px solid #F3F4F6" }}>
-        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "#F9FAFB", display: "flex", alignItems: "center", justifyContent: "center", color: "#9CA3AF", flexShrink: 0 }}>
+      <Box key={field.key} sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
+        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: COLORES.fondoGris, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.textoSuave, flexShrink: 0 }}>
           {field.icon}
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", mb: 0.2 }}>{field.label}</Typography>
+          <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", mb: 0.2 }}>{field.label}</Typography>
           {isEditing ? (
             isSelect ? (
               <TextField
@@ -181,7 +182,7 @@ export default function MiPerfilPage() {
               />
             )
           ) : (
-            <Typography sx={{ fontSize: 14, fontWeight: 500, color: "#111827", wordBreak: "break-word" }}>
+            <Typography sx={{ fontSize: 14, fontWeight: 500, color: COLORES.textoPrimario, wordBreak: "break-word" }}>
               {field.type === "date" && value ? formatDate(value) : (field.display || value || "—")}
             </Typography>
           )}
@@ -193,14 +194,14 @@ export default function MiPerfilPage() {
 
   return (
     <Box sx={{ height: { md: editando ? "auto" : "100dvh" }, overflowX: "hidden", overflowY: { xs: "auto", md: editando ? "auto" : "hidden" }, p: { xs: 2, md: 2 }, display: "flex", flexDirection: "column", gap: 2, maxWidth: "100%", width: "100%", boxSizing: "border-box" }}>
-      <Typography sx={{ fontSize: 13, color: "#9CA3AF", flexShrink: 0 }}>
+      <Typography sx={{ fontSize: 13, color: COLORES.textoMuted, flexShrink: 0 }}>
                 Inicio / Mi cuenta / Mi perfil
             </Typography>
-      <Paper elevation={0} sx={{ p: 0, borderRadius: "20px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap", flexShrink: 0 }}>
+      <Paper elevation={0} sx={{ p: 0, borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap", flexShrink: 0 }}>
         <Box sx={{ position: "relative", "&:hover .foto-overlay": { opacity: 1 } }}>
           <Avatar
             src={usuario.foto_url || empleado?.foto_url || ""}
-            sx={{ width: 72, height: 72, bgcolor: "#E8F5E9", color: "#1B5E20", fontSize: 26, fontWeight: 700, cursor: "pointer" }}
+            sx={{ width: 72, height: 72, bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro, fontSize: 26, fontWeight: 700, cursor: "pointer" }}
           >
             {initials}
           </Avatar>
@@ -209,7 +210,7 @@ export default function MiPerfilPage() {
             onClick={() => document.getElementById("foto-input")?.click()}
             sx={{
               position: "absolute", inset: 0, borderRadius: "50%", bgcolor: "rgba(0,0,0,0.5)",
-              display: "flex", alignItems: "center", justifyContent: "center", color: "#fff",
+              display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.fondoBlanco,
               opacity: 0, transition: "opacity 0.2s", cursor: "pointer",
             }}
           >
@@ -222,11 +223,11 @@ export default function MiPerfilPage() {
           <input id="foto-input" type="file" hidden accept="image/*" onChange={handleFotoChange} />
         </Box>
         <Box sx={{ flex: 1, minWidth: 200 }}>
-          <Typography sx={{ fontSize: 22, fontWeight: 700, color: "#111827" }}>{usuario.nombre || "Usuario"}</Typography>
-          <Typography sx={{ fontSize: 14, color: "#6B7280", mt: 0.3 }}>
+          <Typography sx={{ fontSize: 22, fontWeight: 700, color: COLORES.textoPrimario }}>{usuario.nombre || "Usuario"}</Typography>
+          <Typography sx={{ fontSize: 14, color: COLORES.textoTerciario, mt: 0.3 }}>
             {(data?.cargo || "—")} · {(data?.area || "—")}
           </Typography>
-          <Typography sx={{ fontSize: 13, color: "#9CA3AF", mt: 0.3 }}>
+          <Typography sx={{ fontSize: 13, color: COLORES.textoSuave, mt: 0.3 }}>
             {usuario.email || ""}
           </Typography>
         </Box>
@@ -234,12 +235,12 @@ export default function MiPerfilPage() {
           <Chip
             label={data?.estado === "inactivo" ? "Inactivo" : "Activo"}
             size="small"
-            sx={{ fontWeight: 600, borderRadius: "8px", bgcolor: data?.estado === "inactivo" ? "#FEE2E2" : "#E8F5E9", color: data?.estado === "inactivo" ? "#DC2626" : "#2E7D32", fontSize: 12 }}
+            sx={{ fontWeight: 600, borderRadius: "8px", bgcolor: data?.estado === "inactivo" ? COLORES.dangerFondo : COLORES.primarioClaro, color: data?.estado === "inactivo" ? COLORES.danger : COLORES.primario, fontSize: 12 }}
           />
           <Chip
             label={usuario.rol?.replace("_", " ") || "—"}
             size="small"
-            sx={{ fontWeight: 600, borderRadius: "8px", bgcolor: "#EFF6FF", color: "#1565C0", fontSize: 12, textTransform: "capitalize" }}
+            sx={{ fontWeight: 600, borderRadius: "8px", bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro, fontSize: 12, textTransform: "capitalize" }}
           />
         </Box>
       </Paper>
@@ -247,25 +248,25 @@ export default function MiPerfilPage() {
       {/* Grid principal — 50/50, llena el espacio, sin scroll */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 0.95fr" }, gap: 3, alignItems: "stretch", overflow: "hidden", minHeight: 0, flex: 1, width: "100%" }}>
         {/* Columna izquierda — Datos personales */}
-        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: "1px solid #ECECEC", overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0 }}>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Datos personales</Typography>
+            <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.textoTerciario, textTransform: "uppercase" }}>Datos personales</Typography>
             {editando === "personal" ? (
               <Box sx={{ display: "flex", gap: 0.5 }}>
-                <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: "#E8F5E9", color: "#2E7D32", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#C8E6C9" } }}>
+                <IconButton aria-label="Guardar cambios" size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: COLORES.primarioClaro, color: COLORES.primario, borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}>
                   <Save size={15} />
                 </IconButton>
-                <IconButton size="small" onClick={handleCancel} sx={{ bgcolor: "#FEE2E2", color: "#DC2626", borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: "#FECACA" } }}>
+                <IconButton aria-label="Cancelar edición" size="small" onClick={handleCancel} sx={{ bgcolor: COLORES.dangerFondo, color: COLORES.danger, borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: COLORES.dangerBorde } }}>
                   <X size={15} />
                 </IconButton>
               </Box>
             ) : (
               <Box onClick={() => handleEdit("personal")} title="Editar" sx={{
                 width: 34, height: 34, borderRadius: "9px", border: "none",
-                bgcolor: "#EFF6FF", color: "#1565C0", cursor: "pointer",
+                bgcolor: COLORES.primarioClaro, color: COLORES.primario, cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 transition: "all .2s", flexShrink: 0,
-                "&:hover": { bgcolor: "#DBEAFE" },
+                "&:hover": { bgcolor: COLORES.primarioClaro2 },
               }}>
                 <Edit3 size={15} />
               </Box>
@@ -277,25 +278,25 @@ export default function MiPerfilPage() {
         {/* Columna derecha — grid 2×2, 1fr 1fr, sin scroll */}
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gridTemplateRows: { xs: "auto", md: "1fr 1fr" }, gap: 2, overflow: "hidden", minHeight: 0 }}>
           {/* Info laboral */}
-          <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: "1px solid #ECECEC", display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
+          <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-              <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Información laboral</Typography>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoTerciario, textTransform: "uppercase" }}>Información laboral</Typography>
               {editando === "laboral" ? (
                 <Box sx={{ display: "flex", gap: 0.5 }}>
-                  <IconButton size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: "#E8F5E9", color: "#2E7D32", borderRadius: "8px", width: 24, height: 24, "&:hover": { bgcolor: "#C8E6C9" } }}>
+                  <IconButton aria-label="Guardar cambios" size="small" onClick={handleSave} disabled={guardando} sx={{ bgcolor: COLORES.primarioClaro, color: COLORES.primario, borderRadius: "8px", width: 24, height: 24, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}>
                     <Save size={12} />
                   </IconButton>
-                  <IconButton size="small" onClick={handleCancel} sx={{ bgcolor: "#FEE2E2", color: "#DC2626", borderRadius: "8px", width: 24, height: 24, "&:hover": { bgcolor: "#FECACA" } }}>
+                  <IconButton aria-label="Cancelar edición" size="small" onClick={handleCancel} sx={{ bgcolor: COLORES.dangerFondo, color: COLORES.danger, borderRadius: "8px", width: 24, height: 24, "&:hover": { bgcolor: COLORES.dangerBorde } }}>
                     <X size={12} />
                   </IconButton>
                 </Box>
               ) : (
                 <Box onClick={() => handleEdit("laboral")} title="Editar" sx={{
                   width: 26, height: 26, borderRadius: "7px", border: "none",
-                  bgcolor: "#EFF6FF", color: "#1565C0", cursor: "pointer",
+                  bgcolor: COLORES.primarioClaro, color: COLORES.primario, cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   transition: "all .2s", flexShrink: 0,
-                  "&:hover": { bgcolor: "#DBEAFE" },
+                  "&:hover": { bgcolor: COLORES.primarioClaro2 },
                 }}>
                   <Edit3 size={12} />
                 </Box>
@@ -305,37 +306,37 @@ export default function MiPerfilPage() {
           </Paper>
 
           {/* Indicadores */}
-          <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: "1px solid #ECECEC", display: "flex", flexDirection: "column", gap: 1, overflow: "hidden", minHeight: 0 }}>
-            <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#6B7280", textTransform: "uppercase" }}>Indicadores</Typography>
+          <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", flexDirection: "column", gap: 1, overflow: "hidden", minHeight: 0 }}>
+            <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoTerciario, textTransform: "uppercase" }}>Indicadores</Typography>
             {statsCards.map((card, i) => (
-              <Box key={i} sx={{ display: "flex", alignItems: "center", gap: 1, p: 1, borderRadius: "8px", bgcolor: "#F9FAFB" }}>
+              <Box key={i} sx={{ display: "flex", alignItems: "center", gap: 1, p: 1, borderRadius: "8px", bgcolor: COLORES.fondoGris }}>
                 <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: card.bg, display: "flex", alignItems: "center", justifyContent: "center", color: card.color, flexShrink: 0 }}>
                   {card.icon}
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ fontSize: 9, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase" }}>{card.title}</Typography>
-                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#111827", lineHeight: 1.2 }}>{card.value}</Typography>
+                  <Typography sx={{ fontSize: 9, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase" }}>{card.title}</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: COLORES.textoPrimario, lineHeight: 1.2 }}>{card.value}</Typography>
                 </Box>
               </Box>
             ))}
           </Paper>
 
           {/* Dispositivos y seguridad */}
-          <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: "1px solid #ECECEC", display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
-            <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", mb: 1 }}>
+          <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
+            <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoTerciario, textTransform: "uppercase", mb: 1 }}>
               Dispositivos y seguridad
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               {[
-                { label: "Huella digital", icon: <Fingerprint size={14} />, status: "Registrada", color: "#16A34A", bg: "#D1FAE5" },
-                { label: "Último acceso", icon: <Shield size={14} />, status: `Hoy ${new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}`, color: "#1565C0", bg: "#E3F2FD" },
+                { label: "Huella digital", icon: <Fingerprint size={14} />, status: "Registrada", color: COLORES.verdeTexto, bg: COLORES.successFondo },
+                { label: "Último acceso", icon: <Shield size={14} />, status: `Hoy ${new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}`, color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
               ].map((item, i) => (
-                <Paper key={i} elevation={0} sx={{ p: 1, borderRadius: "8px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 1 }}>
+                <Paper key={i} elevation={0} sx={{ p: 1, borderRadius: "8px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", alignItems: "center", gap: 1 }}>
                   <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: item.bg, display: "flex", alignItems: "center", justifyContent: "center", color: item.color, flexShrink: 0 }}>
                     {item.icon}
                   </Box>
                   <Box>
-                    <Typography sx={{ fontSize: 9, fontWeight: 600, color: "#9CA3AF" }}>{item.label}</Typography>
+                    <Typography sx={{ fontSize: 9, fontWeight: 600, color: COLORES.textoSuave }}>{item.label}</Typography>
                     <Typography sx={{ fontSize: 12, fontWeight: 700, color: item.color, mt: 0.1 }}>{item.status}</Typography>
                   </Box>
                 </Paper>
@@ -347,8 +348,8 @@ export default function MiPerfilPage() {
           {userId ? (
             <MisNovedades empleadoId={userId} maxItems={2} sx={{ overflow: "hidden", minHeight: 0, p: 1.5, borderRadius: "14px" }} />
           ) : (
-            <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", minHeight: 0 }}>
-              <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Sin empleado</Typography>
+            <Paper elevation={0} sx={{ p: 1.5, borderRadius: "14px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", minHeight: 0 }}>
+              <Typography sx={{ fontSize: 13, color: COLORES.textoSuave }}>Sin empleado</Typography>
             </Paper>
           )}
         </Box>

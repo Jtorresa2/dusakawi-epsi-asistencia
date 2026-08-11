@@ -6,28 +6,15 @@ import {
 } from "@mui/material";
 import { X, Plus, Trash2, Clock, Timer, CheckCircle2, CalendarClock, Info } from "lucide-react";
 import { crearHorario } from "../horario.api";
+import { COLORES } from "../../../shared/constants/colores.js";
+import { PALETA } from "../../../shared/constants/paleta.js";
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-
-const PALETA = {
-  verdeOscuro: "#1B5E20",
-  verde: "#2E7D32",
-  verdeClaro: "#E8F5E9",
-  verdeMuySuave: "#F1F8F1",
-  borde: "#ECECEC",
-  bordeInput: "#D1D5DB",
-  grisClaro: "#F3F4F6",
-  gris: "#9CA3AF",
-  grisTexto: "#6B7280",
-  texto: "#111827",
-  rojo: "#DC2626",
-  rojoBg: "#FEF2F2",
-};
 
 const modalFieldSx = {
   "& .MuiOutlinedInput-root": {
     borderRadius: "10px",
-    bgcolor: "#FFFFFF",
+    bgcolor: COLORES.fondoBlanco,
     minHeight: 36,
     transition: "border-color 0.2s ease, box-shadow 0.2s ease",
     "& fieldset": { borderColor: PALETA.bordeInput },
@@ -46,7 +33,7 @@ const asterisco = <span style={{ color: PALETA.rojo }}>*</span>;
 // Tarjeta seleccionable (sección 2 y 3)
 const tarjetaOpcion = (seleccionada) => ({
   border: seleccionada ? `2px solid ${PALETA.verdeOscuro}` : `1.5px solid ${PALETA.bordeInput}`,
-  bgcolor: seleccionada ? PALETA.verdeMuySuave : "#FFFFFF",
+  bgcolor: seleccionada ? PALETA.verdeMuySuave : COLORES.fondoBlanco,
   borderRadius: "12px",
   p: 1.5,
   cursor: "pointer",
@@ -141,7 +128,7 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md"
-      PaperProps={{ sx: { borderRadius: "18px", boxShadow: "0 24px 70px rgba(0,0,0,0.25)", backgroundColor: "#FFFFFF", maxHeight: "94vh" } }}
+      slotProps={{ paper: { sx: { borderRadius: "18px", boxShadow: "0 24px 70px rgba(0,0,0,0.25)", backgroundColor: COLORES.fondoBlanco, maxHeight: "94vh" } } }}
       sx={{ "& .MuiBackdrop-root": { bgcolor: "rgba(17, 24, 39, 0.5)", backdropFilter: "blur(4px)" } }}>
 
       {/* HEADER */}
@@ -162,17 +149,17 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
             </Typography>
           </Box>
         </Box>
-        <IconButton onClick={onClose} size="small"
+        <IconButton aria-label="Cerrar" onClick={onClose} size="small"
           sx={{ position: "absolute", top: 11, right: 11, color: PALETA.gris, bgcolor: PALETA.grisClaro, "&:hover": { color: PALETA.texto, bgcolor: PALETA.borde } }}>
           <X size={18} />
         </IconButton>
       </DialogTitle>
       <Divider />
 
-      <DialogContent sx={{ px: 3, py: 1.75, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.5, bgcolor: "#FFFFFF" }}>
+      <DialogContent sx={{ px: 3, py: 1.75, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.5, bgcolor: COLORES.fondoBlanco }}>
 
         {/* SECCIÓN 1 — INFORMACIÓN GENERAL */}
-        <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: "#FFFFFF", p: 1.75 }}>
+        <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: COLORES.fondoBlanco, p: 1.75 }}>
           <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: PALETA.texto, mb: 1.25 }}>
             Información general
           </Typography>
@@ -202,7 +189,7 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
 
         {/* SECCIÓN 2 + 3 — LADO A LADO */}
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 1.5 }}>
-          <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: "#FFFFFF", p: 1.75 }}>
+          <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: COLORES.fondoBlanco, p: 1.75 }}>
             <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: PALETA.texto, mb: 0.25 }}>
               ¿Cómo trabaja este horario?
             </Typography>
@@ -237,7 +224,7 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
             </Box>
           </Box>
 
-          <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: "#FFFFFF", p: 1.75 }}>
+          <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: COLORES.fondoBlanco, p: 1.75 }}>
             <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: PALETA.texto, mb: 0.25 }}>
               ¿Cómo se evaluará la asistencia?
             </Typography>
@@ -275,7 +262,7 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
 
         {/* CONFIGURACIÓN CONDICIONAL */}
         {tipoJornada === "fija" ? (
-          <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: "#FFFFFF", p: 1.75 }}>
+          <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: COLORES.fondoBlanco, p: 1.75 }}>
             <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: PALETA.texto, mb: 0.25 }}>
               Configuración semanal
             </Typography>
@@ -288,7 +275,7 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
                   border: `1px solid ${PALETA.borde}`,
                   borderRadius: "10px",
                   p: 1.25,
-                  bgcolor: d.hora_entrada_manana || d.hora_salida_manana ? PALETA.verdeMuySuave : "#FFFFFF",
+                  bgcolor: d.hora_entrada_manana || d.hora_salida_manana ? PALETA.verdeMuySuave : COLORES.fondoBlanco,
                   transition: "all 0.2s ease",
                   "&:hover": { borderColor: PALETA.gris, boxShadow: "0 4px 12px rgba(0,0,0,0.06)" },
                 }}>
@@ -315,23 +302,23 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
                       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0.75 }}>
                         <TextField type="time" size="small" value={d.hora_entrada_manana}
                           label="Entrada" onChange={(e) => cambiarDia(idx, "hora_entrada_manana", e.target.value)}
-                          sx={{ "& .MuiInputBase-input": { fontSize: 11.5 }, ...modalFieldSx }} InputLabelProps={{ shrink: true }} />
+                          sx={{ "& .MuiInputBase-input": { fontSize: 11.5 }, ...modalFieldSx }} slotProps={{ inputLabel: { shrink: true } }} />
                         <TextField type="time" size="small" value={d.hora_salida_manana}
                           label="Salida" onChange={(e) => cambiarDia(idx, "hora_salida_manana", e.target.value)}
-                          sx={{ "& .MuiInputBase-input": { fontSize: 11.5 }, ...modalFieldSx }} InputLabelProps={{ shrink: true }} />
+                          sx={{ "& .MuiInputBase-input": { fontSize: 11.5 }, ...modalFieldSx }} slotProps={{ inputLabel: { shrink: true } }} />
                       </Box>
                       {d.bloque2 ? (
                         <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0.75 }}>
                           <TextField type="time" size="small" value={d.hora_entrada_tarde}
                             label="Entrada 2" onChange={(e) => cambiarDia(idx, "hora_entrada_tarde", e.target.value)}
-                            sx={{ "& .MuiInputBase-input": { fontSize: 11.5 }, ...modalFieldSx }} InputLabelProps={{ shrink: true }} />
+                            sx={{ "& .MuiInputBase-input": { fontSize: 11.5 }, ...modalFieldSx }} slotProps={{ inputLabel: { shrink: true } }} />
                           <TextField type="time" size="small" value={d.hora_salida_tarde}
                             label="Salida 2" onChange={(e) => cambiarDia(idx, "hora_salida_tarde", e.target.value)}
-                            sx={{ "& .MuiInputBase-input": { fontSize: 11.5 }, ...modalFieldSx }} InputLabelProps={{ shrink: true }} />
+                            sx={{ "& .MuiInputBase-input": { fontSize: 11.5 }, ...modalFieldSx }} slotProps={{ inputLabel: { shrink: true } }} />
                         </Box>
                       ) : (
                         <Button size="small" startIcon={<Plus size={12} />} onClick={() => cambiarDia(idx, "bloque2", true)}
-                          sx={{ textTransform: "none", fontWeight: 600, fontSize: 11, color: PALETA.verdeOscuro, bgcolor: PALETA.verdeClaro, borderRadius: "7px", py: 0.35, "&:hover": { bgcolor: "#C8E6C9" } }}>
+                          sx={{ textTransform: "none", fontWeight: 600, fontSize: 11, color: PALETA.verdeOscuro, bgcolor: PALETA.verdeClaro, borderRadius: "7px", py: 0.35, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}>
                           Agregar bloque
                         </Button>
                       )}
@@ -356,7 +343,7 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
             </Box>
           </Box>
         ) : (
-          <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: "#FFFFFF", p: 1.75 }}>
+          <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: COLORES.fondoBlanco, p: 1.75 }}>
             <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: PALETA.texto, mb: 1.25 }}>
               Horas esperadas
             </Typography>
@@ -408,7 +395,7 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
       <Divider />
       <DialogActions sx={{ px: 3, py: 1.5, gap: 1.5 }}>
         <Button onClick={onClose}
-          sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: PALETA.grisTexto, bgcolor: "#FFFFFF", border: `1px solid ${PALETA.bordeInput}`, px: 3, py: 0.6, "&:hover": { bgcolor: PALETA.grisClaro } }}>
+          sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: PALETA.grisTexto, bgcolor: COLORES.fondoBlanco, border: `1px solid ${PALETA.bordeInput}`, px: 3, py: 0.6, "&:hover": { bgcolor: PALETA.grisClaro } }}>
           Cancelar
         </Button>
         <Button variant="contained" startIcon={<Plus size={15} />} onClick={handleGuardar} disabled={guardando}

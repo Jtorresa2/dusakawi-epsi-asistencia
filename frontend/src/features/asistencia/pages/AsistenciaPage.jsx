@@ -16,6 +16,7 @@ import ConfirmDialog from "../../../shared/components/ConfirmDialog";
 import { asistenciaColumns } from "../components/columns";
 import { obtenerRegistros, registrarManual, eliminarRegistro, actualizarRegistro } from "../asistencia.api";
 import { obtenerAreas } from "../../areas/area.api";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 function minDesde(hora) {
   if (!hora) return 0;
@@ -234,11 +235,11 @@ export default function AsistenciaPage() {
   };
 
   const cards = [
-    { icon: <Users size={20} />, value: resumen.total, label: "Total registros", estadoKey: "", color: "#1B5E20", bg: "#E8F5E9" },
-    { icon: <UserCheck size={20} />, value: resumen.puntuales, label: "Puntuales", estadoKey: "puntual", color: "#065F46", bg: "#ECFDF5" },
-    { icon: <Clock size={20} />, value: resumen.tardanzas, label: "Tardanzas", estadoKey: "tardanza", color: "#D97706", bg: "#FFFBEB" },
-    { icon: <UserX size={20} />, value: resumen.ausentes, label: "Ausentes", estadoKey: "ausente", color: "#DC2626", bg: "#FEF2F2" },
-    { icon: <FileText size={20} />, value: resumen.justificados, label: "Justificados", estadoKey: "justificado", color: "#1E40AF", bg: "#EFF6FF" },
+    { icon: <Users size={20} />, value: resumen.total, label: "Total registros", estadoKey: "", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
+    { icon: <UserCheck size={20} />, value: resumen.puntuales, label: "Puntuales", estadoKey: "puntual", color: COLORES.verdeTexto, bg: COLORES.successClaro },
+    { icon: <Clock size={20} />, value: resumen.tardanzas, label: "Tardanzas", estadoKey: "tardanza", color: COLORES.warningOscuro, bg: COLORES.warningFondo },
+    { icon: <UserX size={20} />, value: resumen.ausentes, label: "Ausentes", estadoKey: "ausente", color: COLORES.danger, bg: COLORES.dangerFondo2 },
+    { icon: <FileText size={20} />, value: resumen.justificados, label: "Justificados", estadoKey: "justificado", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
   ];
 
   function handleCardClick(estadoKey) {
@@ -266,11 +267,11 @@ export default function AsistenciaPage() {
   if (loading) return <Loading />;
 
   return (
-    <Box sx={{ p: 3, bgcolor: "#F5F7F8", minHeight: "100vh" }}>
+    <Box sx={{ p: 3, bgcolor: COLORES.grisAzulado, minHeight: "100vh" }}>
       {/* 1. ENCABEZADO */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
         <Box>
-          <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
+          <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>
             Inicio / Gestión del personal / Asistencia
           </Typography>
         </Box>
@@ -279,9 +280,9 @@ export default function AsistenciaPage() {
           startIcon={<Plus size={18} />}
           onClick={() => setOpenManual(true)}
           sx={{
-            bgcolor: "#1B5E20", borderRadius: "12px", textTransform: "none",
+            bgcolor: COLORES.primarioOscuro, borderRadius: "12px", textTransform: "none",
             fontWeight: 600, fontSize: 14, px: 3.5, py: 1.2, height: 44,
-            "&:hover": { bgcolor: "#2E7D32" },
+            "&:hover": { bgcolor: COLORES.primario },
           }}
         >
           Registro manual
@@ -292,12 +293,12 @@ export default function AsistenciaPage() {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(5, 1fr)" }, gap: 2, mb: 3.5 }}>
         {cards.map((card, i) => (
           <Paper key={i} elevation={0} onClick={() => handleCardClick(card.estadoKey)}
-            sx={{ p: 2, borderRadius: "16px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 1.5, cursor: "pointer", transition: "all .25s ease", "&:hover": { transform: "translateY(-2px)", boxShadow: "0 4px 15px rgba(0,0,0,.06)" } }}>
+            sx={{ p: 2, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", alignItems: "center", gap: 1.5, cursor: "pointer", transition: "all .25s ease", "&:hover": { transform: "translateY(-2px)", boxShadow: "0 4px 15px rgba(0,0,0,.06)" } }}>
             <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: card.bg, display: "flex", alignItems: "center", justifyContent: "center", color: card.color, flexShrink: 0 }}>
               {card.icon}
             </Box>
             <Box>
-              <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.03em" }}>{card.label}</Typography>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", letterSpacing: "0.03em" }}>{card.label}</Typography>
               <Typography sx={{ fontSize: 22, fontWeight: 700, color: card.color, lineHeight: 1.2 }}>{card.value}</Typography>
             </Box>
           </Paper>
@@ -305,19 +306,19 @@ export default function AsistenciaPage() {
       </Box>
 
       {/* 3. BARRA DE FILTROS */}
-      <Paper elevation={0} sx={{ p: 2, borderRadius: "14px", border: "1px solid #E5E7EB", mb: 2.5 }}>
+      <Paper elevation={0} sx={{ p: 2, borderRadius: "14px", border: `1px solid ${COLORES.borde}`, mb: 2.5 }}>
         {/* Header */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1.5 }}>
-          <Filter size={16} color="#1B5E20" />
-          <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}></Typography>
+          <Filter size={16} color={COLORES.primarioOscuro} />
+          <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}></Typography>
         </Box>
 
         {/* Row 1 — Select filters with CSS Grid */}
         <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 1.5, mb: 1.5 }}>
           <Box>
-            <Typography sx={{ fontSize: 11, fontWeight: 500, color: "#6B7280", mb: 0.4 }}>Vista</Typography>
+            <Typography sx={{ fontSize: 11, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.4 }}>Vista</Typography>
             <Select value={vista} onChange={(e) => setVista(e.target.value)} size="small" fullWidth
-              sx={{ borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#E5E7EB" } }}>
+              sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
               <MenuItem value="dia">Día</MenuItem>
               <MenuItem value="semana">Semana</MenuItem>
               <MenuItem value="mes">Mes</MenuItem>
@@ -327,42 +328,42 @@ export default function AsistenciaPage() {
           {vista === "mes" && (
             <>
               <Box>
-                <Typography sx={{ fontSize: 11, fontWeight: 500, color: "#6B7280", mb: 0.4 }}>Mes</Typography>
+                <Typography sx={{ fontSize: 11, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.4 }}>Mes</Typography>
                 <Select value={mes} onChange={(e) => setMes(Number(e.target.value))} size="small" fullWidth
-                  sx={{ borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#E5E7EB" } }}>
+                  sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
                   {["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"].map((m, i) => (
                     <MenuItem key={i} value={i + 1}>{m}</MenuItem>
                   ))}
                 </Select>
               </Box>
               <Box>
-                <Typography sx={{ fontSize: 11, fontWeight: 500, color: "#6B7280", mb: 0.4 }}>Año</Typography>
+                <Typography sx={{ fontSize: 11, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.4 }}>Año</Typography>
                 <Select value={anio} onChange={(e) => setAnio(Number(e.target.value))} size="small" fullWidth
-                  sx={{ borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#E5E7EB" } }}>
+                  sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
                   {[2024, 2025, 2026].map((a) => <MenuItem key={a} value={a}>{a}</MenuItem>)}
                 </Select>
               </Box>
             </>
           )}
           <Box>
-            <Typography sx={{ fontSize: 11, fontWeight: 500, color: "#6B7280", mb: 0.4 }}>Área</Typography>
+            <Typography sx={{ fontSize: 11, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.4 }}>Área</Typography>
             <Select value={filtroArea} onChange={(e) => setFiltroArea(e.target.value)} size="small" fullWidth
-              sx={{ borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#E5E7EB" } }}>
+              sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
               {[{ nombre: "Todas las áreas" }, ...areas].map((a) => <MenuItem key={a.nombre} value={a.nombre}>{a.nombre}</MenuItem>)}
             </Select>
           </Box>
           <Box>
-            <Typography sx={{ fontSize: 11, fontWeight: 500, color: "#6B7280", mb: 0.4 }}>Piso</Typography>
+            <Typography sx={{ fontSize: 11, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.4 }}>Piso</Typography>
             <Select value={filtroPiso} onChange={(e) => setFiltroPiso(e.target.value)} size="small" fullWidth
-              sx={{ borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#E5E7EB" } }}>
+              sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
               <MenuItem value="">Todos</MenuItem>
               {pisosDisponibles.map((p) => <MenuItem key={p} value={p}>Piso {p}</MenuItem>)}
             </Select>
           </Box>
           <Box>
-            <Typography sx={{ fontSize: 11, fontWeight: 500, color: "#6B7280", mb: 0.4 }}>Estado</Typography>
+            <Typography sx={{ fontSize: 11, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.4 }}>Estado</Typography>
             <Select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} size="small" fullWidth
-              sx={{ borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#E5E7EB" } }}>
+              sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
               {ESTADOS.map((e) => <MenuItem key={e.value} value={e.value}>{e.label}</MenuItem>)}
             </Select>
           </Box>
@@ -373,38 +374,38 @@ export default function AsistenciaPage() {
           {vista === "dia" && (
             <TextField label="Fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)}
               slotProps={{
-                inputLabel: { shrink: true, sx: { fontSize: 12, color: "#6B7280", fontWeight: 500 } },
-                input: { startAdornment: <InputAdornment position="start"><CalendarDays size={14} color="#9CA3AF" /></InputAdornment>, sx: { borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB" } },
+                inputLabel: { shrink: true, sx: { fontSize: 12, color: COLORES.textoTerciario, fontWeight: 500 } },
+                input: { startAdornment: <InputAdornment position="start"><CalendarDays size={14} color={COLORES.textoSuave} /></InputAdornment>, sx: { borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris } },
               }} />
           )}
           {(vista === "semana" || vista === "rango") && (
             <TextField label="Fecha desde" type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)}
               slotProps={{
-                inputLabel: { shrink: true, sx: { fontSize: 12, color: "#6B7280", fontWeight: 500 } },
-                input: { startAdornment: <InputAdornment position="start"><CalendarDays size={14} color="#9CA3AF" /></InputAdornment>, sx: { borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB" } },
+                inputLabel: { shrink: true, sx: { fontSize: 12, color: COLORES.textoTerciario, fontWeight: 500 } },
+                input: { startAdornment: <InputAdornment position="start"><CalendarDays size={14} color={COLORES.textoSuave} /></InputAdornment>, sx: { borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris } },
               }} />
           )}
           {(vista === "semana" || vista === "rango") && (
             <TextField label="Fecha hasta" type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)}
               slotProps={{
-                inputLabel: { shrink: true, sx: { fontSize: 12, color: "#6B7280", fontWeight: 500 } },
-                input: { startAdornment: <InputAdornment position="start"><CalendarDays size={14} color="#9CA3AF" /></InputAdornment>, sx: { borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB" } },
+                inputLabel: { shrink: true, sx: { fontSize: 12, color: COLORES.textoTerciario, fontWeight: 500 } },
+                input: { startAdornment: <InputAdornment position="start"><CalendarDays size={14} color={COLORES.textoSuave} /></InputAdornment>, sx: { borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris } },
               }} />
           )}
           {vista === "mes" && <Box />}
           {vista === "mes" && <Box />}
           <Box sx={{ display: "flex", gap: 0.8, flexWrap: "wrap", justifySelf: { xs: "start", md: "end" }, alignSelf: "end" }}>
             <Button variant="outlined" onClick={limpiar} startIcon={<X size={14} />}
-              sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12, height: 36, px: 2, color: "#6B7280", borderColor: "#E5E7EB", bgcolor: "#fff", "&:hover": { borderColor: "#DC2626", color: "#DC2626" }, whiteSpace: "nowrap" }}>
+                             sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12, height: 40, px: 2, color: COLORES.textoTerciario, borderColor: COLORES.borde, bgcolor: COLORES.fondoBlanco, "&:hover": { borderColor: COLORES.danger, color: COLORES.danger }, whiteSpace: "nowrap" }}>
               Limpiar
             </Button>
             <Button variant="outlined" startIcon={<Download size={14} />} onClick={(e) => setExportAnchor(e.currentTarget)}
-              sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12, height: 36, px: 2, color: "#6B7280", borderColor: "#E5E7EB", bgcolor: "#fff", "&:hover": { borderColor: "#1B5E20", color: "#1B5E20" }, whiteSpace: "nowrap" }}>
+                             sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12, height: 40, px: 2, color: COLORES.textoTerciario, borderColor: COLORES.borde, bgcolor: COLORES.fondoBlanco, "&:hover": { borderColor: COLORES.primarioOscuro, color: COLORES.primarioOscuro }, whiteSpace: "nowrap" }}>
               Exportar
             </Button>
             <Menu anchorEl={exportAnchor} open={Boolean(exportAnchor)} onClose={() => setExportAnchor(null)}
               transformOrigin={{ horizontal: "right", vertical: "top" }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-              PaperProps={{ sx: { borderRadius: "12px", mt: 0.5, minWidth: 150, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" } }}>
+              slotProps={{ paper: { sx: { borderRadius: "12px", mt: 0.5, minWidth: 150, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" } } }}>
               <MenuItem onClick={exportarExcel} sx={{ borderRadius: "8px", mx: 0.5, fontSize: 13, gap: 1 }}>
                 <FileText size={16} /> Exportar Excel
               </MenuItem>
@@ -420,7 +421,7 @@ export default function AsistenciaPage() {
       </Paper>
 
       {/* 4. TABLA */}
-      <Paper elevation={0} sx={{ borderRadius: "20px", border: "1px solid #ECECEC", overflow: "hidden" }}>
+      <Paper elevation={0} sx={{ borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`, overflow: "hidden" }}>
         {filtrados.length === 0 ? (
           <EmptyState mensaje="No hay registros para los filtros seleccionados" />
         ) : (
@@ -514,18 +515,18 @@ function DetalleAsistenciaModal({ open, onClose, row }) {
   if (!open || !row) return null;
 
   const badgeColors = {
-    puntual: { bg: "#D1FAE5", color: "#065F46" },
-    tardanza: { bg: "#FEF3C7", color: "#92400E" },
-    ausente: { bg: "#FEE2E2", color: "#991B1B" },
-    justificado: { bg: "#DBEAFE", color: "#1E40AF" },
+    puntual: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
+    tardanza: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+    ausente: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
+    justificado: { bg: COLORES.primarioClaro2, color: COLORES.primarioOscuro },
   };
-  const ec = badgeColors[row.estado] || { bg: "#F3F4F6", color: "#6B7280" };
+  const ec = badgeColors[row.estado] || { bg: COLORES.fondoGris2, color: COLORES.textoTerciario };
 
   const esLyM = row.dia_semana && (row.dia_semana === 1 || row.dia_semana === 2);
   const salidaTardeEsperada = esLyM ? "18:00" : "17:00";
   const turnos = [
-    { label: "Mañana", entrada: row.entrada1, salida: row.salida1, esperadoE: "07:00", esperadoS: "12:00", color: "#1B5E20", bg: "#F0FFF4" },
-    { label: "Tarde", entrada: row.entrada2, salida: row.salida2, esperadoE: "14:00", esperadoS: salidaTardeEsperada, color: "#1B5E20", bg: "#F0FFF4" },
+    { label: "Mañana", entrada: row.entrada1, salida: row.salida1, esperadoE: "07:00", esperadoS: "12:00", color: COLORES.primarioOscuro, bg: COLORES.successClaro },
+    { label: "Tarde", entrada: row.entrada2, salida: row.salida2, esperadoE: "14:00", esperadoS: salidaTardeEsperada, color: COLORES.primarioOscuro, bg: COLORES.successClaro },
   ];
 
   const tipoIconMap = {
@@ -537,20 +538,20 @@ function DetalleAsistenciaModal({ open, onClose, row }) {
 
   const calculos = [
     { label: "Horas trabajadas", value: row.horas_trabajadas ? `${row.horas_trabajadas}h` : "—" },
-    { label: "Minutos de tardanza", value: row.minutos_tardanza > 0 ? `${row.minutos_tardanza} min` : "0 min", color: row.minutos_tardanza > 0 ? "#B45309" : "#065F46" },
-    { label: "Horas extra", value: row.horas_extra > 0 ? `${row.horas_extra}h` : "—", color: row.horas_extra > 0 ? "#7C3AED" : "#9CA3AF" },
+    { label: "Minutos de tardanza", value: row.minutos_tardanza > 0 ? `${row.minutos_tardanza} min` : "0 min", color: row.minutos_tardanza > 0 ? COLORES.warningOscuro : COLORES.verdeTexto },
+    { label: "Horas extra", value: row.horas_extra > 0 ? `${row.horas_extra}h` : "—", color: row.horas_extra > 0 ? COLORES.primario : COLORES.textoSuave },
   ];
 
   return (
     <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-      <Paper elevation={0} sx={{ position: "relative", borderRadius: "16px", p: 3, width: "100%", maxWidth: 560, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", bgcolor: "#FFFFFF" }}>
-        <IconButton onClick={onClose} size="small" sx={{ position: "absolute", top: 12, right: 12, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+      <Paper elevation={0} sx={{ position: "relative", borderRadius: "16px", p: 3, width: "100%", maxWidth: 560, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", bgcolor: COLORES.fondoBlanco }}>
+        <IconButton aria-label="Cerrar" onClick={onClose} size="small" sx={{ position: "absolute", top: 12, right: 12, color: COLORES.textoSuave, "&:hover": { color: COLORES.textoTerciario, bgcolor: COLORES.fondoGris2 } }}>
           <X size={18} />
         </IconButton>
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2.5}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2.5 }}>
           <Box>
-            <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>{row.empleado}</Typography>
-            <Typography sx={{ fontSize: 13, color: "#6B7280", mt: 0.3 }}>{row.area || "—"} · Piso {row.piso || "—"}</Typography>
+            <Typography sx={{ fontSize: 18, fontWeight: 700, color: COLORES.textoPrimario }}>{row.empleado}</Typography>
+            <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario, mt: 0.3 }}>{row.area || "—"} · Piso {row.piso || "—"}</Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Typography sx={{ fontSize: 11, fontWeight: 600, px: 1.2, py: 0.4, borderRadius: "8px", bgcolor: ec.bg, color: ec.color, textTransform: "capitalize" }}>
@@ -565,21 +566,21 @@ function DetalleAsistenciaModal({ open, onClose, row }) {
             const tieneEntrada = !!t.entrada;
             const tieneSalida = !!t.salida;
             return (
-              <Paper key={t.label} elevation={0} sx={{ p: 2, borderRadius: "14px", bgcolor: t.bg, border: "1px solid #ECECEC" }}>
+              <Paper key={t.label} elevation={0} sx={{ p: 2, borderRadius: "14px", bgcolor: t.bg, border: `1px solid ${COLORES.grisContorno}` }}>
                 <Typography sx={{ fontSize: 12, fontWeight: 700, color: t.color, mb: 1.5, textTransform: "uppercase", letterSpacing: 0.5 }}>
                   {t.label}
                 </Typography>
                 <Box sx={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 2, alignItems: "center" }}>
                   <Box>
-                    <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", mb: 0.3 }}>Esperado</Typography>
-                    <Typography sx={{ fontSize: 13, color: "#6B7280" }}>{t.esperadoE} → {t.esperadoS}</Typography>
+                    <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", mb: 0.3 }}>Esperado</Typography>
+                    <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario }}>{t.esperadoE} → {t.esperadoS}</Typography>
                   </Box>
                   <Box sx={{ textAlign: "center" }}>
-                    <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", mb: 0.3 }}>vs</Typography>
+                    <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", mb: 0.3 }}>vs</Typography>
                   </Box>
                   <Box>
-                    <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", mb: 0.3 }}>Real</Typography>
-                    <Typography sx={{ fontSize: 13, fontWeight: 700, color: tieneEntrada || tieneSalida ? "#111827" : "#9CA3AF" }}>
+                    <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", mb: 0.3 }}>Real</Typography>
+                    <Typography sx={{ fontSize: 13, fontWeight: 700, color: tieneEntrada || tieneSalida ? COLORES.textoPrimario : COLORES.textoSuave }}>
                       {tieneEntrada || tieneSalida ? `${t.entrada || "—"} → ${t.salida || "—"}` : "Sin registro"}
                     </Typography>
                   </Box>
@@ -592,21 +593,21 @@ function DetalleAsistenciaModal({ open, onClose, row }) {
         {/* Resumen de cálculos */}
         <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 3 }}>
           {calculos.map((c, i) => (
-            <Paper key={i} elevation={0} sx={{ p: 2, borderRadius: "12px", border: "1px solid #ECECEC", textAlign: "center" }}>
-              <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", mb: 0.5 }}>{c.label}</Typography>
-              <Typography sx={{ fontSize: 18, fontWeight: 700, color: c.color || "#111827" }}>{c.value}</Typography>
+            <Paper key={i} elevation={0} sx={{ p: 2, borderRadius: "12px", border: `1px solid ${COLORES.grisContorno}`, textAlign: "center" }}>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", mb: 0.5 }}>{c.label}</Typography>
+              <Typography sx={{ fontSize: 18, fontWeight: 700, color: c.color || COLORES.textoPrimario }}>{c.value}</Typography>
             </Paper>
           ))}
         </Box>
 
         {/* Marcación */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, py: 1.5, borderTop: "1px solid #F3F4F6" }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: "10px", bgcolor: "#F9FAFB", display: "flex", alignItems: "center", justifyContent: "center", color: "#9CA3AF" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, py: 1.5, borderTop: `1px solid ${COLORES.fondoGris2}` }}>
+          <Box sx={{ width: 36, height: 36, borderRadius: "10px", bgcolor: COLORES.fondoGris, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.textoSuave }}>
             {tipoIconMap[row.tipo_marcacion] || <CircleCheckBig size={18} />}
           </Box>
           <Box>
-            <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase" }}>Tipo de marcación</Typography>
-            <Typography sx={{ fontSize: 14, fontWeight: 500, color: "#111827", textTransform: "capitalize" }}>{row.tipo_marcacion || "—"}</Typography>
+            <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase" }}>Tipo de marcación</Typography>
+            <Typography sx={{ fontSize: 14, fontWeight: 500, color: COLORES.textoPrimario, textTransform: "capitalize" }}>{row.tipo_marcacion || "—"}</Typography>
           </Box>
         </Box>
       </Paper>
@@ -638,55 +639,55 @@ function EditarAsistenciaModal({ open, onClose, row, onGuardar }) {
 
   const inputSx = {
     borderRadius: "10px", fontSize: 13, height: 40, py: 0,
-    background: "#FFFFFF",
-    "& fieldset": { borderColor: "#111827" },
-    "&:hover fieldset": { borderColor: "#111827" },
-    "&.Mui-focused fieldset": { borderColor: "#111827" },
+    background: COLORES.fondoBlanco,
+    "& fieldset": { borderColor: COLORES.textoPrimario },
+    "&:hover fieldset": { borderColor: COLORES.textoPrimario },
+    "&.Mui-focused fieldset": { borderColor: COLORES.textoPrimario },
   };
 
   return (
     <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-      <Paper elevation={0} sx={{ position: "relative", borderRadius: "16px", p: 3, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", bgcolor: "#FFFFFF" }}>
-        <IconButton onClick={onClose} size="small" sx={{ position: "absolute", top: 12, right: 12, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+      <Paper elevation={0} sx={{ position: "relative", borderRadius: "16px", p: 3, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", bgcolor: COLORES.fondoBlanco }}>
+        <IconButton aria-label="Cerrar" onClick={onClose} size="small" sx={{ position: "absolute", top: 12, right: 12, color: COLORES.textoSuave, "&:hover": { color: COLORES.textoTerciario, bgcolor: COLORES.fondoGris2 } }}>
           <X size={18} />
         </IconButton>
-        <Typography sx={{ fontSize: 17, fontWeight: 700, color: "#111827", mb: 2.5 }}>Editar registro de asistencia</Typography>
+        <Typography sx={{ fontSize: 17, fontWeight: 700, color: COLORES.textoPrimario, mb: 2.5 }}>Editar registro de asistencia</Typography>
 
-        <Typography sx={{ fontSize: 13, color: "#6B7280", mb: 2 }}>
+        <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario, mb: 2 }}>
           {row.empleado} — {row.area || ""} · {row.fecha || ""}
         </Typography>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Fecha</Typography>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Fecha</Typography>
             <TextField type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
           </Box>
 
           {/* TURNO MAÑANA */}
-          <Box sx={{ bgcolor: "#FFFFFF", borderRadius: "12px", p: 2 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#1B5E20", mb: 1.5 }}>Turno mañana</Typography>
+          <Box sx={{ bgcolor: COLORES.fondoBlanco, borderRadius: "12px", p: 2 }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.primarioOscuro, mb: 1.5 }}>Turno mañana</Typography>
             <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
               <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Entrada</Typography>
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Entrada</Typography>
                 <TextField type="time" value={form.entrada1} onChange={(e) => setForm({ ...form, entrada1: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
               </Box>
               <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Salida</Typography>
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Salida</Typography>
                 <TextField type="time" value={form.salida1} onChange={(e) => setForm({ ...form, salida1: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
               </Box>
             </Box>
           </Box>
 
           {/* TURNO TARDE */}
-          <Box sx={{ bgcolor: "#FFFFFF", borderRadius: "12px", p: 2 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#1B5E20", mb: 1.5 }}>Turno tarde</Typography>
+          <Box sx={{ bgcolor: COLORES.fondoBlanco, borderRadius: "12px", p: 2 }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.primarioOscuro, mb: 1.5 }}>Turno tarde</Typography>
             <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
               <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Entrada</Typography>
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Entrada</Typography>
                 <TextField type="time" value={form.entrada2} onChange={(e) => setForm({ ...form, entrada2: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
               </Box>
               <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Salida</Typography>
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Salida</Typography>
                 <TextField type="time" value={form.salida2} onChange={(e) => setForm({ ...form, salida2: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
               </Box>
             </Box>
@@ -694,7 +695,7 @@ function EditarAsistenciaModal({ open, onClose, row, onGuardar }) {
 
           {/* ESTADO */}
           <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Estado</Typography>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Estado</Typography>
             <Select value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })} size="small" fullWidth sx={inputSx}>
               <MenuItem value="puntual">Puntual</MenuItem>
               <MenuItem value="tardanza">Tardanza</MenuItem>
@@ -705,7 +706,7 @@ function EditarAsistenciaModal({ open, onClose, row, onGuardar }) {
 
           {/* TIPO MARCACIÓN */}
           <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Tipo de marcación</Typography>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Tipo de marcación</Typography>
             <Select value={form.tipo_marcacion} onChange={(e) => setForm({ ...form, tipo_marcacion: e.target.value })} size="small" fullWidth sx={inputSx}>
               <MenuItem value="manual">Manual</MenuItem>
               <MenuItem value="huella">Huella</MenuItem>
@@ -716,12 +717,12 @@ function EditarAsistenciaModal({ open, onClose, row, onGuardar }) {
 
           {/* OBSERVACIÓN */}
           <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6B7280", mb: 0.6 }}>Observación</Typography>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Observación</Typography>
             <TextField multiline rows={2} value={form.observacion} onChange={(e) => setForm({ ...form, observacion: e.target.value })} fullWidth slotProps={{ input: { sx: { ...inputSx, height: "auto", py: 1 } } }} />
           </Box>
 
-          <Box display="flex" gap={1} justifyContent="flex-end" mt={1}>
-            <Button onClick={onClose} variant="outlined" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 3, color: "#6B7280", borderColor: "#ECECEC", "&:hover": { borderColor: "#1B5E20" } }}>
+          <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end", mt: 1 }}>
+            <Button onClick={onClose} variant="outlined" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 3, color: COLORES.textoTerciario, borderColor: COLORES.grisContorno, "&:hover": { borderColor: COLORES.primarioOscuro } }}>
               Cancelar
             </Button>
             <Button
@@ -732,7 +733,7 @@ function EditarAsistenciaModal({ open, onClose, row, onGuardar }) {
                 setGuardando(false);
               }}
               variant="contained"
-              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 3, bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } }}
+              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 3, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } }}
             >
               {guardando ? "Guardando..." : "Guardar cambios"}
             </Button>
@@ -767,35 +768,35 @@ function RegistroManualModal({ open, onClose, onGuardar, areas = [] }) {
   if (!open) return null;
 
   const inputSx = {
-    borderRadius: "10px", fontSize: 13, height: 40, bgcolor: "#FFFFFF",
-    "& fieldset": { borderColor: "#111827" },
-    "&:hover fieldset": { borderColor: "#111827" },
-    "&.Mui-focused fieldset": { borderColor: "#111827" },
+    borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoBlanco,
+    "& fieldset": { borderColor: COLORES.textoPrimario },
+    "&:hover fieldset": { borderColor: COLORES.textoPrimario },
+    "&.Mui-focused fieldset": { borderColor: COLORES.textoPrimario },
   };
 
-  const labelSx = { fontSize: 12, fontWeight: 600, color: "#6B7280", mb: 0.6 };
+  const labelSx = { fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.6 };
 
   return (
     <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(17, 24, 39, 0.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-      <Paper elevation={0} sx={{ position: "relative", borderRadius: "16px", width: "100%", maxWidth: 760, maxHeight: "90vh", overflow: "auto", boxShadow: "0 8px 30px rgba(0,0,0,0.12)", bgcolor: "#FFFFFF" }}>
+      <Paper elevation={0} sx={{ position: "relative", borderRadius: "16px", width: "100%", maxWidth: 760, maxHeight: "90vh", overflow: "auto", boxShadow: "0 8px 30px rgba(0,0,0,0.12)", bgcolor: COLORES.fondoBlanco }}>
         {/* HEADER */}
         <Box sx={{ p: 3, pb: 2.5, pr: 6 }}>
           <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
-            <Box sx={{ width: 42, height: 42, borderRadius: "12px", bgcolor: "#E8F5E9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <ClipboardCheck size={22} color="#1B5E20" />
+            <Box sx={{ width: 42, height: 42, borderRadius: "12px", bgcolor: COLORES.primarioClaro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <ClipboardCheck size={22} color={COLORES.primarioOscuro} />
             </Box>
             <Box>
-              <Typography sx={{ fontSize: 17, fontWeight: 700, color: "#111827" }}>Registro manual</Typography>
-              <Typography sx={{ fontSize: 13, color: "#6B7280", mt: 0.5, lineHeight: 1.5 }}>
+              <Typography sx={{ fontSize: 17, fontWeight: 700, color: COLORES.textoPrimario }}>Registro manual</Typography>
+              <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario, mt: 0.5, lineHeight: 1.5 }}>
                 Registra manualmente una asistencia cuando el empleado no pudo marcar normalmente.
               </Typography>
             </Box>
           </Box>
-          <IconButton onClick={onClose} size="small" sx={{ position: "absolute", top: 14, right: 14, color: "#9CA3AF", "&:hover": { color: "#6B7280", bgcolor: "#F3F4F6" } }}>
+          <IconButton aria-label="Cerrar" onClick={onClose} size="small" sx={{ position: "absolute", top: 14, right: 14, color: COLORES.textoSuave, "&:hover": { color: COLORES.textoTerciario, bgcolor: COLORES.fondoGris2 } }}>
             <X size={18} />
           </IconButton>
         </Box>
-        <Divider sx={{ borderColor: "#F3F4F6" }} />
+        <Divider sx={{ borderColor: COLORES.fondoGris2 }} />
 
         {/* BODY */}
         <Box sx={{ p: 3, pt: 2.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
@@ -812,11 +813,12 @@ function RegistroManualModal({ open, onClose, onGuardar, areas = [] }) {
                 renderInput={(params) => (
                   <TextField
                     {...params}
+                    aria-label="Buscar empleado"
                     placeholder="Buscar por nombre o cédula..."
                     InputProps={{
                       ...params.InputProps,
-                      startAdornment: <Search size={16} style={{ color: "#9CA3AF", marginRight: 4 }} />,
-                      sx: { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: "#FFFFFF", "& fieldset": { borderColor: "#111827" } },
+                      startAdornment: <Search size={16} style={{ color: COLORES.textoSuave, marginRight: 4 }} />,
+                      sx: { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: COLORES.fondoBlanco, "& fieldset": { borderColor: COLORES.textoPrimario } },
                     }}
                   />
                 )}
@@ -831,14 +833,14 @@ function RegistroManualModal({ open, onClose, onGuardar, areas = [] }) {
           {/* JORNADAS (lado a lado) */}
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
             {/* JORNADA MAÑANA */}
-            <Box sx={{ border: "1px solid #E5E7EB", borderRadius: "14px", p: 2.5, bgcolor: "#FFFFFF" }}>
+            <Box sx={{ border: `1px solid ${COLORES.borde}`, borderRadius: "14px", p: 2.5, bgcolor: COLORES.fondoBlanco }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-                <Box sx={{ width: 36, height: 36, borderRadius: "50%", bgcolor: "#E8F5E9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Sun size={17} color="#1B5E20" />
+                <Box sx={{ width: 36, height: 36, borderRadius: "50%", bgcolor: COLORES.primarioClaro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Sun size={17} color={COLORES.primarioOscuro} />
                 </Box>
                 <Box>
-                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Jornada mañana</Typography>
-                  <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>Primer bloque de trabajo</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: COLORES.textoPrimario }}>Jornada mañana</Typography>
+                  <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>Primer bloque de trabajo</Typography>
                 </Box>
               </Box>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
@@ -854,14 +856,14 @@ function RegistroManualModal({ open, onClose, onGuardar, areas = [] }) {
             </Box>
 
             {/* JORNADA TARDE */}
-            <Box sx={{ border: "1px solid #E5E7EB", borderRadius: "14px", p: 2.5, bgcolor: "#FFFFFF" }}>
+            <Box sx={{ border: `1px solid ${COLORES.borde}`, borderRadius: "14px", p: 2.5, bgcolor: COLORES.fondoBlanco }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-                <Box sx={{ width: 36, height: 36, borderRadius: "50%", bgcolor: "#E8F5E9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Moon size={17} color="#1B5E20" />
+                <Box sx={{ width: 36, height: 36, borderRadius: "50%", bgcolor: COLORES.primarioClaro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Moon size={17} color={COLORES.primarioOscuro} />
                 </Box>
                 <Box>
-                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Jornada tarde</Typography>
-                  <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>Segundo bloque de trabajo</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: COLORES.textoPrimario }}>Jornada tarde</Typography>
+                  <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>Segundo bloque de trabajo</Typography>
                 </Box>
               </Box>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
@@ -880,19 +882,19 @@ function RegistroManualModal({ open, onClose, onGuardar, areas = [] }) {
           {/* OBSERVACIÓN */}
           <Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.6 }}>
-              <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280" }}>Observación</Typography>
-              <Typography sx={{ fontSize: 11, color: "#9CA3AF" }}>Opcional</Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario }}>Observación</Typography>
+              <Typography sx={{ fontSize: 11, color: COLORES.textoSuave }}>Opcional</Typography>
             </Box>
             <TextField multiline minRows={3} value={form.observacion} onChange={(e) => setForm({ ...form, observacion: e.target.value })} placeholder="Agregar una observación sobre este registro..." fullWidth slotProps={{ input: { sx: { ...inputSx, height: "auto", py: 1.5, resize: "vertical", alignItems: "flex-start" } } }} />
           </Box>
         </Box>
 
         {/* FOOTER */}
-        <Box sx={{ p: 3, pt: 2, borderTop: "1px solid #F3F4F6", display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
-          <Button onClick={onClose} variant="outlined" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 42, px: 3, color: "#6B7280", borderColor: "#D1D5DB", bgcolor: "#FFFFFF", "&:hover": { borderColor: "#9CA3AF", bgcolor: "#F9FAFB" } }}>
+        <Box sx={{ p: 3, pt: 2, borderTop: `1px solid ${COLORES.fondoGris2}`, display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
+          <Button onClick={onClose} variant="outlined" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 42, px: 3, color: COLORES.textoTerciario, borderColor: COLORES.borde2, bgcolor: COLORES.fondoBlanco, "&:hover": { borderColor: COLORES.textoSuave, bgcolor: COLORES.fondoGris } }}>
             Cancelar
           </Button>
-          <Button onClick={() => onGuardar(form)} variant="contained" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 42, px: 3.5, bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } }}>
+          <Button onClick={() => onGuardar(form)} variant="contained" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 42, px: 3.5, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } }}>
             Guardar registro
           </Button>
         </Box>

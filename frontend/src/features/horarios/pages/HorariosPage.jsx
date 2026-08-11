@@ -20,21 +20,8 @@ import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 import IconBox from "../../../shared/components/IconBox";
 import NuevoHorarioModal from "../components/NuevoHorarioModal";
-
-const PALETA = {
-  verdeOscuro: "#1B5E20",
-  verde: "#2E7D32",
-  verdeClaro: "#E8F5E9",
-  verdeMedio: "#C8E6C9",
-  verdeSuave: "#DCF5E4",
-  borde: "#ECECEC",
-  grisClaro: "#F3F4F6",
-  gris: "#9CA3AF",
-  grisTexto: "#6B7280",
-  texto: "#111827",
-  rojo: "#DC2626",
-  rojoBg: "#FEF2F2",
-};
+import { COLORES } from "../../../shared/constants/colores.js";
+import { PALETA } from "../../../shared/constants/paleta.js";
 
 const DIAS_LABORABLES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
@@ -47,18 +34,18 @@ const inputSx = {
   fontSize: 13,
   height: 40,
   py: 0,
-  bgcolor: "#F9FAFB",
-  "& fieldset": { borderColor: "#ECECEC" },
+  bgcolor: COLORES.fondoGris,
+  "& fieldset": { borderColor: COLORES.grisContorno },
 };
 
 const modalFieldSx = {
   "& .MuiOutlinedInput-root": {
     borderRadius: "10px",
-    "& fieldset": { borderColor: "#E5E7EB" },
-    "&:hover fieldset": { borderColor: "#2E7D32" },
-    "&.Mui-focused fieldset": { borderColor: "#1B5E20" },
+    "& fieldset": { borderColor: COLORES.borde },
+    "&:hover fieldset": { borderColor: COLORES.primario },
+    "&.Mui-focused fieldset": { borderColor: COLORES.primarioOscuro },
   },
-  "& .MuiInputLabel-root": { fontSize: 13, color: "#6B7280" },
+  "& .MuiInputLabel-root": { fontSize: 13, color: COLORES.textoTerciario },
   "& .MuiInputBase-input": { fontSize: 13 },
 };
 
@@ -150,7 +137,7 @@ function HistorialGlobalTable({ data = [], cargando = false }) {
           <TableHead>
             <TableRow>
               {COLUMNAS_HISTORIAL.map((c) => (
-                <TableCell key={c} sx={{ fontWeight: 600, color: PALETA.grisTexto, fontSize: 12, bgcolor: "#F9FAFB", py: 1.1, whiteSpace: "nowrap" }}>
+                <TableCell key={c} sx={{ fontWeight: 600, color: PALETA.grisTexto, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.1, whiteSpace: "nowrap" }}>
                   {c}
                 </TableCell>
               ))}
@@ -171,13 +158,13 @@ function HistorialGlobalTable({ data = [], cargando = false }) {
               </TableRow>
             ) : (
               data.map((r, i) => (
-                <TableRow key={r.id ?? i} sx={{ "&:hover": { bgcolor: "#F9FAFB" } }}>
+                <TableRow key={r.id ?? i} sx={{ "&:hover": { bgcolor: COLORES.fondoGris } }}>
                   <TableCell sx={{ fontSize: 13, fontWeight: 600, color: PALETA.texto, py: 1, whiteSpace: "nowrap" }}>{r.empleado || "—"}</TableCell>
-                  <TableCell sx={{ fontSize: 13, color: "#4B5563", py: 1, whiteSpace: "nowrap" }}>{r.horario_anterior || "—"}</TableCell>
+                  <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1, whiteSpace: "nowrap" }}>{r.horario_anterior || "—"}</TableCell>
                   <TableCell sx={{ fontSize: 13, color: PALETA.verdeOscuro, fontWeight: 600, py: 1, whiteSpace: "nowrap" }}>{r.horario_nuevo || "—"}</TableCell>
-                  <TableCell sx={{ fontSize: 13, color: "#4B5563", py: 1, whiteSpace: "nowrap" }}>{fmtFecha(r.fecha)}</TableCell>
-                  <TableCell sx={{ fontSize: 13, color: "#4B5563", py: 1, whiteSpace: "nowrap" }}>{r.usuario || "—"}</TableCell>
-                  <TableCell sx={{ fontSize: 13, color: "#4B5563", py: 1 }}>{r.motivo || "—"}</TableCell>
+                  <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1, whiteSpace: "nowrap" }}>{fmtFecha(r.fecha)}</TableCell>
+                  <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1, whiteSpace: "nowrap" }}>{r.usuario || "—"}</TableCell>
+                  <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1 }}>{r.motivo || "—"}</TableCell>
                 </TableRow>
               ))
             )}
@@ -222,7 +209,7 @@ function ReglasCard() {
       </Box>
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5 }}>
         {REGLAS.map((r) => (
-          <Box key={r.titulo} sx={{ bgcolor: "#F9FAFB", borderRadius: "12px", p: 1.5, display: "flex", gap: 1.25, alignItems: "flex-start" }}>
+          <Box key={r.titulo} sx={{ bgcolor: COLORES.fondoGris, borderRadius: "12px", p: 1.5, display: "flex", gap: 1.25, alignItems: "flex-start" }}>
             <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: PALETA.verdeClaro, color: PALETA.verdeOscuro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               {r.icon}
             </Box>
@@ -252,8 +239,8 @@ function HorarioCard({
   const conteo = Array.isArray(asignados) ? asignados.length : 0;
   const chipModalidad =
     h.modalidad === "flexible"
-      ? { bgcolor: "#FFF7ED", color: "#D97706" }
-      : { bgcolor: "#F0FDF4", color: PALETA.verdeOscuro };
+      ? { bgcolor: COLORES.warningFondo, color: COLORES.warningOscuro }
+      : { bgcolor: COLORES.successClaro, color: PALETA.verdeOscuro };
 
   return (
     <Paper
@@ -262,14 +249,14 @@ function HorarioCard({
       sx={{
         borderRadius: "16px",
         border: `1.5px solid ${seleccionado ? PALETA.verde : PALETA.borde}`,
-        bgcolor: seleccionado ? "#F5FBF5" : "#FFFFFF",
+        bgcolor: seleccionado ? COLORES.verdeVariante3 : COLORES.fondoBlanco,
         p: 2.5,
         cursor: "pointer",
         flex: "1 1 0",
         display: "flex",
         flexDirection: "column",
         transition: "all .15s",
-        "&:hover": { borderColor: "#A5D6A7", boxShadow: "0 4px 14px rgba(0,0,0,0.05)" },
+        "&:hover": { borderColor: COLORES.primarioClaro2, boxShadow: "0 4px 14px rgba(0,0,0,0.05)" },
       }}
     >
       {/* Cabecera */}
@@ -287,8 +274,8 @@ function HorarioCard({
           <Box
             sx={{
               width: 8, height: 8, borderRadius: "50%",
-              bgcolor: h.activo ? PALETA.verde : "#9CA3AF",
-              boxShadow: `0 0 0 3px ${h.activo ? PALETA.verdeClaro : "#ECECEC"}`,
+              bgcolor: h.activo ? PALETA.verde : COLORES.textoSuave,
+              boxShadow: `0 0 0 3px ${h.activo ? PALETA.verdeClaro : COLORES.grisContorno}`,
             }}
           />
           <Typography sx={{ fontSize: 12, fontWeight: 600, color: h.activo ? PALETA.verdeOscuro : PALETA.gris }}>
@@ -328,14 +315,14 @@ function HorarioCard({
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, pt: 1.5, borderTop: `1px solid ${PALETA.borde}` }}>
         {esAdmin && (
           <Button size="small" variant="contained" startIcon={<Edit3 size={13} />} onClick={() => onSelect?.(h)}
-            sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12, height: 32, px: 1.5, bgcolor: PALETA.verdeOscuro, "&:hover": { bgcolor: PALETA.verde } }}>
+            sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12, height: 40, px: 1.5, bgcolor: PALETA.verdeOscuro, "&:hover": { bgcolor: PALETA.verde } }}>
             Editar
           </Button>
         )}
         {esAdmin && (
           <IconButton size="small" onClick={() => onPorDefecto?.(h)} title={h.es_por_defecto ? "Por defecto" : "Establecer como por defecto"}
-            sx={{ color: h.es_por_defecto ? "#D97706" : PALETA.gris, bgcolor: h.es_por_defecto ? "#FFF7ED" : PALETA.grisClaro, "&:hover": { bgcolor: "#E5E7EB" } }}>
-            <Star size={15} fill={h.es_por_defecto ? "#D97706" : "none"} />
+            sx={{ color: h.es_por_defecto ? COLORES.warningOscuro : PALETA.gris, bgcolor: h.es_por_defecto ? COLORES.warningFondo : PALETA.grisClaro, "&:hover": { bgcolor: COLORES.borde } }}>
+            <Star size={15} fill={h.es_por_defecto ? COLORES.warningOscuro : "none"} />
           </IconButton>
         )}
         <Box sx={{ flex: 1 }} />
@@ -347,7 +334,7 @@ function HorarioCard({
         )}
         {esAdmin && (
           <IconButton size="small" onClick={() => onEliminar?.(h)} title="Eliminar horario"
-            sx={{ color: PALETA.rojo, bgcolor: PALETA.rojoBg, "&:hover": { bgcolor: "#FECACA" } }}>
+            sx={{ color: PALETA.rojo, bgcolor: PALETA.rojoBg, "&:hover": { bgcolor: COLORES.dangerBorde } }}>
             <Trash2 size={15} />
           </IconButton>
         )}
@@ -362,7 +349,7 @@ function SelectorCard({ titulo, descripcion, seleccionado = false, onClick, disa
       onClick={disabled ? undefined : onClick}
       sx={{
         border: `1.5px solid ${seleccionado ? PALETA.verde : PALETA.borde}`,
-        bgcolor: seleccionado ? "#F5FBF5" : "#FFFFFF",
+        bgcolor: seleccionado ? COLORES.verdeVariante3 : COLORES.fondoBlanco,
         borderRadius: "12px",
         p: 1.5,
         cursor: disabled ? "default" : "pointer",
@@ -371,7 +358,7 @@ function SelectorCard({ titulo, descripcion, seleccionado = false, onClick, disa
         gap: 0.75,
         opacity: disabled ? 0.55 : 1,
         transition: "all .15s",
-        "&:hover": disabled ? {} : { borderColor: "#A5D6A7", boxShadow: "0 2px 10px rgba(0,0,0,0.04)" },
+        "&:hover": disabled ? {} : { borderColor: COLORES.primarioClaro2, boxShadow: "0 2px 10px rgba(0,0,0,0.04)" },
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
@@ -380,7 +367,7 @@ function SelectorCard({ titulo, descripcion, seleccionado = false, onClick, disa
           width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
           border: `1.5px solid ${seleccionado ? PALETA.verde : PALETA.gris}`,
           bgcolor: seleccionado ? PALETA.verde : "transparent",
-          color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+          color: COLORES.fondoBlanco, display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           {seleccionado && <Check size={12} strokeWidth={3} />}
         </Box>
@@ -612,7 +599,7 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
         {esFija ? (
           <>
             {/* Configuración semanal */}
-            <Box sx={{ bgcolor: "#F9FAFB", borderRadius: "12px", p: 2 }}>
+            <Box sx={{ bgcolor: COLORES.fondoGris, borderRadius: "12px", p: 2 }}>
               <Typography sx={{ fontSize: 13, fontWeight: 700, color: PALETA.texto, mb: 1 }}>
                 Jornada laboral
               </Typography>
@@ -630,28 +617,28 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
                       <Typography sx={{ fontSize: 13, fontWeight: 600, color: PALETA.texto, pr: 0.25 }}>{d.dia_semana}</Typography>
                       <TextField type="time" size="small" value={d.hora_entrada_manana}
                         onChange={(e) => setDia(idx, "hora_entrada_manana", e.target.value)} disabled={readonly}
-                        label="Entrada" InputLabelProps={{ shrink: true }} slotProps={{
-                          inputLabel: { sx: { fontSize: 11 } },
+                        label="Entrada" slotProps={{
+                          inputLabel: { shrink: true, sx: { fontSize: 11 } },
                           input: { sx: { ...inputSx, height: 36 } },
                         }} />
                       <TextField type="time" size="small" value={d.hora_salida_manana}
                         onChange={(e) => setDia(idx, "hora_salida_manana", e.target.value)} disabled={readonly}
-                        label="Salida" InputLabelProps={{ shrink: true }} slotProps={{
-                          inputLabel: { sx: { fontSize: 11 } },
+                        label="Salida" slotProps={{
+                          inputLabel: { shrink: true, sx: { fontSize: 11 } },
                           input: { sx: { ...inputSx, height: 36 } },
                         }} />
                       {conBloque2 && (
                         <>
                           <TextField type="time" size="small" value={d.hora_entrada_tarde}
                             onChange={(e) => setDia(idx, "hora_entrada_tarde", e.target.value)} disabled={readonly}
-                            label="Entrada tarde" InputLabelProps={{ shrink: true }} slotProps={{
-                              inputLabel: { sx: { fontSize: 11 } },
+                            label="Entrada tarde" slotProps={{
+                              inputLabel: { shrink: true, sx: { fontSize: 11 } },
                               input: { sx: { ...inputSx, height: 36 } },
                             }} />
                           <TextField type="time" size="small" value={d.hora_salida_tarde}
                             onChange={(e) => setDia(idx, "hora_salida_tarde", e.target.value)} disabled={readonly}
-                            label="Salida tarde" InputLabelProps={{ shrink: true }} slotProps={{
-                              inputLabel: { sx: { fontSize: 11 } },
+                            label="Salida tarde" slotProps={{
+                              inputLabel: { shrink: true, sx: { fontSize: 11 } },
                               input: { sx: { ...inputSx, height: 36 } },
                             }} />
                         </>
@@ -663,7 +650,7 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
                             width: 32, height: 32, borderRadius: "8px",
                             color: conBloque2 ? PALETA.grisTexto : PALETA.verdeOscuro,
                             bgcolor: conBloque2 ? PALETA.grisClaro : PALETA.verdeClaro,
-                            "&:hover": { bgcolor: conBloque2 ? "#E5E7EB" : PALETA.verdeMedio },
+                            "&:hover": { bgcolor: conBloque2 ? COLORES.borde : PALETA.verdeMedio },
                           }}>
                           {conBloque2 ? <Trash2 size={15} /> : <Plus size={15} />}
                         </IconButton>
@@ -709,7 +696,7 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
                       sx={{
                         borderRadius: "8px", fontWeight: 600, fontSize: 11, cursor: readonly ? "default" : "pointer",
                         bgcolor: form.horas_esperadas === v ? PALETA.verdeOscuro : PALETA.verdeClaro,
-                        color: form.horas_esperadas === v ? "#fff" : PALETA.verdeOscuro,
+                        color: form.horas_esperadas === v ? COLORES.fondoBlanco : PALETA.verdeOscuro,
                         "&:hover": readonly ? {} : { bgcolor: form.horas_esperadas === v ? PALETA.verde : PALETA.verdeMedio },
                       }} />
                   ))}
@@ -726,7 +713,7 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
         )}
 
         {/* Vista previa de evaluación */}
-        <Box sx={{ bgcolor: "#F9FAFB", borderRadius: "12px", p: 2 }}>
+        <Box sx={{ bgcolor: COLORES.fondoGris, borderRadius: "12px", p: 2 }}>
           <Typography sx={{ fontSize: 13, fontWeight: 700, color: PALETA.texto, mb: 1 }}>
             Vista previa de evaluación
           </Typography>
@@ -753,9 +740,9 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
           {esAdmin && (
             <Button size="small" startIcon={<Star size={14} />} onClick={handlePorDefecto}
               sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12,
-                color: horario.es_por_defecto ? "#D97706" : PALETA.grisTexto,
-                bgcolor: horario.es_por_defecto ? "#FFF7ED" : PALETA.grisClaro,
-                "&:hover": { bgcolor: "#E5E7EB" } }}>
+                color: horario.es_por_defecto ? COLORES.warningOscuro : PALETA.grisTexto,
+                bgcolor: horario.es_por_defecto ? COLORES.warningFondo : PALETA.grisClaro,
+                "&:hover": { bgcolor: COLORES.borde } }}>
               {horario.es_por_defecto ? "Es el horario por defecto" : "Establecer por defecto"}
             </Button>
           )}
@@ -765,7 +752,7 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, borderTop: `1px solid ${PALETA.borde}`, pt: 2 }}>
           {esAdmin && (
             <Button startIcon={<Trash2 size={15} />} onClick={handleEliminar} disabled={eliminando}
-              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, color: PALETA.rojo, borderColor: "#FECACA", "&:hover": { bgcolor: PALETA.rojoBg, borderColor: PALETA.rojo } }}>
+              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, color: PALETA.rojo, borderColor: COLORES.dangerBorde, "&:hover": { bgcolor: PALETA.rojoBg, borderColor: PALETA.rojo } }}>
               Eliminar
             </Button>
           )}
@@ -944,7 +931,7 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
     <TableHead>
       <TableRow>
         {cols.map((c) => (
-          <TableCell key={c} sx={{ fontWeight: 600, color: PALETA.grisTexto, fontSize: 12, bgcolor: "#F9FAFB", py: 1.25, whiteSpace: "nowrap" }}>{c}</TableCell>
+          <TableCell key={c} sx={{ fontWeight: 600, color: PALETA.grisTexto, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.25, whiteSpace: "nowrap" }}>{c}</TableCell>
         ))}
       </TableRow>
     </TableHead>
@@ -953,7 +940,7 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
   const panelLateralSx = {
     width: 320,
     flexShrink: 0,
-    bgcolor: "#F9FAFB",
+    bgcolor: COLORES.fondoGris,
     borderRadius: "12px",
     border: `1px solid ${PALETA.borde}`,
     p: 2,
@@ -992,21 +979,21 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
               {/* Filtros individual */}
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 2fr" }, gap: 1.5, mb: 2 }}>
                 <Select size="small" value={filtroAreaInd} onChange={(e) => setFiltroAreaInd(e.target.value)} displayEmpty
-                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: "#F9FAFB", "& fieldset": { borderColor: PALETA.borde } }}>
+                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: PALETA.borde } }}>
                   <MenuItem value=""><em>Todas las áreas</em></MenuItem>
                   {areasList.map((a) => <MenuItem key={a.id} value={a.id}>{a.nombre}</MenuItem>)}
                 </Select>
                 <Select size="small" value={filtroCargoInd} onChange={(e) => setFiltroCargoInd(e.target.value)} displayEmpty
-                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: "#F9FAFB", "& fieldset": { borderColor: PALETA.borde } }}>
+                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: PALETA.borde } }}>
                   <MenuItem value=""><em>Todos los cargos</em></MenuItem>
                   {cargosList.map((c) => <MenuItem key={c.id} value={c.id}>{c.nombre}</MenuItem>)}
                 </Select>
-                <TextField placeholder="Buscar empleado por nombre, cargo, área, correo..." value={busqueda}
+                <TextField aria-label="Buscar empleado" placeholder="Buscar empleado por nombre, cargo, área, correo..." value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
                   slotProps={{
                     input: {
                       startAdornment: <Search size={15} style={{ color: PALETA.gris, marginRight: 8 }} />,
-                      sx: { borderRadius: "10px", fontSize: 13, height: 40, bgcolor: "#F9FAFB", py: 0, "& fieldset": { borderColor: PALETA.borde } },
+                      sx: { borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, py: 0, "& fieldset": { borderColor: PALETA.borde } },
                     },
                   }} />
               </Box>
@@ -1026,13 +1013,13 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
                       filtradosInd.map((e) => {
                         const actual = horarioNombre(e.horario_id);
                         return (
-                          <TableRow key={e.id} sx={{ "&:hover": { bgcolor: "#F9FAFB" } }}>
+                          <TableRow key={e.id} sx={{ "&:hover": { bgcolor: COLORES.fondoGris } }}>
                             <TableCell sx={{ fontSize: 13, fontWeight: 600, color: PALETA.texto, py: 1.1, whiteSpace: "nowrap" }}>
                               {nombreEmpleado(e)}
                               {e.correo && <Typography sx={{ fontSize: 11, color: PALETA.gris }}>{e.correo}</Typography>}
                             </TableCell>
-                            <TableCell sx={{ fontSize: 13, color: "#4B5563", py: 1.1 }}>{e.area || "—"}</TableCell>
-                            <TableCell sx={{ fontSize: 13, color: "#4B5563", py: 1.1 }}>{e.cargo || "—"}</TableCell>
+                            <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1.1 }}>{e.area || "—"}</TableCell>
+                            <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1.1 }}>{e.cargo || "—"}</TableCell>
                             <TableCell sx={{ py: 1.1 }}>
                               {actual ? (
                                 <Chip label={actual} size="small"
@@ -1045,13 +1032,13 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
                             <TableCell sx={{ py: 1.1 }}>
                               <Box sx={{ display: "flex", gap: 0.75, alignItems: "center" }}>
                                 <Button size="small" startIcon={<UserPlus size={13} />} onClick={() => abrirAsignacion(e)}
-                                  sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 11, height: 28, whiteSpace: "nowrap", px: 1.25, bgcolor: PALETA.verdeOscuro, color: "#fff", "&:hover": { bgcolor: PALETA.verde } }}>
+                                  sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 11, height: 28, whiteSpace: "nowrap", px: 1.25, bgcolor: PALETA.verdeOscuro, color: COLORES.fondoBlanco, "&:hover": { bgcolor: PALETA.verde } }}>
                                   Asignar horario
                                 </Button>
                                 {actual && (
                                   <IconButton size="small" onClick={() => quitar(e)} disabled={quitandoId === e.id}
                                     title="Quitar horario"
-                                    sx={{ width: 28, height: 28, borderRadius: "8px", color: PALETA.rojo, bgcolor: PALETA.rojoBg, "&:hover": { bgcolor: "#FECACA" } }}>
+                                    sx={{ width: 28, height: 28, borderRadius: "8px", color: PALETA.rojo, bgcolor: PALETA.rojoBg, "&:hover": { bgcolor: COLORES.dangerBorde } }}>
                                     <UserMinus size={14} />
                                   </IconButton>
                                 )}
@@ -1078,7 +1065,7 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
                       {nombreEmpleado(asignarA)}
                     </Typography>
                   </Box>
-                  <IconButton size="small" onClick={() => setAsignarA(null)}
+                  <IconButton aria-label="Cerrar asignación" size="small" onClick={() => setAsignarA(null)}
                     sx={{ color: PALETA.gris, "&:hover": { color: PALETA.grisTexto, bgcolor: PALETA.grisClaro } }}>
                     <X size={16} />
                   </IconButton>
@@ -1120,12 +1107,12 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
               {/* Filtros masiva */}
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5, mb: 2 }}>
                 <Select size="small" value={filtroArea} onChange={(e) => setFiltroArea(e.target.value)} displayEmpty
-                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: "#F9FAFB", "& fieldset": { borderColor: PALETA.borde } }}>
+                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: PALETA.borde } }}>
                   <MenuItem value=""><em>Todas las áreas</em></MenuItem>
                   {areasList.map((a) => <MenuItem key={a.id} value={a.id}>{a.nombre}</MenuItem>)}
                 </Select>
                 <Select size="small" value={filtroCargo} onChange={(e) => setFiltroCargo(e.target.value)} displayEmpty
-                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: "#F9FAFB", "& fieldset": { borderColor: PALETA.borde } }}>
+                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: PALETA.borde } }}>
                   <MenuItem value=""><em>Todos los cargos</em></MenuItem>
                   {cargosList.map((c) => <MenuItem key={c.id} value={c.id}>{c.nombre}</MenuItem>)}
                 </Select>
@@ -1150,13 +1137,13 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
                 <Table size="small" stickyHeader>
                   <TableHead>
                     <TableRow>
-                      <TableCell padding="checkbox" sx={{ bgcolor: "#F9FAFB", py: 1.25 }}>
+                      <TableCell padding="checkbox" sx={{ bgcolor: COLORES.fondoGris, py: 1.25 }}>
                         <Checkbox size="small" checked={todosSeleccionados} indeterminate={seleccionados.size > 0 && !todosSeleccionados}
                           onChange={toggleTodos}
                           sx={{ color: PALETA.gris, "&.Mui-checked": { color: PALETA.verdeOscuro } }} />
                       </TableCell>
                       {["Empleado", "Área", "Cargo", "Horario actual", "Estado"].map((c) => (
-                        <TableCell key={c} sx={{ fontWeight: 600, color: PALETA.grisTexto, fontSize: 12, bgcolor: "#F9FAFB", py: 1.25, whiteSpace: "nowrap" }}>{c}</TableCell>
+                        <TableCell key={c} sx={{ fontWeight: 600, color: PALETA.grisTexto, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.25, whiteSpace: "nowrap" }}>{c}</TableCell>
                       ))}
                     </TableRow>
                   </TableHead>
@@ -1169,15 +1156,15 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
                       </TableRow>
                     ) : (
                       filtradosMasivo.map((e) => (
-                        <TableRow key={e.id} hover sx={{ "&:hover": { bgcolor: "#F9FAFB" } }}>
+                        <TableRow key={e.id} hover sx={{ "&:hover": { bgcolor: COLORES.fondoGris } }}>
                           <TableCell padding="checkbox" sx={{ py: 1 }}>
                             <Checkbox size="small" checked={seleccionados.has(e.id)} onChange={() => toggleSeleccion(e.id)}
                               sx={{ color: PALETA.gris, "&.Mui-checked": { color: PALETA.verdeOscuro } }} />
                           </TableCell>
                           <TableCell sx={{ fontSize: 13, fontWeight: 600, color: PALETA.texto, py: 1, whiteSpace: "nowrap" }}>{nombreEmpleado(e)}</TableCell>
-                          <TableCell sx={{ fontSize: 13, color: "#4B5563", py: 1 }}>{e.area || "—"}</TableCell>
-                          <TableCell sx={{ fontSize: 13, color: "#4B5563", py: 1 }}>{e.cargo || "—"}</TableCell>
-                          <TableCell sx={{ fontSize: 13, color: "#4B5563", py: 1 }}>{horarioNombre(e.horario_id) || "—"}</TableCell>
+                          <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1 }}>{e.area || "—"}</TableCell>
+                          <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1 }}>{e.cargo || "—"}</TableCell>
+                          <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1 }}>{horarioNombre(e.horario_id) || "—"}</TableCell>
                           <TableCell sx={{ py: 1 }}><EstadoChip activo={!!e.activo} /></TableCell>
                         </TableRow>
                       ))
@@ -1199,7 +1186,7 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
                       {seleccionados.size} empleado{seleccionados.size === 1 ? "" : "s"} seleccionado{seleccionados.size === 1 ? "" : "s"}
                     </Typography>
                   </Box>
-                  <IconButton size="small" onClick={() => setMostrarMasivo(false)}
+                  <IconButton aria-label="Cerrar asignación masiva" size="small" onClick={() => setMostrarMasivo(false)}
                     sx={{ color: PALETA.gris, "&:hover": { color: PALETA.grisTexto, bgcolor: PALETA.grisClaro } }}>
                     <X size={16} />
                   </IconButton>
@@ -1405,17 +1392,17 @@ export default function HorariosPage() {
 
   if (cargando && horarios.length === 0) {
     return (
-      <Box sx={{ p: 3, bgcolor: "#F5F7F8", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <Box sx={{ p: 3, bgcolor: COLORES.grisAzulado, minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
         <CircularProgress sx={{ color: PALETA.verde }} />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ p: 3, bgcolor: "#F5F7F8", minHeight: "100vh" }}>
+    <Box sx={{ p: 3, bgcolor: COLORES.grisAzulado, minHeight: "100vh" }}>
       {/* Header */}
       <Box sx={{ mb: 3 }}>
-        <Typography sx={{ fontSize: 13, color: PALETA.gris }}>Inicio / Gestión del personal / Horarios</Typography>
+        <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>Inicio / Gestión del personal / Horarios</Typography>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, mt: 1, flexWrap: "wrap" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             
@@ -1479,8 +1466,8 @@ export default function HorariosPage() {
       {toast && (
         <Box sx={{
           position: "fixed", bottom: 24, right: 24,
-          bgcolor: toast.tipo === "err" ? "#DC2626" : "#1B5E20",
-          color: "#fff", borderRadius: "10px", px: 2.5, py: 1.5,
+          bgcolor: toast.tipo === "err" ? COLORES.danger : COLORES.primarioOscuro,
+          color: COLORES.fondoBlanco, borderRadius: "10px", px: 2.5, py: 1.5,
           fontSize: 13, fontWeight: 500, zIndex: 9999,
           boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
           display: "flex", alignItems: "center", gap: 1,

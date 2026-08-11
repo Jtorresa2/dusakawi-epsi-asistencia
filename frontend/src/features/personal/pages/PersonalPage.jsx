@@ -13,6 +13,7 @@ import {
 import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 import PersonalPerfilModal from "../components/PersonalPerfilModal";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const initialForm = {
   cedula: "", nombre: "", apellido: "", correo: "", telefono: "", fecha_nacimiento: "",
@@ -22,58 +23,58 @@ const initialForm = {
 const ESTADOS_FILTRO = ["Todos", "Activo", "Inactivo"];
 
 const ROL_BADGE = {
-  "Administrador":  { bg: "#FFF3E0", color: "#E65100" },
-  "Talento Humano": { bg: "#E8F5E9", color: "#1B5E20" },
-  "Empleado":       { bg: "#E3F2FD", color: "#0D47A1" },
+  "Administrador":  { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+  "Talento Humano": { bg: COLORES.primarioClaro, color: COLORES.primarioOscuro },
+  "Empleado":       { bg: COLORES.primarioClaro, color: COLORES.primarioOscuro },
 };
 
 const selectMenuSx = {
-  PaperProps: {
-    sx: { bgcolor: "#FFFFFF", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } },
+  slotProps: {
+    paper: { sx: { bgcolor: COLORES.fondoBlanco, "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } } },
   },
 };
 
-const verdeBoton = { bgcolor: "#1B5E20", "&:hover": { bgcolor: "#2E7D32" } };
+const verdeBoton = { bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } };
 
 // ─── Estilos del modal premium (Nuevo/Editar colaborador) ───────────────────
 const modalFieldSx = {
   "& .MuiOutlinedInput-root": {
     borderRadius: "12px",
-    bgcolor: "#FFFFFF",
+    bgcolor: COLORES.fondoBlanco,
     minHeight: 40,
     transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-    "& fieldset": { borderColor: "#D1D5DB" },
-    "&:hover fieldset": { borderColor: "#9CA3AF" },
-    "&.Mui-focused fieldset": { borderColor: "#1B5E20" },
+    "& fieldset": { borderColor: COLORES.borde2 },
+    "&:hover fieldset": { borderColor: COLORES.textoSuave },
+    "&.Mui-focused fieldset": { borderColor: COLORES.primarioOscuro },
     "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" },
   },
-  "& .MuiInputLabel-root": { fontSize: 13, color: "#6B7280" },
-  "& .MuiInputLabel-root.Mui-focused": { color: "#1B5E20" },
+  "& .MuiInputLabel-root": { fontSize: 13, color: COLORES.textoTerciario },
+  "& .MuiInputLabel-root.Mui-focused": { color: COLORES.primarioOscuro },
 };
 
 const modalSelectSx = {
-  borderRadius: "12px", fontSize: 14, bgcolor: "#FFFFFF", minHeight: 40,
+  borderRadius: "12px", fontSize: 14, bgcolor: COLORES.fondoBlanco, minHeight: 40,
   transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-  "& fieldset": { borderColor: "#D1D5DB" },
-  "&:hover fieldset": { borderColor: "#9CA3AF" },
-  "&.Mui-focused fieldset": { borderColor: "#1B5E20" },
+  "& fieldset": { borderColor: COLORES.borde2 },
+  "&:hover fieldset": { borderColor: COLORES.textoSuave },
+  "&.Mui-focused fieldset": { borderColor: COLORES.primarioOscuro },
   "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(27, 94, 32, 0.10)" },
 };
 
 const selectIconAdornment = {
   "& .MuiSelect-select": { display: "flex", alignItems: "center" },
-  "& .MuiSelect-icon": { color: "#9CA3AF" },
+  "& .MuiSelect-icon": { color: COLORES.textoSuave },
 };
 
 const modalSeccionCard = {
-  border: "1px solid #ECECEC",
+  border: `1px solid ${COLORES.grisContorno}`,
   borderRadius: "14px",
-  bgcolor: "#FFFFFF",
+  bgcolor: COLORES.fondoBlanco,
   p: 2,
 };
 
-const modalSeccionTitulo = { fontSize: 13, fontWeight: 700, color: "#111827", display: "flex", alignItems: "center", gap: 1 };
-const modalSeccionSubtitulo = { fontSize: 11, color: "#9CA3AF", mt: 0.25 };
+const modalSeccionTitulo = { fontSize: 13, fontWeight: 700, color: COLORES.textoPrimario, display: "flex", alignItems: "center", gap: 1 };
+const modalSeccionSubtitulo = { fontSize: 11, color: COLORES.textoSuave, mt: 0.25 };
 
 // Genera una contraseña temporal segura
 const generarPasswordTemporal = (len = 10) => {
@@ -292,16 +293,16 @@ export default function PersonalPage() {
     <Box sx={{ p: 3 }}>
       {/* ENCABEZADO */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, gap: 2, flexWrap: "wrap" }}>
-        <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Inicio / Gestión del personal / Personal</Typography>
+        <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>Inicio / Gestión del personal / Personal</Typography>
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
           {pendientes > 0 && (
             <Button onClick={() => setModalGenerar(true)}
-              sx={{ bgcolor: "#1b5e20", color: "#fff", borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, "&:hover": { bgcolor: "#2E7D32" } }}>
+              sx={{ bgcolor: COLORES.primarioOscuro, color: COLORES.fondoBlanco, borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, "&:hover": { bgcolor: COLORES.primario } }}>
               Generar faltantes ({pendientes})
             </Button>
           )}
           <Button startIcon={<Plus size={18} />} onClick={abrirCrear}
-            sx={{ bgcolor: "#1b5e20", color: "#fff", borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, "&:hover": { bgcolor: "#2E7D32" } }}>
+            sx={{ bgcolor: COLORES.primarioOscuro, color: COLORES.fondoBlanco, borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, "&:hover": { bgcolor: COLORES.primario } }}>
             Nuevo empleado
           </Button>
         </Box>
@@ -310,18 +311,18 @@ export default function PersonalPage() {
       {/* TARJETAS RESUMEN */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" }, gap: 2, mb: 3.5 }}>
         {[
-          { icon: <Users size={20} />, value: personal.length, label: "Total colaboradores", color: "#1B5E20", bg: "#E8F5E9" },
-          { icon: <UserCheck size={20} />, value: personal.filter((e) => isActive(e)).length, label: "Activos", color: "#1565C0", bg: "#EFF6FF" },
-          { icon: <UserX size={20} />, value: personal.filter((e) => !isActive(e)).length, label: "Inactivos", color: "#DC2626", bg: "#FEE2E2" },
-          { icon: <Building2 size={20} />, value: new Set(personal.map((e) => e.area).filter(Boolean)).size, label: "Áreas distintas", color: "#7C3AED", bg: "#F3E8FF" },
+          { icon: <Users size={20} />, value: personal.length, label: "Total colaboradores", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
+          { icon: <UserCheck size={20} />, value: personal.filter((e) => isActive(e)).length, label: "Activos", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
+          { icon: <UserX size={20} />, value: personal.filter((e) => !isActive(e)).length, label: "Inactivos", color: COLORES.danger, bg: COLORES.dangerFondo },
+          { icon: <Building2 size={20} />, value: new Set(personal.map((e) => e.area).filter(Boolean)).size, label: "Áreas distintas", color: COLORES.primario, bg: COLORES.primarioClaro },
         ].map((card, i) => (
           <Paper key={i} elevation={0}
-            sx={{ p: 2, borderRadius: "16px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 1.5 }}>
+            sx={{ p: 2, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", alignItems: "center", gap: 1.5 }}>
             <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: card.bg, display: "flex", alignItems: "center", justifyContent: "center", color: card.color, flexShrink: 0 }}>
               {card.icon}
             </Box>
             <Box>
-              <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.03em" }}>{card.label}</Typography>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", letterSpacing: "0.03em" }}>{card.label}</Typography>
               <Typography sx={{ fontSize: 22, fontWeight: 700, color: card.color, lineHeight: 1.2 }}>{card.value}</Typography>
             </Box>
           </Paper>
@@ -329,26 +330,26 @@ export default function PersonalPage() {
       </Box>
 
       {/* BARRA DE FILTROS */}
-      <Paper elevation={0} sx={{ p: 2, borderRadius: "16px", border: "1px solid #ECECEC", mb: 3 }}>
+      <Paper elevation={0} sx={{ p: 2, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, mb: 3 }}>
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "2fr 1fr 1fr 1fr" }, gap: 1.5, alignItems: "center" }}>
-          <TextField placeholder="Buscar colaborador..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
+          <TextField aria-label="Buscar colaborador" placeholder="Buscar colaborador..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
             slotProps={{
               input: {
-                startAdornment: <Search size={15} style={{ color: "#9CA3AF", marginRight: 6 }} />,
-                sx: { borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", py: 0 },
+                startAdornment: <Search size={15} style={{ color: COLORES.textoSuave, marginRight: 6 }} />,
+                sx: { borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, py: 0 },
               },
             }} />
           <Select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} size="small"
-            sx={{ borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#E5E7EB" } }}>
+            sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
             {ESTADOS_FILTRO.map((e) => <MenuItem key={e} value={e}>{e}</MenuItem>)}
           </Select>
           <Select value={filtroArea} onChange={(e) => setFiltroArea(e.target.value)} size="small"
-            sx={{ borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#E5E7EB" } }}>
+            sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
             <MenuItem value="Todas">Área</MenuItem>
             {areas.map((a) => <MenuItem key={a.id} value={a.nombre}>{a.nombre}</MenuItem>)}
           </Select>
           <Select value={filtroRol} onChange={(e) => setFiltroRol(e.target.value)} size="small"
-            sx={{ borderRadius: "8px", fontSize: 13, height: 36, bgcolor: "#F9FAFB", "& fieldset": { borderColor: "#E5E7EB" } }}>
+            sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
             <MenuItem value="Todos">Rol</MenuItem>
             {roles.map((r) => <MenuItem key={r.id} value={r.nombre}>{r.nombre}</MenuItem>)}
           </Select>
@@ -356,14 +357,14 @@ export default function PersonalPage() {
       </Paper>
 
       {/* TABLA PRINCIPAL */}
-      <Paper elevation={0} sx={{ borderRadius: "20px", border: "1px solid #ECECEC", overflow: "visible" }}>
+      <Paper elevation={0} sx={{ borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`, overflow: "visible" }}>
         <TableContainer sx={{ overflowX: "auto" }}>
           <Table>
             <TableHead>
               <TableRow>
                 {["", "Colaborador", "Documento", "Cargo", "Área / Piso", "Rol", "Usuario", "Último acceso", "Inas.", "Tard.", "Estado", "Acciones"].map((h) => (
                   <TableCell key={h} sx={{
-                    fontWeight: 600, color: "#6B7280", fontSize: 12, bgcolor: "#F9FAFB", py: 1.5, whiteSpace: "nowrap",
+                    fontWeight: 600, color: COLORES.textoTerciario, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.5, whiteSpace: "nowrap",
                     display: h === "Cargo" || h === "Área / Piso" ? { xs: "none", md: "table-cell" }
                       : h === "Rol" || h === "Acciones" ? { xs: "none", sm: "table-cell" } : undefined,
                   }}>
@@ -375,69 +376,69 @@ export default function PersonalPage() {
             <TableBody>
               {cargando ? (
                 <TableRow>
-                  <TableCell colSpan={12} align="center" sx={{ py: 6, color: "#9CA3AF", fontSize: 14 }}>Cargando...</TableCell>
+                  <TableCell colSpan={12} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>Cargando...</TableCell>
                 </TableRow>
               ) : filtrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={12} align="center" sx={{ py: 6, color: "#9CA3AF", fontSize: 14 }}>
+                  <TableCell colSpan={12} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>
                     {busqueda ? "No se encontraron empleados" : "No hay empleados registrados"}
                   </TableCell>
                 </TableRow>
               ) : (
                 filtrados.map((e) => {
-                  const badge = ROL_BADGE[e.rol] || { bg: "#F3F4F6", color: "#374151" };
+                  const badge = ROL_BADGE[e.rol] || { bg: COLORES.fondoGris2, color: COLORES.textoSecundario };
                   return (
-                    <TableRow key={e.id} sx={{ "&:hover": { bgcolor: "#F9FAFB" }, transition: "background .15s" }}>
+                    <TableRow key={e.id} sx={{ "&:hover": { bgcolor: COLORES.fondoGris }, transition: "background .15s" }}>
                       <TableCell sx={{ py: 1.2 }}>
-                        <Avatar sx={{ width: 34, height: 34, bgcolor: "#E8F5E9", color: "#2E7D32", fontSize: 12, fontWeight: 700 }}>
+                        <Avatar sx={{ width: 34, height: 34, bgcolor: COLORES.primarioClaro, color: COLORES.primario, fontSize: 12, fontWeight: 700 }}>
                           {getInitials(e) || "?"}
                         </Avatar>
                       </TableCell>
                       <TableCell sx={{ py: 1.2 }}>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                           <Box>
-                            <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{getName(e)}</Typography>
-                            <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>{e.correo || "—"}</Typography>
+                            <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>{getName(e)}</Typography>
+                            <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>{e.correo || "—"}</Typography>
                           </Box>
                           <IconButton size="small" onClick={() => setPerfilId(e.id)} title="Ver perfil"
-                            sx={{ bgcolor: "#EFF6FF", color: "#1565C0", borderRadius: "6px", width: 26, height: 26, "&:hover": { bgcolor: "#DBEAFE" } }}>
+                            sx={{ bgcolor: COLORES.primarioClaro, color: COLORES.primario, borderRadius: "6px", width: 26, height: 26, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}>
                             <Eye size={13} />
                           </IconButton>
                         </Box>
                       </TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: "#4B5563", whiteSpace: "nowrap" }}>{e.cedula || "—"}</TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: "#4B5563", display: { xs: "none", md: "table-cell" } }}>{e.cargo || "—"}</TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: "#4B5563", whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap" }}>{e.cedula || "—"}</TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, display: { xs: "none", md: "table-cell" } }}>{e.cargo || "—"}</TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
                         {e.area || "—"}{e.piso ? ` / P${e.piso}` : ""}
                       </TableCell>
                       <TableCell sx={{ py: 1.2, display: { xs: "none", sm: "table-cell" } }}>
                         <Chip label={e.rol || "Sin rol"} size="small"
                           sx={{ height: 24, fontSize: 11, fontWeight: 600, bgcolor: badge.bg, color: badge.color }} />
                       </TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 12, fontFamily: "monospace", color: "#374151", whiteSpace: "nowrap" }}>
+                      <TableCell sx={{ py: 1.2, fontSize: 12, fontFamily: "monospace", color: COLORES.textoSecundario, whiteSpace: "nowrap" }}>
                         {e.username || "—"}
                       </TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 12, color: "#9CA3AF", whiteSpace: "nowrap" }}>
+                      <TableCell sx={{ py: 1.2, fontSize: 12, color: COLORES.textoSuave, whiteSpace: "nowrap" }}>
                         {e.ultimo_acceso ? new Date(e.ultimo_acceso).toLocaleDateString("es-CO") : "Nunca"}
                       </TableCell>
                       <TableCell sx={{ py: 1.2 }}>
                         <Chip label={e.inasistencias ?? 0} size="small"
                           sx={{ height: 24, fontSize: 11, fontWeight: 700, minWidth: 32,
-                            bgcolor: (e.inasistencias ?? 0) > 0 ? "#FEE2E2" : "#F3F4F6",
-                            color: (e.inasistencias ?? 0) > 0 ? "#DC2626" : "#9CA3AF" }} />
+                            bgcolor: (e.inasistencias ?? 0) > 0 ? COLORES.dangerFondo : COLORES.fondoGris2,
+                            color: (e.inasistencias ?? 0) > 0 ? COLORES.danger : COLORES.textoSuave }} />
                       </TableCell>
                       <TableCell sx={{ py: 1.2 }}>
                         <Chip label={e.llegadas_tardias ?? 0} size="small"
                           sx={{ height: 24, fontSize: 11, fontWeight: 700, minWidth: 32,
-                            bgcolor: (e.llegadas_tardias ?? 0) > 0 ? "#FEF3C7" : "#F3F4F6",
-                            color: (e.llegadas_tardias ?? 0) > 0 ? "#92400E" : "#9CA3AF" }} />
+                            bgcolor: (e.llegadas_tardias ?? 0) > 0 ? COLORES.warningFondo : COLORES.fondoGris2,
+                            color: (e.llegadas_tardias ?? 0) > 0 ? COLORES.warningOscuro : COLORES.textoSuave }} />
                       </TableCell>
                       <TableCell sx={{ py: 1.2 }}>
                         <Button size="small" onClick={() => toggleActivo(e)} title="Cambiar estado"
                           sx={{ borderRadius: "20px", fontSize: 11, fontWeight: 600, minWidth: 0, px: 1.5, textTransform: "none",
-                            bgcolor: isActive(e) ? "#D1FAE5" : "#FEE2E2",
-                            color: isActive(e) ? "#065F46" : "#991B1B",
-                            "&:hover": { bgcolor: isActive(e) ? "#A7F3D0" : "#FECACA" } }}>
+                            bgcolor: isActive(e) ? COLORES.successFondo : COLORES.dangerFondo,
+                            color: isActive(e) ? COLORES.verdeTexto : COLORES.dangerOscuro,
+                            "&:hover": { bgcolor: isActive(e) ? COLORES.successFondo : COLORES.dangerBorde } }}>
                           {isActive(e) ? "Activo" : "Inactivo"}
                         </Button>
                       </TableCell>
@@ -445,19 +446,19 @@ export default function PersonalPage() {
                         <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
                           <Box onClick={() => abrirEditar(e)} title="Editar" sx={{
                             width: 34, height: 34, borderRadius: "9px",
-                            bgcolor: "#EFF6FF", color: "#1565C0", cursor: "pointer",
+                            bgcolor: COLORES.primarioClaro, color: COLORES.primario, cursor: "pointer",
                             display: "flex", alignItems: "center", justifyContent: "center",
                             transition: "all .2s", flexShrink: 0,
-                            "&:hover": { bgcolor: "#DBEAFE" },
+                            "&:hover": { bgcolor: COLORES.primarioClaro2 },
                           }}>
                             <Edit3 size={15} />
                           </Box>
                           <Box onClick={() => setConfirmEliminar(e)} title="Eliminar" sx={{
                             width: 34, height: 34, borderRadius: "9px",
-                            bgcolor: "#FEE2E2", color: "#DC2626", cursor: "pointer",
+                            bgcolor: COLORES.dangerFondo, color: COLORES.danger, cursor: "pointer",
                             display: "flex", alignItems: "center", justifyContent: "center",
                             transition: "all .2s", flexShrink: 0,
-                            "&:hover": { bgcolor: "#FECACA" },
+                            "&:hover": { bgcolor: COLORES.dangerBorde },
                           }}>
                             <Trash2 size={15} />
                           </Box>
@@ -474,40 +475,40 @@ export default function PersonalPage() {
 
       {/* MODAL CREAR / EDITAR */}
       <Dialog open={modalAbierto} onClose={() => setModalAbierto(false)} maxWidth="md" fullWidth
-        PaperProps={{ sx: { borderRadius: "18px", position: "relative", boxShadow: "0 24px 70px rgba(0,0,0,0.25)", maxHeight: "92vh" } }}
+        slotProps={{ paper: { sx: { borderRadius: "18px", position: "relative", boxShadow: "0 24px 70px rgba(0,0,0,0.25)", maxHeight: "92vh" } } }}
         sx={{ "& .MuiBackdrop-root": { bgcolor: "rgba(17, 24, 39, 0.5)", backdropFilter: "blur(4px)" } }}>
         {/* HEADER FIJO */}
         <DialogTitle sx={{ px: 3, py: 2, position: "relative", pb: 1.5 }}>
           <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
             <Box sx={{
-              width: 40, height: 40, borderRadius: "12px", bgcolor: "#E8F5E9", color: "#1B5E20",
+              width: 40, height: 40, borderRadius: "12px", bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro,
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
               <User size={20} />
             </Box>
             <Box>
-              <Typography sx={{ fontSize: 17, fontWeight: 700, color: "#111827", lineHeight: 1.2 }}>
+              <Typography sx={{ fontSize: 17, fontWeight: 700, color: COLORES.textoPrimario, lineHeight: 1.2 }}>
                 {editando ? "Editar colaborador" : "Nuevo colaborador"}
               </Typography>
-              <Typography sx={{ fontSize: 12, color: "#6B7280", mt: 0.15 }}>
+              <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, mt: 0.15 }}>
                 {editando ? "Actualiza la información del colaborador." : "Registra un nuevo empleado dentro del sistema."}
               </Typography>
             </Box>
           </Box>
-          <IconButton onClick={() => setModalAbierto(false)} size="small"
-            sx={{ position: "absolute", top: 12, right: 12, color: "#9CA3AF", bgcolor: "#F3F4F6", "&:hover": { color: "#111827", bgcolor: "#E5E7EB" } }}>
+          <IconButton aria-label="Cerrar" onClick={() => setModalAbierto(false)} size="small"
+            sx={{ position: "absolute", top: 12, right: 12, color: COLORES.textoSuave, bgcolor: COLORES.fondoGris2, "&:hover": { color: COLORES.textoPrimario, bgcolor: COLORES.borde } }}>
             <X size={18} />
           </IconButton>
         </DialogTitle>
         <Divider />
 
         {/* CUERPO SCROLLEABLE */}
-        <DialogContent sx={{ px: 3, py: 2, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.75, bgcolor: "#FCFCFD" }}>
+        <DialogContent sx={{ px: 3, py: 2, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.75, bgcolor: COLORES.fondoGris }}>
 
           {/* SECCIÓN 1 — INFORMACIÓN PERSONAL */}
           <Box sx={modalSeccionCard}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
-              <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: "#E8F5E9", color: "#1B5E20", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <User size={14} />
               </Box>
               <Box>
@@ -543,7 +544,7 @@ export default function PersonalPage() {
           {/* SECCIÓN 2 — INFORMACIÓN LABORAL */}
           <Box sx={modalSeccionCard}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
-              <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: "#E8F5E9", color: "#1B5E20", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Briefcase size={14} />
               </Box>
               <Box>
@@ -553,9 +554,9 @@ export default function PersonalPage() {
             </Box>
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 1.5 }}>
               <FormControl fullWidth>
-                <InputLabel sx={{ fontSize: 12.5, color: "#6B7280" }}>Área</InputLabel>
-                <Select value={form.area_id} label="Área" sx={{ ...modalSelectSx, ...selectIconAdornment }} MenuProps={selectMenuSx}
-                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Building2 size={15} style={{ color: "#9CA3AF" }} /></InputAdornment> } }}
+                <InputLabel sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>Área</InputLabel>
+                <Select value={form.area_id} label="Área" sx={{ ...modalSelectSx, ...selectIconAdornment }}
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Building2 size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment> }, menu: selectMenuSx }}
                   onChange={(e) => setForm({ ...form, area_id: e.target.value })}>
                   <MenuItem value=""><em>Sin área</em></MenuItem>
                   {areas.map((a) => (
@@ -564,9 +565,9 @@ export default function PersonalPage() {
                 </Select>
               </FormControl>
               <FormControl fullWidth>
-                <InputLabel sx={{ fontSize: 12.5, color: "#6B7280" }}>Cargo</InputLabel>
-                <Select value={form.cargo_id} label="Cargo" sx={{ ...modalSelectSx, ...selectIconAdornment }} MenuProps={selectMenuSx}
-                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Briefcase size={15} style={{ color: "#9CA3AF" }} /></InputAdornment> } }}
+                <InputLabel sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>Cargo</InputLabel>
+                <Select value={form.cargo_id} label="Cargo" sx={{ ...modalSelectSx, ...selectIconAdornment }}
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Briefcase size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment> }, menu: selectMenuSx }}
                   onChange={(e) => setForm({ ...form, cargo_id: e.target.value })}>
                   <MenuItem value=""><em>Sin cargo</em></MenuItem>
                   {cargos.filter((c) => c.estado !== "inactivo").map((c) => (
@@ -576,11 +577,11 @@ export default function PersonalPage() {
               </FormControl>
               <TextField label="Piso" type="number" value={form.piso}
                 onChange={(e) => setForm({ ...form, piso: e.target.value === "" ? "" : Number(e.target.value) })}
-                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, htmlInput: { min: 1 }, input: { startAdornment: <InputAdornment position="start"><Layers size={15} style={{ color: "#9CA3AF" }} /></InputAdornment> } }} sx={modalFieldSx} />
+                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, htmlInput: { min: 1 }, input: { startAdornment: <InputAdornment position="start"><Layers size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment> } }} sx={modalFieldSx} />
               <FormControl fullWidth>
-                <InputLabel sx={{ fontSize: 12.5, color: "#6B7280" }}>Rol del sistema</InputLabel>
-                <Select value={form.rol_id} label="Rol del sistema" sx={{ ...modalSelectSx, ...selectIconAdornment }} MenuProps={selectMenuSx}
-                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><ShieldCheck size={15} style={{ color: "#9CA3AF" }} /></InputAdornment> } }}
+                <InputLabel sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>Rol del sistema</InputLabel>
+                <Select value={form.rol_id} label="Rol del sistema" sx={{ ...modalSelectSx, ...selectIconAdornment }}
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><ShieldCheck size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment> }, menu: selectMenuSx }}
                   onChange={(e) => setForm({ ...form, rol_id: e.target.value })}>
                   <MenuItem value=""><em>Sin rol</em></MenuItem>
                   {roles.map((r) => (
@@ -589,12 +590,12 @@ export default function PersonalPage() {
                 </Select>
               </FormControl>
               <FormControl fullWidth>
-                <InputLabel sx={{ fontSize: 12.5, color: "#6B7280" }}>Horario asignado</InputLabel>
+                <InputLabel sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>Horario asignado</InputLabel>
                 <Select value="" label="Horario asignado" disabled sx={{ ...modalSelectSx, ...selectIconAdornment }}
-                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Clock size={15} style={{ color: "#9CA3AF" }} /></InputAdornment> } }}>
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Clock size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment> } }}>
                   <MenuItem value=""><em>Sin asignar</em></MenuItem>
                 </Select>
-                <Typography sx={{ fontSize: 10.5, color: "#9CA3AF", mt: 0.5 }}>
+                <Typography sx={{ fontSize: 10.5, color: COLORES.textoSuave, mt: 0.5 }}>
                   El horario podrá modificarse posteriormente.
                 </Typography>
               </FormControl>
@@ -602,7 +603,7 @@ export default function PersonalPage() {
                 <FormControlLabel
                   control={<Switch checked={form.activo} onChange={(e) => setForm({ ...form, activo: e.target.checked })} />}
                   label={form.activo ? "Colaborador activo" : "Colaborador inactivo"}
-                  sx={{ "& .MuiFormControlLabel-label": { fontSize: 13.5, fontWeight: 500, color: "#374151" } }}
+                  sx={{ "& .MuiFormControlLabel-label": { fontSize: 13.5, fontWeight: 500, color: COLORES.textoSecundario } }}
                 />
               </Box>
             </Box>
@@ -611,7 +612,7 @@ export default function PersonalPage() {
           {/* SECCIÓN 3 — INFORMACIÓN DE ACCESO */}
           <Box sx={modalSeccionCard}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
-              <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: "#E8F5E9", color: "#1B5E20", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <KeyRound size={14} />
               </Box>
               <Box>
@@ -633,11 +634,11 @@ export default function PersonalPage() {
                   slotProps={{
                     inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } },
                     input: {
-                      startAdornment: <InputAdornment position="start"><KeyRound size={15} style={{ color: "#9CA3AF" }} /></InputAdornment>,
+                      startAdornment: <InputAdornment position="start"><KeyRound size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment>,
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton size="small" onClick={handleGenerarPassword} disabled={!!editando}
-                            sx={{ color: "#1B5E20", bgcolor: "#E8F5E9", borderRadius: "8px", "&:hover": { bgcolor: "#C8E6C9" } }}
+                            sx={{ color: COLORES.primarioOscuro, bgcolor: COLORES.primarioClaro, borderRadius: "8px", "&:hover": { bgcolor: COLORES.primarioClaro2 } }}
                             title="Generar contraseña">
                             <RefreshCw size={14} />
                           </IconButton>
@@ -656,7 +657,7 @@ export default function PersonalPage() {
             </Box>
             {!editando && (
               <Button startIcon={<KeyRound size={14} />} onClick={handleGenerarPassword}
-                sx={{ mt: 1.5, borderRadius: "10px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: "#1B5E20", bgcolor: "#E8F5E9", px: 2.5, py: 0.75, "&:hover": { bgcolor: "#C8E6C9" } }}>
+                sx={{ mt: 1.5, borderRadius: "10px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: COLORES.primarioOscuro, bgcolor: COLORES.primarioClaro, px: 2.5, py: 0.75, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}>
                 Generar automáticamente
               </Button>
             )}
@@ -667,7 +668,7 @@ export default function PersonalPage() {
         <Divider />
         <DialogActions sx={{ px: 3, py: 2, gap: 1.5 }}>
           <Button onClick={() => setModalAbierto(false)}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, fontWeight: 600, color: "#374151", bgcolor: "#FFFFFF", border: "1px solid #D1D5DB", px: 3, py: 0.75, "&:hover": { bgcolor: "#F9FAFB" } }}>
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, fontWeight: 600, color: COLORES.textoSecundario, bgcolor: COLORES.fondoBlanco, border: `1px solid ${COLORES.borde2}`, px: 3, py: 0.75, "&:hover": { bgcolor: COLORES.fondoGris } }}>
             Cancelar
           </Button>
           <Button variant="contained" startIcon={<Plus size={16} />} onClick={handleGuardar}
@@ -680,18 +681,18 @@ export default function PersonalPage() {
 
       {/* CONFIRMAR ELIMINAR */}
       <Dialog open={!!confirmEliminar} onClose={() => setConfirmEliminar(null)} maxWidth="xs" fullWidth
-        PaperProps={{ sx: { borderRadius: "16px" } }}>
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>Eliminar empleado?</DialogTitle>
+        slotProps={{ paper: { sx: { borderRadius: "16px" } } }}>
+        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario }}>Eliminar empleado?</DialogTitle>
         <DialogContent>
-          <Typography sx={{ fontSize: 13, color: "#6B7280" }}>
+          <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario }}>
             Se eliminará a <strong>{confirmEliminar?.nombre} {confirmEliminar?.apellido}</strong> de forma permanente. Esta acción no se puede deshacer.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
           <Button onClick={() => setConfirmEliminar(null)}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: "#6B7280" }}>Cancelar</Button>
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: COLORES.textoTerciario }}>Cancelar</Button>
           <Button variant="contained" onClick={handleEliminar}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, bgcolor: "#DC2626", "&:hover": { bgcolor: "#B91C1C" } }}>
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, bgcolor: COLORES.danger, "&:hover": { bgcolor: COLORES.dangerOscuro2 } }}>
             Eliminar
           </Button>
         </DialogActions>
@@ -699,22 +700,22 @@ export default function PersonalPage() {
 
       {/* CONFIRMAR GENERAR MASIVOS */}
       <Dialog open={modalGenerar && !resultadoGen} onClose={() => setModalGenerar(false)} maxWidth="xs" fullWidth
-        PaperProps={{ sx: { borderRadius: "16px" } }}>
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>Generar usuarios faltantes?</DialogTitle>
+        slotProps={{ paper: { sx: { borderRadius: "16px" } } }}>
+        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario }}>Generar usuarios faltantes?</DialogTitle>
         <DialogContent>
-          <Typography sx={{ fontSize: 13, color: "#6B7280" }}>
+          <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario }}>
             Se crearán usuarios para <strong>{pendientes} empleados</strong> que aún no tienen acceso al sistema.
             El username se genera automáticamente y la contraseña inicial es la cédula.
           </Typography>
           {pendientes > 0 && (
-            <Typography sx={{ fontSize: 13, color: "#6B7280", mt: 1 }}>
+            <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario, mt: 1 }}>
               Se enviará un correo a cada empleado si SMTP está configurado.
             </Typography>
           )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
           <Button onClick={() => setModalGenerar(false)}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: "#6B7280" }}>Cancelar</Button>
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: COLORES.textoTerciario }}>Cancelar</Button>
           <Button variant="contained" onClick={handleGenerarMasivos} disabled={generando}
             sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, ...verdeBoton }}>
             {generando ? "Generando..." : "Generar"}
@@ -724,36 +725,36 @@ export default function PersonalPage() {
 
       {/* MODAL RESULTADO GENERACION */}
       <Dialog open={!!resultadoGen} onClose={() => { setModalGenerar(false); setResultadoGen(null); }} maxWidth="sm" fullWidth
-        PaperProps={{ sx: { borderRadius: "16px" } }}>
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827", textAlign: "center" }}>Resultado</DialogTitle>
+        slotProps={{ paper: { sx: { borderRadius: "16px" } } }}>
+        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario, textAlign: "center" }}>Resultado</DialogTitle>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
-            <Paper elevation={0} sx={{ textAlign: "center", bgcolor: "#F0FDF4", borderRadius: "10px", p: 1.5, px: 3 }}>
-              <Typography sx={{ fontSize: 24, fontWeight: 700, color: "#1B5E20" }}>{resultadoGen?.creados || 0}</Typography>
-              <Typography sx={{ fontSize: 11, color: "#6B7280" }}>Creados</Typography>
+            <Paper elevation={0} sx={{ textAlign: "center", bgcolor: COLORES.successClaro, borderRadius: "10px", p: 1.5, px: 3 }}>
+              <Typography sx={{ fontSize: 24, fontWeight: 700, color: COLORES.primarioOscuro }}>{resultadoGen?.creados || 0}</Typography>
+              <Typography sx={{ fontSize: 11, color: COLORES.textoTerciario }}>Creados</Typography>
             </Paper>
-            <Paper elevation={0} sx={{ textAlign: "center", bgcolor: "#EFF6FF", borderRadius: "10px", p: 1.5, px: 3 }}>
-              <Typography sx={{ fontSize: 24, fontWeight: 700, color: "#0284C7" }}>{resultadoGen?.emails_enviados || 0}</Typography>
-              <Typography sx={{ fontSize: 11, color: "#6B7280" }}>Emails enviados</Typography>
+            <Paper elevation={0} sx={{ textAlign: "center", bgcolor: COLORES.primarioClaro, borderRadius: "10px", p: 1.5, px: 3 }}>
+              <Typography sx={{ fontSize: 24, fontWeight: 700, color: COLORES.verdeTexto }}>{resultadoGen?.emails_enviados || 0}</Typography>
+              <Typography sx={{ fontSize: 11, color: COLORES.textoTerciario }}>Emails enviados</Typography>
             </Paper>
-            <Paper elevation={0} sx={{ textAlign: "center", bgcolor: "#FEF2F2", borderRadius: "10px", p: 1.5, px: 3 }}>
-              <Typography sx={{ fontSize: 24, fontWeight: 700, color: "#DC2626" }}>{resultadoGen?.emails_fallados || 0}</Typography>
-              <Typography sx={{ fontSize: 11, color: "#6B7280" }}>Fallos</Typography>
+            <Paper elevation={0} sx={{ textAlign: "center", bgcolor: COLORES.dangerFondo2, borderRadius: "10px", p: 1.5, px: 3 }}>
+              <Typography sx={{ fontSize: 24, fontWeight: 700, color: COLORES.danger }}>{resultadoGen?.emails_fallados || 0}</Typography>
+              <Typography sx={{ fontSize: 11, color: COLORES.textoTerciario }}>Fallos</Typography>
             </Paper>
           </Box>
           {resultadoGen?.resultados?.length > 0 && (
-            <TableContainer sx={{ maxHeight: 220, border: "1px solid #E5E7EB", borderRadius: "8px" }}>
+            <TableContainer sx={{ maxHeight: 220, border: `1px solid ${COLORES.borde}`, borderRadius: "8px" }}>
               <Table size="small" stickyHeader>
                 <TableHead>
                   <TableRow>
                     {["Empleado", "Usuario", "Contrasena", "Email"].map((h) => (
-                      <TableCell key={h} sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", bgcolor: "#F9FAFB", py: 1 }}>{h}</TableCell>
+                      <TableCell key={h} sx={{ fontSize: 11, fontWeight: 600, color: COLORES.textoTerciario, bgcolor: COLORES.fondoGris, py: 1 }}>{h}</TableCell>
                     ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {resultadoGen.resultados.map((r, i) => (
-                    <TableRow key={i} sx={{ "&:hover": { bgcolor: "#F9FAFB" } }}>
+                    <TableRow key={i} sx={{ "&:hover": { bgcolor: COLORES.fondoGris } }}>
                       <TableCell sx={{ fontSize: 11, py: 1 }}>{r.empleado}</TableCell>
                       <TableCell sx={{ fontSize: 11, py: 1, fontFamily: "monospace" }}>{r.username}</TableCell>
                       <TableCell sx={{ fontSize: 11, py: 1, fontFamily: "monospace" }}>{r.password}</TableCell>
@@ -771,7 +772,7 @@ export default function PersonalPage() {
             Descargar reporte TSV
           </Button>
           <Button onClick={() => { setModalGenerar(false); setResultadoGen(null); }}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: "#6B7280" }}>Cerrar</Button>
+            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: COLORES.textoTerciario }}>Cerrar</Button>
         </DialogActions>
       </Dialog>
 
@@ -787,8 +788,8 @@ export default function PersonalPage() {
       {toast && (
         <Box sx={{
           position: "fixed", bottom: 24, right: 24,
-          bgcolor: toast.tipo === "err" ? "#DC2626" : "#1B5E20",
-          color: "#fff", borderRadius: "10px", px: 2.5, py: 1.5,
+          bgcolor: toast.tipo === "err" ? COLORES.danger : COLORES.primarioOscuro,
+          color: COLORES.fondoBlanco, borderRadius: "10px", px: 2.5, py: 1.5,
           fontSize: 13, fontWeight: 500, zIndex: 9999,
           boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
           display: "flex", alignItems: "center", gap: 1,

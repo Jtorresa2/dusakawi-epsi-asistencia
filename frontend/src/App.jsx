@@ -6,36 +6,43 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { COLORES } from './shared/constants/colores.js';
 import theme from "./shared/theme";
 
 import LoginPage from "./features/login/pages/LoginPage";
-import OlvideContrasenaPage from "./features/login/pages/OlvideContrasenaPage";
-import RestablecerContrasenaPage from "./features/login/pages/RestablecerContrasenaPage";
-import DashboardPage from "./features/dashboard/pages/DashboardPage";
-import AsistenciaPage from "./features/asistencia/pages/AsistenciaPage";
-import ReportesPage from "./features/reportes/pages/ReportesPage";
-import CargosPage from "./features/cargos/pages/CargosPage";
-import PersonalPage from "./features/personal/pages/PersonalPage";
-import HorariosPage from "./features/horarios/pages/HorariosPage";
-import NovedadesPage from "./features/novedades/pages/NovedadesPage";
-import IncidenciasPage from "./features/incidencias/pages/IncidenciasPage";
-import IncidenciaExpedientePage from "./features/incidencias/pages/IncidenciaExpedientePage";
-import AreasPage from "./features/areas/pages/AreasPage";
-import FestivosPage from "./features/festivos/pages/FestivosPage";
-import ConfiguracionPage from "./features/configuracion/pages/ConfiguracionPage";
-import RolesPage from "./features/roles/pages/RolesPage";
-import CopiasSeguridadPage from "./features/copiasSeguridad/pages/CopiasSeguridadPage";
-import MiPerfilPage from "./features/miperfil/pages/MiPerfilPage";
-import MiHorarioPage from "./features/miHorario/pages/MiHorarioPage";
-import MisSolicitudesPage from "./features/misSolicitudes/pages/MisSolicitudesPage";
-import IntegracionesPage from "./features/integraciones/pages/IntegracionesPage";
-import ReportarIncidenciaPage from "./features/reportarIncidencia/pages/ReportarIncidenciaPage";
-import CambiarPasswordPage from "./features/cambiarPassword/pages/CambiarPasswordPage";
 import Layout from "./shared/components/Layout";
 import RoleRoute from "./shared/components/RoleRoute";
 import ErrorBoundary from "./shared/components/ErrorBoundary";
 
+// Route-level code splitting: cada página se descarga bajo demanda,
+// el chunk inicial solo lleva login + núcleo MUI.
+const CambiarPasswordPage = lazy(() => import("./features/cambiarPassword/pages/CambiarPasswordPage"));
+const OlvideContrasenaPage = lazy(() => import("./features/login/pages/OlvideContrasenaPage"));
+const RestablecerContrasenaPage = lazy(() => import("./features/login/pages/RestablecerContrasenaPage"));
+const DashboardPage = lazy(() => import("./features/dashboard/pages/DashboardPage"));
+const AsistenciaPage = lazy(() => import("./features/asistencia/pages/AsistenciaPage"));
+const ReportesPage = lazy(() => import("./features/reportes/pages/ReportesPage"));
+const CargosPage = lazy(() => import("./features/cargos/pages/CargosPage"));
+const PersonalPage = lazy(() => import("./features/personal/pages/PersonalPage"));
+const HorariosPage = lazy(() => import("./features/horarios/pages/HorariosPage"));
+const NovedadesPage = lazy(() => import("./features/novedades/pages/NovedadesPage"));
+const IncidenciasPage = lazy(() => import("./features/incidencias/pages/IncidenciasPage"));
+const IncidenciaExpedientePage = lazy(() => import("./features/incidencias/pages/IncidenciaExpedientePage"));
+const AreasPage = lazy(() => import("./features/areas/pages/AreasPage"));
+const FestivosPage = lazy(() => import("./features/festivos/pages/FestivosPage"));
+const ConfiguracionPage = lazy(() => import("./features/configuracion/pages/ConfiguracionPage"));
+const RolesPage = lazy(() => import("./features/roles/pages/RolesPage"));
+const CopiasSeguridadPage = lazy(() => import("./features/copiasSeguridad/pages/CopiasSeguridadPage"));
+const MiPerfilPage = lazy(() => import("./features/miperfil/pages/MiPerfilPage"));
+const MiHorarioPage = lazy(() => import("./features/miHorario/pages/MiHorarioPage"));
+const MisSolicitudesPage = lazy(() => import("./features/misSolicitudes/pages/MisSolicitudesPage"));
+const IntegracionesPage = lazy(() => import("./features/integraciones/pages/IntegracionesPage"));
+const ReportarIncidenciaPage = lazy(() => import("./features/reportarIncidencia/pages/ReportarIncidenciaPage"));
 const MiAsistenciaPage = lazy(() => import("./features/miAsistencia/pages/MiAsistenciaPage"));
+
+const routeFallback = (
+  <div style={{ padding: 40, textAlign: "center", color: COLORES.textoSuave }}>Cargando...</div>
+);
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -47,7 +54,9 @@ function R({ children, roles }) {
   return (
     <ProtectedRoute>
       <RoleRoute roles={roles}>
-        <Layout>{children}</Layout>
+        <Layout>
+          <Suspense fallback={routeFallback}>{children}</Suspense>
+        </Layout>
       </RoleRoute>
     </ProtectedRoute>
   );
@@ -60,9 +69,9 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/cambiar-password" element={<CambiarPasswordPage />} />
-        <Route path="/olvide-contrasena" element={<OlvideContrasenaPage />} />
-        <Route path="/restablecer-contrasena" element={<RestablecerContrasenaPage />} />
+        <Route path="/cambiar-password" element={<Suspense fallback={routeFallback}><CambiarPasswordPage /></Suspense>} />
+        <Route path="/olvide-contrasena" element={<Suspense fallback={routeFallback}><OlvideContrasenaPage /></Suspense>} />
+        <Route path="/restablecer-contrasena" element={<Suspense fallback={routeFallback}><RestablecerContrasenaPage /></Suspense>} />
 
         {/* General */}
         <Route path="/dashboard" element={<R roles={["admin", "talento_humano", "empleado"]}><DashboardPage /></R>} />
@@ -90,7 +99,7 @@ export default function App() {
         <Route path="/integraciones" element={<R roles={["admin"]}><IntegracionesPage /></R>} />
 
         {/* Empleado */}
-        <Route path="/mi-asistencia" element={<ErrorBoundary><Suspense fallback={<div style={{padding:40,textAlign:"center",color:"#9CA3AF"}}>Cargando...</div>}><R roles={["empleado"]}><MiAsistenciaPage /></R></Suspense></ErrorBoundary>} />
+        <Route path="/mi-asistencia" element={<ErrorBoundary><R roles={["empleado"]}><MiAsistenciaPage /></R></ErrorBoundary>} />
         <Route path="/mi-horario" element={<R roles={["admin", "talento_humano", "empleado"]}><MiHorarioPage /></R>} />
         <Route path="/reportar-incidencia" element={<ErrorBoundary><R roles={["empleado"]}><ReportarIncidenciaPage /></R></ErrorBoundary>} />
         <Route path="/perfil" element={<ErrorBoundary><R roles={["admin", "talento_humano", "empleado"]}><MiPerfilPage /></R></ErrorBoundary>} />

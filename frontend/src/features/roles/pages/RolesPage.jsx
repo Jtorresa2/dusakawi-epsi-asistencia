@@ -5,14 +5,15 @@ import {
 import { ShieldCheck, Badge, UserRound } from "lucide-react";
 import { obtenerRoles } from "../roles.api";
 import RolDrawer from "../components/RolDrawer";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const ROL_ESTILO = {
-  Administrador: { icon: <ShieldCheck size={22} />, bg: "#FFF3E0", color: "#E65100" },
-  "Talento Humano": { icon: <Badge size={22} />, bg: "#E8F5E9", color: "#1B5E20" },
-  Empleado: { icon: <UserRound size={22} />, bg: "#E3F2FD", color: "#0D47A1" },
+  Administrador: { icon: <ShieldCheck size={22} />, bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+  "Talento Humano": { icon: <Badge size={22} />, bg: COLORES.primarioClaro, color: COLORES.primarioOscuro },
+  Empleado: { icon: <UserRound size={22} />, bg: COLORES.primarioClaro, color: COLORES.primarioOscuro },
 };
 
-const estiloFallback = { icon: <ShieldCheck />, bg: "#F3F4F6", color: "#374151" };
+const estiloFallback = { icon: <ShieldCheck />, bg: COLORES.fondoGris2, color: COLORES.textoSecundario };
 
 export default function RolesPage() {
   const [roles, setRoles] = useState([]);
@@ -46,30 +47,30 @@ export default function RolesPage() {
     <Box sx={{ p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2.5 }}>
       {/* ENCABEZADO */}
       <Box>
-        <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Inicio / Gestión del Sistema / Roles</Typography>
-        <Typography sx={{ fontSize: 14, color: "#6B7280", mt: 0.5 }}>
+        <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>Inicio / Gestión del Sistema / Roles</Typography>
+        <Typography sx={{ fontSize: 14, color: COLORES.textoTerciario, mt: 0.5 }}>
           Consulta y administra los permisos asignados a cada rol del sistema.
         </Typography>
       </Box>
 
       {/* TARJETAS */}
       {cargando ? (
-        <Typography sx={{ fontSize: 14, color: "#9CA3AF", py: 6, textAlign: "center" }}>Cargando roles...</Typography>
+        <Typography sx={{ fontSize: 14, color: COLORES.textoSuave, py: 6, textAlign: "center" }}>Cargando roles...</Typography>
       ) : error ? (
-        <Typography sx={{ fontSize: 14, color: "#DC2626", py: 6, textAlign: "center" }}>{error}</Typography>
+        <Typography sx={{ fontSize: 14, color: COLORES.danger, py: 6, textAlign: "center" }}>{error}</Typography>
       ) : (
         <Grid container spacing={2}>
           {roles.map((r) => {
             const estilo = ROL_ESTILO[r.nombre] || estiloFallback;
             return (
-              <Grid item key={r.id} xs={12} sm={6} lg={4}>
+              <Grid key={r.id} xs={12} sm={6} lg={4}>
                 <Paper
                   elevation={0}
                   onClick={() => setRolSeleccionado(r)}
                   sx={{
                     p: 2.5,
                     borderRadius: "16px",
-                    border: "1px solid #ECECEC",
+                    border: `1px solid ${COLORES.grisContorno}`,
                     display: "flex",
                     flexDirection: "column",
                     gap: 1.5,
@@ -83,23 +84,23 @@ export default function RolesPage() {
                     <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: estilo.bg, color: estilo.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       {estilo.icon}
                     </Box>
-                    <Chip label="Activo" size="small" sx={{ height: 20, fontSize: 11, fontWeight: 600, bgcolor: "#D1FAE5", color: "#065F46" }} />
+                    <Chip label="Activo" size="small" sx={{ height: 20, fontSize: 11, fontWeight: 600, bgcolor: COLORES.successFondo, color: COLORES.verdeTexto }} />
                   </Box>
                   <Box>
-                    <Typography sx={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>{r.nombre}</Typography>
-                    <Typography sx={{ fontSize: 12, color: "#6B7280", mt: 0.5, lineHeight: 1.5, minHeight: 36 }}>
+                    <Typography sx={{ fontSize: 15, fontWeight: 700, color: COLORES.textoPrimario }}>{r.nombre}</Typography>
+                    <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, mt: 0.5, lineHeight: 1.5, minHeight: 36 }}>
                       {r.descripcion || "Sin descripción"}
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: "auto" }}>
-                    <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>
-                      <strong style={{ color: "#111827", fontSize: 14 }}>{Number(r.cantidad_usuarios) || 0}</strong> usuarios
+                    <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>
+                      <strong style={{ color: COLORES.textoPrimario, fontSize: 14 }}>{Number(r.cantidad_usuarios) || 0}</strong> usuarios
                     </Typography>
                     <Button
                       size="small"
                       variant="outlined"
                       onClick={(e) => { e.stopPropagation(); setRolSeleccionado(r); }}
-                      sx={{ borderRadius: "8px", textTransform: "none", fontSize: 12, fontWeight: 600, color: "#1B5E20", borderColor: "#86B886", "&:hover": { borderColor: "#1B5E20", bgcolor: "#F0FDF4" } }}
+                      sx={{ borderRadius: "8px", textTransform: "none", fontSize: 12, fontWeight: 600, color: COLORES.primarioOscuro, borderColor: COLORES.acento, "&:hover": { borderColor: COLORES.primarioOscuro, bgcolor: COLORES.successClaro } }}
                     >
                       Ver detalles
                     </Button>

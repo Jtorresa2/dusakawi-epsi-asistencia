@@ -1,16 +1,17 @@
+import { COLORES } from "../constants/colores.js";
 export default function Badge({ texto, tipo }) {
   const estilos = {
-    Puntual:   { bg: "#d1fae5", color: "#065f46" },
-    Tardanza:  { bg: "#fef3c7", color: "#92400e" },
-    Ausente:   { bg: "#fee2e2", color: "#991b1b" },
-    Activo:    { bg: "#dbeafe", color: "#1e40af" },
-    Inactivo:  { bg: "#f3f4f6", color: "#6b7280" },
-    Aprobado:  { bg: "#d1fae5", color: "#065f46" },
-    Pendiente: { bg: "#fef3c7", color: "#92400e" },
-    Rechazado: { bg: "#fee2e2", color: "#991b1b" },
+    Puntual:   { bg: COLORES.successFondo, color: COLORES.verdeTexto },
+    Tardanza:  { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+    Ausente:   { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
+    Activo:    { bg: COLORES.primarioClaro2, color: COLORES.primarioOscuro },
+    Inactivo:  { bg: COLORES.fondoGris2, color: COLORES.textoTerciario },
+    Aprobado:  { bg: COLORES.successFondo, color: COLORES.verdeTexto },
+    Pendiente: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+    Rechazado: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
   };
 
-  const estilo = estilos[tipo] || { bg: "#f3f4f6", color: "#6b7280" };
+  const estilo = estilos[tipo] || { bg: COLORES.fondoGris2, color: COLORES.textoTerciario };
 
   return (
     <span style={{

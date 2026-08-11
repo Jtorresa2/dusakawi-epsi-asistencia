@@ -8,30 +8,19 @@ import {
   UserRound, Save, Info,
 } from "lucide-react";
 import { actualizarNovedad } from "../novedad.api";
-
-const PALETA = {
-  verdeOscuro: "#1B5E20",
-  verde: "#2E7D32",
-  verdeClaro: "#E8F5E9",
-  borde: "#ECECEC",
-  bordeInput: "#D1D5DB",
-  grisClaro: "#F3F4F6",
-  gris: "#9CA3AF",
-  grisTexto: "#6B7280",
-  texto: "#111827",
-  rojo: "#DC2626",
-};
+import { COLORES } from "../../../shared/constants/colores.js";
+import { PALETA } from "../../../shared/constants/paleta.js";
 
 const selectMenuSx = {
-  PaperProps: {
-    sx: { bgcolor: "#FFFFFF", "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } },
+  slotProps: {
+    paper: { sx: { bgcolor: COLORES.fondoBlanco, "& .MuiMenuItem-root": { borderRadius: 1, mx: 0.5 } } },
   },
 };
 
 const fieldSx = {
   "& .MuiOutlinedInput-root": {
     borderRadius: "12px",
-    bgcolor: "#FFFFFF",
+    bgcolor: COLORES.fondoBlanco,
     minHeight: 40,
     transition: "border-color 0.2s ease, box-shadow 0.2s ease",
     "& fieldset": { borderColor: PALETA.bordeInput },
@@ -146,10 +135,10 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md"
-      PaperProps={{ sx: { borderRadius: "18px", position: "relative", boxShadow: "0 24px 70px rgba(0,0,0,0.25)", backgroundColor: "#FFFFFF", overflow: "hidden" } }}
+      slotProps={{ paper: { sx: { borderRadius: "18px", position: "relative", boxShadow: "0 24px 70px rgba(0,0,0,0.25)", backgroundColor: COLORES.fondoBlanco, overflow: "hidden" } } }}
       sx={{ "& .MuiBackdrop-root": { bgcolor: "rgba(17, 24, 39, 0.5)", backdropFilter: "blur(4px)" } }}>
       {/* HEADER */}
-      <DialogTitle sx={{ px: 3, py: 1.75, position: "relative", pb: 1.25, bgcolor: "#FFFFFF" }}>
+      <DialogTitle sx={{ px: 3, py: 1.75, position: "relative", pb: 1.25, bgcolor: COLORES.fondoBlanco }}>
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
           <Box sx={{
             width: 38, height: 38, borderRadius: "11px", bgcolor: PALETA.verdeClaro, color: PALETA.verdeOscuro,
@@ -166,7 +155,7 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
             </Typography>
           </Box>
         </Box>
-        <IconButton onClick={onClose} size="small"
+        <IconButton aria-label="Cerrar" onClick={onClose} size="small"
           sx={{ position: "absolute", top: 11, right: 11, color: PALETA.gris, bgcolor: PALETA.grisClaro, "&:hover": { color: PALETA.texto, bgcolor: PALETA.borde } }}>
           <X size={18} />
         </IconButton>
@@ -174,7 +163,7 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
       <Divider />
 
       {/* CUERPO */}
-      <DialogContent sx={{ px: 3, py: 1.75, bgcolor: "#FFFFFF" }}>
+      <DialogContent sx={{ px: 3, py: 1.75, bgcolor: COLORES.fondoBlanco }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           {/* FILA 1 — Empleado + Tipo */}
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5 }}>
@@ -182,10 +171,11 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
               <Typography sx={labelSx}>Empleado {asterisco}</Typography>
               <TextField select size="small" name="usuario_id" value={form.usuario_id} onChange={handleChange}
                 error={!!errors.usuario_id} helperText={errors.usuario_id}
-                sx={{ width: "100%", ...fieldSx }} MenuProps={selectMenuSx}
+                sx={{ width: "100%", ...fieldSx }}
                 slotProps={{
                   input: { startAdornment: <UserRound size={15} style={{ color: PALETA.gris, marginRight: 6 }} /> },
                   formHelperText: { sx: { fontSize: 11 } },
+                  menu: selectMenuSx,
                 }}>
                 <MenuItem value="">Seleccionar empleado</MenuItem>
                 {(empleados || []).map((emp) => (
@@ -198,9 +188,10 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
             <Box>
               <Typography sx={labelSx}>Tipo de novedad {asterisco}</Typography>
               <TextField select size="small" name="tipo_novedad" value={form.tipo_novedad} onChange={handleChange}
-                sx={{ width: "100%", ...fieldSx }} MenuProps={selectMenuSx}
+                sx={{ width: "100%", ...fieldSx }}
                 slotProps={{
                   input: { startAdornment: <Box sx={{ color: PALETA.gris, marginRight: 6, display: "flex" }}>{tipoSel.icon}</Box> },
+                  menu: selectMenuSx,
                 }}>
                 {TIPOS_NOVEDAD.map((t) => (
                   <MenuItem key={t.value} value={t.value}>
@@ -217,14 +208,14 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
               <Typography sx={labelSx}>Fecha desde {asterisco}</Typography>
               <TextField type="date" size="small" name="fecha_desde" value={form.fecha_desde} onChange={handleChange}
                 error={!!errors.fecha_desde} helperText={errors.fecha_desde}
-                sx={{ width: "100%", ...fieldSx }} InputLabelProps={{ shrink: true }}
+                sx={{ width: "100%", ...fieldSx }} slotProps={{ inputLabel: { shrink: true } }}
                 slotProps={{ formHelperText: { sx: { fontSize: 11 } } }} />
             </Box>
             <Box>
               <Typography sx={labelSx}>Fecha hasta {asterisco}</Typography>
               <TextField type="date" size="small" name="fecha_hasta" value={form.fecha_hasta} onChange={handleChange}
                 error={!!errors.fecha_hasta} helperText={errors.fecha_hasta}
-                sx={{ width: "100%", ...fieldSx }} InputLabelProps={{ shrink: true }}
+                sx={{ width: "100%", ...fieldSx }} slotProps={{ inputLabel: { shrink: true } }}
                 slotProps={{ formHelperText: { sx: { fontSize: 11 } } }} />
             </Box>
           </Box>
@@ -236,8 +227,8 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
                 <Box>
                   <Typography sx={labelSx}>Modalidad {asterisco}</Typography>
                   <TextField select size="small" name="modalidad" value={form.modalidad} onChange={handleChange}
-                    sx={{ width: "100%", ...fieldSx }} MenuProps={selectMenuSx}
-                    slotProps={{ input: { startAdornment: <Box sx={{ color: PALETA.gris, marginRight: 6, display: "flex" }}>{modSel.icon}</Box> } }}>
+                    sx={{ width: "100%", ...fieldSx }}
+                    slotProps={{ input: { startAdornment: <Box sx={{ color: PALETA.gris, marginRight: 6, display: "flex" }}>{modSel.icon}</Box> }, menu: selectMenuSx }}>
                     {MODALIDADES.map((m) => (
                       <MenuItem key={m.value} value={m.value}>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>{m.icon} {m.label}</Box>
@@ -249,23 +240,21 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
                   <Typography sx={labelSx}>Hora inicio {asterisco}</Typography>
                   <TextField type="time" size="small" name="hora_desde" value={form.hora_desde} onChange={handleChange}
                     error={!!errors.hora_desde} helperText={errors.hora_desde}
-                    sx={{ width: "100%", ...fieldSx }} InputLabelProps={{ shrink: true }} inputProps={{ step: 300 }}
-                    slotProps={{ formHelperText: { sx: { fontSize: 11 } } }} />
+                    sx={{ width: "100%", ...fieldSx }} slotProps={{ inputLabel: { shrink: true }, htmlInput: { step: 300 }, formHelperText: { sx: { fontSize: 11 } } }} />
                 </Box>
                 <Box>
                   <Typography sx={labelSx}>Hora fin {asterisco}</Typography>
                   <TextField type="time" size="small" name="hora_hasta" value={form.hora_hasta} onChange={handleChange}
                     error={!!errors.hora_hasta} helperText={errors.hora_hasta}
-                    sx={{ width: "100%", ...fieldSx }} InputLabelProps={{ shrink: true }} inputProps={{ step: 300 }}
-                    slotProps={{ formHelperText: { sx: { fontSize: 11 } } }} />
+                    sx={{ width: "100%", ...fieldSx }} slotProps={{ inputLabel: { shrink: true }, htmlInput: { step: 300 }, formHelperText: { sx: { fontSize: 11 } } }} />
                 </Box>
               </Box>
             ) : (
               <Box>
                 <Typography sx={labelSx}>Modalidad {asterisco}</Typography>
                 <TextField select size="small" name="modalidad" value={form.modalidad} onChange={handleChange}
-                  sx={{ maxWidth: 380, ...fieldSx }} MenuProps={selectMenuSx}
-                  slotProps={{ input: { startAdornment: <Box sx={{ color: PALETA.gris, marginRight: 6, display: "flex" }}>{modSel.icon}</Box> } }}>
+                  sx={{ maxWidth: 380, ...fieldSx }}
+                  slotProps={{ input: { startAdornment: <Box sx={{ color: PALETA.gris, marginRight: 6, display: "flex" }}>{modSel.icon}</Box> }, menu: selectMenuSx }}>
                   {MODALIDADES.map((m) => (
                     <MenuItem key={m.value} value={m.value}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>{m.icon} {m.label}</Box>
@@ -308,7 +297,7 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
       <Divider />
       <DialogActions sx={{ px: 3, py: 1.5, gap: 1.5 }}>
         <Button onClick={onClose}
-          sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: PALETA.grisTexto, bgColor: "#FFFFFF", border: `1px solid ${PALETA.bordeInput}`, px: 3, py: 0.6, "&:hover": { bgcolor: PALETA.grisClaro } }}>
+          sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: PALETA.grisTexto, bgColor: COLORES.fondoBlanco, border: `1px solid ${PALETA.bordeInput}`, px: 3, py: 0.6, "&:hover": { bgcolor: PALETA.grisClaro } }}>
           Cancelar
         </Button>
         <Button variant="contained" startIcon={<Save size={15} />} onClick={handleGuardar} disabled={guardando || sinCambios}

@@ -2,6 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { menuPorRol } from "../menu";
+import { COLORES } from "../constants/colores.js";
 
 const EXPANDIDO = 260;
 const COLAPSADO = 72;
@@ -55,7 +56,7 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
   const ancho = isMobile ? EXPANDIDO : (abierto ? EXPANDIDO : COLAPSADO);
 
   const baseStyle = {
-    background: "#1B5E20",
+    background: COLORES.primarioOscuro,
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
@@ -95,7 +96,7 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
         marginLeft: abierto ? 0 : 8,
         marginRight: abierto ? 0 : 8,
         padding: abierto ? "10px 14px" : "10px 0",
-        color: isActive ? "#fff" : "rgba(255,255,255,.7)",
+        color: isActive ? COLORES.fondoBlanco : "rgba(255,255,255,.7)",
         background: isActive ? "rgba(255,255,255,.13)" : "transparent",
         transition: "all .2s",
       })}
@@ -178,7 +179,7 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
           <img src="/logo.png" alt="Dusakawi" style={{ width: 38, height: 38, objectFit: "contain", flexShrink: 0 }} />
           {abierto && (
             <div style={{ overflow: "hidden" }}>
-              <div style={{ color: "#fff", fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>Dusakawi EPSI</div>
+              <div style={{ color: COLORES.fondoBlanco, fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>Dusakawi EPSI</div>
               <div style={{ color: "rgba(255,255,255,.5)", fontSize: 11, whiteSpace: "nowrap" }}>Control de asistencia</div>
             </div>
           )}
@@ -186,7 +187,7 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
         {abierto && !isMobile && (
           <button onClick={() => setAbierto(false)} style={{
             border: "none", background: "rgba(255,255,255,.1)",
-            color: "#fff", borderRadius: 8, width: 30, height: 30,
+            color: COLORES.fondoBlanco, borderRadius: 8, width: 30, height: 30,
             cursor: "pointer", fontSize: 16, display: "flex",
             alignItems: "center", justifyContent: "center",
           }}>✕</button>
@@ -213,7 +214,7 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
       }}>
         <button onClick={() => setMenuAbierto(!menuAbierto)} style={{
           width: "100%", border: "none", background: "transparent",
-          color: "#fff", display: "flex", alignItems: "center",
+          color: COLORES.fondoBlanco, display: "flex", alignItems: "center",
           justifyContent: abierto ? "flex-start" : "center",
           gap: 12, cursor: "pointer",
         }}>
@@ -237,10 +238,10 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
           )}
         </button>
         {menuAbierto && abierto && (
-          <div style={{ marginTop: 10, borderRadius: 10, background: "#fff", overflow: "hidden" }}>
+          <div style={{ marginTop: 10, borderRadius: 10, background: COLORES.fondoBlanco, overflow: "hidden" }}>
             <button onClick={handleLogout} style={{
               width: "100%", border: "none", background: "transparent",
-              padding: 11, cursor: "pointer", color: "#dc2626", fontSize: 13, fontWeight: 500,
+              padding: 11, cursor: "pointer", color: COLORES.danger, fontSize: 13, fontWeight: 500,
             }}>
               Cerrar sesión
             </button>
