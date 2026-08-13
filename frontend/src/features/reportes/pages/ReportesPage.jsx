@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Box, Typography, Paper, Button, Chip, Dialog, DialogTitle, DialogContent, IconButton } from "@mui/material";
 import { ChevronRight, FileText, Eye, Download, X } from "lucide-react";
 import Loading from "../../../shared/components/Loading";
@@ -32,7 +33,11 @@ const API_FNS = { obtenerReporteAsistencia, obtenerReporteIncidencias, obtenerRe
 const NOMBRES_REV = Object.fromEntries(Object.entries(NOMBRES).map(([k, v]) => [v, k]));
 
 export default function ReportesPage() {
-  const [tipoActivo, setTipoActivo] = useState(null);
+  const [searchParams] = useSearchParams();
+  // ?tipo=<id> abre directo ese reporte (ej. /reportes?tipo=asistencia)
+  const tipoQuery = searchParams.get("tipo");
+  const tipoInicial = CARD_DATA.some((r) => r.id === tipoQuery) ? tipoQuery : null;
+  const [tipoActivo, setTipoActivo] = useState(tipoInicial);
   const [indicadores, setIndicadores] = useState(null);
   const [tendencia, setTendencia] = useState([]);
   const [historial, setHistorial] = useState([]);
@@ -129,8 +134,7 @@ export default function ReportesPage() {
               <DataTable rows={historial} columns={[
                 { field: "tipo_reporte", headerName: "Reporte", width: 180 },
                 { field: "usuario_nombre", headerName: "Usuario", width: 150 },
-                { field: "fecha_generacion", headerName: "Fecha", width: 120, valueFormatter: v => v ? new Date(v).toLocaleDateString("es-CO") : "—" },
-                { field: "fecha_generacion_hora", headerName: "Hora", width: 80, valueFormatter: v => v ? new Date(v).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" }) : "—" },
+                { field: "fecha_generacion", headerName: "Fecha y hora", width: 150, valueFormatter: v => v ? `${new Date(v).toLocaleDateString("es-CO")} · ${new Date(v).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}` : "—" },
                 { field: "formato", headerName: "Formato", width: 100, renderCell: p => { const c = { PDF: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro }, Excel: { bg: COLORES.successFondo, color: COLORES.verdeTexto }, Pantalla: { bg: COLORES.fondoGris2, color: COLORES.textoSecundario } }; const cl = c[p.value] || c.Pantalla; return <Chip label={p.value || "Pantalla"} size="small" sx={{ fontWeight: 600, fontSize: 11, background: cl.bg, color: cl.color, borderRadius: "8px" }} />; } },
                 { field: "acciones", headerName: "Acciones", width: 100, sortable: false, renderCell: ({ row }) => {
                   const estiloBtn = { width: 30, height: 30, borderRadius: "8px", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all .2s ease" };

@@ -18,6 +18,7 @@ export default function IconBox({
   color = COLORES.primario,
   size = 48,
   iconSize = 22,
+  sx = {},
 }) {
   return (
     <Box
@@ -33,6 +34,7 @@ export default function IconBox({
         flexShrink: 0,
         boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
         "& svg": { width: iconSize, height: iconSize },
+        ...sx,
       }}
     >
       {icon}

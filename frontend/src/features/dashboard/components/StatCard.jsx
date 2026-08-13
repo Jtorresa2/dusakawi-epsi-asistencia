@@ -27,11 +27,11 @@ export default function StatCard({
         },
       }}
     >
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 1 }}>
         <Typography sx={{ color: COLORES.textoTerciario, fontSize: 15, fontWeight: 600, letterSpacing: "0.02em" }}>
           {title}
         </Typography>
-        <IconBox icon={icon} color={color} size={52} iconSize={24} />
+        <IconBox icon={icon} color={color} size={32} iconSize={14} sx={{ flexShrink: 0 }} />
       </Box>
 
       <Box>

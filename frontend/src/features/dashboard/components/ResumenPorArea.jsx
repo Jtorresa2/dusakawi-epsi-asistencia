@@ -40,7 +40,7 @@ export default function ResumenPorArea({ data = [] }) {
         <Typography sx={{ fontSize: 13, fontWeight: 700, color: COLORES.textoPrimario, flex: 1 }}>
           Asistencia por área
         </Typography>
-        <Box onClick={() => navigate("/reportes")}
+        <Box onClick={() => navigate("/reportes?tipo=asistencia")}
           sx={{ display: "flex", alignItems: "center", gap: 0.3, color: COLORES.primarioOscuro, cursor: "pointer", fontSize: 11, fontWeight: 600, "&:hover": { color: COLORES.primarioOscuro } }}>
           Ver reporte <ArrowRight size={12} />
         </Box>

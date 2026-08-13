@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Box, Paper, Typography, TextField, Button, Chip, IconButton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -90,6 +91,9 @@ export default function PersonalPage() {
   const [cargos, setCargos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [perfilId, setPerfilId] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const cargoFiltro = searchParams.get("cargo") || "";
+  const areaFiltro = searchParams.get("area") || "";
 
   // ─── Filtros ──────────────────────────────────────────────────────────────
   const [busqueda, setBusqueda] = useState("");
@@ -120,12 +124,18 @@ export default function PersonalPage() {
     cargarDatos();
     fetchAreas();
     fetchCargos();
-  }, []);
+  }, [cargoFiltro, areaFiltro]);
 
   const cargarDatos = async () => {
     try {
       setCargando(true);
-      const [resPersonal, resRoles] = await Promise.all([obtenerPersonal(), obtenerRoles()]);
+      const params = {};
+      if (cargoFiltro) params.cargo = cargoFiltro;
+      if (areaFiltro) params.area = areaFiltro;
+      const [resPersonal, resRoles] = await Promise.all([
+        obtenerPersonal(params),
+        obtenerRoles(),
+      ]);
       setPersonal(resPersonal.empleados || []);
       setRoles(resRoles.roles || []);
     } catch (err) {
@@ -354,6 +364,39 @@ export default function PersonalPage() {
             {roles.map((r) => <MenuItem key={r.id} value={r.nombre}>{r.nombre}</MenuItem>)}
           </Select>
         </Box>
+        {(cargoFiltro || areaFiltro) && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1.5, flexWrap: "wrap" }}>
+            <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>
+              Mostrando solo empleados de:
+            </Typography>
+            {cargoFiltro && (
+              <Chip
+                label={`Cargo: ${cargoFiltro}`}
+                icon={<Briefcase size={13} />}
+                onDelete={() => setSearchParams(areaFiltro ? { area: areaFiltro } : {})}
+                size="small"
+                sx={{
+                  height: 26, fontSize: 12, fontWeight: 600, borderRadius: "8px",
+                  bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro,
+                  "& .MuiChip-deleteIcon": { color: COLORES.primarioOscuro, "&:hover": { color: COLORES.primario } },
+                }}
+              />
+            )}
+            {areaFiltro && (
+              <Chip
+                label={`Área: ${areaFiltro}`}
+                icon={<Building2 size={13} />}
+                onDelete={() => setSearchParams(cargoFiltro ? { cargo: cargoFiltro } : {})}
+                size="small"
+                sx={{
+                  height: 26, fontSize: 12, fontWeight: 600, borderRadius: "8px",
+                  bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro,
+                  "& .MuiChip-deleteIcon": { color: COLORES.primarioOscuro, "&:hover": { color: COLORES.primario } },
+                }}
+              />
+            )}
+          </Box>
+        )}
       </Paper>
 
       {/* TABLA PRINCIPAL */}

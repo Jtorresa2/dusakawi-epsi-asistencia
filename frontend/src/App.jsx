@@ -5,6 +5,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { COLORES } from './shared/constants/colores.js';
 import theme from "./shared/theme";
@@ -50,6 +51,12 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+// Redirect que preserva query params (?cargo=X) hacia la ruta destino.
+function PreserveQueryRedirect({ to }) {
+  const location = useLocation();
+  return <Navigate to={`${to}${location.search}`} replace />;
+}
+
 function R({ children, roles }) {
   return (
     <ProtectedRoute>
@@ -78,7 +85,7 @@ export default function App() {
 
         {/* Gestion */}
         <Route path="/personal" element={<R roles={["admin", "talento_humano"]}><PersonalPage /></R>} />
-        <Route path="/empleados" element={<Navigate to="/personal" replace />} />
+        <Route path="/empleados" element={<PreserveQueryRedirect to="/personal" />} />
         <Route path="/cargos" element={<R roles={["admin", "talento_humano"]}><CargosPage /></R>} />
         <Route path="/horarios" element={<R roles={["admin", "talento_humano"]}><HorariosPage /></R>} />
         <Route path="/novedades" element={<R roles={["admin", "talento_humano"]}><NovedadesPage /></R>} />
@@ -91,7 +98,7 @@ export default function App() {
         <Route path="/reportes" element={<R roles={["admin", "talento_humano"]}><ReportesPage /></R>} />
 
         {/* Administracion */}
-        <Route path="/usuarios" element={<Navigate to="/personal" replace />} />
+        <Route path="/usuarios" element={<PreserveQueryRedirect to="/personal" />} />
         <Route path="/configuracion" element={<R roles={["admin"]}><ConfiguracionPage /></R>} />
         <Route path="/roles" element={<R roles={["admin"]}><RolesPage /></R>} />
         <Route path="/copias-seguridad" element={<R roles={["admin"]}><CopiasSeguridadPage /></R>} />

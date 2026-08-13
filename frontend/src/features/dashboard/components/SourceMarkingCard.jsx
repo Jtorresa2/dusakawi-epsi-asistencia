@@ -20,13 +20,13 @@ export default function SourceMarkingCard() {
       <Typography sx={{ fontSize: 15, fontWeight: 600, color: COLORES.textoPrimario }}>
         Fuente de marcado
       </Typography>
-      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, flex: 1, alignContent: "center" }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: "1fr", gridTemplateRows: "repeat(4, 1fr)", gap: 0.5, flex: 1 }}>
         {INDICADORES.map((item) => (
-          <Box key={item.label} sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <IconBox icon={item.icon} color={item.color} size={40} iconSize={20} />
-            <Box>
-              <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, lineHeight: 1.2 }}>{item.label}</Typography>
-              <Typography sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario }}>{item.value}</Typography>
+          <Box key={item.label} sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0 }}>
+            <IconBox icon={item.icon} color={item.color} size={32} iconSize={18} sx={{ borderRadius: "50%" }} />
+            <Box sx={{ minWidth: 0 }}>
+              <Typography sx={{ fontSize: 12.5, color: COLORES.textoTerciario, lineHeight: 1.2 }}>{item.label}</Typography>
+              <Typography sx={{ fontSize: 22, fontWeight: 700, color: COLORES.textoPrimario, lineHeight: 1.2 }}>{item.value}</Typography>
             </Box>
           </Box>
         ))}

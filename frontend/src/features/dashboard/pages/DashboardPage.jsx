@@ -226,7 +226,7 @@ function AdminDashboard({ usuario }) {
       <DashboardHeader usuario={usuario} />
       <FilterBar activo={filtro} onChange={setFiltro} />
 
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(3, 1fr)", xl: "repeat(6, 1fr)" }, gap: 2.5, mb: 2.5 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(3, 1fr)", lg: "repeat(6, 1fr)" }, gap: 2.5, mb: 2.5 }}>
         {KPI_CARDS.map((card, i) => (
           <Box key={i} sx={{ flex: 1, minWidth: 0 }}>
             <StatCard title={card.title} value={card.value} subtitle="Hoy" icon={card.icon} color={card.color} />
