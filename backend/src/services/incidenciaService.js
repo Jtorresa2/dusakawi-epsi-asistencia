@@ -1,40 +1,43 @@
 const pool = require("../config/db");
 const fs = require("fs");
 const path = require("path");
+const calculoHorario = require("./calculoHorarioService");
 
 const UPLOADS_DIR = path.join(__dirname, "../../uploads");
 
-exports.crear = async ({ empleado_id, tipo, descripcion, evidencia_url, fecha }) => {
+exports.crear = async ({ usuario_id, tipo, descripcion, evidencia_url, fecha }) => {
+  if (!usuario_id) throw new Error("usuario_id es requerido");
   const [rows, result] = await pool.query(
-    `INSERT INTO incidencias (empleado_id, tipo, descripcion, evidencia_url, fecha, estado)
+    `INSERT INTO incidencias (usuario_id, tipo, descripcion, evidencia_url, fecha, estado)
      VALUES (?, ?, ?, ?, ?, 'pendiente') RETURNING id`,
-    [empleado_id, tipo, descripcion, evidencia_url, fecha]
+    [usuario_id, tipo, descripcion, evidencia_url, fecha]
   );
   return rows[0]?.id || result.insertId;
 };
 
 exports.obtenerTodas = async (filtros = {}) => {
   let sql = `
-    SELECT i.*, e.nombre as empleado_nombre, e.cedula, e.apellido,
+    SELECT i.*, u.nombre as empleado_nombre, u.cedula, u.apellido,
       ar.nombre AS area,
       c.nombre AS cargo
     FROM incidencias i
-    LEFT JOIN empleado e ON i.empleado_id = e.id
-    LEFT JOIN areas ar ON e.area_id = ar.id
-    LEFT JOIN cargos c ON e.cargo_id = c.id
+    LEFT JOIN usuarios u ON i.usuario_id = u.id
+    LEFT JOIN areas ar ON u.area_id = ar.id
+    LEFT JOIN cargos c ON u.cargo_id = c.id
     WHERE 1=1
   `;
   const params = [];
-  if (filtros.empleado_id) { sql += " AND i.empleado_id = ?"; params.push(filtros.empleado_id); }
+  if (filtros.usuario_id) { sql += " AND i.usuario_id = ?"; params.push(filtros.usuario_id); }
+  else if (filtros.empleado_id) { sql += " AND i.usuario_id = ?"; params.push(filtros.empleado_id); }
   if (filtros.estado) { sql += " AND i.estado = ?"; params.push(filtros.estado); }
   if (filtros.tipo) { sql += " AND i.tipo = ?"; params.push(filtros.tipo); }
   if (filtros.prioridad) { sql += " AND i.prioridad = ?"; params.push(filtros.prioridad); }
-  if (filtros.area_id) { sql += " AND e.area_id = ?"; params.push(filtros.area_id); }
-  if (filtros.cargo_id) { sql += " AND e.cargo_id = ?"; params.push(filtros.cargo_id); }
+  if (filtros.area_id) { sql += " AND u.area_id = ?"; params.push(filtros.area_id); }
+  if (filtros.cargo_id) { sql += " AND u.cargo_id = ?"; params.push(filtros.cargo_id); }
   if (filtros.fecha_desde) { sql += " AND i.fecha >= ?"; params.push(filtros.fecha_desde); }
   if (filtros.fecha_hasta) { sql += " AND i.fecha <= ?"; params.push(filtros.fecha_hasta); }
   if (filtros.busqueda) {
-    sql += " AND (e.nombre LIKE ? OR e.apellido LIKE ? OR e.cedula LIKE ?)";
+    sql += " AND (u.nombre LIKE ? OR u.apellido LIKE ? OR u.cedula LIKE ?)";
     const term = `%${filtros.busqueda}%`;
     params.push(term, term, term);
   }
@@ -46,28 +49,28 @@ exports.obtenerTodas = async (filtros = {}) => {
 exports.obtenerPorId = async (id) => {
   const [rows] = await pool.query(
     `SELECT i.*,
-      e.nombre AS empleado_nombre, e.cedula, e.apellido,
+      u.nombre AS empleado_nombre, u.cedula, u.apellido,
       ar.nombre AS area,
       c.nombre AS cargo,
       CONCAT(er.nombre, ' ', er.apellido) AS revisor_nombre
      FROM incidencias i
-     LEFT JOIN empleado e ON i.empleado_id = e.id
-     LEFT JOIN areas ar ON e.area_id = ar.id
-     LEFT JOIN cargos c ON e.cargo_id = c.id
-     LEFT JOIN usuarios ur ON i.revisado_por = ur.id
-     LEFT JOIN empleado er ON ur.empleado_id = er.id
+     LEFT JOIN usuarios u ON i.usuario_id = u.id
+     LEFT JOIN areas ar ON u.area_id = ar.id
+     LEFT JOIN cargos c ON u.cargo_id = c.id
+     LEFT JOIN usuarios er ON i.revisado_por = er.id
      WHERE i.id = ?`,
     [id]
   );
   const incidencia = rows[0] || null;
   if (incidencia) {
-    incidencia.asistencia = await exports.obtenerAsistenciaRelacionada(incidencia.empleado_id, incidencia.fecha);
+    incidencia.asistencia = await exports.obtenerAsistenciaRelacionada(incidencia.usuario_id, incidencia.fecha);
   }
   return incidencia;
 };
 
-exports.obtenerAsistenciaRelacionada = async (empleadoId, fecha) => {
+exports.obtenerAsistenciaRelacionada = async (usuarioId, fecha) => {
   try {
+    const diaSemana = calculoHorario.diaSemanaDeFecha(fecha);
     const [rows] = await pool.query(
       `SELECT
         a.fecha_hora_entrada,
@@ -75,33 +78,39 @@ exports.obtenerAsistenciaRelacionada = async (empleadoId, fecha) => {
         a.minutos_tardanza,
         a.tipo_marcacion,
         a.estado AS estado_marcacion,
-        TO_CHAR(MIN(hd.hora_entrada_manana), 'HH24:MI') AS hora_entrada_programada,
-        TO_CHAR(MIN(hd.hora_salida_manana), 'HH24:MI') AS hora_salida_programada
+        h.modalidad,
+        TO_CHAR(hd.hora_entrada_manana, 'HH24:MI') AS hora_entrada_programada,
+        TO_CHAR(hd.hora_salida_manana, 'HH24:MI') AS hora_salida_programada
        FROM asistencia a
-       LEFT JOIN empleado e ON a.empleado_id = e.id
-       LEFT JOIN horario_detalle hd ON e.horario_id = hd.horario_id
-       WHERE a.empleado_id = ? AND a.fecha = ?
-       GROUP BY a.id`,
-      [empleadoId, fecha]
+       LEFT JOIN usuarios u ON a.usuario_id = u.id
+       LEFT JOIN horarios h ON u.horario_id = h.id
+       LEFT JOIN horario_detalle hd ON h.id = hd.horario_id AND hd.dia_semana = ?
+       WHERE a.usuario_id = ? AND a.fecha = ?
+       GROUP BY a.id, h.modalidad, hd.hora_entrada_manana, hd.hora_salida_manana`,
+      [diaSemana, usuarioId, fecha]
     );
-    return rows[0] || null;
+    const fila = rows[0] || null;
+    if (fila && (fila.modalidad === "flexible" || fila.modalidad === "por_horas")) {
+      fila.minutos_tardanza = 0;
+    }
+    return fila;
   } catch {
     return null;
   }
 };
 
-exports.aprobar = async (id, revisado_por) => {
+exports.aprobar = async (id, prioridad, revisado_por) => {
   const [result] = await pool.query(
-    "UPDATE incidencias SET estado = 'aprobado', revisado_por = ? WHERE id = ? AND estado IN ('pendiente','en_revision')",
-    [revisado_por, id]
+    "UPDATE incidencias SET estado = 'aprobado', prioridad = ?, revisado_por = ? WHERE id = ? AND estado IN ('pendiente','en_revision')",
+    [prioridad || 'media', revisado_por, id]
   );
   return result.affectedRows > 0;
 };
 
-exports.aprobarConFirma = async (id, archivo_firmado, revisado_por) => {
+exports.aprobarConFirma = async (id, archivo_firmado, prioridad, revisado_por) => {
   const [result] = await pool.query(
-    "UPDATE incidencias SET estado = 'aprobado', archivo_firmado = ?, revisado_por = ? WHERE id = ? AND estado IN ('pendiente','en_revision')",
-    [archivo_firmado, revisado_por, id]
+    "UPDATE incidencias SET estado = 'aprobado', archivo_firmado = ?, prioridad = ?, revisado_por = ? WHERE id = ? AND estado IN ('pendiente','en_revision')",
+    [archivo_firmado, prioridad || 'media', revisado_por, id]
   );
   return result.affectedRows > 0;
 };

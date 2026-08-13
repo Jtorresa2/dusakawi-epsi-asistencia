@@ -6,8 +6,8 @@ exports.getRegistros = async (req, res) => {
 
     let query = `
       SELECT
-        a.id, e.cedula,
-        CONCAT(e.nombre, ' ', e.apellido) AS empleado,
+        a.id, u.cedula,
+        CONCAT(u.nombre, ' ', u.apellido) AS empleado,
         ar.nombre AS area, ar.piso, a.fecha,
         TO_CHAR(a.fecha_hora_entrada, 'HH24:MI') AS entrada1,
         TO_CHAR(a.fecha_hora_salida_manana, 'HH24:MI') AS salida1,
@@ -17,8 +17,8 @@ exports.getRegistros = async (req, res) => {
         a.tipo_marcacion, a.estado, a.observacion,
         EXTRACT(DOW FROM a.fecha) + 1 AS dia_semana
       FROM asistencia a
-      JOIN empleado e ON a.empleado_id = e.id
-      JOIN areas ar ON e.area_id = ar.id
+      JOIN usuarios u ON a.usuario_id = u.id
+      JOIN areas ar ON u.area_id = ar.id
       WHERE 1=1
     `;
 
@@ -49,7 +49,8 @@ exports.getRegistros = async (req, res) => {
 
 exports.registrarManual = async (req, res) => {
   try {
-    const { empleado_id, fecha, entrada1, salida1, entrada2, salida2, tipo_marcacion, observacion } = req.body;
+    const { usuario_id, fecha, entrada1, salida1, entrada2, salida2, tipo_marcacion, observacion } = req.body;
+    const targetId = usuario_id || req.body.empleado_id; // backward compat
 
     const fecha_e1 = `${fecha} ${entrada1}:00`;
     const fecha_s1 = salida1 ? `${fecha} ${salida1}:00` : null;
@@ -58,16 +59,16 @@ exports.registrarManual = async (req, res) => {
 
     await pool.query(
       `INSERT INTO asistencia
-        (empleado_id, fecha, fecha_hora_entrada, fecha_hora_salida_manana, fecha_hora_entrada_tarde, fecha_hora_salida, tipo_marcacion, estado, observacion)
+        (usuario_id, fecha, fecha_hora_entrada, fecha_hora_salida_manana, fecha_hora_entrada_tarde, fecha_hora_salida, tipo_marcacion, estado, observacion)
        VALUES (?, ?, ?, ?, ?, ?, ?, 'puntual', ?)
-       ON CONFLICT (empleado_id, fecha) DO UPDATE SET
+       ON CONFLICT (usuario_id, fecha) DO UPDATE SET
         fecha_hora_entrada = EXCLUDED.fecha_hora_entrada,
         fecha_hora_salida_manana = EXCLUDED.fecha_hora_salida_manana,
         fecha_hora_entrada_tarde = EXCLUDED.fecha_hora_entrada_tarde,
         fecha_hora_salida = EXCLUDED.fecha_hora_salida,
         tipo_marcacion = EXCLUDED.tipo_marcacion,
         observacion = EXCLUDED.observacion`,
-      [empleado_id, fecha, fecha_e1, fecha_s1, fecha_e2, fecha_s2, tipo_marcacion, observacion]
+      [targetId, fecha, fecha_e1, fecha_s1, fecha_e2, fecha_s2, tipo_marcacion, observacion]
     );
 
     res.json({ mensaje: 'Registro guardado correctamente' });
@@ -79,10 +80,10 @@ exports.registrarManual = async (req, res) => {
 exports.getMiAsistencia = async (req, res) => {
   try {
     const { mes, anio } = req.query;
-    const empleado_id = req.user.empleado_id;
+    const usuarioId = req.user.id;
 
-    if (!empleado_id) {
-      return res.status(400).json({ mensaje: 'Empleado no identificado' });
+    if (!usuarioId) {
+      return res.status(400).json({ mensaje: 'Usuario no identificado' });
     }
 
     const [rows] = await pool.query(`
@@ -95,11 +96,11 @@ exports.getMiAsistencia = async (req, res) => {
         a.horas_trabajadas, a.estado,
         EXTRACT(DOW FROM a.fecha) + 1 AS dia_semana
       FROM asistencia a
-      WHERE a.empleado_id = ?
+      WHERE a.usuario_id = ?
         AND EXTRACT(YEAR FROM a.fecha) = ?
         AND EXTRACT(MONTH FROM a.fecha) = ?
       ORDER BY a.fecha DESC
-    `, [empleado_id, anio, mes]);
+    `, [usuarioId, anio, mes]);
 
     const registros = rows.map(r => ({
       fecha: r.fecha,

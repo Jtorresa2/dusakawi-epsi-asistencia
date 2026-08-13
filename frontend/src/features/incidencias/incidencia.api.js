@@ -40,9 +40,10 @@ export const descargarPlantilla = (id) => {
   window.open(`/api/pdf/incidencias/${id}/plantilla?token=${token}`, "_blank");
 };
 
-export const aprobarConFirma = (id, file) => {
+export const aprobarConFirma = (id, file, prioridad) => {
   const formData = new FormData();
   formData.append("archivo_firmado", file);
+  if (prioridad) formData.append("prioridad", prioridad);
   return apiFetch(`/incidencias/${id}/aprobar-con-firma`, {
     method: "PUT",
     body: formData,

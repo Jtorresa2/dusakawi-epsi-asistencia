@@ -1,12 +1,13 @@
 import { Paper, Typography, Box } from "@mui/material";
 import IconBox from "../../../shared/components/IconBox";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 export default function StatCard({
   title,
   value,
   subtitle,
   icon,
-  color = "#1B5E20",
+  color = COLORES.primarioOscuro,
 }) {
   return (
     <Paper
@@ -14,7 +15,7 @@ export default function StatCard({
       sx={{
         p: 2.5,
         borderRadius: "20px",
-        border: "1px solid #ECECEC",
+        border: `1px solid ${COLORES.grisContorno}`,
         height: 150,
         display: "flex",
         flexDirection: "column",
@@ -26,18 +27,18 @@ export default function StatCard({
         },
       }}
     >
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography sx={{ color: "#6B7280", fontSize: 15, fontWeight: 600, letterSpacing: "0.02em" }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 1 }}>
+        <Typography sx={{ color: COLORES.textoTerciario, fontSize: 15, fontWeight: 600, letterSpacing: "0.02em" }}>
           {title}
         </Typography>
-        <IconBox icon={icon} color={color} size={52} iconSize={24} />
+        <IconBox icon={icon} color={color} size={32} iconSize={14} sx={{ flexShrink: 0 }} />
       </Box>
 
       <Box>
-        <Typography sx={{ fontSize: 44, fontWeight: 700, lineHeight: 1, color: "#111827" }}>
+        <Typography sx={{ fontSize: 44, fontWeight: 700, lineHeight: 1, color: COLORES.textoPrimario }}>
           {value}
         </Typography>
-        <Typography sx={{ mt: 0.5, color: "#9CA3AF", fontSize: 14 }}>
+        <Typography sx={{ mt: 0.5, color: COLORES.textoSuave, fontSize: 14 }}>
           {subtitle}
         </Typography>
       </Box>

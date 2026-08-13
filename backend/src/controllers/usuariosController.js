@@ -1,6 +1,7 @@
 ﻿const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
 const { enviarCredenciales } = require('../services/emailService');
+const personalService = require('../services/personalService');
 
 exports.getUsuarios = async (req, res) => {
   try {
@@ -8,14 +9,13 @@ exports.getUsuarios = async (req, res) => {
       SELECT 
         u.id, u.username, u.activo, u.password_reset_required, u.ultimo_acceso, u.creado_en,
         r.nombre AS rol,
-        CONCAT(e.nombre, ' ', e.apellido) AS empleado,
-        e.cedula, e.correo,
+        CONCAT(u.nombre, ' ', u.apellido) AS empleado,
+        u.cedula, u.correo,
         a.nombre AS area,
         a.piso
       FROM usuarios u
       JOIN roles r ON u.rol_id = r.id
-      JOIN empleado e ON u.empleado_id = e.id
-      JOIN areas a ON e.area_id = a.id
+      LEFT JOIN areas a ON u.area_id = a.id
       ORDER BY u.creado_en DESC
     `);
     res.json({ usuarios: rows });
@@ -26,38 +26,43 @@ exports.getUsuarios = async (req, res) => {
 
 exports.crearUsuario = async (req, res) => {
   try {
-    const { empleado_id, rol_id, username, password } = req.body;
+    const { cedula, nombre, apellido, correo, rol_id, username, password } = req.body;
 
-    // Si no enviaron password, usar la cedula del empleado
-    let passFinal = password;
-    let cedula = null;
-    if (!passFinal) {
-      const [emp] = await pool.query('SELECT cedula, correo, nombre, apellido FROM empleado WHERE id = ?', [empleado_id]);
-      if (!emp.length) return res.status(400).json({ mensaje: 'Empleado no encontrado' });
-      cedula = emp[0].cedula;
-      passFinal = cedula;
-    }
+    // Use personalService to create the user with all fields
+    const result = await personalService.crear({
+      cedula,
+      nombre,
+      apellido,
+      correo: correo || req.body.correo,
+      telefono: req.body.telefono || null,
+      fecha_nacimiento: req.body.fecha_nacimiento || null,
+      cargo_id: req.body.cargo_id || null,
+      area_id: req.body.area_id || null,
+      piso: req.body.piso ?? null,
+      activo: req.body.activo !== undefined ? req.body.activo : 1,
+      rol_id,
+      username,
+      password,
+    });
 
-    const hash = await bcrypt.hash(passFinal, 10);
-    const [result] = await pool.query(
-      `INSERT INTO usuarios (empleado_id, rol_id, username, password_hash, password_reset_required) VALUES (?, ?, ?, ?, 1)`,
-      [empleado_id, rol_id, username, hash]
-    );
-
-    // Obtener datos del empleado para el email
-    const [emp] = await pool.query('SELECT e.correo, e.nombre, e.apellido, e.cedula FROM empleado e WHERE e.id = ?', [empleado_id]);
-    if (emp.length && emp[0].correo) {
+    // Send credentials email if correo is provided
+    const correoFinal = correo || req.body.correo;
+    if (correoFinal) {
       const link = process.env.FRONTEND_URL || 'http://localhost:3000';
       await enviarCredenciales({
-        email: emp[0].correo,
-        nombre: `${emp[0].nombre} ${emp[0].apellido}`,
-        username,
-        password: passFinal,
+        email: correoFinal,
+        nombre: `${nombre} ${apellido}`,
+        username: result.username,
+        password: result.password,
         link: `${link}/cambiar-password`,
       });
     }
 
-    res.json({ mensaje: 'Usuario creado correctamente', password: passFinal, password_reset_required: 1 });
+    res.json({
+      mensaje: 'Usuario creado correctamente',
+      password: result.password,
+      password_reset_required: 1,
+    });
   } catch (err) {
     if (err.code === '23505') return res.status(400).json({ mensaje: 'El usuario ya existe' });
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
@@ -92,15 +97,18 @@ exports.eliminarUsuario = async (req, res) => {
 
 exports.generarMasivos = async (req, res) => {
   try {
-    // Empleados sin usuario
-    const [sinUsuario] = await pool.query(`
-      SELECT e.id, e.nombre, e.apellido, e.cedula, e.correo
-      FROM empleado e
-      LEFT JOIN usuarios u ON e.id = u.empleado_id
-      WHERE u.id IS NULL
+    // After the merge, all personal data lives in usuarios.
+    // There are no separate empleado records without a linked usuario.
+    // Check for any usuarios with missing personal data fields.
+    const [incompletos] = await pool.query(`
+      SELECT id, nombre, apellido, cedula, correo
+      FROM usuarios
+      WHERE cedula IS NULL OR correo IS NULL
     `);
 
-    if (!sinUsuario.length) return res.json({ mensaje: 'No hay empleados pendientes', creados: 0 });
+    if (!incompletos.length) {
+      return res.json({ mensaje: 'No hay usuarios pendientes — todos los datos están completos', creados: 0 });
+    }
 
     let creados = 0;
     let emailsOk = 0;
@@ -108,11 +116,8 @@ exports.generarMasivos = async (req, res) => {
     const link = process.env.FRONTEND_URL || 'http://localhost:3000';
     const resultados = [];
 
-    for (const emp of sinUsuario) {
-      // Generar username: nombre.apellido normalizado
-      const username = emp.nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.') + '.' +
-                       emp.apellido.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.');
-      // Evitar duplicados: agregar sufijo si existe
+    for (const user of incompletos) {
+      const username = generarUsernameDesde(user.nombre, user.apellido);
       let finalUser = username;
       let counter = 1;
       while (true) {
@@ -122,30 +127,36 @@ exports.generarMasivos = async (req, res) => {
         counter++;
       }
 
-      const hash = await bcrypt.hash(emp.cedula, 10);
-      // Asignar rol por defecto: Empleado (id=3)
+      const pass = user.cedula || `${user.nombre.toLowerCase()}.${user.apellido.toLowerCase()}`;
+      const hash = await bcrypt.hash(pass, 10);
       await pool.query(
-        `INSERT INTO usuarios (empleado_id, rol_id, username, password_hash, password_reset_required) VALUES (?, 3, ?, ?, 1)`,
-        [emp.id, finalUser, hash]
+        `UPDATE usuarios SET username = ?, password_hash = ?, password_reset_required = 1 WHERE id = ?`,
+        [finalUser, hash, user.id]
       );
       creados++;
 
-      if (emp.correo) {
+      if (user.correo) {
         const r = await enviarCredenciales({
-          email: emp.correo,
-          nombre: `${emp.nombre} ${emp.apellido}`,
+          email: user.correo,
+          nombre: `${user.nombre} ${user.apellido}`,
           username: finalUser,
-          password: emp.cedula,
+          password: pass,
           link: `${link}/cambiar-password`,
         });
         if (r.enviado) emailsOk++; else emailsFail++;
       }
 
-      resultados.push({ empleado: `${emp.nombre} ${emp.apellido}`, username: finalUser, password: emp.cedula, correo: emp.correo || 'SIN CORREO', email_enviado: !!(emp.correo && r?.enviado) });
+      resultados.push({
+        empleado: `${user.nombre} ${user.apellido}`,
+        username: finalUser,
+        password: pass,
+        correo: user.correo || 'SIN CORREO',
+        email_enviado: !!(user.correo && r?.enviado),
+      });
     }
 
     res.json({
-      mensaje: `${creados} usuarios creados`,
+      mensaje: `${creados} usuarios actualizados`,
       creados,
       emails_enviados: emailsOk,
       emails_fallados: emailsFail,
@@ -158,9 +169,75 @@ exports.generarMasivos = async (req, res) => {
 
 exports.getRoles = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT id, nombre, descripcion FROM roles');
+    const [rows] = await pool.query(`
+      SELECT r.id, r.nombre, r.descripcion, COUNT(u.id) AS cantidad_usuarios
+      FROM roles r
+      LEFT JOIN usuarios u ON u.rol_id = r.id
+      GROUP BY r.id, r.nombre, r.descripcion
+      ORDER BY r.id
+    `);
     res.json({ roles: rows });
   } catch (err) {
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
   }
 };
+
+exports.getPermisosRol = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rol] = await pool.query('SELECT id FROM roles WHERE id = ?', [id]);
+    if (!rol.length) return res.status(404).json({ mensaje: 'Rol no encontrado' });
+
+    const [rows] = await pool.query(
+      'SELECT permiso FROM rol_permiso WHERE rol_id = ? AND activo = TRUE',
+      [id]
+    );
+    res.json({ permisos: rows.map((r) => r.permiso) });
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
+  }
+};
+
+exports.updateRol = async (req, res) => {
+  const { id } = req.params;
+  const { descripcion, permisos } = req.body;
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const { rows: rol } = await client.query('SELECT id FROM roles WHERE id = $1', [id]);
+    if (!rol.length) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ mensaje: 'Rol no encontrado' });
+    }
+
+    if (descripcion !== undefined) {
+      await client.query('UPDATE roles SET descripcion = $1 WHERE id = $2', [descripcion, id]);
+    }
+
+    await client.query('DELETE FROM rol_permiso WHERE rol_id = $1', [id]);
+
+    if (Array.isArray(permisos) && permisos.length) {
+      const placeholders = permisos.map((_, i) => `($1, $${i + 2}, true)`).join(', ');
+      await client.query(
+        `INSERT INTO rol_permiso (rol_id, permiso, activo) VALUES ${placeholders}`,
+        [id, ...permisos]
+      );
+    }
+
+    await client.query('COMMIT');
+    res.json({ mensaje: 'Rol actualizado correctamente' });
+  } catch (err) {
+    try { await client.query('ROLLBACK'); } catch {}
+    res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
+  } finally {
+    client.release();
+  }
+};
+
+// Helper
+function generarUsernameDesde(nombre, apellido) {
+  return nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.') + '.' +
+         apellido.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.');
+}

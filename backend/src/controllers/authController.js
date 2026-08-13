@@ -1,6 +1,8 @@
 ﻿const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const db = require("../config/db");
+const { enviarResetPassword } = require("../services/emailService");
 
 exports.login = async (req, res) => {
   try {
@@ -15,15 +17,13 @@ exports.login = async (req, res) => {
           u.id,
           u.username,
           u.password_hash,
-          u.empleado_id,
           u.activo,
           u.password_reset_required,
           r.nombre AS rol,
-          e.nombre,
-          e.apellido
+          u.nombre,
+          u.apellido
       FROM usuarios u
       LEFT JOIN roles r ON u.rol_id = r.id
-      LEFT JOIN empleado e ON u.empleado_id = e.id
       WHERE u.username = ?
     `, [username]);
 
@@ -44,10 +44,39 @@ exports.login = async (req, res) => {
     }
 
     const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
+
+    // Forced password reset: refuse a normal session (403) but still issue a
+    // token so the frontend can authenticate against /auth/cambiar-password.
+    // Placed AFTER the password check on purpose: no token is ever issued
+    // without proof of the credentials, and the reset-required status is not
+    // leaked through a distinct pre-auth response code.
+    if (user.password_reset_required) {
+      const resetToken = jwt.sign(
+        {
+          id: user.id,
+          username: user.username,
+          nombre: `${user.nombre} ${user.apellido}`,
+          rol: rolesMap[user.rol] || user.rol,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "8h" }
+      );
+      return res.status(403).json({
+        mensaje: "Debe cambiar su contrasena antes de continuar",
+        password_reset_required: true,
+        token: resetToken,
+        user: {
+          id: user.id,
+          username: user.username,
+          nombre: `${user.nombre} ${user.apellido}`,
+          rol: user.rol,
+        },
+      });
+    }
+
     const token = jwt.sign(
       {
         id: user.id,
-        empleado_id: user.empleado_id,
         username: user.username,
         nombre: `${user.nombre} ${user.apellido}`,
         rol: rolesMap[user.rol] || user.rol,
@@ -64,7 +93,6 @@ exports.login = async (req, res) => {
       password_reset_required: !!user.password_reset_required,
       user: {
         id: user.id,
-        empleado_id: user.empleado_id,
         username: user.username,
         nombre: `${user.nombre} ${user.apellido}`,
         rol: user.rol,
@@ -97,14 +125,13 @@ exports.cambiarPassword = async (req, res) => {
     if (!valida) return res.status(400).json({ mensaje: "Contrasena actual incorrecta" });
 
     const hash = await bcrypt.hash(password_nuevo, 10);
-    await db.query("UPDATE usuarios SET password_hash = ?, password_reset_required = 0 WHERE id = ?", [hash, usuarioId]);
+    await db.query("UPDATE usuarios SET password_hash = ?, password_reset_required = false WHERE id = ?", [hash, usuarioId]);
 
     // Generar nuevo token
     const [userData] = await db.query(`
-      SELECT u.id, u.username, u.empleado_id, r.nombre AS rol, e.nombre, e.apellido
+      SELECT u.id, u.username, r.nombre AS rol, u.nombre, u.apellido
       FROM usuarios u
       LEFT JOIN roles r ON u.rol_id = r.id
-      LEFT JOIN empleado e ON u.empleado_id = e.id
       WHERE u.id = ?
     `, [usuarioId]);
 
@@ -112,7 +139,6 @@ exports.cambiarPassword = async (req, res) => {
     const token = jwt.sign(
       {
         id: userData[0].id,
-        empleado_id: userData[0].empleado_id,
         username: userData[0].username,
         nombre: `${userData[0].nombre} ${userData[0].apellido}`,
         rol: rolesMap[userData[0].rol] || userData[0].rol,
@@ -128,16 +154,108 @@ exports.cambiarPassword = async (req, res) => {
   }
 };
 
+exports.solicitarResetPassword = async (req, res) => {
+  try {
+    const { correo } = req.body;
+
+    if (!correo) {
+      return res.status(400).json({ mensaje: "Faltan datos" });
+    }
+
+    const mensajeGenerico = "Si el correo esta registrado, recibiras un enlace para restablecer tu contrasena";
+
+    const [rows] = await db.query(
+      "SELECT id, username, nombre, apellido, correo FROM usuarios WHERE correo = ?",
+      [correo]
+    );
+
+    // Anti-enumeracion: mismo mensaje (y mismo codigo 200) si el correo no existe.
+    if (rows.length === 0) {
+      return res.json({ mensaje: mensajeGenerico });
+    }
+
+    const usuario = rows[0];
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    // Invalida tokens previos del usuario antes de emitir uno nuevo.
+    await db.query(
+      "UPDATE password_reset_tokens SET usado = true WHERE usuario_id = ? AND usado = false",
+      [usuario.id]
+    );
+    await db.query(
+      `INSERT INTO password_reset_tokens (usuario_id, token_hash, expira_en)
+       VALUES (?, ?, now() + interval '30 minutes')`,
+      [usuario.id, tokenHash]
+    );
+
+    const link = `${process.env.FRONTEND_URL || "http://localhost:3000"}/restablecer-contrasena?token=${token}`;
+    await enviarResetPassword({
+      email: usuario.correo,
+      nombre: `${usuario.nombre} ${usuario.apellido}`,
+      link,
+    });
+
+    // Nunca se devuelve el token en la respuesta HTTP.
+    res.json({ mensaje: mensajeGenerico });
+  } catch (error) {
+    console.error("SOLICITAR RESET ERROR:", error);
+    res.status(500).json({ mensaje: "Error al solicitar restablecimiento de contrasena" });
+  }
+};
+
+exports.restablecerPassword = async (req, res) => {
+  try {
+    const { token, password_nuevo } = req.body;
+
+    if (!token || !password_nuevo) {
+      return res.status(400).json({ mensaje: "Faltan datos" });
+    }
+
+    if (password_nuevo.length < 8) {
+      return res.status(400).json({ mensaje: "La contrasena debe tener al menos 8 caracteres" });
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    const [rows] = await db.query(
+      `SELECT t.id, t.usuario_id, t.expira_en, t.usado
+       FROM password_reset_tokens t
+       WHERE t.token_hash = ?`,
+      [tokenHash]
+    );
+
+    if (rows.length === 0 || rows[0].usado) {
+      return res.status(400).json({ mensaje: "Enlace invalido o ya utilizado" });
+    }
+
+    if (new Date(rows[0].expira_en) < new Date()) {
+      return res.status(400).json({ mensaje: "El enlace ha expirado" });
+    }
+
+    const hash = await bcrypt.hash(password_nuevo, 10);
+    await db.query(
+      "UPDATE usuarios SET password_hash = ?, password_reset_required = false WHERE id = ?",
+      [hash, rows[0].usuario_id]
+    );
+    await db.query("UPDATE password_reset_tokens SET usado = true WHERE id = ?", [rows[0].id]);
+
+    res.json({ mensaje: "Contrasena restablecida exitosamente" });
+  } catch (error) {
+    console.error("RESTABLECER RESET ERROR:", error);
+    res.status(500).json({ mensaje: "Error al restablecer contrasena" });
+  }
+};
+
 exports.perfil = async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT
           u.id, u.username, u.password_reset_required,
-          CONCAT(e.nombre,' ',e.apellido) AS nombre,
+          CONCAT(u.nombre,' ',u.apellido) AS nombre,
           r.nombre AS rol
       FROM usuarios u
       LEFT JOIN roles r ON u.rol_id = r.id
-      LEFT JOIN empleado e ON u.empleado_id = e.id
       WHERE u.id = ?
     `, [req.user.id]);
 

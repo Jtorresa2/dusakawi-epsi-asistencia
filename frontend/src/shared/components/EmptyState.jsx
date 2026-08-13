@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import InboxIcon from "@mui/icons-material/Inbox";
 import IconBox from "./IconBox";
+import { COLORES } from "../constants/colores.js";
 
 export default function EmptyState({
   mensaje = "No hay registros."
@@ -12,8 +13,8 @@ export default function EmptyState({
         textAlign: "center",
       }}
     >
-      <Box display="flex" justifyContent="center" mb={2}>
-        <IconBox icon={<InboxIcon />} color="#9CA3AF" size={80} iconSize={40} />
+      <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+        <IconBox icon={<InboxIcon />} color={COLORES.textoSuave} size={80} iconSize={40} />
       </Box>
 
       <Typography

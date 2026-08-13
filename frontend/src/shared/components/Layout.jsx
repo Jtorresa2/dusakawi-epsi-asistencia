@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
+import { COLORES } from "../constants/colores.js";
 
 function useMediaQuery(query) {
   const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
@@ -24,7 +25,7 @@ export default function Layout({ children }) {
   }, [isMobile]);
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#f4f7f6" }}>
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: COLORES.fondoGris2 }}>
       <Sidebar abierto={abierto} setAbierto={setAbierto} isMobile={isMobile} />
       {isMobile && abierto && (
         <div onClick={() => setAbierto(false)}

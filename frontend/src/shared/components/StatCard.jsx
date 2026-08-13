@@ -1,10 +1,11 @@
 import { Paper, Typography, Box } from "@mui/material";
+import { COLORES } from "../constants/colores.js";
 
 export default function StatCard({
   titulo,
   valor,
   icono,
-  color = "#2e7d32",
+  color = COLORES.primario,
 }) {
   return (
     <Paper
@@ -12,11 +13,11 @@ export default function StatCard({
       sx={{
         p: 3,
         borderRadius: 3,
-        border: "1px solid #E5E7EB",
+        border: `1px solid ${COLORES.borde}`,
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        background: "#fff",
+        background: COLORES.fondoBlanco,
         minHeight: 110,
         transition: ".25s",
         "&:hover": {
@@ -51,7 +52,7 @@ export default function StatCard({
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          color: "#fff",
+          color: COLORES.fondoBlanco,
         }}
       >
         {icono}

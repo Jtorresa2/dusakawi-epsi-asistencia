@@ -1,2 +1,2 @@
 allowBuilds:
-  core-js-pure: true
+  core-js-pure: set this to true or false

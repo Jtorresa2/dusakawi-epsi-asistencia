@@ -1,4 +1,5 @@
 import { createTheme } from "@mui/material/styles";
+import { COLORES } from "./constants/colores.js";
 
 const theme = createTheme({
 
@@ -6,19 +7,19 @@ const theme = createTheme({
 
     primary: {
 
-      main: "#2e7d32",
+      main: COLORES.primario,
 
     },
 
     secondary: {
 
-      main: "#81c784",
+      main: COLORES.acento,
 
     },
 
     background: {
 
-      default: "#f5faf5",
+      default: COLORES.verdeVariante3,
 
     },
 

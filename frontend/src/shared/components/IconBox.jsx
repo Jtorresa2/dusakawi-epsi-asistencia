@@ -1,7 +1,8 @@
 import { Box } from "@mui/material";
+import { COLORES } from "../constants/colores.js";
 
 function lighten(hex, intensity = 0.88) {
-  if (!hex) return "#f5f5f5";
+  if (!hex) return COLORES.fondoGris2;
   const c = hex.replace("#", "");
   const r = parseInt(c.substring(0, 2), 16);
   const g = parseInt(c.substring(2, 4), 16);
@@ -14,9 +15,10 @@ function lighten(hex, intensity = 0.88) {
 
 export default function IconBox({
   icon,
-  color = "#2E7D32",
+  color = COLORES.primario,
   size = 48,
   iconSize = 22,
+  sx = {},
 }) {
   return (
     <Box
@@ -32,6 +34,7 @@ export default function IconBox({
         flexShrink: 0,
         boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
         "& svg": { width: iconSize, height: iconSize },
+        ...sx,
       }}
     >
       {icon}

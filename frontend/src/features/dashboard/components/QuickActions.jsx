@@ -5,27 +5,28 @@ import AccessTimeFilledIcon from "@mui/icons-material/AccessTimeFilled";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import IconBox from "../../../shared/components/IconBox";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const acciones = [
   {
     titulo: "Nuevo empleado",
     icono: <PersonAddAltIcon />,
-    color: "#2E7D32",
+    color: COLORES.primario,
   },
   {
     titulo: "Registrar asistencia",
     icono: <AccessTimeFilledIcon />,
-    color: "#1565C0",
+    color: COLORES.primarioOscuro,
   },
   {
     titulo: "Ver reportes",
     icono: <AssessmentIcon />,
-    color: "#EF6C00",
+    color: COLORES.warningOscuro,
   },
   {
     titulo: "Gestionar horarios",
     icono: <ScheduleIcon />,
-    color: "#6A1B9A",
+    color: COLORES.primario,
   },
 ];
 
@@ -36,7 +37,7 @@ export default function QuickActions() {
       sx={{
         p: 3,
         borderRadius: 4,
-        border: "1px solid #ECECEC",
+        border: `1px solid ${COLORES.grisContorno}`,
         height: "100%",
       }}
     >
@@ -50,7 +51,7 @@ export default function QuickActions() {
 
       <Grid container spacing={2}>
         {acciones.map((accion) => (
-          <Grid item xs={6} key={accion.titulo}>
+          <Grid xs={6} key={accion.titulo}>
             <Button
               fullWidth
               variant="outlined"
@@ -61,7 +62,7 @@ export default function QuickActions() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 1.5,
-                borderColor: "#ECECEC",
+                borderColor: COLORES.grisContorno,
 
                 "&:hover": {
                   borderColor: accion.color,

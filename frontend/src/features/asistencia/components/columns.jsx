@@ -1,11 +1,12 @@
 import { Box, Typography } from "@mui/material";
 import { CircleArrowOutUpRight, CircleCheckBig, Ban, Clock, Fingerprint, Eye, Edit3, Trash2 } from "lucide-react";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const badgeColors = {
-  puntual: { bg: "#D1FAE5", color: "#065F46" },
-  tardanza: { bg: "#FEF3C7", color: "#92400E" },
-  ausente: { bg: "#FEE2E2", color: "#991B1B" },
-  justificado: { bg: "#DBEAFE", color: "#1E40AF" },
+  puntual: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
+  tardanza: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+  ausente: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
+  justificado: { bg: COLORES.primarioClaro2, color: COLORES.primarioOscuro },
 };
 
 const tipoIcon = {
@@ -43,7 +44,7 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     renderCell: ({ row }) => (
       <Typography
         onClick={() => onDetalle?.(row)}
-        sx={{ fontSize: 13, fontWeight: 500, color: "#111827", alignSelf: "flex-start", pt: 1, cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+        sx={{ fontSize: 13, fontWeight: 500, color: COLORES.textoPrimario, alignSelf: "flex-start", pt: 1, cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
       >
         {row.empleado}
       </Typography>
@@ -55,7 +56,7 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     width: 100,
     renderCell: ({ value }) => {
       const label = value && typeof value === "object" ? (value.nombre || value.name) : value;
-      return <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{label || "—"}</Typography>;
+      return <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario }}>{label || "—"}</Typography>;
     },
   },
   {
@@ -66,7 +67,7 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     renderCell: ({ row }) => {
       const piso = getPiso ? getPiso(row.area) : row.piso;
       return (
-        <Typography sx={{ fontSize: 12, color: "#6B7280", textAlign: "center", width: "100%" }}>
+        <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, textAlign: "center", width: "100%" }}>
           {piso ? `P${piso}` : "—"}
         </Typography>
       );
@@ -78,7 +79,7 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     width: 120,
     sortable: false,
     renderCell: ({ row }) => (
-      <Typography sx={{ fontSize: 12, color: "#374151" }}>
+      <Typography sx={{ fontSize: 12, color: COLORES.textoSecundario }}>
         {row.entrada1 && row.salida1 ? `${row.entrada1} → ${row.salida1}` : "—"}
       </Typography>
     ),
@@ -89,7 +90,7 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     width: 120,
     sortable: false,
     renderCell: ({ row }) => (
-      <Typography sx={{ fontSize: 12, color: "#374151" }}>
+      <Typography sx={{ fontSize: 12, color: COLORES.textoSecundario }}>
         {row.entrada2 && row.salida2 ? `${row.entrada2} → ${row.salida2}` : "—"}
       </Typography>
     ),
@@ -99,7 +100,7 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     headerName: "Horas",
     width: 75,
     renderCell: ({ value }) => (
-      <Typography sx={{ fontSize: 12, color: "#374151" }}>{value ? `${value}h` : "—"}</Typography>
+      <Typography sx={{ fontSize: 12, color: COLORES.textoSecundario }}>{value ? `${value}h` : "—"}</Typography>
     ),
   },
   {
@@ -107,7 +108,7 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     headerName: "Extra",
     width: 65,
     renderCell: ({ value }) => (
-      <Typography sx={{ fontSize: 12, color: value > 0 ? "#7C3AED" : "#9CA3AF" }}>
+      <Typography sx={{ fontSize: 12, color: value > 0 ? COLORES.primario : COLORES.textoSuave }}>
         {value > 0 ? `${value}h` : "—"}
       </Typography>
     ),
@@ -118,13 +119,13 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     width: 130,
     renderCell: ({ value }) => (
       <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-        {value > 0 && <Clock size={14} color="#D97706" style={{ flexShrink: 0 }} />}
+        {value > 0 && <Clock size={14} color={COLORES.warning} style={{ flexShrink: 0 }} />}
         {value > 0 ? (
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#B45309" }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: COLORES.warningOscuro }}>
             {value} min
           </span>
         ) : (
-          <span style={{ fontSize: 12, color: "#9CA3AF" }}>—</span>
+          <span style={{ fontSize: 12, color: COLORES.textoSuave }}>—</span>
         )}
       </span>
     ),
@@ -136,7 +137,7 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     renderCell: ({ value }) => (
       <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
         {tipoIcon[value] || null}
-        <span style={{ fontSize: 12, color: "#6B7280", textTransform: "capitalize" }}>
+        <span style={{ fontSize: 12, color: COLORES.textoTerciario, textTransform: "capitalize" }}>
           {value || "—"}
         </span>
       </span>
@@ -147,7 +148,7 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     headerName: "Estado",
     width: 95,
     renderCell: ({ value }) => {
-      const c = badgeColors[value] || { bg: "#F3F4F6", color: "#6B7280" };
+      const c = badgeColors[value] || { bg: COLORES.fondoGris2, color: COLORES.textoTerciario };
       return <Badge label={value || "—"} bg={c.bg} color={c.color} />;
     },
   },
@@ -163,21 +164,21 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     renderCell: ({ row }) => (
       <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
         <Box
-          sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }}
+          sx={{ ...btnBase, bgcolor: COLORES.primarioClaro, color: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}
           title="Ver detalle"
           onClick={(e) => { e.stopPropagation(); onDetalle(row); }}
         >
           <Eye size={15} />
         </Box>
         <Box
-          sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }}
+          sx={{ ...btnBase, bgcolor: COLORES.primarioClaro, color: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}
           title="Editar"
           onClick={(e) => { e.stopPropagation(); onEditar(row); }}
         >
           <Edit3 size={15} />
         </Box>
         <Box
-          sx={{ ...btnBase, bgcolor: "#FEE2E2", color: "#DC2626", "&:hover": { bgcolor: "#FECACA" } }}
+          sx={{ ...btnBase, bgcolor: COLORES.dangerFondo, color: COLORES.danger, "&:hover": { bgcolor: COLORES.dangerBorde } }}
           title="Eliminar"
           onClick={(e) => { e.stopPropagation(); onEliminar?.(row); }}
         >

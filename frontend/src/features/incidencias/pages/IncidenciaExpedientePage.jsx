@@ -11,16 +11,17 @@ import {
 } from "lucide-react";
 import { aprobarConFirma } from "../incidencia.api";
 import PDFPreviewModal from "../../../shared/components/PDFPreviewModal";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const API = "/api";
 const TIPOS = { falla_biometrica: "Falla biométrica", tardanza_justificada: "Tardanza justificada", otro: "Otro" };
 const ESTADO_STYLES = {
-  pendiente: { bg: "#FEF3C7", color: "#92400E", label: "Pendiente" },
-  aprobado: { bg: "#D1FAE5", color: "#065F46", label: "Aprobada" },
-  rechazado: { bg: "#FEE2E2", color: "#991B1B", label: "Rechazada" },
+  pendiente: { bg: COLORES.warningFondo, color: COLORES.warningOscuro, label: "Pendiente" },
+  aprobado: { bg: COLORES.successFondo, color: COLORES.verdeTexto, label: "Aprobada" },
+  rechazado: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro, label: "Rechazada" },
 };
 
-const PRIORIDADES = { baja: { label: "Baja", color: "#6B7280", bg: "#F3F4F6" }, media: { label: "Media", color: "#92400E", bg: "#FEF3C7" }, alta: { label: "Alta", color: "#991B1B", bg: "#FEE2E2" } };
+const PRIORIDADES = { baja: { label: "Baja", color: COLORES.textoTerciario, bg: COLORES.fondoGris2 }, media: { label: "Media", color: COLORES.warningOscuro, bg: COLORES.warningFondo }, alta: { label: "Alta", color: COLORES.dangerOscuro, bg: COLORES.dangerFondo } };
 
 function formatDate(d) {
   if (!d) return "—";
@@ -61,20 +62,20 @@ function TimelineItem({ icon, label, fecha, responsable, activo, ultimo, iconCol
         <Box sx={{
           width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center",
           justifyContent: "center", flexShrink: 0,
-          bgcolor: activo ? "#D1FAE5" : "#F3F4F6",
-          color: iconColor || (activo ? "#16A34A" : "#9CA3AF"),
+          bgcolor: activo ? COLORES.successFondo : COLORES.fondoGris2,
+          color: iconColor || (activo ? COLORES.success : COLORES.textoSuave),
           transition: "all 0.2s",
         }}>
           {icon}
         </Box>
-        {!ultimo && <Box sx={{ width: 1.5, flex: 1, bgcolor: activo ? "#BBF7D0" : "#E5E7EB", my: 0.5 }} />}
+        {!ultimo && <Box sx={{ width: 1.5, flex: 1, bgcolor: activo ? COLORES.successFondo : COLORES.borde, my: 0.5 }} />}
       </Box>
       <Box sx={{ pb: ultimo ? 0 : 1 }}>
-        <Typography sx={{ fontSize: 13, fontWeight: activo ? 500 : 400, color: iconColor || (activo ? "#111827" : "#9CA3AF") }}>
+        <Typography sx={{ fontSize: 13, fontWeight: activo ? 500 : 400, color: iconColor || (activo ? COLORES.textoPrimario : COLORES.textoSuave) }}>
           {label}
         </Typography>
         {(fecha || responsable) && (
-          <Typography sx={{ fontSize: 11, color: "#9CA3AF", mt: 0.2 }}>
+          <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, mt: 0.2 }}>
             {[fecha, responsable].filter(Boolean).join(" · ")}
           </Typography>
         )}
@@ -85,9 +86,9 @@ function TimelineItem({ icon, label, fecha, responsable, activo, ultimo, iconCol
 
 function SectionCard({ title, children, action, sx }) {
   return (
-    <Paper elevation={0} sx={{ borderRadius: "16px", border: "1px solid #ECECEC", overflow: "hidden", ...sx }}>
-      <Box sx={{ px: 2.5, py: 1.75, borderBottom: "1px solid #F3F4F6", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5 }}>
+    <Paper elevation={0} sx={{ borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, overflow: "hidden", ...sx }}>
+      <Box sx={{ px: 2.5, py: 1.75, borderBottom: `1px solid ${COLORES.fondoGris2}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Typography sx={{ fontSize: 11, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", letterSpacing: 0.5 }}>
           {title}
         </Typography>
         {action}
@@ -178,7 +179,7 @@ export default function IncidenciaExpedientePage() {
     setSubiendoFirma(true);
     setActionError("");
     try {
-      await aprobarConFirma(incidencia.id, firmaFile);
+      await aprobarConFirma(incidencia.id, firmaFile, prioridad);
       if (firmaPreviewUrl) URL.revokeObjectURL(firmaPreviewUrl);
       setFirmaModalOpen(false);
       setFirmaFile(null);
@@ -232,7 +233,7 @@ export default function IncidenciaExpedientePage() {
   if (cargando) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh" }}>
-        <CircularProgress size={32} sx={{ color: "#1B5E20" }} />
+        <CircularProgress size={32} sx={{ color: COLORES.primarioOscuro }} />
       </Box>
     );
   }
@@ -240,8 +241,8 @@ export default function IncidenciaExpedientePage() {
   if (pageError || !incidencia) {
     return (
       <Box sx={{ p: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-        <AlertTriangle size={48} color="#DC2626" />
-        <Typography sx={{ color: "#DC2626", fontSize: 16, fontWeight: 600 }}>{pageError || "Incidencia no encontrada"}</Typography>
+        <AlertTriangle size={48} color={COLORES.danger} />
+        <Typography sx={{ color: COLORES.danger, fontSize: 16, fontWeight: 600 }}>{pageError || "Incidencia no encontrada"}</Typography>
         <Button variant="outlined" startIcon={<ArrowLeft size={16} />} onClick={() => navigate("/incidencias")}
           sx={{ borderRadius: "10px", textTransform: "none" }}>
           Volver a incidencias
@@ -255,40 +256,40 @@ export default function IncidenciaExpedientePage() {
   const anio = new Date().getFullYear();
   const isImageFile = (url) => /\.(jpg|jpeg|png|webp|gif)$/i.test(url);
   const fechaCreacion = incidencia.created_at || incidencia.fecha;
-  const estadoAjuste = incidencia.estado === "pendiente" ? { label: "Pendiente", bg: "#FEF3C7", color: "#92400E" }
-    : incidencia.estado === "aprobado" ? { label: "Aplicado", bg: "#D1FAE5", color: "#065F46" }
-    : { label: "No aplicado", bg: "#FEE2E2", color: "#DC2626" };
+  const estadoAjuste = incidencia.estado === "pendiente" ? { label: "Pendiente", bg: COLORES.warningFondo, color: COLORES.warningOscuro }
+    : incidencia.estado === "aprobado" ? { label: "Aplicado", bg: COLORES.successFondo, color: COLORES.verdeTexto }
+    : { label: "No aplicado", bg: COLORES.dangerFondo, color: COLORES.danger };
 
   return (
     <Box sx={{ px: 2.5, py: 2, display: "flex", flexDirection: "column", gap: 2, maxWidth: 1400, mx: "auto" }}>
       {/* Breadcrumb */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
         <Button size="small" onClick={() => navigate("/incidencias")}
-          sx={{ borderRadius: "8px", textTransform: "none", fontSize: 12, color: "#6B7280", minWidth: 0, p: 0.5 }}>
+          sx={{ borderRadius: "8px", textTransform: "none", fontSize: 12, color: COLORES.textoTerciario, minWidth: 0, p: 0.5 }}>
           <ArrowLeft size={16} />
         </Button>
-        <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>Incidencias</Typography>
-        <ChevronRight size={14} color="#9CA3AF" />
-        <Typography sx={{ fontSize: 12, color: "#6B7280", fontWeight: 500 }}>
+        <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>Incidencias</Typography>
+        <ChevronRight size={14} color={COLORES.textoSuave} />
+        <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, fontWeight: 500 }}>
           INC-{anio}-{String(incidencia.id).padStart(5, "0")}
         </Typography>
       </Box>
 
       {/* Header */}
-      <Paper elevation={0} sx={{ borderRadius: "16px", border: "1px solid #ECECEC", p: 2.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+      <Paper elevation={0} sx={{ borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, p: 2.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: "#1B5E20", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <FileText size={22} color="#FFF" />
+          <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: COLORES.primarioOscuro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <FileText size={22} color={COLORES.fondoBlanco} />
           </Box>
           <Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 0.3 }}>
-              <Typography sx={{ fontSize: 20, fontWeight: 700, color: "#111827", lineHeight: 1.2 }}>
+              <Typography sx={{ fontSize: 20, fontWeight: 700, color: COLORES.textoPrimario, lineHeight: 1.2 }}>
                 INC-{anio}-{String(incidencia.id).padStart(5, "0")}
               </Typography>
               <Chip label={ec.label} size="small" sx={{ borderRadius: "6px", fontSize: 11, fontWeight: 600, bgcolor: ec.bg, color: ec.color }} />
               <Chip label={pc.label} size="small" sx={{ borderRadius: "6px", fontSize: 11, fontWeight: 600, bgcolor: pc.bg, color: pc.color }} />
             </Box>
-            <Typography sx={{ fontSize: 12, color: "#9CA3AF" }}>
+            <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>
               Creada el {formatDate(fechaCreacion)}
             </Typography>
           </Box>
@@ -304,43 +305,43 @@ export default function IncidenciaExpedientePage() {
           {/* Info General */}
           <SectionCard title="Información general">
             <Box sx={{ display: "flex", gap: 2.5 }}>
-              <Avatar sx={{ width: 56, height: 56, borderRadius: "12px", bgcolor: "#1B5E20", fontSize: 20, fontWeight: 700, flexShrink: 0 }}>
+              <Avatar sx={{ width: 56, height: 56, borderRadius: "12px", bgcolor: COLORES.primarioOscuro, fontSize: 20, fontWeight: 700, flexShrink: 0 }}>
                 {(incidencia.empleado_nombre || "?").charAt(0).toUpperCase()}
               </Avatar>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5, flex: 1 }}>
                 <Box>
-                  <Typography sx={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500 }}>Nombre completo</Typography>
-                  <Typography sx={{ fontSize: 14, fontWeight: 500, color: "#111827" }}>{incidencia.empleado_nombre}</Typography>
+                  <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 500 }}>Nombre completo</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 500, color: COLORES.textoPrimario }}>{incidencia.empleado_nombre}</Typography>
                 </Box>
                 <Box>
-                  <Typography sx={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500 }}>Cédula</Typography>
-                  <Typography sx={{ fontSize: 14, color: "#374151" }}>{incidencia.cedula}</Typography>
+                  <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 500 }}>Cédula</Typography>
+                  <Typography sx={{ fontSize: 14, color: COLORES.textoSecundario }}>{incidencia.cedula}</Typography>
                 </Box>
                 <Box>
-                  <Typography sx={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500 }}>Cargo</Typography>
-                  <Typography sx={{ fontSize: 14, color: "#374151" }}>{incidencia.cargo || "—"}</Typography>
+                  <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 500 }}>Cargo</Typography>
+                  <Typography sx={{ fontSize: 14, color: COLORES.textoSecundario }}>{incidencia.cargo || "—"}</Typography>
                 </Box>
                 <Box>
-                  <Typography sx={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500 }}>Área</Typography>
-                  <Typography sx={{ fontSize: 14, color: "#374151" }}>{incidencia.area || "—"}</Typography>
+                  <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 500 }}>Área</Typography>
+                  <Typography sx={{ fontSize: 14, color: COLORES.textoSecundario }}>{incidencia.area || "—"}</Typography>
                 </Box>
                 <Box>
-                  <Typography sx={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500 }}>Tipo de incidencia</Typography>
-                  <Typography sx={{ fontSize: 14, fontWeight: 500, color: "#111827" }}>{TIPOS[incidencia.tipo] || incidencia.tipo}</Typography>
+                  <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 500 }}>Tipo de incidencia</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 500, color: COLORES.textoPrimario }}>{TIPOS[incidencia.tipo] || incidencia.tipo}</Typography>
                 </Box>
                 <Box>
-                  <Typography sx={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500 }}>Fecha del reporte</Typography>
-                  <Typography sx={{ fontSize: 14, color: "#374151" }}>{formatDateShort(incidencia.fecha)}</Typography>
+                  <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 500 }}>Fecha del reporte</Typography>
+                  <Typography sx={{ fontSize: 14, color: COLORES.textoSecundario }}>{formatDateShort(incidencia.fecha)}</Typography>
                 </Box>
                 <Box>
-                  <Typography sx={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500 }}>Hora registrada</Typography>
-                  <Typography sx={{ fontSize: 14, color: "#374151" }}>
+                  <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 500 }}>Hora registrada</Typography>
+                  <Typography sx={{ fontSize: 14, color: COLORES.textoSecundario }}>
                     {fechaCreacion ? new Date(fechaCreacion).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" }) : "—"}
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography sx={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500 }}>Registrado por</Typography>
-                  <Typography sx={{ fontSize: 14, color: "#374151" }}>{incidencia.empleado_nombre || "—"}</Typography>
+                  <Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 500 }}>Registrado por</Typography>
+                  <Typography sx={{ fontSize: 14, color: COLORES.textoSecundario }}>{incidencia.empleado_nombre || "—"}</Typography>
                 </Box>
               </Box>
             </Box>
@@ -348,8 +349,8 @@ export default function IncidenciaExpedientePage() {
 
           {/* Descripción */}
           <SectionCard title="Descripción">
-            <Box sx={{ bgcolor: "#F9FAFB", borderRadius: "10px", p: 2, border: "1px solid #F3F4F6" }}>
-              <Typography sx={{ fontSize: 13, color: "#374151", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+            <Box sx={{ bgcolor: COLORES.fondoGris, borderRadius: "10px", p: 2, border: `1px solid ${COLORES.fondoGris2}` }}>
+              <Typography sx={{ fontSize: 13, color: COLORES.textoSecundario, lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
                 {incidencia.descripcion || "Sin descripción"}
               </Typography>
             </Box>
@@ -362,7 +363,7 @@ export default function IncidenciaExpedientePage() {
                 {isImageFile(incidencia.evidencia_url) ? (
                   <Box sx={{
                     width: 120, height: 120, borderRadius: "10px", overflow: "hidden",
-                    border: "1px solid #ECECEC", position: "relative", cursor: "pointer",
+                    border: `1px solid ${COLORES.grisContorno}`, position: "relative", cursor: "pointer",
                     "&:hover .overlay": { opacity: 1 },
                   }}
                     onClick={() => window.open(incidencia.evidencia_url, "_blank")}>
@@ -373,61 +374,61 @@ export default function IncidenciaExpedientePage() {
                       display: "flex", alignItems: "center", justifyContent: "center", opacity: 0,
                       transition: "opacity 0.2s",
                     }}>
-                      <Eye size={20} color="#FFF" />
+                      <Eye size={20} color={COLORES.fondoBlanco} />
                     </Box>
                   </Box>
                 ) : (
                   <Button variant="outlined" startIcon={<FileText size={16} />}
                     href={incidencia.evidencia_url} target="_blank"
-                    sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, color: "#6B7280", borderColor: "#D1D5DB" }}>
+                    sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, color: COLORES.textoTerciario, borderColor: COLORES.borde2 }}>
                     Ver PDF de evidencia
                   </Button>
                 )}
               </Box>
             ) : (
-              <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>Sin evidencia adjunta</Typography>
+              <Typography sx={{ fontSize: 13, color: COLORES.textoSuave }}>Sin evidencia adjunta</Typography>
             )}
           </SectionCard>
 
           {/* Documentos */}
           <SectionCard title="Documentos">
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2, bgcolor: "#F0FDF4", borderRadius: "10px", p: 2, border: "1px solid #BBF7D0" }}>
-                <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "#D1FAE5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <FileText size={18} color="#16A34A" />
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2, bgcolor: COLORES.fondoGris, borderRadius: "10px", p: 2, border: `1px solid ${COLORES.grisContorno}` }}>
+                <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: COLORES.successFondo, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <FileText size={18} color={COLORES.success} />
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography sx={{ fontSize: 13, fontWeight: 500, color: "#065F46" }}>Plantilla de incidencia</Typography>
-                  <Typography sx={{ fontSize: 11, color: "#6B7280" }}>Generada el {formatDateShort(fechaCreacion)}</Typography>
+                  <Typography sx={{ fontSize: 13, fontWeight: 500, color: COLORES.verdeTexto }}>Plantilla de incidencia</Typography>
+                  <Typography sx={{ fontSize: 11, color: COLORES.textoTerciario }}>Generada el {formatDateShort(fechaCreacion)}</Typography>
                 </Box>
                 <Button size="small" variant="outlined" startIcon={<Eye size={14} />}
                   onClick={() => setPlantillaPreviewUrl(`/api/pdf/incidencias/${incidencia.id}/plantilla?token=${localStorage.getItem("token")}`)}
-                  sx={{ borderRadius: "6px", textTransform: "none", fontSize: 11, color: "#16A34A", borderColor: "#16A34A", minWidth: 0, px: 1.5 }}>
+                  sx={{ borderRadius: "6px", textTransform: "none", fontSize: 11, color: COLORES.verdeTexto, borderColor: COLORES.verdeTexto, minWidth: 0, px: 1.5 }}>
                   Ver
                 </Button>
                 <Button size="small" variant="outlined" startIcon={<Download size={14} />}
                   onClick={() => descargarArchivo(`/api/pdf/incidencias/${incidencia.id}/plantilla?token=${localStorage.getItem("token")}`, `INC-${anio}-${String(incidencia.id).padStart(5, "0")}.pdf`)}
-                  sx={{ borderRadius: "6px", textTransform: "none", fontSize: 11, color: "#16A34A", borderColor: "#16A34A", minWidth: 0, px: 1.5 }}>
+                  sx={{ borderRadius: "6px", textTransform: "none", fontSize: 11, color: COLORES.verdeTexto, borderColor: COLORES.verdeTexto, minWidth: 0, px: 1.5 }}>
                   Descargar
                 </Button>
               </Box>
               {incidencia.archivo_firmado && (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2, bgcolor: "#EFF6FF", borderRadius: "10px", p: 2, border: "1px solid #BFDBFE" }}>
-                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "#DBEAFE", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <FileSignature size={18} color="#2563EB" />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2, bgcolor: COLORES.primarioClaro, borderRadius: "10px", p: 2, border: `1px solid ${COLORES.primarioClaro2}` }}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: COLORES.primarioClaro2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <FileSignature size={18} color={COLORES.primario} />
                   </Box>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography sx={{ fontSize: 13, fontWeight: 500, color: "#1E40AF" }}>Documento firmado electrónicamente</Typography>
-                    <Typography sx={{ fontSize: 11, color: "#6B7280" }}>Disponible para descarga</Typography>
+                    <Typography sx={{ fontSize: 13, fontWeight: 500, color: COLORES.primarioOscuro }}>Documento firmado electrónicamente</Typography>
+                    <Typography sx={{ fontSize: 11, color: COLORES.textoTerciario }}>Disponible para descarga</Typography>
                   </Box>
                   <Button size="small" variant="outlined" startIcon={<Eye size={14} />}
                     onClick={() => setFirmadoPreviewUrl(incidencia.archivo_firmado)}
-                    sx={{ borderRadius: "6px", textTransform: "none", fontSize: 11, color: "#2563EB", borderColor: "#2563EB", minWidth: 0, px: 1.5 }}>
+                    sx={{ borderRadius: "6px", textTransform: "none", fontSize: 11, color: COLORES.primario, borderColor: COLORES.primario, minWidth: 0, px: 1.5 }}>
                     Ver
                   </Button>
                   <Button size="small" variant="outlined" startIcon={<Download size={14} />}
                     onClick={() => descargarArchivo(incidencia.archivo_firmado, `INC-${anio}-${String(incidencia.id).padStart(5, "0")}-firmado.pdf`)}
-                    sx={{ borderRadius: "6px", textTransform: "none", fontSize: 11, color: "#2563EB", borderColor: "#2563EB", minWidth: 0, px: 1.5 }}>
+                    sx={{ borderRadius: "6px", textTransform: "none", fontSize: 11, color: COLORES.primario, borderColor: COLORES.primario, minWidth: 0, px: 1.5 }}>
                     Descargar
                   </Button>
                 </Box>
@@ -455,7 +456,7 @@ export default function IncidenciaExpedientePage() {
                 <TimelineItem
                   icon={esAprobado ? <CheckCircle size={13} /> : esRechazado ? <XCircle size={13} /> : esCorreccion ? <AlertTriangle size={13} /> : <Clock size={13} />}
                   activo={!esPendiente}
-                  iconColor={esRechazado ? "#DC2626" : esCorreccion ? "#D97706" : undefined}
+                  iconColor={esRechazado ? COLORES.danger : esCorreccion ? COLORES.warning : undefined}
                   label={esAprobado ? "Incidencia aprobada" : esRechazado ? "Incidencia rechazada" : esCorreccion ? "Corrección solicitada" : "Pendiente de revisión"}
                   responsable={(esAprobado || esRechazado) ? incidencia.revisor_nombre : null}
                   ultimo
@@ -466,57 +467,57 @@ export default function IncidenciaExpedientePage() {
 
           {/* Impacto en la asistencia */}
           <SectionCard title="Impacto en la asistencia"
-            action={<Clock size={16} color="#9CA3AF" />}>
+            action={<Clock size={16} color={COLORES.textoSuave} />}>
             {incidencia.tipo === "otro" ? (
-              <Typography sx={{ fontSize: 13, color: "#9CA3AF" }}>
+              <Typography sx={{ fontSize: 13, color: COLORES.textoSuave }}>
                 Esta incidencia no genera modificaciones en el registro de asistencia del empleado.
               </Typography>
             ) : incidencia.tipo === "tardanza_justificada" ? (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: "1px solid #F3F4F6" }}>
-                  <Clock size={16} color="#9CA3AF" />
-                  <Typography sx={{ fontSize: 12, color: "#6B7280", flex: 1 }}>Horario asignado</Typography>
-                  <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
+                  <Clock size={16} color={COLORES.textoSuave} />
+                  <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, flex: 1 }}>Horario asignado</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>
                     {incidencia.asistencia?.hora_entrada_programada && incidencia.asistencia?.hora_salida_programada
                       ? `${formatHoraProg(incidencia.asistencia.hora_entrada_programada)} - ${formatHoraProg(incidencia.asistencia.hora_salida_programada)}`
                       : "—"}
                   </Typography>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: "1px solid #F3F4F6" }}>
-                  <Clock size={16} color="#9CA3AF" />
-                  <Typography sx={{ fontSize: 12, color: "#6B7280", flex: 1 }}>Hora registrada</Typography>
-                  <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
+                  <Clock size={16} color={COLORES.textoSuave} />
+                  <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, flex: 1 }}>Hora registrada</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>
                     {formatHora12h(incidencia.asistencia?.fecha_hora_entrada)}
                   </Typography>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: "1px solid #F3F4F6" }}>
-                  <Timer size={16} color="#9CA3AF" />
-                  <Typography sx={{ fontSize: 12, color: "#6B7280", flex: 1 }}>Minutos de retraso</Typography>
-                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? "#DC2626" : "#16A34A" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
+                  <Timer size={16} color={COLORES.textoSuave} />
+                  <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, flex: 1 }}>Minutos de retraso</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? COLORES.danger : COLORES.success }}>
                     {incidencia.asistencia?.minutos_tardanza != null ? `${incidencia.asistencia.minutos_tardanza} minutos` : "—"}
                   </Typography>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: "1px solid #F3F4F6" }}>
-                  <CircleDollarSign size={16} color="#9CA3AF" />
-                  <Typography sx={{ fontSize: 12, color: "#6B7280", flex: 1 }}>Descuento aplicado</Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
+                  <CircleDollarSign size={16} color={COLORES.textoSuave} />
+                  <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, flex: 1 }}>Descuento aplicado</Typography>
                   <Chip label={incidencia.estado === "aprobado" && (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? "Sí" : "No"} size="small"
                     sx={{ borderRadius: "6px", fontSize: 11, fontWeight: 600, height: 24,
-                      bgcolor: incidencia.estado === "aprobado" && (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? "#D1FAE5" : "#F3F4F6",
-                      color: incidencia.estado === "aprobado" && (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? "#065F46" : "#6B7280" }} />
+                      bgcolor: incidencia.estado === "aprobado" && (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? COLORES.successFondo : COLORES.fondoGris2,
+                      color: incidencia.estado === "aprobado" && (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? COLORES.verdeTexto : COLORES.textoTerciario }} />
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <RefreshCw size={16} color="#9CA3AF" />
-                  <Typography sx={{ fontSize: 12, color: "#6B7280", flex: 1 }}>Estado del ajuste</Typography>
+                  <RefreshCw size={16} color={COLORES.textoSuave} />
+                  <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, flex: 1 }}>Estado del ajuste</Typography>
                   <Chip label={estadoAjuste.label} size="small"
                     sx={{ borderRadius: "6px", fontSize: 11, fontWeight: 600, height: 24, bgcolor: estadoAjuste.bg, color: estadoAjuste.color }} />
                 </Box>
               </Box>
             ) : (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: "1px solid #F3F4F6" }}>
-                  <MapPin size={16} color="#9CA3AF" />
-                  <Typography sx={{ fontSize: 12, color: "#6B7280", flex: 1 }}>Tipo de marcación afectada</Typography>
-                  <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
+                  <MapPin size={16} color={COLORES.textoSuave} />
+                  <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, flex: 1 }}>Tipo de marcación afectada</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>
                     {(() => {
                       const tm = incidencia.asistencia?.tipo_marcacion;
                       if (tm) return tm === "entrada" ? "Entrada" : "Salida";
@@ -524,25 +525,25 @@ export default function IncidenciaExpedientePage() {
                     })()}
                   </Typography>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: "1px solid #F3F4F6" }}>
-                  <MapPin size={16} color="#9CA3AF" />
-                  <Typography sx={{ fontSize: 12, color: "#6B7280", flex: 1 }}>Estado de la marcación</Typography>
-                  <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
+                  <MapPin size={16} color={COLORES.textoSuave} />
+                  <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, flex: 1 }}>Estado de la marcación</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>
                     {incidencia.asistencia?.estado_marcacion
                       ? incidencia.asistencia.estado_marcacion.charAt(0).toUpperCase() + incidencia.asistencia.estado_marcacion.slice(1)
                       : incidencia.estado === "aprobado" ? "Corregida" : "No marcada"}
                   </Typography>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: "1px solid #F3F4F6" }}>
-                  <AlertTriangle size={16} color="#9CA3AF" />
-                  <Typography sx={{ fontSize: 12, color: "#6B7280", flex: 1 }}>Impacto en la asistencia</Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
+                  <AlertTriangle size={16} color={COLORES.textoSuave} />
+                  <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, flex: 1 }}>Impacto en la asistencia</Typography>
                   <Chip label="Sí" size="small"
                     sx={{ borderRadius: "6px", fontSize: 11, fontWeight: 600, height: 24,
-                      bgcolor: "#D1FAE5", color: "#065F46" }} />
+                      bgcolor: COLORES.successFondo, color: COLORES.verdeTexto }} />
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <RefreshCw size={16} color="#9CA3AF" />
-                  <Typography sx={{ fontSize: 12, color: "#6B7280", flex: 1 }}>Estado del ajuste</Typography>
+                  <RefreshCw size={16} color={COLORES.textoSuave} />
+                  <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, flex: 1 }}>Estado del ajuste</Typography>
                   <Chip label={estadoAjuste.label} size="small"
                     sx={{ borderRadius: "6px", fontSize: 11, fontWeight: 600, height: 24, bgcolor: estadoAjuste.bg, color: estadoAjuste.color }} />
                 </Box>
@@ -554,43 +555,43 @@ export default function IncidenciaExpedientePage() {
           {puedeGestionar && (
             <Paper elevation={0} sx={{
               borderRadius: "16px", overflow: "hidden",
-              border: "2px solid #1B5E20",
+              border: `2px solid ${COLORES.primarioOscuro}`,
               boxShadow: "0 4px 20px rgba(27,94,32,0.12)",
             }}>
               <Box sx={{
                 px: 2.5, py: 1.75,
-                borderBottom: "1px solid #1B5E20",
-                bgcolor: "#1B5E20",
+                borderBottom: `1px solid ${COLORES.primarioOscuro}`,
+                bgcolor: COLORES.primarioOscuro,
                 display: "flex", alignItems: "center", justifyContent: "space-between",
               }}>
                 <Typography sx={{
                   fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5,
-                  color: "#FFF",
+                  color: COLORES.fondoBlanco,
                 }}>
                   Gestión de la incidencia
                 </Typography>
-                <Shield size={16} color="#A5D6A7" />
+                <Shield size={16} color={COLORES.primarioClaro2} />
               </Box>
               <Box sx={{ p: 2.5, display: "flex", flexDirection: "column", gap: 2 }}>
 
                 {actionError && (
-                  <Box sx={{ px: 1.5, py: 1, bgcolor: "#FEE2E2", borderRadius: "8px", display: "flex", alignItems: "center", gap: 1 }}>
-                    <AlertTriangle size={14} color="#DC2626" />
-                    <Typography sx={{ fontSize: 12, color: "#DC2626" }}>{actionError}</Typography>
+                  <Box sx={{ px: 1.5, py: 1, bgcolor: COLORES.dangerFondo, borderRadius: "8px", display: "flex", alignItems: "center", gap: 1 }}>
+                    <AlertTriangle size={14} color={COLORES.danger} />
+                    <Typography sx={{ fontSize: 12, color: COLORES.danger }}>{actionError}</Typography>
                   </Box>
                 )}
 
                 {incidencia.observacion && (
-                  <Box sx={{ bgcolor: "#FFFBEB", borderRadius: "8px", p: 1.5, border: "1px solid #FDE68A" }}>
-                    <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#92400E", mb: 0.5 }}>Observación de revisión anterior</Typography>
-                    <Typography sx={{ fontSize: 12, color: "#78350F" }}>{incidencia.observacion}</Typography>
+                  <Box sx={{ bgcolor: COLORES.warningFondo, borderRadius: "8px", p: 1.5, border: `1px solid ${COLORES.warningFondo}` }}>
+                    <Typography sx={{ fontSize: 11, fontWeight: 600, color: COLORES.warningOscuro, mb: 0.5 }}>Observación de revisión anterior</Typography>
+                    <Typography sx={{ fontSize: 12, color: COLORES.warningOscuro }}>{incidencia.observacion}</Typography>
                   </Box>
                 )}
 
                 <Box>
-                  <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#6B7280", mb: 0.5, textTransform: "uppercase" }}>Prioridad</Typography>
+                  <Typography sx={{ fontSize: 11, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5, textTransform: "uppercase" }}>Prioridad</Typography>
                   <Select value={prioridad} onChange={e => setPrioridad(e.target.value)} size="small" fullWidth
-                    sx={{ borderRadius: "8px", fontSize: 13, bgcolor: "#FFF" }}>
+                    sx={{ borderRadius: "8px", fontSize: 13, bgcolor: COLORES.fondoBlanco }}>
                     <MenuItem value="baja">Baja</MenuItem>
                     <MenuItem value="media">Media</MenuItem>
                     <MenuItem value="alta">Alta</MenuItem>
@@ -598,24 +599,24 @@ export default function IncidenciaExpedientePage() {
                 </Box>
                 <TextField multiline rows={2} value={observacion} onChange={e => setObservacion(e.target.value)}
                   placeholder="Escribe una observación (requerido para solicitar corrección)"
-                  fullWidth sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: 13, bgcolor: "#FFF" } }} />
+                  fullWidth sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: 13, bgcolor: COLORES.fondoBlanco } }} />
                 <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end", flexWrap: "wrap" }}>
                   <>
                     <input type="file" accept=".pdf" ref={firmaInputRef}
                       onChange={handleFirmaSelect} style={{ display: "none" }} />
                     <Button variant="contained" onClick={() => firmaInputRef.current?.click()} disabled={subiendoFirma}
-                      sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, fontWeight: 600, bgcolor: "#16A34A", "&:hover": { bgcolor: "#15803D" }, px: 3 }}>
+                      sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, fontWeight: 600, bgcolor: COLORES.success, "&:hover": { bgcolor: COLORES.primario }, px: 3 }}>
                       {subiendoFirma ? "Subiendo..." : "Subir PDF firmado"}
                     </Button>
                   </>
                   <Button variant="contained" onClick={handleSolicitarCorreccion}
                     disabled={accionando || !observacion.trim()}
-                    sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, fontWeight: 600, bgcolor: "#CA8A04", "&:hover": { bgcolor: "#B45309" }, px: 3 }}>
+                    sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, fontWeight: 600, bgcolor: COLORES.warningOscuro, "&:hover": { bgcolor: COLORES.warningOscuro2 }, px: 3 }}>
                     Solicitar corrección
                   </Button>
                   <Button variant="contained" onClick={handleRechazar}
                     disabled={accionando || !observacion.trim()}
-                    sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, fontWeight: 600, bgcolor: "#DC2626", "&:hover": { bgcolor: "#B91C1C" }, px: 3 }}>
+                    sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, fontWeight: 600, bgcolor: COLORES.danger, "&:hover": { bgcolor: COLORES.dangerOscuro2 }, px: 3 }}>
                     Rechazar incidencia
                   </Button>
                 </Box>
@@ -643,12 +644,12 @@ export default function IncidenciaExpedientePage() {
 
       {/* Firma preview modal */}
       <Dialog open={firmaModalOpen} onClose={() => { setFirmaModalOpen(false); if (firmaPreviewUrl) URL.revokeObjectURL(firmaPreviewUrl); setFirmaFile(null); setFirmaPreviewUrl(null); }}
-        maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: "16px", overflow: "hidden" } }}>
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: "#111827", display: "flex", alignItems: "center", gap: 1.5 }}>
+        maxWidth="md" fullWidth slotProps={{ paper: { sx: { borderRadius: "16px", overflow: "hidden" } } }}>
+        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario, display: "flex", alignItems: "center", gap: 1.5 }}>
           <FileSignature size={20} />
           Vista previa - PDF firmado
         </DialogTitle>
-        <DialogContent sx={{ p: 0, bgcolor: "#52525B", height: "60vh" }}>
+        <DialogContent sx={{ p: 0, bgcolor: COLORES.textoMuted, height: "60vh" }}>
           {firmaFile && firmaPreviewUrl ? (
             firmaFile.type === "application/pdf" ? (
               <iframe src={firmaPreviewUrl} width="100%" height="100%" style={{ border: "none" }} title="Vista previa PDF" />
@@ -657,14 +658,14 @@ export default function IncidenciaExpedientePage() {
             )
           ) : null}
         </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1, borderTop: "1px solid #ECECEC" }}>
+        <DialogActions sx={{ p: 2, gap: 1, borderTop: `1px solid ${COLORES.grisContorno}` }}>
           <Button onClick={() => { setFirmaModalOpen(false); if (firmaPreviewUrl) URL.revokeObjectURL(firmaPreviewUrl); setFirmaFile(null); setFirmaPreviewUrl(null); }}
-            sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, color: "#6B7280" }}>
+            sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, color: COLORES.textoTerciario }}>
             Cancelar
           </Button>
           <Button variant="contained" startIcon={<Upload size={16} />}
             onClick={handleConfirmarFirma} disabled={subiendoFirma}
-            sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, fontWeight: 600, bgcolor: "#16A34A", "&:hover": { bgcolor: "#15803D" } }}>
+            sx={{ borderRadius: "8px", textTransform: "none", fontSize: 13, fontWeight: 600, bgcolor: COLORES.verdeTexto, "&:hover": { bgcolor: COLORES.primarioOscuro } }}>
             {subiendoFirma ? "Subiendo..." : "Subir PDF firmado"}
           </Button>
         </DialogActions>

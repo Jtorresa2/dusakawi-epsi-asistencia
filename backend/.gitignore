@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+
+# User-uploaded files (incidencias, permisos, firmas)
+uploads/
+
+# Local test artifacts (not source)
+test-*.pdf
+
+# One-off helper scripts
+hash.js
+
+# Logs
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db

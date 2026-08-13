@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Paper, Typography, Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { BarChart, Bar, XAxis, ResponsiveContainer } from "recharts";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const DATA_HORAS = [
   { dia: "Lun", valor: 4 },
@@ -28,12 +29,12 @@ export default function OvertimeBarChart({ data: _data }) {
 
   return (
     <Paper elevation={0} sx={{
-      p: 3, borderRadius: "20px", border: "1px solid #ECECEC",
+      p: 3, borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`,
       height: 320,
       display: "flex", flexDirection: "column", justifyContent: "space-between",
     }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography sx={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Typography sx={{ fontSize: 15, fontWeight: 600, color: COLORES.textoPrimario }}>
           Horas extra
         </Typography>
         <ToggleButtonGroup
@@ -49,9 +50,9 @@ export default function OvertimeBarChart({ data: _data }) {
               px: 1.2,
               py: 0.2,
               borderRadius: "8px !important",
-              border: "1px solid #ECECEC !important",
-              color: "#6B7280",
-              "&.Mui-selected": { background: "#E8F5E9", color: "#1B5E20" },
+              border: `1px solid ${COLORES.grisContorno} !important`,
+              color: COLORES.textoTerciario,
+              "&.Mui-selected": { background: COLORES.primarioClaro, color: COLORES.primarioOscuro },
             },
           }}
         >
@@ -62,8 +63,8 @@ export default function OvertimeBarChart({ data: _data }) {
       <Box sx={{ flex: 1, display: "flex", alignItems: "flex-end" }}>
         <ResponsiveContainer width="100%" height="90%">
           <BarChart data={chartData} barCategoryGap="25%" margin={{ top: 10, right: 0, left: -10, bottom: 0 }}>
-            <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
-            <Bar dataKey="valor" radius={[6, 6, 0, 0]} fill="#7C3AED" />
+            <XAxis dataKey="dia" tick={{ fontSize: 11, fill: COLORES.textoSuave }} axisLine={false} tickLine={false} />
+            <Bar dataKey="valor" radius={[6, 6, 0, 0]} fill={COLORES.primario} />
           </BarChart>
         </ResponsiveContainer>
       </Box>

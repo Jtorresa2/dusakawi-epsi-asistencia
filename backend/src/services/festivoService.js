@@ -108,6 +108,7 @@ function calcularFestivosNacionales(year) {
     { m: 0, d: 6, n: "Día de los Reyes Magos" },
     { m: 2, d: 19, n: "Día de San José" },
     { m: 5, d: 29, n: "San Pedro y San Pablo" },
+    { m: 6, d: 9, n: "Virgen de Chiquinquirá" },
     { m: 7, d: 15, n: "Asunción de la Virgen" },
     { m: 9, d: 12, n: "Día de la Raza" },
     { m: 10, d: 1, n: "Todos los Santos" },
@@ -119,7 +120,6 @@ function calcularFestivosNacionales(year) {
   const easter = getEaster(year);
   push(addDays(easter, -3), "Jueves Santo");
   push(addDays(easter, -2), "Viernes Santo");
-  push(easter, "Domingo de Resurrección");
 
   // Religiosos móviles (siempre lunes por Ley Emiliani)
   push(addDays(easter, 43), "Ascensión del Señor");
