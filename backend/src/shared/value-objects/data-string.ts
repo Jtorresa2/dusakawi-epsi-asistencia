@@ -9,16 +9,18 @@ export class DataString {
   }
 
   static create(value: string): DataString {
+    const normalizedValue = value.trim();
+
     if (
-      value.length < DataString.MIN_LENGTH ||
-      value.length > DataString.MAX_LENGTH
+      normalizedValue.length < DataString.MIN_LENGTH ||
+      normalizedValue.length > DataString.MAX_LENGTH
     ) {
       throw new Error(
         `El campo debe tener entre ${DataString.MIN_LENGTH} y ${DataString.MAX_LENGTH} caracteres.`,
       );
     }
 
-    return new DataString(value);
+    return new DataString(normalizedValue);
   }
 
   get value(): string {

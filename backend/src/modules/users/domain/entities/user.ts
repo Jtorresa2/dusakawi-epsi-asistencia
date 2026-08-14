@@ -1,21 +1,22 @@
+import { Area } from '../../../areas/entities/area.js';
 import { DataString } from '@shared/value-objects/data-string.js';
 import { DocumentDetails } from './document-details.js';
 import { Email } from '../value-objects/email.js';
 import { GenericEntity } from '@shared/entities/generic-entity.js';
 import { HashedPassword } from '../value-objects/hashed-password.js';
+import { Name } from '../value-objects/name.js';
 import { Position } from './position.js';
-import { Area } from '../../../areas/entities/area.js';
 
 export class User extends GenericEntity {
   private _password: HashedPassword;
 
   constructor(
     public readonly documentDetails: DocumentDetails,
-    public readonly firstName: DataString,
-    public readonly firstSurname: DataString,
-    public readonly secondSurname: DataString,
+    public readonly firstName: Name,
+    public readonly firstSurname: Name,
+    public readonly secondSurname: Name,
     public readonly dateOfBirth: Date,
-    public readonly placeOfBirth: string,
+    public readonly placeOfBirth: DataString,
     public readonly address: DataString,
     public readonly cell: DataString,
     public readonly position: Position,
@@ -23,7 +24,7 @@ export class User extends GenericEntity {
     public readonly username: DataString,
     password: HashedPassword,
     public readonly email: Email,
-    public readonly middleName?: DataString,
+    public readonly middleName?: Name,
     public readonly phone?: DataString,
   ) {
     super();

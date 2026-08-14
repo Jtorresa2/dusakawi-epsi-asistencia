@@ -6,15 +6,16 @@ import { Position } from '../../entities/position.js';
 import { Email } from '../../value-objects/email.js';
 import { HashedPassword } from '../../value-objects/hashed-password.js';
 import { Builder } from '../../interfaces/builder.js';
+import { Name } from '../../value-objects/name.js';
 
 export class UserBuilder implements Builder<User> {
   private _documentDetails?: DocumentDetails;
-  private _firstName?: DataString;
-  private _middleName?: DataString;
-  private _firstSurname?: DataString;
-  private _secondSurname?: DataString;
+  private _firstName?: Name;
+  private _middleName?: Name;
+  private _firstSurname?: Name;
+  private _secondSurname?: Name;
   private _dateOfBirth?: Date;
-  private _placeOfBirth?: string;
+  private _placeOfBirth?: DataString;
   private _address?: DataString;
   private _phone?: DataString;
   private _cell?: DataString;
@@ -29,22 +30,22 @@ export class UserBuilder implements Builder<User> {
     return this;
   }
 
-  firstName(firstName: DataString): this {
+  firstName(firstName: Name): this {
     this._firstName = firstName;
     return this;
   }
 
-  middleName(middleName?: DataString): this {
+  middleName(middleName?: Name): this {
     this._middleName = middleName;
     return this;
   }
 
-  firstSurname(firstSurname: DataString): this {
+  firstSurname(firstSurname: Name): this {
     this._firstSurname = firstSurname;
     return this;
   }
 
-  secondSurname(secondSurname: DataString): this {
+  secondSurname(secondSurname: Name): this {
     this._secondSurname = secondSurname;
     return this;
   }
@@ -54,7 +55,7 @@ export class UserBuilder implements Builder<User> {
     return this;
   }
 
-  placeOfBirth(placeOfBirth: string): this {
+  placeOfBirth(placeOfBirth: DataString): this {
     this._placeOfBirth = placeOfBirth;
     return this;
   }
