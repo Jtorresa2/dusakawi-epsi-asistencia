@@ -180,7 +180,7 @@ INSERT INTO users (
         '1995-04-12', 'Astrea', 'Calle 10 # 5-23', NULL, '3001234567',
         (SELECT id FROM positions WHERE name = 'Técnico de Sistemas'),
         (SELECT a.id FROM area a JOIN floors f ON a.floor_id = f.id WHERE a.name = 'Sistemas' AND f.name = 'Piso 3'),
-        'Jtorresa22', '$2b$10$QfVbkqSfSztAqeMBBcIOxuyeCFGxeCa/X3ErYjTvG5YSKbzM5SHvG', 'jtorresa@email.com'
+        'Jtorresa22', '$2a$12$w5cCwla/RnLBWFTrLn0snOODkQlsZ2Lw96igxODh4KrdWy3ScyS8K', 'jtorresa@email.com'
     ),
     (
         (SELECT id FROM document_details WHERE document_number = '1073654298'),
