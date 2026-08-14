@@ -7,6 +7,7 @@ import { Email } from '../../value-objects/email.js';
 import { HashedPassword } from '../../value-objects/hashed-password.js';
 import { Builder } from '../../interfaces/builder.js';
 import { Name } from '../../value-objects/name.js';
+import { Role } from '../../entities/role.js';
 
 export class UserBuilder implements Builder<User> {
   private _documentDetails?: DocumentDetails;
@@ -24,6 +25,7 @@ export class UserBuilder implements Builder<User> {
   private _username?: DataString;
   private _password?: HashedPassword;
   private _email?: Email;
+  private _roles?: Role[];
 
   documentDetails(documentDetails: DocumentDetails): this {
     this._documentDetails = documentDetails;
@@ -100,6 +102,11 @@ export class UserBuilder implements Builder<User> {
     return this;
   }
 
+  roles(roles: Role[]): this {
+    this._roles = roles;
+    return this;
+  }
+
   build(): User {
     return new User(
       this._documentDetails!,
@@ -115,6 +122,7 @@ export class UserBuilder implements Builder<User> {
       this._username!,
       this._password!,
       this._email!,
+      this._roles!,
       this._middleName,
       this._phone,
     );

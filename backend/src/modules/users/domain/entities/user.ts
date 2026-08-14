@@ -6,6 +6,7 @@ import { GenericEntity } from '@shared/entities/generic-entity.js';
 import { HashedPassword } from '../value-objects/hashed-password.js';
 import { Name } from '../value-objects/name.js';
 import { Position } from './position.js';
+import { Role } from './role.js';
 
 export class User extends GenericEntity {
   private _password: HashedPassword;
@@ -24,6 +25,7 @@ export class User extends GenericEntity {
     public readonly username: DataString,
     password: HashedPassword,
     public readonly email: Email,
+    public readonly roles: Role[],
     public readonly middleName?: Name,
     public readonly phone?: DataString,
   ) {
