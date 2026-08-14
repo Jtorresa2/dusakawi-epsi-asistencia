@@ -1,8 +1,10 @@
 import { GenericEntity } from '@shared/entities/generic-entity.js';
 
 export const enum DocumentTypeName {
-  CC = 'Cédula de ciudadanía',
-  CCE = 'Cédula de extranjería',
+  ID = 'Cédula de ciudadanía',
+  FBN = 'Cédula de extranjería',
+  MIN = 'Tarjeta de identidad',
+  PASS = 'Pasaporte',
 }
 
 export class DocumentType extends GenericEntity {
