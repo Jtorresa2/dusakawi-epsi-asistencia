@@ -30,6 +30,10 @@ export class User extends GenericEntity {
     this._password = password;
   }
 
+  get password(): HashedPassword {
+    return this._password;
+  }
+
   changePassword(password: HashedPassword) {
     this._password = password;
   }
