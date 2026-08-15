@@ -14,14 +14,14 @@ export class LoginQueryHandler {
   async handle(request: LoginQueryDto): Promise<AuthResposeDto> {
     const user = await this.userRepository.getUserByUsername(request.username);
 
-    if (!user) throw new Error('User not found');
+    if (!user) throw new Error('Invalid username or password');
 
     const isPasswordValid = this.passwordHasher.verify(
       request.password,
       user.password,
     );
 
-    if (!isPasswordValid) throw new Error('Invalid password');
+    if (!isPasswordValid) throw new Error('Invalid username or password');
 
     const token = this.tokenHandler.createToken(user.id, user.roles);
 
