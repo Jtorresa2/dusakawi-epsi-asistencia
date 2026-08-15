@@ -32,23 +32,23 @@ export class UserBuilder implements Builder<User> {
     return this;
   }
 
-  firstName(firstName: Name): this {
-    this._firstName = firstName;
+  firstName(firstName: string): this {
+    this._firstName = Name.create(firstName);
     return this;
   }
 
-  middleName(middleName?: Name): this {
-    this._middleName = middleName;
+  middleName(middleName?: string): this {
+    this._middleName = middleName ? Name.create(middleName) : undefined;
     return this;
   }
 
-  firstSurname(firstSurname: Name): this {
-    this._firstSurname = firstSurname;
+  firstSurname(firstSurname: string): this {
+    this._firstSurname = Name.create(firstSurname);
     return this;
   }
 
-  secondSurname(secondSurname: Name): this {
-    this._secondSurname = secondSurname;
+  secondSurname(secondSurname: string): this {
+    this._secondSurname = Name.create(secondSurname);
     return this;
   }
 
@@ -57,23 +57,23 @@ export class UserBuilder implements Builder<User> {
     return this;
   }
 
-  placeOfBirth(placeOfBirth: DataString): this {
-    this._placeOfBirth = placeOfBirth;
+  placeOfBirth(placeOfBirth: string): this {
+    this._placeOfBirth = DataString.create(placeOfBirth);
     return this;
   }
 
-  address(address: DataString): this {
-    this._address = address;
+  address(address: string): this {
+    this._address = DataString.create(address);
     return this;
   }
 
-  phone(phone?: DataString): this {
-    this._phone = phone;
+  phone(phone?: string): this {
+    this._phone = phone ? DataString.create(phone) : undefined;
     return this;
   }
 
-  cell(cell: DataString): this {
-    this._cell = cell;
+  cell(cell: string): this {
+    this._cell = DataString.create(cell);
     return this;
   }
 
@@ -87,8 +87,8 @@ export class UserBuilder implements Builder<User> {
     return this;
   }
 
-  username(username: DataString): this {
-    this._username = username;
+  username(username: string): this {
+    this._username = DataString.create(username);
     return this;
   }
 
@@ -97,8 +97,8 @@ export class UserBuilder implements Builder<User> {
     return this;
   }
 
-  email(email: Email): this {
-    this._email = email;
+  email(email: string): this {
+    this._email = Email.create(email);
     return this;
   }
 
