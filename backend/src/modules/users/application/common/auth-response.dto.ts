@@ -1,3 +1,3 @@
-export class AuthResposeDto {
-  constructor(public readonly token: string) {}
+export interface AuthResposeDto {
+  readonly token: string;
 }
