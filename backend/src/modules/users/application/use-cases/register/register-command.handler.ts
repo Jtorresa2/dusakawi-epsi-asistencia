@@ -22,8 +22,13 @@ export class RegisterCommandHandler {
 
   async handle(request: RegisterCommandDto): Promise<void> {
     const userExist = await this.userRepository.getUserExists(request.username);
-
     if (userExist) throw new Error('User already exist');
+
+    const documentExist =
+      await this.userRepository.getUserExistsByDocumentNumber(
+        request.documentDetails.number,
+      );
+    if (documentExist) throw new Error('Document already exist');
 
     const position = await this.positionRepository.findById(request.positionId);
     if (!position) throw new Error('Position not found');
