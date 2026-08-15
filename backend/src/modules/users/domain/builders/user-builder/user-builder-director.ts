@@ -4,7 +4,7 @@ import { Position } from '../../entities/position.js';
 import { Role } from '../../entities/role.js';
 import { User } from '../../entities/user.js';
 import { HashedPassword } from '../../value-objects/hashed-password.js';
-import { UserBuilder } from './user-builder.js';
+import { UserBuilder } from '../../interfaces/user-builder.js';
 
 export class UserBuilderDirector {
   constructor(private userBuilder: UserBuilder) {}

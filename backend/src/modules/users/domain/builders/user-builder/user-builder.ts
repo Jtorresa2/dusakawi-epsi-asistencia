@@ -1,15 +1,15 @@
+import { Area } from '../../../../areas/entities/area.js';
 import { DataString } from '@shared/value-objects/data-string.js';
 import { DocumentDetails } from '../../value-objects/document-details.js';
-import { User } from '../../entities/user.js';
-import { Area } from '../../../../areas/entities/area.js';
-import { Position } from '../../entities/position.js';
 import { Email } from '../../value-objects/email.js';
 import { HashedPassword } from '../../value-objects/hashed-password.js';
-import { Builder } from '../../interfaces/builder.js';
 import { Name } from '../../value-objects/name.js';
+import { Position } from '../../entities/position.js';
 import { Role } from '../../entities/role.js';
+import { User } from '../../entities/user.js';
+import { UserBuilder } from '../../interfaces/user-builder.js';
 
-export class UserBuilder implements Builder<User> {
+export class UserDatabaseBuilder implements UserBuilder {
   private _documentDetails?: DocumentDetails;
   private _firstName?: Name;
   private _middleName?: Name;

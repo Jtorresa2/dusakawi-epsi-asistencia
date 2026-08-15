@@ -4,7 +4,7 @@ import { PositionRepository } from '../../../domain/repositories/position-reposi
 import { RegisterCommandDto } from './register-command.dto.js';
 import { RoleRepository } from '../../../domain/repositories/role-repository.js';
 import { UnitOfWork } from '../../../domain/interfaces/unit-of-work.js';
-import { UserBuilder } from '../../../domain/builders/user-builder/user-builder.js';
+import { UserDatabaseBuilder } from '../../../domain/builders/user-builder/user-builder.js';
 import { UserBuilderDirector } from '../../../domain/builders/user-builder/user-builder-director.js';
 import { UserRepository } from '../../../domain/repositories/user-repository.js';
 import { DocumentDetailsCreator } from '../../../domain/services/document-details-creator.js';
@@ -48,7 +48,7 @@ export class RegisterCommandHandler {
 
     const hashedPassword = await this.passwordHasher.hash(request.password);
 
-    const newUser = new UserBuilderDirector(new UserBuilder())
+    const newUser = new UserBuilderDirector(new UserDatabaseBuilder())
       .basicData(
         request.firstName,
         request.firstSurname,
