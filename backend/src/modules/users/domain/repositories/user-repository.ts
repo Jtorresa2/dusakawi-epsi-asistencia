@@ -4,5 +4,5 @@ import { User } from '../entities/user.js';
 export interface UserRepository extends GenericRepository<User> {
   getUserByUsername(username: string): Promise<User | null>;
   getUserExists(username: string): Promise<boolean>;
-  getUserExistsByDocumentNumber(documentNumber: string): Promise<boolean>;
+  getUserExistsByDocument(documentNumber: string): Promise<boolean>;
 }
