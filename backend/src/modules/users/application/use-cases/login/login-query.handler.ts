@@ -1,7 +1,7 @@
 import { PasswordHasher } from '../../../domain/interfaces/password-hasher.js';
 import { TokenHandler } from '../../../domain/interfaces/token.handler.js';
 import { UserRepository } from '../../../domain/repositories/user-repository.js';
-import { AuthResposeDto } from '../../common/auth-response.dto.js';
+import { AuthResposeDto } from '../../common/dtos/auth-response.dto.js';
 import { LoginQueryDto } from './login-query.dto.js';
 
 export class LoginQueryHandler {
