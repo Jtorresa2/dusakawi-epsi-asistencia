@@ -11,4 +11,8 @@ export class DocumentType extends GenericEntity {
   constructor(public readonly name: DocumentTypeName) {
     super();
   }
+
+  equals(other: DocumentType): boolean {
+    return this.name === other.name;
+  }
 }

@@ -1,6 +1,6 @@
 import { Area } from '../../../areas/entities/area.js';
 import { DataString } from '@shared/value-objects/data-string.js';
-import { DocumentDetails } from './document-details.js';
+import { DocumentDetails } from '../value-objects/document-details.js';
 import { Email } from '../value-objects/email.js';
 import { GenericEntity } from '@shared/entities/generic-entity.js';
 import { HashedPassword } from '../value-objects/hashed-password.js';

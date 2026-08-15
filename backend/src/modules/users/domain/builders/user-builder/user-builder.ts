@@ -1,5 +1,5 @@
 import { DataString } from '@shared/value-objects/data-string.js';
-import { DocumentDetails } from '../../entities/document-details.js';
+import { DocumentDetails } from '../../value-objects/document-details.js';
 import { User } from '../../entities/user.js';
 import { Area } from '../../../../areas/entities/area.js';
 import { Position } from '../../entities/position.js';

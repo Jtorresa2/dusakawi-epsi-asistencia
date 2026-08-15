@@ -1,5 +1,5 @@
 import { Uuid } from '@shared/types/uuid.js';
-import { DocumentDetails } from '../entities/document-details.js';
+import { DocumentDetails } from '../value-objects/document-details.js';
 import { DocumentTypeRepository } from '../repositories/document-type-repository.js';
 import { DocumentNumber } from '../value-objects/document-number.js';
 import { DataString } from '@shared/value-objects/data-string.js';
@@ -19,7 +19,7 @@ export class DocumentDetailsCreator {
       await this.documentTypeRepository.findById(documentTypeId);
     if (!documentType) throw new Error(documentTypeId);
 
-    return new DocumentDetails(
+    return DocumentDetails.create(
       documentType,
       DocumentNumber.create(documentNumber),
       issueDate,
