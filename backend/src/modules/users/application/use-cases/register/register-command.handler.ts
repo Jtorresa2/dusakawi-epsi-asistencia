@@ -4,7 +4,7 @@ import { PositionRepository } from '../../../domain/repositories/position-reposi
 import { RegisterCommandDto } from './register-command.dto.js';
 import { RoleRepository } from '../../../domain/repositories/role-repository.js';
 import { UnitOfWork } from '../../../domain/interfaces/unit-of-work.js';
-import { UserDatabaseBuilder } from '../../../domain/builders/user-builder/user-builder.js';
+import { UserDatabaseBuilder } from '../../../domain/builders/user-builder/user-database-builder.js';
 import { UserBuilderDirector } from '../../../domain/builders/user-builder/user-builder-director.js';
 import { UserRepository } from '../../../domain/repositories/user-repository.js';
 import { DocumentDetailsCreator } from '../../../domain/services/document-details-creator.js';
