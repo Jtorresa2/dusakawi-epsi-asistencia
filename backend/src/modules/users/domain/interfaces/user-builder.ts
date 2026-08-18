@@ -1,4 +1,4 @@
-import { Area } from '../../../areas/entities/area.js';
+import { Area } from '../../../areas/domain/entities/area.js';
 import { Position } from '../entities/position.js';
 import { Role } from '../entities/role.js';
 import { User } from '../entities/user.js';
