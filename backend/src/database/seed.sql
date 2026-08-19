@@ -60,7 +60,7 @@ ON CONFLICT (name) DO NOTHING;
 -- ---------------------------------------------------------------------
 -- area
 -- ---------------------------------------------------------------------
-INSERT INTO area (floor_id, name, description) VALUES
+INSERT INTO areas (floor_id, name, description) VALUES
     ((SELECT id FROM floors WHERE name = 'Piso 1'), 'SIAU', 'Sistema de Información y Atención al Usuario'),
     ((SELECT id FROM floors WHERE name = 'Piso 1'), 'PQR', 'Peticiones, Quejas y Reclamos'),
     ((SELECT id FROM floors WHERE name = 'Piso 1'), 'Call Center', 'Centro de atención telefónica'),
@@ -179,7 +179,7 @@ INSERT INTO users (
         'Juliana', NULL, 'Torres', 'Aaron',
         '1995-04-12', 'Astrea', 'Calle 10 # 5-23', NULL, '3001234567',
         (SELECT id FROM positions WHERE name = 'Técnico de Sistemas'),
-        (SELECT a.id FROM area a JOIN floors f ON a.floor_id = f.id WHERE a.name = 'Sistemas' AND f.name = 'Piso 3'),
+        (SELECT a.id FROM areas a JOIN floors f ON a.floor_id = f.id WHERE a.name = 'Sistemas' AND f.name = 'Piso 3'),
         'Jtorresa22', '$2a$12$w5cCwla/RnLBWFTrLn0snOODkQlsZ2Lw96igxODh4KrdWy3ScyS8K', 'jtorresa@email.com'
     ),
     (
@@ -187,7 +187,7 @@ INSERT INTO users (
         'María', NULL, 'Lopez', 'Peréz',
         '1990-09-25', 'Valledupar', 'Carrera 15 # 20-14', NULL, '3009876543',
         (SELECT id FROM positions WHERE name = 'Coordinador de Talento Humano'),
-        (SELECT a.id FROM area a JOIN floors f ON a.floor_id = f.id WHERE a.name = 'Talento Humano' AND f.name = 'Piso 4'),
+        (SELECT a.id FROM areas a JOIN floors f ON a.floor_id = f.id WHERE a.name = 'Talento Humano' AND f.name = 'Piso 4'),
         'talento', '$2b$10$FnNwnu0sg.DOrspnoCm91.PVx/HHmKhXM7fUGh6i1mZQLN7JhIVR.', 'm.lopez@dusakawi.com'
     ),
     (
@@ -195,7 +195,7 @@ INSERT INTO users (
         'Carlos', NULL, 'Rodríguez', 'Rojas',
         '1992-11-05', 'Barranquilla', 'Calle 72 # 8-90', '3155556677', '3184455667',
         (SELECT id FROM positions WHERE name = 'Contador'),
-        (SELECT a.id FROM area a JOIN floors f ON a.floor_id = f.id WHERE a.name = 'Contabilidad' AND f.name = 'Piso 3'),
+        (SELECT a.id FROM areas a JOIN floors f ON a.floor_id = f.id WHERE a.name = 'Contabilidad' AND f.name = 'Piso 3'),
         'carlos', '$2b$10$QfVbkqSfSztAqeMBBcIOxuyeCFGxeCa/X3ErYjTvG5YSKbzM5SHvG', 'c.rodriguez@dusakawi.com'
     )
 ON CONFLICT (username) DO NOTHING;

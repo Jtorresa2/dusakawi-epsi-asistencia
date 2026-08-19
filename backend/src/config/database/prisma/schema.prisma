@@ -16,20 +16,6 @@ model actions {
   role_actions role_actions[]
 }
 
-model area {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  floor_id    String    @db.Uuid
-  name        String    @db.VarChar(100)
-  description String?
-  created_at  DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime? @db.Timestamptz(6)
-  floors      floors    @relation(fields: [floor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users       users[]
-
-  @@unique([name, floor_id], map: "uq_area_name_floor")
-  @@index([floor_id], map: "idx_area_floor_id")
-}
-
 model attendances {
   id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id              String    @db.Uuid
@@ -70,7 +56,7 @@ model floors {
   name       String    @unique(map: "uq_floors_name") @db.VarChar(100)
   created_at DateTime  @default(now()) @db.Timestamptz(6)
   updated_at DateTime? @db.Timestamptz(6)
-  area       area[]
+  areas      areas[]
 }
 
 model holidays {
@@ -107,7 +93,7 @@ model incidents {
 model positions {
   id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String    @unique(map: "uq_positions_name") @db.VarChar(100)
-  description String?
+  description String
   created_at  DateTime  @default(now()) @db.Timestamptz(6)
   updated_at  DateTime? @db.Timestamptz(6)
   users       users[]
@@ -139,7 +125,7 @@ model role_actions {
 model roles {
   id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String         @unique(map: "uq_roles_name") @db.VarChar(100)
-  description  String?
+  description  String
   created_at   DateTime       @default(now()) @db.Timestamptz(6)
   updated_at   DateTime?      @db.Timestamptz(6)
   role_actions role_actions[]
@@ -180,11 +166,25 @@ model users {
   incidents_incidents_user_idTousers     incidents[]      @relation("incidents_user_idTousers")
   requests                               requests[]
   user_roles                             user_roles[]
-  area                                   area             @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  area                                   areas            @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   document_details                       document_details @relation(fields: [document_details_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   positions                              positions        @relation(fields: [position_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([area_id], map: "idx_users_area_id")
   @@index([document_details_id], map: "idx_users_document_details_id")
   @@index([position_id], map: "idx_users_position_id")
+}
+
+model areas {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  floor_id    String    @db.Uuid
+  name        String    @db.VarChar(100)
+  description String?
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime? @db.Timestamptz(6)
+  floors      floors    @relation(fields: [floor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users       users[]
+
+  @@unique([name, floor_id], map: "uq_area_name_floor")
+  @@index([floor_id], map: "idx_area_floor_id")
 }

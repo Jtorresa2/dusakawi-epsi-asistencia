@@ -71,7 +71,7 @@ FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TABLE IF NOT EXISTS roles (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name        VARCHAR(100) NOT NULL,
-    description TEXT,
+    description TEXT NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at  TIMESTAMPTZ,
     CONSTRAINT uq_roles_name UNIQUE (name)
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS role_actions (
 CREATE TABLE IF NOT EXISTS positions (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name        VARCHAR(100) NOT NULL,
-    description TEXT,
+    description TEXT NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at  TIMESTAMPTZ,
     CONSTRAINT uq_positions_name UNIQUE (name)
@@ -139,11 +139,11 @@ BEFORE UPDATE ON floors
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ---------------------------------------------------------------------
--- area
+-- areas
 -- An area belongs to a floor; the same area name can be
 -- repeated across different floors, hence the composite UNIQUE.
 -- ---------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS area (
+CREATE TABLE IF NOT EXISTS areas (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     floor_id    UUID NOT NULL REFERENCES floors(id),
     name        VARCHAR(100) NOT NULL,
@@ -153,10 +153,10 @@ CREATE TABLE IF NOT EXISTS area (
     CONSTRAINT uq_area_name_floor UNIQUE (name, floor_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_area_floor_id ON area(floor_id);
+CREATE INDEX IF NOT EXISTS idx_area_floor_id ON areas(floor_id);
 
-CREATE OR REPLACE TRIGGER trg_area_updated_at
-BEFORE UPDATE ON area
+CREATE OR REPLACE TRIGGER trg_areas_updated_at
+BEFORE UPDATE ON areas
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ---------------------------------------------------------------------
@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS users (
     phone                VARCHAR(20),
     cell                 VARCHAR(20)  NOT NULL,
     position_id          UUID NOT NULL REFERENCES positions(id),
-    area_id              UUID NOT NULL REFERENCES area(id),
+    area_id              UUID NOT NULL REFERENCES areas(id),
     username             VARCHAR(50)  NOT NULL,
     password             VARCHAR(255) NOT NULL,
     email                VARCHAR(150) NOT NULL,
