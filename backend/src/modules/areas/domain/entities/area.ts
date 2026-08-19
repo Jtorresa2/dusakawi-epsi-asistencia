@@ -6,7 +6,7 @@ export class Area extends GenericEntity {
   constructor(
     public readonly floor: Floor,
     public readonly name: DataString,
-    public readonly description: DataString,
+    public readonly description: DataString | null = null,
   ) {
     super();
   }
