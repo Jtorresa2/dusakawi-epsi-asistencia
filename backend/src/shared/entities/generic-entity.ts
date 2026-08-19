@@ -1,7 +1,11 @@
-import { Uuid } from '@shared/types/uuid.js';
+import type { Metadata } from '@shared/types/metadata.js';
 
 export abstract class GenericEntity {
-  public readonly id: Uuid = crypto.randomUUID();
-  public readonly createdAt: Date = new Date();
-  public readonly updatedAt?: Date;
+  protected constructor(
+    public readonly metadata: Metadata | null = {
+      id: crypto.randomUUID(),
+      createdAt: new Date(),
+      updatedAt: null,
+    },
+  ) {}
 }

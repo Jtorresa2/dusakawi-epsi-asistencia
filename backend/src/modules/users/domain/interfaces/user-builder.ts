@@ -1,3 +1,4 @@
+import type { Metadata } from '@shared/types/metadata.js';
 import { Area } from '../../../areas/domain/entities/area.js';
 import { Position } from '../entities/position.js';
 import { Role } from '../entities/role.js';
@@ -23,4 +24,5 @@ export interface UserBuilder extends Builder<User> {
   password(password: HashedPassword): this;
   email(email: string): this;
   roles(roles: Role[]): this;
+  metadata(metadata: Metadata | null): this;
 }

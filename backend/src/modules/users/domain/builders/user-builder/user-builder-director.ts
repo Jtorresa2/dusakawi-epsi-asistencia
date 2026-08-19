@@ -5,6 +5,7 @@ import { Role } from '../../entities/role.js';
 import { User } from '../../entities/user.js';
 import { HashedPassword } from '../../value-objects/hashed-password.js';
 import { UserBuilder } from '../../interfaces/user-builder.js';
+import type { Metadata } from '@shared/types/metadata.js';
 
 export class UserBuilderDirector {
   constructor(private userBuilder: UserBuilder) {}
@@ -20,8 +21,10 @@ export class UserBuilderDirector {
     cell: string,
     phone?: string,
     middleName?: string,
+    metadata: Metadata | null = null,
   ): UserBuilderDirector {
     this.userBuilder
+      .metadata(metadata)
       .documentDetails(documentDetails)
       .firstName(firstName)
       .middleName(middleName)

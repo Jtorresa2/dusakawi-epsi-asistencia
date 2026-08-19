@@ -7,10 +7,9 @@ import { HashedPassword } from '../value-objects/hashed-password.js';
 import { Name } from '../value-objects/name.js';
 import { Position } from './position.js';
 import { Role } from './role.js';
+import type { Metadata } from '@shared/types/metadata.js';
 
 export class User extends GenericEntity {
-  private _password: HashedPassword;
-
   constructor(
     public readonly documentDetails: DocumentDetails,
     public readonly firstName: Name,
@@ -23,14 +22,14 @@ export class User extends GenericEntity {
     public readonly position: Position,
     public readonly area: Area,
     public readonly username: DataString,
-    password: HashedPassword,
+    private _password: HashedPassword,
     public readonly email: Email,
     public readonly roles: Role[],
     public readonly middleName?: Name,
     public readonly phone?: DataString,
+    public readonly metadata: Metadata | null = null,
   ) {
-    super();
-    this._password = password;
+    super(metadata);
   }
 
   get password(): HashedPassword {

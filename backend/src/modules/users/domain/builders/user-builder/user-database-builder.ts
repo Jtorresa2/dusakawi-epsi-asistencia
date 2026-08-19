@@ -8,6 +8,7 @@ import { Position } from '../../entities/position.js';
 import { Role } from '../../entities/role.js';
 import { User } from '../../entities/user.js';
 import { UserBuilder } from '../../interfaces/user-builder.js';
+import type { Metadata } from '@shared/types/metadata.js';
 
 export class UserDatabaseBuilder implements UserBuilder {
   private _documentDetails?: DocumentDetails;
@@ -26,6 +27,7 @@ export class UserDatabaseBuilder implements UserBuilder {
   private _password?: HashedPassword;
   private _email?: Email;
   private _roles?: Role[];
+  private _metadata?: Metadata | null;
 
   documentDetails(documentDetails: DocumentDetails): this {
     this._documentDetails = documentDetails;
@@ -107,6 +109,11 @@ export class UserDatabaseBuilder implements UserBuilder {
     return this;
   }
 
+  metadata(metadata: Metadata | null): this {
+    this._metadata = metadata;
+    return this;
+  }
+
   build(): User {
     return new User(
       this._documentDetails!,
@@ -125,6 +132,7 @@ export class UserDatabaseBuilder implements UserBuilder {
       this._roles!,
       this._middleName,
       this._phone,
+      this._metadata,
     );
   }
 }
