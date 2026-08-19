@@ -1,4 +1,4 @@
-import { GenericRepository } from '@shared/repositories/generic-repository.js';
+import type { GenericRepository } from '@shared/repositories/generic-repository.js';
 import { User } from '../entities/user.js';
 
 export interface UserRepository extends GenericRepository<User> {

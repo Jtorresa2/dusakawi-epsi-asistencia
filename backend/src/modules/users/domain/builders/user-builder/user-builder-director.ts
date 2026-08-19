@@ -4,7 +4,7 @@ import { Position } from '../../entities/position.js';
 import { Role } from '../../entities/role.js';
 import { User } from '../../entities/user.js';
 import { HashedPassword } from '../../value-objects/hashed-password.js';
-import { UserBuilder } from '../../interfaces/user-builder.js';
+import type { UserBuilder } from '../../interfaces/user-builder.js';
 import type { Metadata } from '@shared/types/metadata.js';
 
 export class UserBuilderDirector {

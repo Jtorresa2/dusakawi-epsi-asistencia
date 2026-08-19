@@ -5,7 +5,7 @@ import { Role } from '../entities/role.js';
 import { User } from '../entities/user.js';
 import { DocumentDetails } from '../value-objects/document-details.js';
 import { HashedPassword } from '../value-objects/hashed-password.js';
-import { Builder } from './builder.js';
+import type { Builder } from './builder.js';
 
 export interface UserBuilder extends Builder<User> {
   documentDetails(documentDetails: DocumentDetails): this;

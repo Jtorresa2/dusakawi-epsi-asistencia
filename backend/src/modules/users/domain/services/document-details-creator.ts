@@ -1,6 +1,6 @@
-import { Uuid } from '@shared/types/uuid.js';
+import type { Uuid } from '@shared/types/uuid.js';
 import { DocumentDetails } from '../value-objects/document-details.js';
-import { DocumentTypeRepository } from '../repositories/document-type-repository.js';
+import type { DocumentTypeRepository } from '../repositories/document-type-repository.js';
 import { DocumentNumber } from '../value-objects/document-number.js';
 import { DataString } from '@shared/value-objects/data-string.js';
 

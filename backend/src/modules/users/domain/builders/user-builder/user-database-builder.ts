@@ -7,7 +7,7 @@ import { Name } from '../../value-objects/name.js';
 import { Position } from '../../entities/position.js';
 import { Role } from '../../entities/role.js';
 import { User } from '../../entities/user.js';
-import { UserBuilder } from '../../interfaces/user-builder.js';
+import type { UserBuilder } from '../../interfaces/user-builder.js';
 import type { Metadata } from '@shared/types/metadata.js';
 
 export class UserDatabaseBuilder implements UserBuilder {

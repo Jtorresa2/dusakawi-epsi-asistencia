@@ -1,12 +1,12 @@
-import { AreaRepository } from '../../../../areas/domain/repositories/area-repository.js';
-import { PasswordHasher } from '../../../domain/interfaces/password-hasher.js';
-import { PositionRepository } from '../../../domain/repositories/position-repository.js';
-import { RegisterCommandDto } from './register-command.dto.js';
-import { RoleRepository } from '../../../domain/repositories/role-repository.js';
-import { UnitOfWork } from '../../../domain/interfaces/unit-of-work.js';
+import type { AreaRepository } from '../../../../areas/domain/repositories/area-repository.js';
+import type { PasswordHasher } from '../../../domain/interfaces/password-hasher.js';
+import type { PositionRepository } from '../../../domain/repositories/position-repository.js';
+import type { RegisterCommandDto } from './register-command.dto.js';
+import type { RoleRepository } from '../../../domain/repositories/role-repository.js';
+import type { UnitOfWork } from '../../../domain/interfaces/unit-of-work.js';
 import { UserDatabaseBuilder } from '../../../domain/builders/user-builder/user-database-builder.js';
 import { UserBuilderDirector } from '../../../domain/builders/user-builder/user-builder-director.js';
-import { UserRepository } from '../../../domain/repositories/user-repository.js';
+import type { UserRepository } from '../../../domain/repositories/user-repository.js';
 import { DocumentDetailsCreator } from '../../../domain/services/document-details-creator.js';
 
 export class RegisterCommandHandler {
