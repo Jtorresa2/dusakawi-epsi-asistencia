@@ -23,7 +23,7 @@ export class LoginQueryHandler {
 
     if (!isPasswordValid) throw new Error('Invalid username or password');
 
-    const token = this.tokenHandler.createToken(user.id, user.roles);
+    const token = this.tokenHandler.createToken(user.metadata!.id, user.roles);
 
     return {
       token,
