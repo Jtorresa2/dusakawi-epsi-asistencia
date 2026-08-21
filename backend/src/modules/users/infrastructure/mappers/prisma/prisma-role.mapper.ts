@@ -2,17 +2,11 @@ import { Prisma } from '@config/database/prisma/generated/client.js';
 import { DataString } from '@shared/value-objects/data-string.js';
 import { Role } from '../../../domain/entities/role.js';
 import type { Uuid } from '@shared/types/uuid.js';
-import type { OrmMapper } from '@shared/mappers/orm.mapper.js';
 
 type PrismaRole = Prisma.rolesGetPayload<{}>;
 
-export class PrismaRoleMapper implements OrmMapper<
-  Role,
-  PrismaRole,
-  Prisma.rolesCreateInput,
-  Prisma.rolesUpdateInput
-> {
-  toDomain(likeRole: PrismaRole): Role {
+export class PrismaRoleMapper {
+  static toDomain(likeRole: PrismaRole): Role {
     return new Role(
       DataString.create(likeRole.name),
       DataString.create(likeRole.description),
@@ -24,7 +18,7 @@ export class PrismaRoleMapper implements OrmMapper<
     );
   }
 
-  toCreate(role: Role): Prisma.rolesCreateInput {
+  static toCreate(role: Role): Prisma.rolesCreateInput {
     return {
       name: role.name.value,
       description: role.description.value,
@@ -34,7 +28,7 @@ export class PrismaRoleMapper implements OrmMapper<
     };
   }
 
-  toUpdate(role: Role): Prisma.rolesUpdateInput {
+  static toUpdate(role: Role): Prisma.rolesUpdateInput {
     return {
       name: role.name.value,
       description: role.description.value,

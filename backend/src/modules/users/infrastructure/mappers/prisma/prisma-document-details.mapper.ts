@@ -3,7 +3,6 @@ import { DataString } from '@shared/value-objects/data-string.js';
 import { DocumentDetails } from '../../../domain/value-objects/document-details.js';
 import { DocumentNumber } from '../../../domain/value-objects/document-number.js';
 import { PrismaDocumentTypeMapper } from './prisma-document-type.mapper.js';
-import type { OrmMapper } from '@shared/mappers/orm.mapper.js';
 
 type PrismaDocumentDetails = Prisma.document_detailsGetPayload<{
   include: {
@@ -11,24 +10,17 @@ type PrismaDocumentDetails = Prisma.document_detailsGetPayload<{
   };
 }>;
 
-export class PrismaDocumentDetailsMapper implements OrmMapper<
-  DocumentDetails,
-  PrismaDocumentDetails,
-  Prisma.document_detailsCreateInput,
-  Prisma.document_detailsUpdateInput
-> {
-  constructor(private readonly documentTypeMapper: PrismaDocumentTypeMapper) {}
-
-  toDomain(likeDocumentDetails: PrismaDocumentDetails): DocumentDetails {
+export class PrismaDocumentDetailsMapper {
+  static toDomain(likeDocumentDetails: PrismaDocumentDetails): DocumentDetails {
     return DocumentDetails.create(
-      this.documentTypeMapper.toDomain(likeDocumentDetails.document_types),
+      PrismaDocumentTypeMapper.toDomain(likeDocumentDetails.document_types),
       DocumentNumber.create(likeDocumentDetails.document_number),
       likeDocumentDetails.issue_date,
       DataString.create(likeDocumentDetails.place_of_issue),
     );
   }
 
-  toCreate(
+  static toCreate(
     documentDetails: DocumentDetails,
   ): Prisma.document_detailsCreateInput {
     return {
@@ -43,7 +35,7 @@ export class PrismaDocumentDetailsMapper implements OrmMapper<
     };
   }
 
-  toUpdate(
+  static toUpdate(
     documentDetails: DocumentDetails,
   ): Prisma.document_detailsUpdateInput {
     return {

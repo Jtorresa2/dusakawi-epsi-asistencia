@@ -4,17 +4,11 @@ import {
   DocumentTypeName,
 } from '../../../domain/entities/document-type.js';
 import type { Uuid } from '@shared/types/uuid.js';
-import type { OrmMapper } from '@shared/mappers/orm.mapper.js';
 
 type PrismaDocumentType = Prisma.document_typesGetPayload<{}>;
 
-export class PrismaDocumentTypeMapper implements OrmMapper<
-  DocumentType,
-  PrismaDocumentType,
-  Prisma.document_typesCreateInput,
-  Prisma.document_typesUpdateInput
-> {
-  toDomain(likeDocumentType: PrismaDocumentType): DocumentType {
+export class PrismaDocumentTypeMapper {
+  static toDomain(likeDocumentType: PrismaDocumentType): DocumentType {
     return new DocumentType(likeDocumentType.name as DocumentTypeName, {
       id: likeDocumentType.id as Uuid,
       createdAt: likeDocumentType.created_at,
@@ -22,7 +16,9 @@ export class PrismaDocumentTypeMapper implements OrmMapper<
     });
   }
 
-  toCreate(documentType: DocumentType): Prisma.document_typesCreateInput {
+  static toCreate(
+    documentType: DocumentType,
+  ): Prisma.document_typesCreateInput {
     return {
       name: documentType.name,
       id: documentType.metadata!.id,
@@ -31,7 +27,9 @@ export class PrismaDocumentTypeMapper implements OrmMapper<
     };
   }
 
-  toUpdate(documentType: DocumentType): Prisma.document_typesUpdateInput {
+  static toUpdate(
+    documentType: DocumentType,
+  ): Prisma.document_typesUpdateInput {
     return {
       name: documentType.name,
       updated_at: documentType.metadata!.updatedAt,

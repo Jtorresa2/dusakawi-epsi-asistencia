@@ -1,13 +1,12 @@
 import { Prisma } from '@config/database/prisma/generated/client.js';
 import { User } from '../../../domain/entities/user.js';
-import type { UserBuilder } from '../../../domain/interfaces/user-builder.js';
 import type { Uuid } from '@shared/types/uuid.js';
-import type { PrismaDocumentDetailsMapper } from './prisma-document-details.mapper.js';
-import type { PrismaPositionMapper } from './prisma-position.mapper.js';
+import { PrismaDocumentDetailsMapper } from './prisma-document-details.mapper.js';
+import { PrismaPositionMapper } from './prisma-position.mapper.js';
 import { HashedPassword } from '../../../domain/value-objects/hashed-password.js';
-import type { PrismaAreaMapper } from '../../../../areas/infrastructure/mappers/prisma/prisma-area-mapper.js';
-import type { PrismaRoleMapper } from './prisma-role.mapper.js';
-import type { OrmMapper } from '@shared/mappers/orm.mapper.js';
+import { PrismaAreaMapper } from '../../../../areas/infrastructure/mappers/prisma/prisma-area-mapper.js';
+import { PrismaRoleMapper } from './prisma-role.mapper.js';
+import type { UserBuilder } from '../../../domain/interfaces/user-builder.js';
 
 type PrismaUser = Prisma.usersGetPayload<{
   include: {
@@ -26,28 +25,21 @@ type PrismaUser = Prisma.usersGetPayload<{
   };
 }>;
 
-export class PrismaUserMapper implements OrmMapper<
-  User,
-  PrismaUser,
-  Prisma.usersCreateInput,
-  Prisma.usersUpdateInput
-> {
-  constructor(
-    private readonly documentDetailsMapper: PrismaDocumentDetailsMapper,
-    private readonly positionMapper: PrismaPositionMapper,
-    private readonly areaMapper: PrismaAreaMapper,
-    private readonly roleMapper: PrismaRoleMapper,
-    private readonly userBuilder: UserBuilder,
-  ) {}
+export class PrismaUserMapper {
+  private static userBuilder: UserBuilder;
 
-  toDomain(likeEntity: PrismaUser): User {
+  constructor(userBuilder: UserBuilder) {
+    PrismaUserMapper.userBuilder = userBuilder;
+  }
+
+  static toDomain(likeEntity: PrismaUser): User {
     const roles = likeEntity.user_roles.map(({ roles }) => {
-      return this.roleMapper.toDomain(roles);
+      return PrismaRoleMapper.toDomain(roles);
     });
 
     return this.userBuilder
       .documentDetails(
-        this.documentDetailsMapper.toDomain(likeEntity.document_details),
+        PrismaDocumentDetailsMapper.toDomain(likeEntity.document_details),
       )
       .firstName(likeEntity.first_name)
       .firstSurname(likeEntity.first_surname)
@@ -56,8 +48,8 @@ export class PrismaUserMapper implements OrmMapper<
       .placeOfBirth(likeEntity.place_of_birth)
       .address(likeEntity.address)
       .cell(likeEntity.cell)
-      .position(this.positionMapper.toDomain(likeEntity.positions))
-      .area(this.areaMapper.toDomain(likeEntity.area))
+      .position(PrismaPositionMapper.toDomain(likeEntity.positions))
+      .area(PrismaAreaMapper.toDomain(likeEntity.area))
       .username(likeEntity.username)
       .passwordHash(HashedPassword.create(likeEntity.password_hash))
       .email(likeEntity.email)
@@ -72,7 +64,7 @@ export class PrismaUserMapper implements OrmMapper<
       .build();
   }
 
-  private basicData(user: User) {
+  private static basicData(user: User) {
     return {
       first_name: user.firstName.value,
       middle_name: user.middleName?.value,
@@ -86,9 +78,9 @@ export class PrismaUserMapper implements OrmMapper<
     };
   }
 
-  toCreate(entity: User): Prisma.usersCreateInput {
+  static toCreate(entity: User): Prisma.usersCreateInput {
     return {
-      ...this.basicData(entity),
+      ...PrismaUserMapper.basicData(entity),
       email: entity.email.value,
       password_hash: entity.password.value,
       username: entity.username.value,
@@ -98,19 +90,19 @@ export class PrismaUserMapper implements OrmMapper<
       positions: { connect: { id: entity.position.metadata!.id } },
       area: { connect: { id: entity.area.metadata!.id } },
       document_details: {
-        create: this.documentDetailsMapper.toCreate(entity.documentDetails),
+        create: PrismaDocumentDetailsMapper.toCreate(entity.documentDetails),
       },
     };
   }
 
-  toUpdate(entity: User): Prisma.usersUpdateInput {
+  static toUpdate(entity: User): Prisma.usersUpdateInput {
     return {
-      ...this.basicData(entity),
+      ...PrismaUserMapper.basicData(entity),
       updated_at: entity.metadata!.updatedAt,
       positions: { connect: { id: entity.position.metadata!.id } },
       area: { connect: { id: entity.area.metadata!.id } },
       document_details: {
-        update: this.documentDetailsMapper.toUpdate(entity.documentDetails),
+        update: PrismaDocumentDetailsMapper.toUpdate(entity.documentDetails),
       },
     };
   }

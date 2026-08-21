@@ -13,8 +13,6 @@ export class PrismaUserRepository implements UserRepository {
     user_roles: { include: { roles: true } },
   };
 
-  constructor(private readonly userMapper: PrismaUserMapper) {}
-
   private async findUserByUniqueInput(
     where: Prisma.usersWhereUniqueInput,
   ): Promise<User | null> {
@@ -23,19 +21,19 @@ export class PrismaUserRepository implements UserRepository {
       include: this.includeEntities,
     });
 
-    return userFound ? this.userMapper.toDomain(userFound) : null;
+    return userFound ? PrismaUserMapper.toDomain(userFound) : null;
   }
 
   async create(entity: User): Promise<void> {
     await prisma.users.create({
-      data: this.userMapper.toCreate(entity),
+      data: PrismaUserMapper.toCreate(entity),
     });
   }
 
   async update(id: Uuid, entity: User): Promise<void> {
     await prisma.users.update({
       where: { id },
-      data: this.userMapper.toUpdate(entity),
+      data: PrismaUserMapper.toUpdate(entity),
     });
   }
 
@@ -52,7 +50,7 @@ export class PrismaUserRepository implements UserRepository {
       include: this.includeEntities,
     });
 
-    return users.map((user) => this.userMapper.toDomain(user));
+    return users.map((user) => PrismaUserMapper.toDomain(user));
   }
 
   async getUserByUsername(username: string): Promise<User | null> {

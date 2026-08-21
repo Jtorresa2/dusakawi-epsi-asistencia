@@ -2,17 +2,11 @@ import { Prisma } from '@config/database/prisma/generated/client.js';
 import { DataString } from '@shared/value-objects/data-string.js';
 import { Position } from '../../../domain/entities/position.js';
 import type { Uuid } from '@shared/types/uuid.js';
-import type { OrmMapper } from '@shared/mappers/orm.mapper.js';
 
 type PrismaPosition = Prisma.positionsGetPayload<{}>;
 
-export class PrismaPositionMapper implements OrmMapper<
-  Position,
-  PrismaPosition,
-  Prisma.positionsCreateInput,
-  Prisma.positionsUpdateInput
-> {
-  toDomain(position: PrismaPosition): Position {
+export class PrismaPositionMapper {
+  static toDomain(position: PrismaPosition): Position {
     return new Position(
       DataString.create(position.name),
       DataString.create(position.description),
@@ -24,7 +18,7 @@ export class PrismaPositionMapper implements OrmMapper<
     );
   }
 
-  toCreate(position: Position): Prisma.positionsCreateInput {
+  static toCreate(position: Position): Prisma.positionsCreateInput {
     return {
       name: position.name.value,
       description: position.description?.value,
@@ -34,7 +28,7 @@ export class PrismaPositionMapper implements OrmMapper<
     };
   }
 
-  toUpdate(position: Position): Prisma.positionsUpdateInput {
+  static toUpdate(position: Position): Prisma.positionsUpdateInput {
     return {
       name: position.name.value,
       description: position.description?.value,
