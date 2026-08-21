@@ -3,7 +3,6 @@ import type { PasswordHasher } from '../../../domain/interfaces/password-hasher.
 import type { PositionRepository } from '../../../domain/repositories/position-repository.js';
 import type { RegisterCommandDto } from './register-command.dto.js';
 import type { RoleRepository } from '../../../domain/repositories/role-repository.js';
-import type { UnitOfWork } from '../../../domain/interfaces/unit-of-work.js';
 import { UserDatabaseBuilder } from '../../../domain/builders/user-builder/user-database-builder.js';
 import { UserBuilderDirector } from '../../../domain/builders/user-builder/user-builder-director.js';
 import type { UserRepository } from '../../../domain/repositories/user-repository.js';
@@ -17,7 +16,6 @@ export class RegisterCommandHandler {
     private readonly roleRepository: RoleRepository,
     private readonly documentDetailsCreator: DocumentDetailsCreator,
     private readonly passwordHasher: PasswordHasher,
-    private readonly unitOfWork: UnitOfWork,
   ) {}
 
   async handle(request: RegisterCommandDto): Promise<void> {
@@ -65,6 +63,5 @@ export class RegisterCommandHandler {
       .build();
 
     await this.userRepository.create(newUser);
-    await this.unitOfWork.save();
   }
 }
