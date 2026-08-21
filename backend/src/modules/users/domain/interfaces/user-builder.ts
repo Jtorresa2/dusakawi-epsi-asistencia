@@ -12,7 +12,7 @@ export interface UserBuilder extends Builder<User> {
   firstName(firstName: string): this;
   middleName(middleName?: string): this;
   firstSurname(firstSurname: string): this;
-  secondSurname(secondSurname: string): this;
+  secondSurname(secondSurname?: string): this;
   dateOfBirth(dateOfBirth: Date): this;
   placeOfBirth(placeOfBirth: string): this;
   address(address: string): this;
@@ -21,7 +21,7 @@ export interface UserBuilder extends Builder<User> {
   position(position: Position): this;
   area(area: Area): this;
   username(username: string): this;
-  password(password: HashedPassword): this;
+  passwordHash(passwordHash: HashedPassword): this;
   email(email: string): this;
   roles(roles: Role[]): this;
   metadata(metadata: Metadata | null): this;

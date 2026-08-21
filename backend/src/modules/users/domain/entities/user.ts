@@ -14,7 +14,6 @@ export class User extends GenericEntity {
     public readonly documentDetails: DocumentDetails,
     public readonly firstName: Name,
     public readonly firstSurname: Name,
-    public readonly secondSurname: Name,
     public readonly dateOfBirth: Date,
     public readonly placeOfBirth: DataString,
     public readonly address: DataString,
@@ -22,10 +21,11 @@ export class User extends GenericEntity {
     public readonly position: Position,
     public readonly area: Area,
     public readonly username: DataString,
-    private _password: HashedPassword,
+    private _passwordHash: HashedPassword,
     public readonly email: Email,
     public readonly roles: Role[],
     public readonly middleName?: Name,
+    public readonly secondSurname?: Name,
     public readonly phone?: DataString,
     public readonly metadata: Metadata | null = null,
   ) {
@@ -33,10 +33,10 @@ export class User extends GenericEntity {
   }
 
   get password(): HashedPassword {
-    return this._password;
+    return this._passwordHash;
   }
 
-  changePassword(password: HashedPassword) {
-    this._password = password;
+  changePassword(passwordHash: HashedPassword) {
+    this._passwordHash = passwordHash;
   }
 }

@@ -13,7 +13,6 @@ export class UserBuilderDirector {
   basicData(
     firstName: string,
     firstSurname: string,
-    secondSurname: string,
     documentDetails: DocumentDetails,
     dateOfBirth: Date,
     placeOfBirth: string,
@@ -21,6 +20,7 @@ export class UserBuilderDirector {
     cell: string,
     phone?: string,
     middleName?: string,
+    secondSurname?: string,
     metadata: Metadata | null = null,
   ): UserBuilderDirector {
     this.userBuilder
@@ -46,10 +46,10 @@ export class UserBuilderDirector {
 
   authData(
     username: string,
-    hashedPassword: HashedPassword,
+    passwordHash: HashedPassword,
     email: string,
   ): UserBuilderDirector {
-    this.userBuilder.username(username).password(hashedPassword).email(email);
+    this.userBuilder.username(username).passwordHash(passwordHash).email(email);
     return this;
   }
 

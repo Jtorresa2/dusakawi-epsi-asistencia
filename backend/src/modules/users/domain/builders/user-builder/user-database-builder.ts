@@ -24,7 +24,7 @@ export class UserDatabaseBuilder implements UserBuilder {
   private _position?: Position;
   private _area?: Area;
   private _username?: DataString;
-  private _password?: HashedPassword;
+  private _passwordHash?: HashedPassword;
   private _email?: Email;
   private _roles?: Role[];
   private _metadata?: Metadata | null;
@@ -49,8 +49,10 @@ export class UserDatabaseBuilder implements UserBuilder {
     return this;
   }
 
-  secondSurname(secondSurname: string): this {
-    this._secondSurname = Name.create(secondSurname);
+  secondSurname(secondSurname?: string): this {
+    this._secondSurname = secondSurname
+      ? Name.create(secondSurname)
+      : undefined;
     return this;
   }
 
@@ -94,8 +96,8 @@ export class UserDatabaseBuilder implements UserBuilder {
     return this;
   }
 
-  password(password: HashedPassword): this {
-    this._password = password;
+  passwordHash(passwordHash: HashedPassword): this {
+    this._passwordHash = passwordHash;
     return this;
   }
 
@@ -119,7 +121,6 @@ export class UserDatabaseBuilder implements UserBuilder {
       this._documentDetails!,
       this._firstName!,
       this._firstSurname!,
-      this._secondSurname!,
       this._dateOfBirth!,
       this._placeOfBirth!,
       this._address!,
@@ -127,10 +128,11 @@ export class UserDatabaseBuilder implements UserBuilder {
       this._position!,
       this._area!,
       this._username!,
-      this._password!,
+      this._passwordHash!,
       this._email!,
       this._roles!,
       this._middleName,
+      this._secondSurname,
       this._phone,
       this._metadata,
     );

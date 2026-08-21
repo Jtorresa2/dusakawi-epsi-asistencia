@@ -51,7 +51,6 @@ export class RegisterCommandHandler {
       .basicData(
         request.firstName,
         request.firstSurname,
-        request.secondSurname,
         documentDetails,
         request.dateOfBirth,
         request.placeOfBirth,
@@ -59,6 +58,7 @@ export class RegisterCommandHandler {
         request.cell,
         request.phone,
         request.middleName,
+        request.secondSurname,
       )
       .workData(position, area, roles)
       .authData(request.username, hashedPassword, request.email)

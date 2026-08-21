@@ -51,7 +51,7 @@ export class PrismaUserMapper implements OrmMapper<
       )
       .firstName(likeEntity.first_name)
       .firstSurname(likeEntity.first_surname)
-      .secondSurname(likeEntity.second_surname)
+      .secondSurname(likeEntity.second_surname ?? undefined)
       .dateOfBirth(likeEntity.date_of_birth)
       .placeOfBirth(likeEntity.place_of_birth)
       .address(likeEntity.address)
@@ -59,7 +59,7 @@ export class PrismaUserMapper implements OrmMapper<
       .position(this.positionMapper.toDomain(likeEntity.positions))
       .area(this.areaMapper.toDomain(likeEntity.area))
       .username(likeEntity.username)
-      .password(HashedPassword.create(likeEntity.password))
+      .passwordHash(HashedPassword.create(likeEntity.password_hash))
       .email(likeEntity.email)
       .roles(roles)
       .middleName(likeEntity.middle_name ?? undefined)
@@ -90,7 +90,7 @@ export class PrismaUserMapper implements OrmMapper<
     return {
       ...this.basicData(entity),
       email: entity.email.value,
-      password: entity.password.value,
+      password_hash: entity.password.value,
       username: entity.username.value,
       id: entity.metadata!.id,
       created_at: entity.metadata!.createdAt,

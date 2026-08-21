@@ -38,7 +38,7 @@ model document_details {
   created_at       DateTime       @default(now()) @db.Timestamptz(6)
   updated_at       DateTime?      @db.Timestamptz(6)
   document_types   document_types @relation(fields: [document_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users            users[]
+  users            users?
 
   @@index([document_type_id], map: "idx_document_details_document_type_id")
 }
@@ -142,13 +142,14 @@ model user_roles {
   @@id([user_id, role_id])
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model users {
   id                                     String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  document_details_id                    String           @db.Uuid
+  document_details_id                    String           @unique(map: "uq_users_document_details") @db.Uuid
   first_name                             String           @db.VarChar(100)
   middle_name                            String?          @db.VarChar(100)
   first_surname                          String           @db.VarChar(100)
-  second_surname                         String           @db.VarChar(100)
+  second_surname                         String?          @db.VarChar(100)
   date_of_birth                          DateTime         @db.Date
   place_of_birth                         String           @db.VarChar(150)
   address                                String           @db.VarChar(255)
@@ -157,7 +158,7 @@ model users {
   position_id                            String           @db.Uuid
   area_id                                String           @db.Uuid
   username                               String           @unique(map: "uq_users_username") @db.VarChar(50)
-  password                               String           @db.VarChar(255)
+  password_hash                          String           @db.VarChar(255)
   email                                  String           @unique(map: "uq_users_email") @db.VarChar(150)
   created_at                             DateTime         @default(now()) @db.Timestamptz(6)
   updated_at                             DateTime?        @db.Timestamptz(6)
@@ -171,7 +172,6 @@ model users {
   positions                              positions        @relation(fields: [position_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([area_id], map: "idx_users_area_id")
-  @@index([document_details_id], map: "idx_users_document_details_id")
   @@index([position_id], map: "idx_users_position_id")
 }
 

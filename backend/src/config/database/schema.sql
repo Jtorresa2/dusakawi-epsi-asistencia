@@ -189,7 +189,7 @@ CREATE TABLE IF NOT EXISTS users (
     first_name           VARCHAR(100) NOT NULL,
     middle_name          VARCHAR(100),
     first_surname        VARCHAR(100) NOT NULL,
-    second_surname       VARCHAR(100) NOT NULL,
+    second_surname       VARCHAR(100),
     date_of_birth        DATE NOT NULL,
     place_of_birth       VARCHAR(150) NOT NULL,
     address              VARCHAR(255) NOT NULL,
@@ -198,15 +198,15 @@ CREATE TABLE IF NOT EXISTS users (
     position_id          UUID NOT NULL REFERENCES positions(id),
     area_id              UUID NOT NULL REFERENCES areas(id),
     username             VARCHAR(50)  NOT NULL,
-    password             VARCHAR(255) NOT NULL,
+    password_hash        VARCHAR(255) NOT NULL,
     email                VARCHAR(150) NOT NULL,
     created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at           TIMESTAMPTZ,
     CONSTRAINT uq_users_username UNIQUE (username),
-    CONSTRAINT uq_users_email UNIQUE (email)
+    CONSTRAINT uq_users_email UNIQUE (email),
+    CONSTRAINT uq_users_document_details UNIQUE (document_details_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_users_document_details_id ON users(document_details_id);
 CREATE INDEX IF NOT EXISTS idx_users_position_id ON users(position_id);
 CREATE INDEX IF NOT EXISTS idx_users_area_id ON users(area_id);
 

@@ -172,7 +172,7 @@ ON CONFLICT (document_number) DO NOTHING;
 INSERT INTO users (
     document_details_id, first_name, middle_name, first_surname, second_surname,
     date_of_birth, place_of_birth, address, phone, cell,
-    position_id, area_id, username, password, email
+    position_id, area_id, username, password_hash, email
 ) VALUES
     (
         (SELECT id FROM document_details WHERE document_number = '1065432187'),
