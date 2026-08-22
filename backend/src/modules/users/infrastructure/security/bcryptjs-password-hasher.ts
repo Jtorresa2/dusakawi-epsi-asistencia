@@ -11,6 +11,6 @@ export class BcryptjsPasswordHasher implements PasswordHasher {
   }
 
   async verify(password: string, hash: HashedPassword): Promise<boolean> {
-    return bcrypt.compare(password, hash.value);
+    return await bcrypt.compare(password, hash.value);
   }
 }

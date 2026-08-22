@@ -16,7 +16,7 @@ export class LoginQueryHandler {
 
     if (!user) throw new Error('Invalid username or password');
 
-    const isPasswordValid = this.passwordHasher.verify(
+    const isPasswordValid = await this.passwordHasher.verify(
       request.password,
       user.password,
     );
