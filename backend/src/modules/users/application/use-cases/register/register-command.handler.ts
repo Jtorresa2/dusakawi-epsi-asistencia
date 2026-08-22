@@ -7,6 +7,7 @@ import { UserDatabaseBuilder } from '../../../domain/builders/user-builder/user-
 import { UserBuilderDirector } from '../../../domain/builders/user-builder/user-builder-director.js';
 import type { UserRepository } from '../../../domain/repositories/user-repository.js';
 import { DocumentDetailsCreator } from '../../../domain/services/document-details-creator.js';
+import type { GenericResponseDto } from '@shared/dtos/generic-response.dto.js';
 
 export class RegisterCommandHandler {
   constructor(
@@ -18,7 +19,7 @@ export class RegisterCommandHandler {
     private readonly passwordHasher: PasswordHasher,
   ) {}
 
-  async handle(request: RegisterCommandDto): Promise<void> {
+  async handle(request: RegisterCommandDto): Promise<GenericResponseDto> {
     const userExist = await this.userRepository.getUserExists(request.username);
     if (userExist) throw new Error('User already exist');
 
@@ -63,5 +64,7 @@ export class RegisterCommandHandler {
       .build();
 
     await this.userRepository.create(newUser);
+
+    return { message: 'User created' };
   }
 }

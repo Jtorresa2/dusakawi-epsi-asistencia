@@ -9,12 +9,12 @@ const login = async (req: Request, res: Response) => {
   return res.json(result);
 };
 
-const register = (req: Request, res: Response) => {
+const register = async (req: Request, res: Response) => {
   const handler = req.container.resolve<RegisterCommandHandler>(
     'registerCommandHandler',
   );
 
-  const result = handler.handle(req.body);
+  const result = await handler.handle(req.body);
   return res.json(result);
 };
 
