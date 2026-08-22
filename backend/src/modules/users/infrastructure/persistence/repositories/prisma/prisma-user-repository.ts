@@ -65,7 +65,9 @@ export class PrismaUserRepository implements UserRepository {
   async getUserExistsByDocument(documentNumber: string): Promise<boolean> {
     const userExist = await prisma.users.count({
       where: {
-        document_details: { some: { document_number: documentNumber } },
+        document_details: {
+          document_number: documentNumber,
+        },
       },
     });
 
