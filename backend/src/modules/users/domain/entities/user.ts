@@ -27,7 +27,7 @@ export class User extends GenericEntity {
     public readonly middleName?: Name,
     public readonly secondSurname?: Name,
     public readonly phone?: DataString,
-    public readonly metadata: Metadata | null = null,
+    metadata?: Metadata | null,
   ) {
     super(metadata);
   }

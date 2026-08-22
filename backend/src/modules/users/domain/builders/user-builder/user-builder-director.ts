@@ -21,7 +21,7 @@ export class UserBuilderDirector {
     phone?: string,
     middleName?: string,
     secondSurname?: string,
-    metadata: Metadata | null = null,
+    metadata?: Metadata | null,
   ): UserBuilderDirector {
     this.userBuilder
       .metadata(metadata)

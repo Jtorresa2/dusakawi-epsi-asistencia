@@ -24,5 +24,5 @@ export interface UserBuilder extends Builder<User> {
   passwordHash(passwordHash: HashedPassword): this;
   email(email: string): this;
   roles(roles: Role[]): this;
-  metadata(metadata: Metadata | null): this;
+  metadata(metadata?: Metadata | null): this;
 }

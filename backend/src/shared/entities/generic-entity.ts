@@ -1,11 +1,13 @@
 import type { Metadata } from '@shared/types/metadata.js';
 
 export abstract class GenericEntity {
-  protected constructor(
-    public readonly metadata: Metadata | null = {
+  public readonly metadata: Metadata;
+
+  protected constructor(metadata?: Metadata | null) {
+    this.metadata = metadata ?? {
       id: crypto.randomUUID(),
       createdAt: new Date(),
       updatedAt: null,
-    },
-  ) {}
+    };
+  }
 }

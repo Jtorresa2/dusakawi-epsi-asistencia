@@ -111,7 +111,7 @@ export class UserDatabaseBuilder implements UserBuilder {
     return this;
   }
 
-  metadata(metadata: Metadata | null): this {
+  metadata(metadata?: Metadata | null): this {
     this._metadata = metadata;
     return this;
   }
