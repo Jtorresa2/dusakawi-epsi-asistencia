@@ -6,7 +6,7 @@ import { PrismaPositionMapper } from './prisma-position.mapper.js';
 import { HashedPassword } from '../../../domain/value-objects/hashed-password.js';
 import { PrismaAreaMapper } from '../../../../areas/infrastructure/mappers/prisma/prisma-area-mapper.js';
 import { PrismaRoleMapper } from './prisma-role.mapper.js';
-import type { UserBuilder } from '../../../domain/interfaces/user-builder.js';
+import { UserDatabaseBuilder } from '../../../domain/builders/user-builder/user-database-builder.js';
 
 type PrismaUser = Prisma.usersGetPayload<{
   include: {
@@ -26,18 +26,12 @@ type PrismaUser = Prisma.usersGetPayload<{
 }>;
 
 export class PrismaUserMapper {
-  private static userBuilder: UserBuilder;
-
-  constructor(userBuilder: UserBuilder) {
-    PrismaUserMapper.userBuilder = userBuilder;
-  }
-
   static toDomain(likeEntity: PrismaUser): User {
     const roles = likeEntity.user_roles.map(({ roles }) => {
       return PrismaRoleMapper.toDomain(roles);
     });
 
-    return this.userBuilder
+    return new UserDatabaseBuilder()
       .documentDetails(
         PrismaDocumentDetailsMapper.toDomain(likeEntity.document_details),
       )
