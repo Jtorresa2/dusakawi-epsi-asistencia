@@ -1,3 +1,4 @@
+import { NotFoundError } from '@shared/errors/errors.js';
 import type { PasswordHasher } from '../../../domain/interfaces/password-hasher.js';
 import type { TokenHandler } from '../../../domain/interfaces/token.handler.js';
 import type { UserRepository } from '../../../domain/repositories/user-repository.js';
@@ -14,14 +15,16 @@ export class LoginQueryHandler {
   async handle(request: LoginQueryDto): Promise<AuthResposeDto> {
     const user = await this.userRepository.getUserByUsername(request.username);
 
-    if (!user) throw new Error('Invalid username or password');
+    if (!user) throw new NotFoundError('username or password');
 
     const isPasswordValid = await this.passwordHasher.verify(
       request.password,
       user.password,
     );
 
-    if (!isPasswordValid) throw new Error('Invalid username or password');
+    if (!isPasswordValid) {
+      throw new NotFoundError('username or password');
+    }
 
     const token = this.tokenHandler.createToken(user.metadata!.id, user.roles);
 

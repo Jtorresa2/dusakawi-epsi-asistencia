@@ -8,6 +8,7 @@ import { UserBuilderDirector } from '../../../domain/builders/user-builder/user-
 import type { UserRepository } from '../../../domain/repositories/user-repository.js';
 import { DocumentDetailsCreator } from '../../../domain/services/document-details-creator.js';
 import type { GenericResponseDto } from '@shared/dtos/generic-response.dto.js';
+import { ConflictError, NotFoundError } from '@shared/errors/errors.js';
 
 export class RegisterCommandHandler {
   constructor(
@@ -21,26 +22,26 @@ export class RegisterCommandHandler {
 
   async handle(request: RegisterCommandDto): Promise<GenericResponseDto> {
     const userExist = await this.userRepository.getUserExists(request.username);
-    if (userExist) throw new Error('User already exist');
+    if (userExist) throw new ConflictError('user already exist');
 
     const documentExist = await this.userRepository.getUserExistsByDocument(
       request.documentDetails.number,
     );
-    if (documentExist) throw new Error('Document already exist');
+    if (documentExist) throw new ConflictError('document already exist');
 
     const emailExist = await this.userRepository.getUserExistsByEmail(
       request.email,
     );
-    if (emailExist) throw new Error('Email already exist');
+    if (emailExist) throw new ConflictError('email already exist');
 
     const position = await this.positionRepository.findById(request.positionId);
-    if (!position) throw new Error('Position not found');
+    if (!position) throw new NotFoundError('position');
 
     const area = await this.areaRepository.findById(request.areaId);
-    if (!area) throw new Error('Area not found');
+    if (!area) throw new NotFoundError('area');
 
     const roles = await this.roleRepository.getRolesByName(request.roles);
-    if (roles.length === 0) throw new Error('Roles not found');
+    if (roles.length === 0) throw new ConflictError('roles');
 
     const documentDetails = await this.documentDetailsCreator.create(
       request.documentDetails.documentTypeId,

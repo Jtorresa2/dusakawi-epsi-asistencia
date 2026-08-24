@@ -3,6 +3,7 @@ import { DocumentDetails } from '../value-objects/document-details.js';
 import type { DocumentTypeRepository } from '../repositories/document-type-repository.js';
 import { DocumentNumber } from '../value-objects/document-number.js';
 import { DataString } from '@shared/value-objects/data-string.js';
+import { ValidationError } from '@shared/errors/errors.js';
 
 export class DocumentDetailsCreator {
   constructor(
@@ -17,7 +18,7 @@ export class DocumentDetailsCreator {
   ): Promise<DocumentDetails> {
     const documentType =
       await this.documentTypeRepository.findById(documentTypeId);
-    if (!documentType) throw new Error(documentTypeId);
+    if (!documentType) throw new ValidationError('documentType not found');
 
     return DocumentDetails.create(
       documentType,
