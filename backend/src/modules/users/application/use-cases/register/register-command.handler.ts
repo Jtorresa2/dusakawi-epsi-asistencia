@@ -28,6 +28,11 @@ export class RegisterCommandHandler {
     );
     if (documentExist) throw new Error('Document already exist');
 
+    const emailExist = await this.userRepository.getUserExistsByEmail(
+      request.email,
+    );
+    if (emailExist) throw new Error('Email already exist');
+
     const position = await this.positionRepository.findById(request.positionId);
     if (!position) throw new Error('Position not found');
 

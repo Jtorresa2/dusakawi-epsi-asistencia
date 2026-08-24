@@ -24,6 +24,13 @@ export class PrismaUserRepository implements UserRepository {
     return userFound ? PrismaUserMapper.toDomain(userFound) : null;
   }
 
+  private async getIfUserExists(
+    where: Prisma.usersWhereInput,
+  ): Promise<boolean> {
+    const userExist = await prisma.users.count({ where });
+    return userExist !== 0;
+  }
+
   async create(entity: User): Promise<void> {
     await prisma.users.create({
       data: PrismaUserMapper.toCreate(entity),
@@ -58,19 +65,16 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async getUserExists(username: string): Promise<boolean> {
-    const userExist = await prisma.users.count({ where: { username } });
-    return userExist !== 0;
+    return await this.getIfUserExists({ username });
   }
 
   async getUserExistsByDocument(documentNumber: string): Promise<boolean> {
-    const userExist = await prisma.users.count({
-      where: {
-        document_details: {
-          document_number: documentNumber,
-        },
-      },
+    return await this.getIfUserExists({
+      document_details: { document_number: documentNumber },
     });
+  }
 
-    return userExist !== 0;
+  async getUserExistsByEmail(email: string): Promise<boolean> {
+    return await this.getIfUserExists({ email });
   }
 }
