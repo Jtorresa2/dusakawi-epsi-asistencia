@@ -9,6 +9,7 @@ import type { UserRepository } from '../../../domain/repositories/user-repositor
 import { DocumentDetailsCreator } from '../../../domain/services/document-details-creator.js';
 import type { GenericResponseDto } from '@shared/dtos/generic-response.dto.js';
 import { ConflictError, NotFoundError } from '@shared/errors/errors.js';
+import { PlainPassword } from '../../../domain/value-objects/plain-password.js';
 
 export class RegisterCommandHandler {
   constructor(
@@ -50,7 +51,8 @@ export class RegisterCommandHandler {
       request.documentDetails.placeOfIssue,
     );
 
-    const hashedPassword = await this.passwordHasher.hash(request.password);
+    const plainPassword = PlainPassword.create(request.password);
+    const hashedPassword = await this.passwordHasher.hash(plainPassword);
 
     const newUser = new UserBuilderDirector(new UserDatabaseBuilder())
       .basicData(
