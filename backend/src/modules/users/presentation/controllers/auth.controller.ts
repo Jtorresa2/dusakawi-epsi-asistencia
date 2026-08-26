@@ -15,7 +15,7 @@ const register = async (req: Request, res: Response) => {
   );
 
   const result = await handler.handle(req.body);
-  return res.json(result);
+  return res.status(201).json(result);
 };
 
 export default { login, register };
