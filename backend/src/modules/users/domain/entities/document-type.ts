@@ -11,7 +11,7 @@ export const enum DocumentTypeName {
 export class DocumentType extends GenericEntity {
   constructor(
     public readonly name: DocumentTypeName,
-    public readonly metadata: Metadata | null = null,
+    metadata: Metadata | null,
   ) {
     super(metadata);
   }

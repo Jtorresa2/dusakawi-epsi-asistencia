@@ -78,18 +78,18 @@ export class PrismaUserMapper {
       email: entity.email.value,
       password_hash: entity.password.value,
       username: entity.username.value,
-      id: entity.metadata!.id,
-      created_at: entity.metadata!.createdAt,
-      updated_at: entity.metadata!.updatedAt,
-      positions: { connect: { id: entity.position.metadata!.id } },
-      area: { connect: { id: entity.area.metadata!.id } },
+      id: entity.metadata.id,
+      created_at: entity.metadata.createdAt,
+      updated_at: entity.metadata.updatedAt,
+      positions: { connect: { id: entity.position.metadata.id } },
+      area: { connect: { id: entity.area.metadata.id } },
       document_details: {
         create: PrismaDocumentDetailsMapper.toCreate(entity.documentDetails),
       },
       user_roles: {
         create: entity.roles.map((role) => {
           return {
-            roles: { connect: { id: role.metadata!.id } },
+            roles: { connect: { id: role.metadata.id } },
           };
         }),
       },
@@ -99,9 +99,9 @@ export class PrismaUserMapper {
   static toUpdate(entity: User): Prisma.usersUpdateInput {
     return {
       ...PrismaUserMapper.basicData(entity),
-      updated_at: entity.metadata!.updatedAt,
-      positions: { connect: { id: entity.position.metadata!.id } },
-      area: { connect: { id: entity.area.metadata!.id } },
+      updated_at: entity.metadata.updatedAt,
+      positions: { connect: { id: entity.position.metadata.id } },
+      area: { connect: { id: entity.area.metadata.id } },
       document_details: {
         update: PrismaDocumentDetailsMapper.toUpdate(entity.documentDetails),
       },

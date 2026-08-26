@@ -17,16 +17,16 @@ export class PrismaFloorMapper {
   static toCreate(floor: Floor): Prisma.floorsCreateInput {
     return {
       name: floor.name.value,
-      id: floor.metadata!.id,
-      created_at: floor.metadata!.createdAt,
-      updated_at: floor.metadata!.updatedAt,
+      id: floor.metadata.id,
+      created_at: floor.metadata.createdAt,
+      updated_at: floor.metadata.updatedAt,
     };
   }
 
   static toUpdate(floor: Floor): Prisma.floorsUpdateInput {
     return {
       name: floor.name.value,
-      updated_at: floor.metadata!.updatedAt,
+      updated_at: floor.metadata.updatedAt,
     };
   }
 }

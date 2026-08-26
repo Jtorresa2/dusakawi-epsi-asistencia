@@ -5,7 +5,7 @@ import { DataString } from '@shared/value-objects/data-string.js';
 export class Floor extends GenericEntity {
   constructor(
     public readonly name: DataString,
-    public readonly metadata: Metadata | null = null,
+    metadata: Metadata | null,
   ) {
     super(metadata);
   }

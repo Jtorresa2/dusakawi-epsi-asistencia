@@ -4,7 +4,7 @@ import type { UserDetailsDto } from '../common/dtos/user-details.dto.js';
 export class UserMapper {
   static toUserResponseDto(user: User): UserDetailsDto {
     const roles = user.roles.map((role) => ({
-      id: role.metadata!.id,
+      id: role.metadata.id,
       name: role.name.value,
     }));
 
@@ -28,11 +28,11 @@ export class UserMapper {
         placeOfIssue: user.documentDetails.placeOfIssue.value,
       },
       area: {
-        id: user.area.metadata!.id,
+        id: user.area.metadata.id,
         name: user.area.name.value,
       },
       position: {
-        id: user.area.metadata!.id,
+        id: user.area.metadata.id,
         name: user.area.name.value,
       },
       roles: roles,

@@ -24,10 +24,10 @@ export class PrismaAreaMapper {
     return {
       name: area.name.value,
       description: area.description?.value ?? null,
-      floors: { connect: { id: area.floor.metadata!.id } },
-      id: area.metadata!.id.toString(),
-      created_at: area.metadata!.createdAt,
-      updated_at: area.metadata!.updatedAt,
+      floors: { connect: { id: area.floor.metadata.id } },
+      id: area.metadata.id.toString(),
+      created_at: area.metadata.createdAt,
+      updated_at: area.metadata.updatedAt,
     };
   }
 
@@ -35,8 +35,8 @@ export class PrismaAreaMapper {
     return {
       name: area.name.value,
       description: area.description?.value ?? null,
-      floors: { connect: { id: area.floor.metadata!.id } },
-      updated_at: area.metadata!.updatedAt,
+      floors: { connect: { id: area.floor.metadata.id } },
+      updated_at: area.metadata.updatedAt,
     };
   }
 }

@@ -21,9 +21,9 @@ export class PrismaDocumentTypeMapper {
   ): Prisma.document_typesCreateInput {
     return {
       name: documentType.name,
-      id: documentType.metadata!.id,
-      created_at: documentType.metadata!.createdAt,
-      updated_at: documentType.metadata!.updatedAt,
+      id: documentType.metadata.id,
+      created_at: documentType.metadata.createdAt,
+      updated_at: documentType.metadata.updatedAt,
     };
   }
 
@@ -32,7 +32,7 @@ export class PrismaDocumentTypeMapper {
   ): Prisma.document_typesUpdateInput {
     return {
       name: documentType.name,
-      updated_at: documentType.metadata!.updatedAt,
+      updated_at: documentType.metadata.updatedAt,
     };
   }
 }

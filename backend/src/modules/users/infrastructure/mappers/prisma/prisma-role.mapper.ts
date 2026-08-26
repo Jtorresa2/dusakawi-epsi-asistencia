@@ -22,9 +22,9 @@ export class PrismaRoleMapper {
     return {
       name: role.name.value,
       description: role.description.value,
-      id: role.metadata!.id,
-      created_at: role.metadata!.createdAt,
-      updated_at: role.metadata!.updatedAt,
+      id: role.metadata.id,
+      created_at: role.metadata.createdAt,
+      updated_at: role.metadata.updatedAt,
     };
   }
 
@@ -32,7 +32,7 @@ export class PrismaRoleMapper {
     return {
       name: role.name.value,
       description: role.description.value,
-      updated_at: role.metadata!.updatedAt,
+      updated_at: role.metadata.updatedAt,
     };
   }
 }

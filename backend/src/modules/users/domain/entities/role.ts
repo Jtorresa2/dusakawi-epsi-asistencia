@@ -6,7 +6,7 @@ export class Role extends GenericEntity {
   constructor(
     public readonly name: DataString,
     public readonly description: DataString,
-    public readonly metadata: Metadata | null = null,
+    metadata: Metadata | null,
   ) {
     super(metadata);
   }

@@ -26,12 +26,13 @@ export class PrismaDocumentDetailsMapper {
     return {
       document_types: {
         connect: {
-          id: documentDetails.documentType.metadata!.id,
+          id: documentDetails.documentType.metadata.id,
         },
       },
       document_number: documentDetails.documentNumber.value,
       issue_date: documentDetails.issueDate,
       place_of_issue: documentDetails.placeOfIssue.value,
+      users: {},
     };
   }
 
@@ -41,7 +42,7 @@ export class PrismaDocumentDetailsMapper {
     return {
       document_types: {
         connect: {
-          id: documentDetails.documentType.metadata!.id,
+          id: documentDetails.documentType.metadata.id,
         },
       },
       document_number: documentDetails.documentNumber.value,

@@ -22,9 +22,9 @@ export class PrismaPositionMapper {
     return {
       name: position.name.value,
       description: position.description?.value,
-      id: position.metadata!.id,
-      created_at: position.metadata!.createdAt,
-      updated_at: position.metadata!.updatedAt,
+      id: position.metadata.id,
+      created_at: position.metadata.createdAt,
+      updated_at: position.metadata.updatedAt,
     };
   }
 
@@ -32,7 +32,7 @@ export class PrismaPositionMapper {
     return {
       name: position.name.value,
       description: position.description?.value,
-      updated_at: position.metadata!.updatedAt,
+      updated_at: position.metadata.updatedAt,
     };
   }
 }
