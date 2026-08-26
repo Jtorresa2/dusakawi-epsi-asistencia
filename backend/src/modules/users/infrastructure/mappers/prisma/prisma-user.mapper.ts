@@ -33,7 +33,7 @@ export class PrismaUserMapper {
 
     return new UserDatabaseBuilder()
       .documentDetails(
-        PrismaDocumentDetailsMapper.toDomain(likeEntity.document_details),
+        PrismaDocumentDetailsMapper.toDomain(likeEntity.document_details!),
       )
       .firstName(likeEntity.first_name)
       .firstSurname(likeEntity.first_surname)

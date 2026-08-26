@@ -31,41 +31,6 @@ BEGIN;
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
--- document_types
--- ---------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS document_types (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name        VARCHAR(100) NOT NULL,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMPTZ,
-    CONSTRAINT uq_document_types_name UNIQUE (name)
-);
-
-CREATE OR REPLACE TRIGGER trg_document_types_updated_at
-BEFORE UPDATE ON document_types
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
--- ---------------------------------------------------------------------
--- document_details
--- ---------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS document_details (
-    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    document_type_id  UUID NOT NULL REFERENCES document_types(id),
-    document_number   VARCHAR(50)  NOT NULL,
-    issue_date        DATE NOT NULL,
-    place_of_issue    VARCHAR(150) NOT NULL,
-    created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at        TIMESTAMPTZ,
-    CONSTRAINT uq_document_details_document_number UNIQUE (document_number)
-);
-
-CREATE INDEX IF NOT EXISTS idx_document_details_document_type_id ON document_details(document_type_id);
-
-CREATE OR REPLACE TRIGGER trg_document_details_updated_at
-BEFORE UPDATE ON document_details
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
--- ---------------------------------------------------------------------
 -- roles
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS roles (
@@ -185,7 +150,6 @@ FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS users (
     id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    document_details_id  UUID NOT NULL REFERENCES document_details(id),
     first_name           VARCHAR(100) NOT NULL,
     middle_name          VARCHAR(100),
     first_surname        VARCHAR(100) NOT NULL,
@@ -203,8 +167,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at           TIMESTAMPTZ,
     CONSTRAINT uq_users_username UNIQUE (username),
-    CONSTRAINT uq_users_email UNIQUE (email),
-    CONSTRAINT uq_users_document_details UNIQUE (document_details_id)
+    CONSTRAINT uq_users_email UNIQUE (email)
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_position_id ON users(position_id);
@@ -212,6 +175,43 @@ CREATE INDEX IF NOT EXISTS idx_users_area_id ON users(area_id);
 
 CREATE OR REPLACE TRIGGER trg_users_updated_at
 BEFORE UPDATE ON users
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- ---------------------------------------------------------------------
+-- document_types
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS document_types (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name        VARCHAR(100) NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at  TIMESTAMPTZ,
+    CONSTRAINT uq_document_types_name UNIQUE (name)
+);
+
+CREATE OR REPLACE TRIGGER trg_document_types_updated_at
+BEFORE UPDATE ON document_types
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- ---------------------------------------------------------------------
+-- document_details
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS document_details (
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    document_type_id  UUID NOT NULL REFERENCES document_types(id),
+    user_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    document_number   VARCHAR(50)  NOT NULL,
+    issue_date        DATE NOT NULL,
+    place_of_issue    VARCHAR(150) NOT NULL,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at        TIMESTAMPTZ,
+    CONSTRAINT uq_document_details_document_number UNIQUE (document_number),
+    CONSTRAINT uq_document_details_user_id UNIQUE (user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_document_details_document_type_id ON document_details(document_type_id);
+
+CREATE OR REPLACE TRIGGER trg_document_details_updated_at
+BEFORE UPDATE ON document_details
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ---------------------------------------------------------------------

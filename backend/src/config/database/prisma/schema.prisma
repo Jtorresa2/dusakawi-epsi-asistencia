@@ -32,13 +32,14 @@ model attendances {
 model document_details {
   id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   document_type_id String         @db.Uuid
+  user_id          String         @unique(map: "uq_document_details_user_id") @db.Uuid
   document_number  String         @unique(map: "uq_document_details_document_number") @db.VarChar(50)
   issue_date       DateTime       @db.Date
   place_of_issue   String         @db.VarChar(150)
   created_at       DateTime       @default(now()) @db.Timestamptz(6)
   updated_at       DateTime?      @db.Timestamptz(6)
   document_types   document_types @relation(fields: [document_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users            users?
+  users            users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([document_type_id], map: "idx_document_details_document_type_id")
 }
@@ -144,32 +145,31 @@ model user_roles {
 
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model users {
-  id                                     String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  document_details_id                    String           @unique(map: "uq_users_document_details") @db.Uuid
-  first_name                             String           @db.VarChar(100)
-  middle_name                            String?          @db.VarChar(100)
-  first_surname                          String           @db.VarChar(100)
-  second_surname                         String?          @db.VarChar(100)
-  date_of_birth                          DateTime         @db.Date
-  place_of_birth                         String           @db.VarChar(150)
-  address                                String           @db.VarChar(255)
-  phone                                  String?          @db.VarChar(20)
-  cell                                   String           @db.VarChar(20)
-  position_id                            String           @db.Uuid
-  area_id                                String           @db.Uuid
-  username                               String           @unique(map: "uq_users_username") @db.VarChar(50)
-  password_hash                          String           @db.VarChar(255)
-  email                                  String           @unique(map: "uq_users_email") @db.VarChar(150)
-  created_at                             DateTime         @default(now()) @db.Timestamptz(6)
-  updated_at                             DateTime?        @db.Timestamptz(6)
+  id                                     String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name                             String            @db.VarChar(100)
+  middle_name                            String?           @db.VarChar(100)
+  first_surname                          String            @db.VarChar(100)
+  second_surname                         String?           @db.VarChar(100)
+  date_of_birth                          DateTime          @db.Date
+  place_of_birth                         String            @db.VarChar(150)
+  address                                String            @db.VarChar(255)
+  phone                                  String?           @db.VarChar(20)
+  cell                                   String            @db.VarChar(20)
+  position_id                            String            @db.Uuid
+  area_id                                String            @db.Uuid
+  username                               String            @unique(map: "uq_users_username") @db.VarChar(50)
+  password_hash                          String            @db.VarChar(255)
+  email                                  String            @unique(map: "uq_users_email") @db.VarChar(150)
+  created_at                             DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at                             DateTime?         @db.Timestamptz(6)
   attendances                            attendances[]
-  incidents_incidents_reviewed_byTousers incidents[]      @relation("incidents_reviewed_byTousers")
-  incidents_incidents_user_idTousers     incidents[]      @relation("incidents_user_idTousers")
+  document_details                       document_details?
+  incidents_incidents_reviewed_byTousers incidents[]       @relation("incidents_reviewed_byTousers")
+  incidents_incidents_user_idTousers     incidents[]       @relation("incidents_user_idTousers")
   requests                               requests[]
   user_roles                             user_roles[]
-  area                                   areas            @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  document_details                       document_details @relation(fields: [document_details_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  positions                              positions        @relation(fields: [position_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  area                                   areas             @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  positions                              positions         @relation(fields: [position_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([area_id], map: "idx_users_area_id")
   @@index([position_id], map: "idx_users_position_id")
