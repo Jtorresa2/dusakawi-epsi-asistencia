@@ -8,6 +8,7 @@ import { PrismaRoleRepository } from './persistence/repositories/prisma/prisma-r
 import { JwtHandler } from './security/jwt/jwt.handler.js';
 import { BcryptjsPasswordHasher } from './security/bcryptjs-password-hasher.js';
 import { LoginQueryHandler } from '../application/use-cases/login/login-query.handler.js';
+import { GetUserQueryHandler } from '../application/use-cases/get-user/get-user-query.handler.js';
 
 export function registerUserModule(container: AwilixContainer) {
   container.register({
@@ -25,5 +26,6 @@ export function registerUserModule(container: AwilixContainer) {
     // use-cases
     registerCommandHandler: asClass(RegisterCommandHandler).scoped(),
     loginQueryHandler: asClass(LoginQueryHandler).scoped(),
+    getUserQueryHandler: asClass(GetUserQueryHandler).scoped(),
   });
 }
