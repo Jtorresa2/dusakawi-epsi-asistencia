@@ -86,6 +86,13 @@ export class PrismaUserMapper {
       document_details: {
         create: PrismaDocumentDetailsMapper.toCreate(entity.documentDetails),
       },
+      user_roles: {
+        create: entity.roles.map((role) => {
+          return {
+            roles: { connect: { id: role.metadata!.id } },
+          };
+        }),
+      },
     };
   }
 
