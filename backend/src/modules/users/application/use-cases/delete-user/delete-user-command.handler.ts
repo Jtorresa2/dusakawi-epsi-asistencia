@@ -9,6 +9,6 @@ export class DeleteUserCommandHandler {
     const userExist = await this.userRepository.findById(request.id);
     if (!userExist) throw new NotFoundError('user');
 
-    return await this.userRepository.delete(request.id);
+    await this.userRepository.delete(request.id);
   }
 }
