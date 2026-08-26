@@ -22,7 +22,7 @@ export class PrismaDocumentDetailsMapper {
 
   static toCreate(
     documentDetails: DocumentDetails,
-  ): Prisma.document_detailsCreateInput {
+  ): Prisma.document_detailsCreateWithoutUsersInput {
     return {
       document_types: {
         connect: {
@@ -32,7 +32,6 @@ export class PrismaDocumentDetailsMapper {
       document_number: documentDetails.documentNumber.value,
       issue_date: documentDetails.issueDate,
       place_of_issue: documentDetails.placeOfIssue.value,
-      users: {},
     };
   }
 
