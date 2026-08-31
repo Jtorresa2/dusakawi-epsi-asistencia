@@ -1,3 +1,5 @@
+import { ValidationError } from '@shared/errors/errors.js';
+
 export class Email {
   private static readonly EMAIL_REGEX =
     /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
@@ -12,7 +14,7 @@ export class Email {
     const normalizedValue = value.trim();
 
     if (!this.isValid(normalizedValue)) {
-      throw new Error('El correo electrónico es inválido.');
+      throw new ValidationError('El correo electrónico es inválido.');
     }
 
     return new Email(value);

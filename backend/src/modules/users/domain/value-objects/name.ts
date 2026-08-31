@@ -1,3 +1,4 @@
+import { ValidationError } from '@shared/errors/errors.js';
 import { DataString } from '@shared/value-objects/data-string.js';
 
 export class Name {
@@ -12,7 +13,7 @@ export class Name {
     const normalizedValue = value.trim();
 
     if (!this.isFirstLetterUpperCase(normalizedValue)) {
-      throw new Error('La primera letra debe ser mayúscula.');
+      throw new ValidationError('La primera letra debe ser mayúscula.');
     }
 
     return new Name(normalizedValue);

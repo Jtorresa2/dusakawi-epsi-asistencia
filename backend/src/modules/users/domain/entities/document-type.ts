@@ -1,4 +1,5 @@
 import { GenericEntity } from '@shared/entities/generic-entity.js';
+import type { Metadata } from '@shared/types/metadata.js';
 
 export const enum DocumentTypeName {
   ID = 'Cédula de ciudadanía',
@@ -8,8 +9,11 @@ export const enum DocumentTypeName {
 }
 
 export class DocumentType extends GenericEntity {
-  constructor(public readonly name: DocumentTypeName) {
-    super();
+  constructor(
+    public readonly name: DocumentTypeName,
+    metadata: Metadata | null,
+  ) {
+    super(metadata);
   }
 
   equals(other: DocumentType): boolean {

@@ -1,5 +1,5 @@
-import { Uuid } from '@shared/types/uuid.js';
-import { DocumentDetailsDto } from './document-details.dto.js';
+import type { Uuid } from '@shared/types/uuid.js';
+import type { DocumentDetailsDto } from './document-details.dto.js';
 
 export interface RegisterCommandDto {
   documentDetails: DocumentDetailsDto;

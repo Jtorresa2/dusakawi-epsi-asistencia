@@ -1,4 +1,4 @@
-import { Area } from '../../../areas/entities/area.js';
+import { Area } from '../../../areas/domain/entities/area.js';
 import { DataString } from '@shared/value-objects/data-string.js';
 import { DocumentDetails } from '../value-objects/document-details.js';
 import { Email } from '../value-objects/email.js';
@@ -7,15 +7,13 @@ import { HashedPassword } from '../value-objects/hashed-password.js';
 import { Name } from '../value-objects/name.js';
 import { Position } from './position.js';
 import { Role } from './role.js';
+import type { Metadata } from '@shared/types/metadata.js';
 
 export class User extends GenericEntity {
-  private _password: HashedPassword;
-
   constructor(
     public readonly documentDetails: DocumentDetails,
     public readonly firstName: Name,
     public readonly firstSurname: Name,
-    public readonly secondSurname: Name,
     public readonly dateOfBirth: Date,
     public readonly placeOfBirth: DataString,
     public readonly address: DataString,
@@ -23,21 +21,22 @@ export class User extends GenericEntity {
     public readonly position: Position,
     public readonly area: Area,
     public readonly username: DataString,
-    password: HashedPassword,
+    private _passwordHash: HashedPassword,
     public readonly email: Email,
     public readonly roles: Role[],
     public readonly middleName?: Name,
+    public readonly secondSurname?: Name,
     public readonly phone?: DataString,
+    metadata?: Metadata | null,
   ) {
-    super();
-    this._password = password;
+    super(metadata);
   }
 
   get password(): HashedPassword {
-    return this._password;
+    return this._passwordHash;
   }
 
-  changePassword(password: HashedPassword) {
-    this._password = password;
+  changePassword(passwordHash: HashedPassword) {
+    this._passwordHash = passwordHash;
   }
 }

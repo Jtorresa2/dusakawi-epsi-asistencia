@@ -1,10 +1,11 @@
-import { Area } from '../../../../areas/entities/area.js';
+import { Area } from '../../../../areas/domain/entities/area.js';
 import { DocumentDetails } from '../../value-objects/document-details.js';
 import { Position } from '../../entities/position.js';
 import { Role } from '../../entities/role.js';
 import { User } from '../../entities/user.js';
 import { HashedPassword } from '../../value-objects/hashed-password.js';
-import { UserBuilder } from '../../interfaces/user-builder.js';
+import type { UserBuilder } from '../../interfaces/user-builder.js';
+import type { Metadata } from '@shared/types/metadata.js';
 
 export class UserBuilderDirector {
   constructor(private userBuilder: UserBuilder) {}
@@ -12,7 +13,6 @@ export class UserBuilderDirector {
   basicData(
     firstName: string,
     firstSurname: string,
-    secondSurname: string,
     documentDetails: DocumentDetails,
     dateOfBirth: Date,
     placeOfBirth: string,
@@ -20,8 +20,11 @@ export class UserBuilderDirector {
     cell: string,
     phone?: string,
     middleName?: string,
+    secondSurname?: string,
+    metadata?: Metadata | null,
   ): UserBuilderDirector {
     this.userBuilder
+      .metadata(metadata)
       .documentDetails(documentDetails)
       .firstName(firstName)
       .middleName(middleName)
@@ -43,10 +46,10 @@ export class UserBuilderDirector {
 
   authData(
     username: string,
-    hashedPassword: HashedPassword,
+    passwordHash: HashedPassword,
     email: string,
   ): UserBuilderDirector {
-    this.userBuilder.username(username).password(hashedPassword).email(email);
+    this.userBuilder.username(username).passwordHash(passwordHash).email(email);
     return this;
   }
 

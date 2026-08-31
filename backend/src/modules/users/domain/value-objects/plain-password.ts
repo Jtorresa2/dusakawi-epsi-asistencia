@@ -1,3 +1,5 @@
+import { ValidationError } from '@shared/errors/errors.js';
+
 export class PlainPassword {
   private static readonly PASSWORD_REGEX =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,128}$/;
@@ -12,7 +14,7 @@ export class PlainPassword {
     const normalizedValue = value.trim();
 
     if (!this.isValid(normalizedValue)) {
-      throw new Error(
+      throw new ValidationError(
         'La contraseña debe tener entre 8 y 128 caracteres, e incluir al menos una mayúscula, una minúscula, un número y un carácter especial.',
       );
     }
