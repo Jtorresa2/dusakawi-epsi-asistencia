@@ -4,6 +4,8 @@ import type { UserRepository } from '../../../../domain/repositories/user-reposi
 import { prisma } from '@config/database/prisma/prisma.js';
 import { PrismaUserMapper } from '../../../mappers/prisma/prisma-user.mapper.js';
 import type { Prisma } from '@config/database/prisma/generated/client.js';
+import type { PagedListResponse } from '@shared/types/paged-list-response.js';
+import type { FindAllOptions } from '@shared/repositories/generic-repository.js';
 
 export class PrismaUserRepository implements UserRepository {
   private readonly includeEntities = {
@@ -12,6 +14,15 @@ export class PrismaUserRepository implements UserRepository {
     document_details: { include: { document_types: true } },
     user_roles: { include: { roles: true } },
   };
+
+  private readonly queryFields = [
+    'first_name',
+    'middle_name',
+    'first_surname',
+    'second_surname',
+    'username',
+    'email',
+  ];
 
   private async findUserByUniqueInput(
     where: Prisma.usersWhereUniqueInput,
@@ -52,12 +63,32 @@ export class PrismaUserRepository implements UserRepository {
     return await this.findUserByUniqueInput({ id });
   }
 
-  async findAll(): Promise<User[]> {
-    const users = await prisma.users.findMany({
-      include: this.includeEntities,
-    });
+  async findAll(options?: FindAllOptions): Promise<PagedListResponse<User>> {
+    const { page = 1, limit = 10, query } = options || {};
 
-    return users.map((user) => PrismaUserMapper.toDomain(user));
+    const where: Prisma.usersWhereInput = query
+      ? {
+          OR: this.queryFields.map((field) => ({
+            [field]: { contains: query, mode: 'insensitive' },
+          })),
+        }
+      : {};
+
+    const [total, users] = await prisma.$transaction([
+      prisma.users.count({ where }),
+      prisma.users.findMany({
+        include: this.includeEntities,
+        take: limit,
+        skip: (page - 1) * limit,
+        orderBy: { created_at: 'desc' },
+        where,
+      }),
+    ]);
+
+    return {
+      total,
+      items: users.map((user) => PrismaUserMapper.toDomain(user)),
+    };
   }
 
   async getUserByUsername(username: string): Promise<User | null> {

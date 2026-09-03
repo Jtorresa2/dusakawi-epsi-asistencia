@@ -206,7 +206,7 @@ VALUES
     (
         (SELECT id FROM document_types WHERE name = 'Cédula de Extranjería'),
         (SELECT id FROM users WHERE username = 'carlos'),
-        'CE897654', '2018-05-30', 'Barranquilla'
+        '1007654321', '2018-05-30', 'Barranquilla'
     )
 ON CONFLICT (document_number) DO NOTHING;
 

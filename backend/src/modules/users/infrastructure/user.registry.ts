@@ -10,6 +10,7 @@ import { BcryptjsPasswordHasher } from './security/bcryptjs-password-hasher.js';
 import { LoginQueryHandler } from '../application/use-cases/login/login-query.handler.js';
 import { GetUserQueryHandler } from '../application/use-cases/get-user/get-user-query.handler.js';
 import { DeleteUserCommandHandler } from '../application/use-cases/delete-user/delete-user-command.handler.js';
+import { GetUsersQueryHandler } from '../application/use-cases/get-users/get-users-query.handler.js';
 
 export function registerUserModule(container: AwilixContainer) {
   container.register({
@@ -28,6 +29,7 @@ export function registerUserModule(container: AwilixContainer) {
     registerCommandHandler: asClass(RegisterCommandHandler).scoped(),
     loginQueryHandler: asClass(LoginQueryHandler).scoped(),
     getUserQueryHandler: asClass(GetUserQueryHandler).scoped(),
+    getUsersQueryHandler: asClass(GetUsersQueryHandler).scoped(),
     deleteUserCommandHandler: asClass(DeleteUserCommandHandler).scoped(),
   });
 }

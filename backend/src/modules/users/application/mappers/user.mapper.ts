@@ -32,8 +32,8 @@ export class UserMapper {
         name: user.area.name.value,
       },
       position: {
-        id: user.area.metadata.id,
-        name: user.area.name.value,
+        id: user.position.metadata.id,
+        name: user.position.name.value,
       },
       roles: roles,
       createdAt: user.metadata.createdAt,
