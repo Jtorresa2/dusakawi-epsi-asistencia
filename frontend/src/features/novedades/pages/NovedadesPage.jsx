@@ -270,9 +270,12 @@ export default function NovedadesPage() {
             <TextField type="date" size="small" name="fecha_desde" value={form.fecha_desde}
               onChange={(e) => {
                 const v = e.target.value;
-                const hoy = new Date().toISOString().split("T")[0];
-                const autoSync = ["manana", "tarde"].includes(form.modalidad) || (form.modalidad === "dia_completo" && v === hoy);
-                setForm({ ...form, fecha_desde: v, ...(autoSync && { fecha_hasta: v }) });
+                // Autocompleta fecha_hasta con fecha_desde salvo que ya exista
+                // un rango válido (hasta >= desde). Evita pisar rangos reales
+                // de varios días (ej. vacaciones) y ahorra el segundo tipeo
+                // cuando el rango es de un solo día.
+                const hastaValido = form.fecha_hasta && form.fecha_hasta >= v;
+                setForm({ ...form, fecha_desde: v, ...(!hastaValido && { fecha_hasta: v }) });
               }}
               sx={{ width: 160, ...fieldSx }} slotProps={{ inputLabel: { shrink: true } }} />
           </Box>

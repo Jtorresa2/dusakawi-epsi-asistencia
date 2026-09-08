@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
 exports.obtenerTodos = async () => {
-  const [rows] = await db.query(`
+  const { rows } = await db.query(`
     SELECT
       p.*,
       uu.nombre AS empleado_nombre,
@@ -40,13 +40,13 @@ exports.crear = async (data, usuarioId) => {
     }
   }
 
-  const [rows, result] = await db.query(
+  const { rows: [nuevo] } = await db.query(
     `INSERT INTO novedades (usuario_id, fecha_desde, fecha_hasta, motivo, tipo_novedad, tipo, hora_desde, hora_hasta, registrado_por)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
     [targetId, fecha_desde, fecha_hasta, motivo, novedadVal, modalidadVal, hora_desde || null, hora_hasta || null, usuarioId || null]
   );
 
-  const novedadId = rows[0]?.id || result.insertId;
+  const novedadId = nuevo?.id ?? 0;
   let diasGenerados = 0;
 
   if (novedadVal === "comision" || modalidadVal === "dia_completo") {
@@ -64,14 +64,14 @@ exports.crear = async (data, usuarioId) => {
     }
 
     for (const fecha of dias) {
-      const [existentes] = await db.query(
-        `SELECT id FROM asistencia WHERE usuario_id = ? AND fecha = ?`,
+      const { rows: existentes } = await db.query(
+        `SELECT id FROM asistencia WHERE usuario_id = $1 AND fecha = $2`,
         [targetId, fecha]
       );
       if (existentes.length === 0) {
         await db.query(
           `INSERT INTO asistencia (usuario_id, fecha, estado, observacion, horas_trabajadas, minutos_tardanza)
-           VALUES (?, ?, ?, ?, 0, 0)`,
+           VALUES ($1, $2, $3, $4, 0, 0)`,
           [targetId, fecha, estado, observacion]
         );
       }
@@ -105,28 +105,28 @@ exports.actualizar = async (id, data, usuarioId) => {
   }
 
   await db.query(
-    `UPDATE novedades SET usuario_id = ?, fecha_desde = ?, fecha_hasta = ?, motivo = ?, tipo_novedad = ?, tipo = ?, hora_desde = ?, hora_hasta = ? WHERE id = ?`,
+    `UPDATE novedades SET usuario_id = $1, fecha_desde = $2, fecha_hasta = $3, motivo = $4, tipo_novedad = $5, tipo = $6, hora_desde = $7, hora_hasta = $8 WHERE id = $9`,
     [targetId, fecha_desde, fecha_hasta, motivo, novedad, modalidadVal, hora_desde || null, hora_hasta || null, id]
   );
   return { id };
 };
 
 exports.obtenerPorEmpleado = async (usuarioId) => {
-  const [rows] = await db.query(`
+  const { rows } = await db.query(`
     SELECT
       p.*,
       u.nombre AS empleado_nombre,
       u.apellido AS empleado_apellido
     FROM novedades p
     LEFT JOIN usuarios u ON u.id = p.usuario_id
-    WHERE p.usuario_id = ?
+    WHERE p.usuario_id = $1
     ORDER BY p.creado_en DESC
   `, [usuarioId]);
   return rows;
 };
 
 exports.eliminar = async (id) => {
-  await db.query(`DELETE FROM novedades WHERE id = ?`, [id]);
+  await db.query(`DELETE FROM novedades WHERE id = $1`, [id]);
   return { id };
 };
 

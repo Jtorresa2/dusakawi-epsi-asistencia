@@ -1,5 +1,5 @@
 import { Paper, Typography, Box } from "@mui/material";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import { CalendarDays as CalendarTodayIcon } from "lucide-react";
 import { COLORES } from "../../../shared/constants/colores.js";
 
 export default function DashboardHeader({ usuario }) {

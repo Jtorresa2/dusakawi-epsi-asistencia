@@ -12,7 +12,7 @@ exports.login = async (req, res) => {
       return res.status(400).json({ mensaje: "Faltan datos" });
     }
 
-    const [rows] = await db.query(`
+    const { rows } = await db.query(`
       SELECT
           u.id,
           u.username,
@@ -24,7 +24,7 @@ exports.login = async (req, res) => {
           u.apellido
       FROM usuarios u
       LEFT JOIN roles r ON u.rol_id = r.id
-      WHERE u.username = ?
+      WHERE u.username = $1
     `, [username]);
 
     if (rows.length === 0) {
@@ -86,7 +86,7 @@ exports.login = async (req, res) => {
     );
 
     // Actualizar ultimo_acceso
-    await db.query("UPDATE usuarios SET ultimo_acceso = NOW() WHERE id = ?", [user.id]);
+    await db.query("UPDATE usuarios SET ultimo_acceso = NOW() WHERE id = $1", [user.id]);
 
     res.json({
       token,
@@ -118,21 +118,21 @@ exports.cambiarPassword = async (req, res) => {
       return res.status(400).json({ mensaje: "La contrasena debe tener al menos 8 caracteres" });
     }
 
-    const [rows] = await db.query("SELECT password_hash FROM usuarios WHERE id = ?", [usuarioId]);
+    const { rows } = await db.query("SELECT password_hash FROM usuarios WHERE id = $1", [usuarioId]);
     if (!rows.length) return res.status(404).json({ mensaje: "Usuario no encontrado" });
 
     const valida = await bcrypt.compare(password_actual, rows[0].password_hash);
     if (!valida) return res.status(400).json({ mensaje: "Contrasena actual incorrecta" });
 
     const hash = await bcrypt.hash(password_nuevo, 10);
-    await db.query("UPDATE usuarios SET password_hash = ?, password_reset_required = false WHERE id = ?", [hash, usuarioId]);
+    await db.query("UPDATE usuarios SET password_hash = $1, password_reset_required = false WHERE id = $2", [hash, usuarioId]);
 
     // Generar nuevo token
-    const [userData] = await db.query(`
+    const { rows: userData } = await db.query(`
       SELECT u.id, u.username, r.nombre AS rol, u.nombre, u.apellido
       FROM usuarios u
       LEFT JOIN roles r ON u.rol_id = r.id
-      WHERE u.id = ?
+      WHERE u.id = $1
     `, [usuarioId]);
 
     const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
@@ -164,8 +164,8 @@ exports.solicitarResetPassword = async (req, res) => {
 
     const mensajeGenerico = "Si el correo esta registrado, recibiras un enlace para restablecer tu contrasena";
 
-    const [rows] = await db.query(
-      "SELECT id, username, nombre, apellido, correo FROM usuarios WHERE correo = ?",
+    const { rows } = await db.query(
+      "SELECT id, username, nombre, apellido, correo FROM usuarios WHERE correo = $1",
       [correo]
     );
 
@@ -180,12 +180,12 @@ exports.solicitarResetPassword = async (req, res) => {
 
     // Invalida tokens previos del usuario antes de emitir uno nuevo.
     await db.query(
-      "UPDATE password_reset_tokens SET usado = true WHERE usuario_id = ? AND usado = false",
+      "UPDATE password_reset_tokens SET usado = true WHERE usuario_id = $1 AND usado = false",
       [usuario.id]
     );
     await db.query(
       `INSERT INTO password_reset_tokens (usuario_id, token_hash, expira_en)
-       VALUES (?, ?, now() + interval '30 minutes')`,
+       VALUES ($1, $2, now() + interval '30 minutes')`,
       [usuario.id, tokenHash]
     );
 
@@ -218,10 +218,10 @@ exports.restablecerPassword = async (req, res) => {
 
     const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `SELECT t.id, t.usuario_id, t.expira_en, t.usado
        FROM password_reset_tokens t
-       WHERE t.token_hash = ?`,
+       WHERE t.token_hash = $1`,
       [tokenHash]
     );
 
@@ -235,10 +235,10 @@ exports.restablecerPassword = async (req, res) => {
 
     const hash = await bcrypt.hash(password_nuevo, 10);
     await db.query(
-      "UPDATE usuarios SET password_hash = ?, password_reset_required = false WHERE id = ?",
+      "UPDATE usuarios SET password_hash = $1, password_reset_required = false WHERE id = $2",
       [hash, rows[0].usuario_id]
     );
-    await db.query("UPDATE password_reset_tokens SET usado = true WHERE id = ?", [rows[0].id]);
+    await db.query("UPDATE password_reset_tokens SET usado = true WHERE id = $1", [rows[0].id]);
 
     res.json({ mensaje: "Contrasena restablecida exitosamente" });
   } catch (error) {
@@ -249,14 +249,14 @@ exports.restablecerPassword = async (req, res) => {
 
 exports.perfil = async (req, res) => {
   try {
-    const [rows] = await db.query(`
+    const { rows } = await db.query(`
       SELECT
           u.id, u.username, u.password_reset_required,
           CONCAT(u.nombre,' ',u.apellido) AS nombre,
           r.nombre AS rol
       FROM usuarios u
       LEFT JOIN roles r ON u.rol_id = r.id
-      WHERE u.id = ?
+      WHERE u.id = $1
     `, [req.user.id]);
 
     res.json(rows[0]);

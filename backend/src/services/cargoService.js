@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
 exports.obtenerTodos = async () => {
-  const [rows] = await db.query(`
+  const { rows } = await db.query(`
     SELECT c.*, a.nombre AS areas, COUNT(u.id)::int AS empleados_count
     FROM cargos c
     LEFT JOIN areas a ON a.id = c.area_id
@@ -14,11 +14,11 @@ exports.obtenerTodos = async () => {
 };
 
 exports.obtenerPorId = async (id) => {
-  const [rows] = await db.query(
+  const { rows } = await db.query(
     `
     SELECT *
     FROM cargos
-    WHERE id = ?
+    WHERE id = $1
     `,
     [id]
   );
@@ -29,16 +29,16 @@ exports.obtenerPorId = async (id) => {
 exports.crear = async (cargo) => {
   const { nombre, descripcion, estado, area_id } = cargo;
 
-  const [rows, result] = await db.query(
+  const { rows: [nuevo] } = await db.query(
     `
     INSERT INTO cargos
     (nombre, descripcion, estado, area_id)
-    VALUES (?, ?, ?, ?) RETURNING id
+    VALUES ($1, $2, $3, $4) RETURNING id
     `,
     [nombre, descripcion, estado || "activo", area_id || null]
   );
 
-  return rows[0]?.id || result.insertId;
+  return nuevo?.id ?? 0;
 };
 
 exports.actualizar = async (id, cargo) => {
@@ -48,11 +48,11 @@ exports.actualizar = async (id, cargo) => {
     `
     UPDATE cargos
     SET
-      nombre = ?,
-      descripcion = ?,
-      estado = ?,
-      area_id = ?
-    WHERE id = ?
+      nombre = $1,
+      descripcion = $2,
+      estado = $3,
+      area_id = $4
+    WHERE id = $5
     `,
     [nombre, descripcion, estado || "activo", area_id || null, id]
   );
@@ -62,7 +62,7 @@ exports.eliminar = async (id) => {
   await db.query(
     `
     DELETE FROM cargos
-    WHERE id = ?
+    WHERE id = $1
     `,
     [id]
   );

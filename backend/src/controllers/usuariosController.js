@@ -5,7 +5,7 @@ const personalService = require('../services/personalService');
 
 exports.getUsuarios = async (req, res) => {
   try {
-    const [rows] = await pool.query(`
+    const { rows } = await pool.query(`
       SELECT 
         u.id, u.username, u.activo, u.password_reset_required, u.ultimo_acceso, u.creado_en,
         r.nombre AS rol,
@@ -75,9 +75,9 @@ exports.actualizarUsuario = async (req, res) => {
     const { rol_id, username, password, activo, password_reset_required } = req.body;
     if (password) {
       const hash = await bcrypt.hash(password, 10);
-      await pool.query(`UPDATE usuarios SET rol_id=?, username=?, password_hash=?, activo=?, password_reset_required=? WHERE id=?`, [rol_id, username, hash, activo, password_reset_required ?? 0, id]);
+      await pool.query(`UPDATE usuarios SET rol_id=$1, username=$2, password_hash=$3, activo=$4, password_reset_required=$5 WHERE id=$6`, [rol_id, username, hash, activo, password_reset_required ?? 0, id]);
     } else {
-      await pool.query(`UPDATE usuarios SET rol_id=?, username=?, activo=?, password_reset_required=? WHERE id=?`, [rol_id, username, activo, password_reset_required ?? 0, id]);
+      await pool.query(`UPDATE usuarios SET rol_id=$1, username=$2, activo=$3, password_reset_required=$4 WHERE id=$5`, [rol_id, username, activo, password_reset_required ?? 0, id]);
     }
     res.json({ mensaje: 'Usuario actualizado correctamente' });
   } catch (err) {
@@ -88,7 +88,7 @@ exports.actualizarUsuario = async (req, res) => {
 exports.eliminarUsuario = async (req, res) => {
   try {
     const { id } = req.params;
-    await pool.query(`DELETE FROM usuarios WHERE id = ?`, [id]);
+    await pool.query(`DELETE FROM usuarios WHERE id = $1`, [id]);
     res.json({ mensaje: 'Usuario eliminado correctamente' });
   } catch (err) {
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
@@ -100,7 +100,7 @@ exports.generarMasivos = async (req, res) => {
     // After the merge, all personal data lives in usuarios.
     // There are no separate empleado records without a linked usuario.
     // Check for any usuarios with missing personal data fields.
-    const [incompletos] = await pool.query(`
+    const { rows: incompletos } = await pool.query(`
       SELECT id, nombre, apellido, cedula, correo
       FROM usuarios
       WHERE cedula IS NULL OR correo IS NULL
@@ -121,7 +121,7 @@ exports.generarMasivos = async (req, res) => {
       let finalUser = username;
       let counter = 1;
       while (true) {
-        const [dup] = await pool.query('SELECT id FROM usuarios WHERE username = ?', [finalUser]);
+        const { rows: dup } = await pool.query('SELECT id FROM usuarios WHERE username = $1', [finalUser]);
         if (!dup.length) break;
         finalUser = username + counter;
         counter++;
@@ -130,7 +130,7 @@ exports.generarMasivos = async (req, res) => {
       const pass = user.cedula || `${user.nombre.toLowerCase()}.${user.apellido.toLowerCase()}`;
       const hash = await bcrypt.hash(pass, 10);
       await pool.query(
-        `UPDATE usuarios SET username = ?, password_hash = ?, password_reset_required = 1 WHERE id = ?`,
+        `UPDATE usuarios SET username = $1, password_hash = $2, password_reset_required = 1 WHERE id = $3`,
         [finalUser, hash, user.id]
       );
       creados++;
@@ -169,7 +169,7 @@ exports.generarMasivos = async (req, res) => {
 
 exports.getRoles = async (req, res) => {
   try {
-    const [rows] = await pool.query(`
+    const { rows } = await pool.query(`
       SELECT r.id, r.nombre, r.descripcion, COUNT(u.id) AS cantidad_usuarios
       FROM roles r
       LEFT JOIN usuarios u ON u.rol_id = r.id
@@ -185,11 +185,11 @@ exports.getRoles = async (req, res) => {
 exports.getPermisosRol = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rol] = await pool.query('SELECT id FROM roles WHERE id = ?', [id]);
+    const { rows: rol } = await pool.query('SELECT id FROM roles WHERE id = $1', [id]);
     if (!rol.length) return res.status(404).json({ mensaje: 'Rol no encontrado' });
 
-    const [rows] = await pool.query(
-      'SELECT permiso FROM rol_permiso WHERE rol_id = ? AND activo = TRUE',
+    const { rows } = await pool.query(
+      'SELECT permiso FROM rol_permiso WHERE rol_id = $1 AND activo = TRUE',
       [id]
     );
     res.json({ permisos: rows.map((r) => r.permiso) });

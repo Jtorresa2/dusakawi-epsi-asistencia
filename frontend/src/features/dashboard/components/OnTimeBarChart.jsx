@@ -2,15 +2,12 @@ import { Paper, Typography, Box } from "@mui/material";
 import { BarChart, Bar, XAxis, ResponsiveContainer } from "recharts";
 import { COLORES } from "../../../shared/constants/colores.js";
 
-const DATA = [
-  { dia: "Lun", min: 12 },
-  { dia: "Mar", min: 8 },
-  { dia: "Mié", min: 15 },
-  { dia: "Jue", min: 10 },
-  { dia: "Vie", min: 6 },
-  { dia: "Sáb", min: 3 },
-  { dia: "Dom", min: 1 },
-];
+const DIAS_LABORALES = ["Lun", "Mar", "Mié", "Jue", "Vie"];
+
+const getMockData = () => DIAS_LABORALES.map((dia, i) => ({
+  dia,
+  min: [12, 8, 15, 10, 6][i],
+}));
 
 export default function OnTimeBarChart({ data: _data }) {
   return (
@@ -24,7 +21,7 @@ export default function OnTimeBarChart({ data: _data }) {
       </Typography>
       <Box sx={{ flex: 1, display: "flex", alignItems: "flex-end" }}>
         <ResponsiveContainer width="100%" height="90%">
-          <BarChart data={DATA} barCategoryGap="25%" margin={{ top: 10, right: 0, left: -10, bottom: 0 }}>
+          <BarChart data={getMockData()} barCategoryGap="25%" margin={{ top: 10, right: 0, left: 10, bottom: 0 }}>
             <XAxis dataKey="dia" tick={{ fontSize: 11, fill: COLORES.textoSuave }} axisLine={false} tickLine={false} />
             <Bar dataKey="min" radius={[6, 6, 0, 0]} fill={COLORES.acento} />
           </BarChart>

@@ -37,7 +37,7 @@ export default function ResumenPorArea({ data = [] }) {
       {/* Encabezado */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
         <IconBox icon={<BarChart3 />} color={COLORES.primarioOscuro} size={32} iconSize={16} />
-        <Typography sx={{ fontSize: 13, fontWeight: 700, color: COLORES.textoPrimario, flex: 1 }}>
+        <Typography sx={{ fontSize: 15, fontWeight: 600, color: COLORES.textoPrimario, flex: 1 }}>
           Asistencia por área
         </Typography>
         <Box onClick={() => navigate("/reportes?tipo=asistencia")}

@@ -42,19 +42,26 @@ const TITULOS = {
   "/areas": "Áreas",
   "/incidencias": "Incidencias",
   "/configuracion": "Configuración",
+  "/copias-seguridad": "Copias de Seguridad",
   "/perfil": "Mi perfil",
   "/mi-asistencia": "Mi asistencia",
   "/reportar-incidencia": "Reportar incidencia",
   "/novedades": "Novedades Laborales",
   "/mis-solicitudes": "Mis solicitudes",
   "/integraciones": "Integraciones",
+  "/seguimiento": "Seguimiento de Asistencia",
+  "/festivos": "Festivos",
+  "/roles": "Roles",
+  "/mi-horario": "Mi horario",
 };
 
 export default function Navbar({ abierto, setAbierto, isMobile }) {
   const location = useLocation();
   const navigate = useNavigate();
   const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
-  const titulo = TITULOS[location.pathname] || "Panel";
+  const titulo =
+    TITULOS[location.pathname] ||
+    (location.pathname.startsWith("/incidencias/") ? "Incidencias" : "Panel");
   const inicial = usuario.nombre ? usuario.nombre[0].toUpperCase() : "U";
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [notifAnchor, setNotifAnchor] = useState(null);
@@ -63,21 +70,27 @@ export default function Navbar({ abierto, setAbierto, isMobile }) {
   const rol = usuario.rol;
   const puedeVerAlertas = rol === "admin" || rol === "talento_humano";
 
-  const cargarAlertas = useCallback(async () => {
-    if (!puedeVerAlertas) return;
-    try {
-      const data = await obtenerIncidencias({ estado: "pendiente", prioridad: "alta" });
-      setAlertas(Array.isArray(data) ? data : []);
-    } catch {
-      // silencioso
-    }
-  }, [puedeVerAlertas]);
-
   useEffect(() => {
+    let montado = true;
+
+    const cargarAlertas = async () => {
+      if (!puedeVerAlertas) return;
+      try {
+        const data = await obtenerIncidencias({ estado: "pendiente", prioridad: "alta" });
+        if (montado) setAlertas(Array.isArray(data) ? data : []);
+      } catch {
+        // silencioso
+      }
+    };
+
     cargarAlertas();
     const intervalo = setInterval(cargarAlertas, 30000);
-    return () => clearInterval(intervalo);
-  }, [cargarAlertas]);
+
+    return () => {
+      montado = false;
+      clearInterval(intervalo);
+    };
+  }, [puedeVerAlertas]);
 
   const fecha = new Date().toLocaleDateString("es-CO", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
@@ -192,10 +205,12 @@ export default function Navbar({ abierto, setAbierto, isMobile }) {
             <ListItemIcon><User size={18} /></ListItemIcon>
             <ListItemText>Mi perfil</ListItemText>
           </MenuItem>
-          <MenuItem onClick={() => { setMenuAnchor(null); navigate("/configuracion"); }}>
-            <ListItemIcon><Settings size={18} /></ListItemIcon>
-            <ListItemText>Configuración</ListItemText>
-          </MenuItem>
+          {rol === "admin" && (
+            <MenuItem onClick={() => { setMenuAnchor(null); navigate("/configuracion"); }}>
+              <ListItemIcon><Settings size={18} /></ListItemIcon>
+              <ListItemText>Configuración</ListItemText>
+            </MenuItem>
+          )}
           <Divider />
           <MenuItem onClick={handleLogout}>
             <ListItemIcon><LogOut size={18} color={COLORES.danger} /></ListItemIcon>

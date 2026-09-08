@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import InboxIcon from "@mui/icons-material/Inbox";
+import { Inbox } from "lucide-react";
 import IconBox from "./IconBox";
 import { COLORES } from "../constants/colores.js";
 
@@ -14,7 +14,7 @@ export default function EmptyState({
       }}
     >
       <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-        <IconBox icon={<InboxIcon />} color={COLORES.textoSuave} size={80} iconSize={40} />
+        <IconBox icon={<Inbox size={40} />} color={COLORES.textoSuave} size={80} iconSize={40} />
       </Box>
 
       <Typography

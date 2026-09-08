@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { CircleArrowOutUpRight, CircleCheckBig, Ban, Clock, Fingerprint, Eye, Edit3, Trash2 } from "lucide-react";
+import { CircleArrowOutUpRight, CircleCheckBig, Ban, Clock, Fingerprint, Eye } from "lucide-react";
 import { COLORES } from "../../../shared/constants/colores.js";
 
 const badgeColors = {
@@ -7,6 +7,11 @@ const badgeColors = {
   tardanza: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
   ausente: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
   justificado: { bg: COLORES.primarioClaro2, color: COLORES.primarioOscuro },
+};
+
+const jornadaBadgeColors = {
+  completa: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
+  abierta: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
 };
 
 const tipoIcon = {
@@ -35,7 +40,7 @@ const btnBase = {
   cursor: "pointer", flexShrink: 0, transition: "all .2s ease",
 };
 
-export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) => [
+export const asistenciaColumns = ({ getPiso, onDetalle }) => [
   {
     field: "empleado",
     headerName: "Empleado",
@@ -74,25 +79,39 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     },
   },
   {
-    field: "maniana",
-    headerName: "Mañana",
-    width: 120,
+    field: "entrada1",
+    headerName: "Entrada AM",
+    width: 95,
     sortable: false,
-    renderCell: ({ row }) => (
-      <Typography sx={{ fontSize: 12, color: COLORES.textoSecundario }}>
-        {row.entrada1 && row.salida1 ? `${row.entrada1} → ${row.salida1}` : "—"}
-      </Typography>
+    renderCell: ({ value }) => (
+      <Typography sx={{ fontSize: 12, color: COLORES.textoSecundario }}>{value || "—"}</Typography>
     ),
   },
   {
-    field: "tarde",
-    headerName: "Tarde",
-    width: 120,
+    field: "salida1",
+    headerName: "Salida AM",
+    width: 95,
     sortable: false,
-    renderCell: ({ row }) => (
-      <Typography sx={{ fontSize: 12, color: COLORES.textoSecundario }}>
-        {row.entrada2 && row.salida2 ? `${row.entrada2} → ${row.salida2}` : "—"}
-      </Typography>
+    renderCell: ({ value }) => (
+      <Typography sx={{ fontSize: 12, color: COLORES.textoSecundario }}>{value || "—"}</Typography>
+    ),
+  },
+  {
+    field: "entrada2",
+    headerName: "Entrada PM",
+    width: 95,
+    sortable: false,
+    renderCell: ({ value }) => (
+      <Typography sx={{ fontSize: 12, color: COLORES.textoSecundario }}>{value || "—"}</Typography>
+    ),
+  },
+  {
+    field: "salida2",
+    headerName: "Salida PM",
+    width: 95,
+    sortable: false,
+    renderCell: ({ value }) => (
+      <Typography sx={{ fontSize: 12, color: COLORES.textoSecundario }}>{value || "—"}</Typography>
     ),
   },
   {
@@ -101,16 +120,6 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     width: 75,
     renderCell: ({ value }) => (
       <Typography sx={{ fontSize: 12, color: COLORES.textoSecundario }}>{value ? `${value}h` : "—"}</Typography>
-    ),
-  },
-  {
-    field: "horas_extra",
-    headerName: "Extra",
-    width: 65,
-    renderCell: ({ value }) => (
-      <Typography sx={{ fontSize: 12, color: value > 0 ? COLORES.primario : COLORES.textoSuave }}>
-        {value > 0 ? `${value}h` : "—"}
-      </Typography>
     ),
   },
   {
@@ -144,6 +153,16 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
     ),
   },
   {
+    field: "marcacion_estado",
+    headerName: "Jornada",
+    width: 100,
+    sortable: false,
+    renderCell: ({ value }) => {
+      const c = jornadaBadgeColors[value] || { bg: COLORES.fondoGris2, color: COLORES.textoTerciario };
+      return <Badge label={value || "—"} bg={c.bg} color={c.color} />;
+    },
+  },
+  {
     field: "estado",
     headerName: "Estado",
     width: 95,
@@ -154,35 +173,21 @@ export const asistenciaColumns = ({ getPiso, onDetalle, onEditar, onEliminar }) 
   },
   {
     field: "acciones",
-    headerName: "Acciones",
-    width: 160,
+    headerName: "Ver",
+    width: 60,
     sortable: false,
     filterable: false,
     disableColumnMenu: true,
     align: "center",
     headerAlign: "center",
     renderCell: ({ row }) => (
-      <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+      <Box sx={{ display: "flex", gap: 0.5, alignItems: "center", justifyContent: "center" }}>
         <Box
           sx={{ ...btnBase, bgcolor: COLORES.primarioClaro, color: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}
           title="Ver detalle"
           onClick={(e) => { e.stopPropagation(); onDetalle(row); }}
         >
           <Eye size={15} />
-        </Box>
-        <Box
-          sx={{ ...btnBase, bgcolor: COLORES.primarioClaro, color: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}
-          title="Editar"
-          onClick={(e) => { e.stopPropagation(); onEditar(row); }}
-        >
-          <Edit3 size={15} />
-        </Box>
-        <Box
-          sx={{ ...btnBase, bgcolor: COLORES.dangerFondo, color: COLORES.danger, "&:hover": { bgcolor: COLORES.dangerBorde } }}
-          title="Eliminar"
-          onClick={(e) => { e.stopPropagation(); onEliminar?.(row); }}
-        >
-          <Trash2 size={15} />
         </Box>
       </Box>
     ),

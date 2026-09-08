@@ -6,3 +6,5 @@ export const obtenerIndicadores = (periodo) => {
 };
 
 export const obtenerResumenPorArea = () => apiFetch("/dashboard/resumen-areas");
+
+export const obtenerStatsIncidencias = () => apiFetch("/incidencias/stats");

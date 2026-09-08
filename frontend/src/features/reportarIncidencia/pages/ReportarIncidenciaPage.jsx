@@ -11,7 +11,7 @@ const MAX_CHARS = 500;
 const INFO_CARDS = [
   {
     title: "Información importante",
-    desc: "Reporta fallos biométricos, tardanzas justificadas, problemas con marcación manual o cualquier novedad relacionada con tu asistencia.",
+    desc: "Reporta fallos biométricos, problemas con marcación manual o cualquier novedad relacionada con tu asistencia.",
     icon: <Info size={20} />,
     color: COLORES.primarioOscuro,
     bg: COLORES.primarioClaro,
@@ -25,7 +25,7 @@ const INFO_CARDS = [
   },
   {
     title: "Tipos de incidencias permitidas",
-    desc: "Falla biométrica, tardanza justificada y otros motivos relacionados con el control de asistencia.",
+    desc: "Falla biométrica, y otros motivos relacionados con el control de asistencia.",
     icon: <FileText size={20} />,
     color: COLORES.warningOscuro,
     bg: COLORES.warningFondo,
@@ -48,7 +48,7 @@ const INFO_CARDS = [
 
 const TIPOS = [
   { value: "falla_biometrica", label: "Falla biométrica", desc: "El lector no reconoció tu huella o no pudiste marcar" },
-  { value: "tardanza_justificada", label: "Tardanza justificada", desc: "Llegaste tarde por una razón válida" },
+  
   { value: "otro", label: "Otro", desc: "Cualquier otra novedad relacionada con tu asistencia" },
 ];
 

@@ -1,17 +1,6 @@
 import { Box } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { COLORES } from "../constants/colores.js";
-
-function lighten(hex, intensity = 0.88) {
-  if (!hex) return COLORES.fondoGris2;
-  const c = hex.replace("#", "");
-  const r = parseInt(c.substring(0, 2), 16);
-  const g = parseInt(c.substring(2, 4), 16);
-  const b = parseInt(c.substring(4, 6), 16);
-  const lr = Math.round(r + (255 - r) * intensity);
-  const lg = Math.round(g + (255 - g) * intensity);
-  const lb = Math.round(b + (255 - b) * intensity);
-  return `#${lr.toString(16).padStart(2, "0")}${lg.toString(16).padStart(2, "0")}${lb.toString(16).padStart(2, "0")}`;
-}
 
 export default function IconBox({
   icon,
@@ -20,14 +9,16 @@ export default function IconBox({
   iconSize = 22,
   sx = {},
 }) {
+  const colorBase = color || COLORES.primario;
+
   return (
     <Box
       sx={{
         width: size,
         height: size,
         borderRadius: "12px",
-        bgcolor: lighten(color),
-        color,
+        bgcolor: alpha(colorBase, 0.12), // Equivale al 88% de aclarado
+        color: colorBase,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

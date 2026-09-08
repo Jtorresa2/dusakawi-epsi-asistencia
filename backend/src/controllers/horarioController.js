@@ -23,7 +23,7 @@ async function aplicarAsignacion(client, { usuario_id, horario_id, vigencia_desd
 
 exports.obtenerTodos = async (req, res) => {
   try {
-    const [horarios] = await pool.query(`
+    const { rows: horarios } = await pool.query(`
       SELECT h.*, hd.dia_semana, hd.hora_entrada_manana, hd.hora_salida_manana,
         hd.hora_entrada_tarde, hd.hora_salida_tarde
       FROM horarios h
@@ -62,12 +62,12 @@ exports.obtenerTodos = async (req, res) => {
 exports.obtenerPorId = async (req, res) => {
   try {
     const { id } = req.params;
-    const [horarios] = await pool.query(`
+    const { rows: horarios } = await pool.query(`
       SELECT h.*, hd.dia_semana, hd.hora_entrada_manana, hd.hora_salida_manana,
         hd.hora_entrada_tarde, hd.hora_salida_tarde
       FROM horarios h
       LEFT JOIN horario_detalle hd ON h.id = hd.horario_id
-      WHERE h.id = ?
+      WHERE h.id = $1
       ORDER BY CASE hd.dia_semana WHEN 'Lunes' THEN 1 WHEN 'Martes' THEN 2 WHEN 'Miércoles' THEN 3 WHEN 'Jueves' THEN 4 WHEN 'Viernes' THEN 5 WHEN 'Sábado' THEN 6 WHEN 'Domingo' THEN 7 END
     `, [id]);
     if (horarios.length === 0) return res.status(404).json({ mensaje: 'Horario no encontrado' });
@@ -147,7 +147,7 @@ exports.actualizar = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    const [existe] = await pool.query('SELECT id FROM horarios WHERE id = ?', [id]);
+    const { rows: existe } = await pool.query('SELECT id FROM horarios WHERE id = $1', [id]);
     if (!existe.length) return res.status(404).json({ mensaje: 'Horario no encontrado' });
 
     await client.query('BEGIN');
@@ -203,18 +203,18 @@ exports.actualizar = async (req, res) => {
 exports.eliminar = async (req, res) => {
   const { id } = req.params;
   try {
-    const [horario] = await pool.query('SELECT id FROM horarios WHERE id = ?', [id]);
+    const { rows: horario } = await pool.query('SELECT id FROM horarios WHERE id = $1', [id]);
     if (!horario.length) return res.status(404).json({ mensaje: 'Horario no encontrado' });
 
-    const [asignaciones] = await pool.query(
-      'SELECT COUNT(*) AS total FROM asignaciones_horario WHERE horario_id = ?',
+    const { rows: asignaciones } = await pool.query(
+      'SELECT COUNT(*) AS total FROM asignaciones_horario WHERE horario_id = $1',
       [id]
     );
     if (Number(asignaciones[0].total) > 0) {
       return res.status(400).json({ mensaje: 'No se puede eliminar: el horario tiene empleados asignados' });
     }
 
-    await pool.query('DELETE FROM horarios WHERE id = ?', [id]);
+    await pool.query('DELETE FROM horarios WHERE id = $1', [id]);
     res.json({ mensaje: 'Horario eliminado correctamente' });
   } catch (err) {
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
@@ -236,9 +236,9 @@ exports.asignar = async (req, res) => {
   }
 
   try {
-    const [usuario] = await pool.query('SELECT id FROM usuarios WHERE id = ?', [usuario_id]);
+    const { rows: usuario } = await pool.query('SELECT id FROM usuarios WHERE id = $1', [usuario_id]);
     if (!usuario.length) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
-    const [horario] = await pool.query('SELECT id FROM horarios WHERE id = ?', [horario_id]);
+    const { rows: horario } = await pool.query('SELECT id FROM horarios WHERE id = $1', [horario_id]);
     if (!horario.length) return res.status(404).json({ mensaje: 'Horario no encontrado' });
 
     const client = await pool.connect();
@@ -282,14 +282,14 @@ exports.asignarMasivo = async (req, res) => {
   }
 
   try {
-    const [horario] = await pool.query('SELECT id FROM horarios WHERE id = ?', [horario_id]);
+    const { rows: horario } = await pool.query('SELECT id FROM horarios WHERE id = $1', [horario_id]);
     if (!horario.length) return res.status(404).json({ mensaje: 'Horario no encontrado' });
 
     let usuarios;
     if (Array.isArray(usuario_ids) && usuario_ids.length > 0) {
       // Lista explícita de usuarios (checkboxes de la UI), se filtran activos.
       const ids = usuario_ids.map((id) => Number(id));
-      const [rows] = await pool.query(
+      const { rows } = await pool.query(
         'SELECT id FROM usuarios WHERE id = ANY($1::int[]) AND activo = TRUE',
         [ids]
       );
@@ -299,15 +299,15 @@ exports.asignarMasivo = async (req, res) => {
       const where = ['u.activo = TRUE'];
       const params = [];
       if (filtros.area_id != null) {
-        where.push('u.area_id = ?');
+        where.push(`u.area_id = $${params.length + 1}`);
         params.push(filtros.area_id);
       }
       if (filtros.cargo_id != null) {
-        where.push('u.cargo_id = ?');
+        where.push(`u.cargo_id = $${params.length + 1}`);
         params.push(filtros.cargo_id);
       }
 
-      const [rows] = await pool.query(
+      const { rows } = await pool.query(
         `SELECT u.id FROM usuarios u WHERE ${where.join(' AND ')}`,
         params
       );
@@ -346,7 +346,7 @@ exports.desasignar = async (req, res) => {
   }
 
   try {
-    const [usuario] = await pool.query('SELECT id FROM usuarios WHERE id = ?', [usuario_id]);
+    const { rows: usuario } = await pool.query('SELECT id FROM usuarios WHERE id = $1', [usuario_id]);
     if (!usuario.length) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
 
     const client = await pool.connect();
@@ -375,10 +375,10 @@ exports.porDefecto = async (req, res) => {
   const es_por_defecto = req.body.es_por_defecto === true;
 
   try {
-    const [horario] = await pool.query('SELECT id FROM horarios WHERE id = ?', [id]);
+    const { rows: horario } = await pool.query('SELECT id FROM horarios WHERE id = $1', [id]);
     if (!horario.length) return res.status(404).json({ mensaje: 'Horario no encontrado' });
 
-    const [cols] = await pool.query(
+    const { rows: cols } = await pool.query(
       `SELECT column_name FROM information_schema.columns
        WHERE table_name = 'horarios' AND column_name = 'es_por_defecto'`
     );
@@ -413,14 +413,14 @@ exports.porDefecto = async (req, res) => {
 exports.asignados = async (req, res) => {
   const { id } = req.params;
   try {
-    const [horario] = await pool.query('SELECT id FROM horarios WHERE id = ?', [id]);
+    const { rows: horario } = await pool.query('SELECT id FROM horarios WHERE id = $1', [id]);
     if (!horario.length) return res.status(404).json({ mensaje: 'Horario no encontrado' });
 
-    const [asignados] = await pool.query(`
+    const { rows: asignados } = await pool.query(`
       SELECT u.id, u.nombre AS nombres, u.apellido AS apellidos, u.correo
       FROM usuarios u
       JOIN asignaciones_horario a ON a.usuario_id = u.id
-      WHERE a.horario_id = ?
+      WHERE a.horario_id = $1
         AND a.vigencia_desde <= CURRENT_DATE
         AND (a.vigencia_hasta IS NULL OR a.vigencia_hasta > CURRENT_DATE)
       ORDER BY u.nombre
@@ -434,8 +434,8 @@ exports.asignados = async (req, res) => {
 exports.miHorario = async (req, res) => {
   try {
     const usuarioId = req.user.id;
-    const [usuarios] = await pool.query(
-      'SELECT u.id, u.horario_id, u.nombre, u.apellido FROM usuarios u WHERE u.id = ?',
+    const { rows: usuarios } = await pool.query(
+      'SELECT u.id, u.horario_id, u.nombre, u.apellido FROM usuarios u WHERE u.id = $1',
       [usuarioId]
     );
     if (!usuarios.length) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
@@ -444,12 +444,12 @@ exports.miHorario = async (req, res) => {
       return res.json({ asignado: false, mensaje: 'No tienes horario asignado' });
     }
 
-    const [horarios] = await pool.query(`
+    const { rows: horarios } = await pool.query(`
       SELECT h.*, hd.dia_semana, hd.hora_entrada_manana, hd.hora_salida_manana,
         hd.hora_entrada_tarde, hd.hora_salida_tarde
       FROM horarios h
       LEFT JOIN horario_detalle hd ON h.id = hd.horario_id
-      WHERE h.id = ?
+      WHERE h.id = $1
       ORDER BY CASE hd.dia_semana WHEN 'Lunes' THEN 1 WHEN 'Martes' THEN 2 WHEN 'Miércoles' THEN 3 WHEN 'Jueves' THEN 4 WHEN 'Viernes' THEN 5 WHEN 'Sábado' THEN 6 WHEN 'Domingo' THEN 7 END
     `, [usuarios[0].horario_id]);
 
@@ -482,11 +482,11 @@ exports.miHorario = async (req, res) => {
 exports.historial = async (req, res) => {
   const { usuarioId } = req.params;
   try {
-    const [asignaciones] = await pool.query(`
+    const { rows: asignaciones } = await pool.query(`
       SELECT a.*, h.nombre AS horario_nombre
       FROM asignaciones_horario a
       JOIN horarios h ON h.id = a.horario_id
-      WHERE a.usuario_id = ?
+      WHERE a.usuario_id = $1
       ORDER BY a.vigencia_desde DESC
     `, [usuarioId]);
     return res.json(asignaciones);
@@ -497,7 +497,7 @@ exports.historial = async (req, res) => {
 
 exports.historialGlobal = async (req, res) => {
   try {
-    const [asignaciones] = await pool.query(`
+    const { rows: asignaciones } = await pool.query(`
       WITH con_anterior AS (
         SELECT a.*,
           LAG(a.horario_id) OVER (PARTITION BY a.usuario_id ORDER BY a.vigencia_desde, a.id) AS horario_anterior_id

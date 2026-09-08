@@ -113,7 +113,7 @@ exports.eliminar = async (req, res) => {
 exports.obtenerStats = async (req, res) => {
   try {
     const pool = require("../config/db");
-    const [rows] = await pool.query(`
+    const { rows } = await pool.query(`
       SELECT 
         SUM((estado = 'pendiente')::int) AS pendientes,
         SUM((estado = 'aprobado')::int) AS aprobadas,
@@ -131,7 +131,7 @@ exports.obtenerStats = async (req, res) => {
 exports.obtenerActividad = async (req, res) => {
   try {
     const pool = require("../config/db");
-    const [rows] = await pool.query(`
+    const { rows } = await pool.query(`
       SELECT i.id, i.estado, i.tipo, i.created_at, i.updated_at, i.fecha,
         u.nombre AS empleado_nombre, u.apellido AS empleado_apellido
       FROM incidencias i

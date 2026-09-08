@@ -51,7 +51,7 @@ export const handleExcel = (tipo, registros) => {
         { "": `Reporte: ${empleado?.nombre} ${empleado?.apellido || ""}`, "": "", "": "", "": "", "": "", "": "" },
         { "": `Periodo: ${MESES.find(m=>m.v===periodo?.mes)?.l || ""} ${periodo?.anio || ""}`, "": "", "": "", "": "", "": "", "": "" },
         { "": "", "": "", "": "", "": "", "": "", "": "" },
-        { "Días hábiles": periodo?.diasHabiles||0, "Festivos": periodo?.festivos||0, "Asistencia %": `${resumen?.porcentaje_asistencia||0}%`, "Puntuales": resumen?.puntuales||0, "Tardanzas": resumen?.tardanzas||0, "Ausentes": resumen?.ausentes||0, "Horas total": resumen?.horas_trabajadas||0, "Horas extra": resumen?.horas_extra||0, "Permisos": permisos?.total||0, "Incidencias": incidencias?.total||0 },
+        { "Días hábiles": periodo?.diasHabiles||0, "Festivos": periodo?.festivos||0, "Asistencia %": `${resumen?.porcentaje_asistencia||0}%`, "Puntuales": resumen?.puntuales||0, "Tardanzas": resumen?.tardanzas||0, "Ausentes": resumen?.ausentes||0, "Horas total": resumen?.horas_trabajadas||0, "Permisos": permisos?.total||0, "Incidencias": incidencias?.total||0 },
         { "": "", "": "", "": "", "": "", "": "", "": "" },
         ...detalle.map(d => ({
           Fecha: d.fecha ? new Date(d.fecha).toLocaleDateString("es-CO") : "—",

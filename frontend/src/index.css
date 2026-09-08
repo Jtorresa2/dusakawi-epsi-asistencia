@@ -5,6 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 code {
@@ -12,26 +13,12 @@ code {
     monospace;
 }
 
-/* Scrollbars institucionales en verde (tokens: primario #2E7D32, primarioOscuro #1B5E20, primarioClaro #E8F5E9) */
+/* Ocultar scrollbars completamente */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: #2E7D32 #E8F5E9;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #E8F5E9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #2E7D32;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #1B5E20;
+*::-webkit-scrollbar {
+  display: none;
 }

@@ -27,6 +27,8 @@ app.use("/api/pdf", require("./routes/pdfRoutes"));
 app.use("/api/config", require("./routes/configRoutes"));
 app.use("/api/novedades", require("./routes/novedadesRoutes"));
 app.use("/api/festivos", require("./routes/festivosRoutes"));
+app.use("/api/marcacion", require("./routes/marcacionRoutes"));
+app.use("/api/seguimiento", require("./routes/seguimientoRoutes"));
 
 // =======================
 
@@ -41,3 +43,9 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
 });
+
+// =======================
+// Jobs programados
+// =======================
+const { iniciarAusentesJob } = require("./jobs/ausentesJob");
+iniciarAusentesJob();

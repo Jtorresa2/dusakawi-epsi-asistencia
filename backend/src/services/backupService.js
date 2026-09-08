@@ -3,7 +3,7 @@ const pool = require("../config/db");
 const EXCLUDED_TABLES = [];
 
 async function getAllTableNames() {
-  const [rows] = await pool.query(
+  const { rows } = await pool.query(
     "SELECT TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public' ORDER BY TABLE_NAME"
   );
   return rows
@@ -13,7 +13,7 @@ async function getAllTableNames() {
 }
 
 async function getTableData(tableName) {
-  const [rows] = await pool.query(`SELECT * FROM "${tableName}"`);
+  const { rows } = await pool.query(`SELECT * FROM "${tableName}"`);
   return rows;
 }
 

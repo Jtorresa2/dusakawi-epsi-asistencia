@@ -242,7 +242,6 @@ function ResultadosPorEmpleado({ data }) {
     { label: "Tardanzas", value: resumen.tardanzas||0, color: COLORES.danger },
     { label: "Ausentes", value: resumen.ausentes||0, color: COLORES.textoTerciario },
     { label: "Horas total", value: resumen.horas_trabajadas ? `${resumen.horas_trabajadas}h` : "0h", color: COLORES.primario },
-    { label: "Horas extra", value: resumen.horas_extra ? `${resumen.horas_extra}h` : "—", color: COLORES.primario },
     { label: "Novedades", value: permisos?.total||0, color: COLORES.verdeTexto },
     { label: "Incidencias", value: incidencias?.total||0, color: COLORES.danger },
   ] : [];

@@ -22,6 +22,7 @@ const OlvideContrasenaPage = lazy(() => import("./features/login/pages/OlvideCon
 const RestablecerContrasenaPage = lazy(() => import("./features/login/pages/RestablecerContrasenaPage"));
 const DashboardPage = lazy(() => import("./features/dashboard/pages/DashboardPage"));
 const AsistenciaPage = lazy(() => import("./features/asistencia/pages/AsistenciaPage"));
+const SeguimientoAsistenciaPage = lazy(() => import("./features/seguimientoAsistencia/pages/SeguimientoAsistenciaPage"));
 const ReportesPage = lazy(() => import("./features/reportes/pages/ReportesPage"));
 const CargosPage = lazy(() => import("./features/cargos/pages/CargosPage"));
 const PersonalPage = lazy(() => import("./features/personal/pages/PersonalPage"));
@@ -95,6 +96,7 @@ export default function App() {
 
         {/* Operacion */}
         <Route path="/asistencia" element={<R roles={["admin", "talento_humano"]}><AsistenciaPage /></R>} />
+        <Route path="/seguimiento" element={<R roles={["admin", "talento_humano"]}><SeguimientoAsistenciaPage /></R>} />
         <Route path="/reportes" element={<R roles={["admin", "talento_humano"]}><ReportesPage /></R>} />
 
         {/* Administracion */}

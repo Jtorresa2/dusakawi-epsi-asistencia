@@ -2,7 +2,7 @@ const pool = require("../config/db");
 const { getAllTableNames, getTableData } = require("../services/backupService");
 
 async function leerConfig() {
-  const [rows] = await pool.query("SELECT clave, valor, tipo FROM configuracion ORDER BY id");
+  const { rows } = await pool.query("SELECT clave, valor, tipo FROM configuracion ORDER BY id");
   const config = {};
   for (const row of rows) {
     if (row.tipo === "number") config[row.clave] = Number(row.valor);
@@ -34,7 +34,7 @@ exports.actualizarConfig = async (req, res) => {
     for (const [clave, valor] of entries) {
       const tipo = typeof valor === "number" ? "number" : typeof valor === "boolean" ? "boolean" : "text";
       await pool.query(
-        `INSERT INTO configuracion (clave, valor, tipo) VALUES (?, ?, ?)
+        `INSERT INTO configuracion (clave, valor, tipo) VALUES ($1, $2, $3)
          ON CONFLICT (clave) DO UPDATE SET valor = EXCLUDED.valor, tipo = EXCLUDED.tipo`,
         [clave, String(valor), tipo]
       );
@@ -61,7 +61,7 @@ exports.respaldarBD = async (req, res) => {
     // Actualizar fecha de último respaldo
     const ahora = new Date().toISOString();
     await pool.query(
-      `INSERT INTO configuracion (clave, valor, tipo) VALUES ('fecha_ultimo_respaldo', ?, 'text')
+      `INSERT INTO configuracion (clave, valor, tipo) VALUES ('fecha_ultimo_respaldo', $1, 'text')
        ON CONFLICT (clave) DO UPDATE SET valor = EXCLUDED.valor`,
       [ahora]
     );

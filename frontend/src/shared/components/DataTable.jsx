@@ -27,13 +27,6 @@ export default function DataTable({
         "& .MuiDataGrid-columnHeaders": {
           backgroundColor: COLORES.fondoGris,
           borderBottom: `1px solid ${COLORES.grisContorno}`,
-          minHeight: "48px!important",
-          maxHeight: "48px!important",
-        },
-        "& .MuiDataGrid-columnHeader": {
-          minHeight: "48px!important",
-          maxHeight: "48px!important",
-          height: "48px!important",
         },
         "& .MuiDataGrid-columnHeaderTitle": {
           fontWeight: 600,
@@ -47,10 +40,15 @@ export default function DataTable({
           py: 1.2,
           display: "flex",
           alignItems: "center",
-          overflow: "visible",
+        },
+        "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
+          outline: "none!important",
+        },
+        "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within": {
+          outline: "none!important",
         },
         "& .MuiDataGrid-row:hover": {
-          backgroundColor: COLORES.successClaro,
+          backgroundColor: COLORES.successClaro || "rgba(16, 185, 129, 0.04)",
         },
         "& .MuiDataGrid-footerContainer": {
           borderTop: `1px solid ${COLORES.grisContorno}`,
@@ -75,32 +73,22 @@ export default function DataTable({
         },
         "& .MuiDataGrid-virtualScroller": {
           minHeight: 200,
-          overflowX: "hidden",
-        },
-        "& .MuiDataGrid-virtualScroller::-webkit-scrollbar": {
-          display: "none",
         },
         "& .MuiDataGrid-scrollbar": {
           scrollbarWidth: "thin",
-          scrollbarColor: `${COLORES.acento} ${COLORES.primarioClaro}`,
+          scrollbarColor: `${COLORES.acento || "#10B981"} ${COLORES.primarioClaro || "#E6F4EA"}`,
         },
         "& .MuiDataGrid-scrollbar::-webkit-scrollbar": {
           width: 8,
           height: 8,
         },
         "& .MuiDataGrid-scrollbar::-webkit-scrollbar-track": {
-          background: COLORES.primarioClaro,
+          background: COLORES.primarioClaro || "#E6F4EA",
           borderRadius: 4,
         },
         "& .MuiDataGrid-scrollbar::-webkit-scrollbar-thumb": {
-          background: COLORES.acento,
+          background: COLORES.acento || "#10B981",
           borderRadius: 4,
-        },
-        "& .MuiDataGrid-scrollbar::-webkit-scrollbar-thumb:hover": {
-          background: COLORES.acento,
-        },
-        "& .MuiDataGrid-main": {
-          overflow: "hidden",
         },
         ...sx,
       }}
@@ -110,18 +98,19 @@ export default function DataTable({
         columns={columns}
         loading={loading}
         autoHeight={autoHeight}
+        columnHeaderHeight={48}
         checkboxSelection={checkboxSelection}
         disableRowSelectionOnClick
         pageSizeOptions={[5, 10, 15, 20, 50]}
         onRowClick={onRowClick}
         getRowId={getRowId}
         getRowHeight={getRowHeight}
-        disableVirtualization
         localeText={{
+          noRowsLabel: "No hay registros para mostrar",
           footerRowSelected: () => "",
           MuiTablePagination: {
             labelDisplayedRows: ({ from, to, count }) =>
-              `Mostrando ${from}-${to} de ${count} ${entityLabel}`,
+              `Mostrando ${from}-${to} de ${count !== -1 ? count : `más de ${to}`} ${entityLabel}`,
           },
         }}
         initialState={{

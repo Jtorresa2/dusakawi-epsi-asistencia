@@ -1,55 +1,20 @@
 import { useState, useEffect } from "react";
 import {
-  Box, Button, Paper, TextField, Typography, Select, MenuItem, Autocomplete, Menu, Chip, IconButton,
-  InputAdornment, Snackbar, Alert, Divider,
+  Box, Paper, Typography,
 } from "@mui/material";
-import {
-  Search, Users, UserCheck, UserX, FileText, Download, Plus, Clock, X, Filter,
-  CircleArrowOutUpRight, CircleCheckBig, Ban, Fingerprint, CalendarDays, Sun, Moon, ClipboardCheck,
-} from "lucide-react";
 import * as XLSX from "xlsx";
 import DataTable from "../../../shared/components/DataTable";
 import Loading from "../../../shared/components/Loading";
 import EmptyState from "../../../shared/components/EmptyState";
 import PDFPreviewModal from "../../../shared/components/PDFPreviewModal";
-import ConfirmDialog from "../../../shared/components/ConfirmDialog";
 import { asistenciaColumns } from "../components/columns";
-import { obtenerRegistros, registrarManual, eliminarRegistro, actualizarRegistro } from "../asistencia.api";
+import { obtenerRegistros } from "../asistencia.api";
 import { obtenerAreas } from "../../areas/area.api";
 import { COLORES } from "../../../shared/constants/colores.js";
 
-function minDesde(hora) {
-  if (!hora) return 0;
-  const [h, m] = hora.split(":").map(Number);
-  return h * 60 + m;
-}
-
-function calcTardanza(e1, e2) {
-  let t = 0;
-  if (e1) {
-    const m = minDesde(e1);
-    if (m > 430) t += m - 430;
-  }
-  if (e2) {
-    const m = minDesde(e2);
-    if (m > 850) t += m - 850;
-  }
-  return t;
-}
-
-function calcHoras(e1, s1, e2, s2) {
-  let h = 0;
-  if (e1 && s1) h += minDesde(s1) - minDesde(e1);
-  if (e2 && s2) h += minDesde(s2) - minDesde(e2);
-  return Math.round(h / 6) / 10;
-}
-
-function determinarEstado(e1, e2, justificado) {
-  if (justificado) return "justificado";
-  if (!e1 && !e2) return "ausente";
-  const t = calcTardanza(e1, e2);
-  return t > 0 ? "tardanza" : "puntual";
-}
+import FiltrosAsistencia from "../components/FiltrosAsistencia";
+import ResumenCards from "../components/ResumenCards";
+import DetalleAsistenciaModal from "../components/DetalleAsistenciaModal";
 
 const AREAS_FALLBACK = [
   { nombre: "SIAU", piso: 1 }, { nombre: "PQR", piso: 1 }, { nombre: "Call Center", piso: 1 }, { nombre: "Aseguramiento", piso: 1 }, { nombre: "Autorización", piso: 1 }, { nombre: "Comunicación", piso: 1 }, { nombre: "Calidad", piso: 1 }, { nombre: "Jurídica", piso: 1 },
@@ -58,7 +23,6 @@ const AREAS_FALLBACK = [
   { nombre: "Contabilidad", piso: 4 }, { nombre: "Presupuesto", piso: 4 }, { nombre: "Cartera", piso: 4 }, { nombre: "Recobro", piso: 4 }, { nombre: "Dirección Administrativa", piso: 4 }, { nombre: "PYM", piso: 4 }, { nombre: "Control Interno", piso: 4 },
   { nombre: "Estadística", piso: 5 }, { nombre: "Sistemas", piso: 5 }, { nombre: "Tesorería", piso: 5 }, { nombre: "Alto Costo", piso: 5 }, { nombre: "Baja Complejidad", piso: 5 }, { nombre: "Talento Humano", piso: 5 }, { nombre: "Intercultural", piso: 5 },
 ];
-const ESTADOS = [{ value: "", label: "Todos" }, { value: "puntual", label: "Puntual" }, { value: "tardanza", label: "Tardanza" }, { value: "ausente", label: "Ausente" }, { value: "justificado", label: "Justificado" }];
 
 export default function AsistenciaPage() {
   const [registros, setRegistros] = useState([]);
@@ -80,14 +44,10 @@ export default function AsistenciaPage() {
   const pisosDisponibles = [...new Set(areas.map((a) => a.piso).filter(Boolean))].sort((a, b) => a - b);
   const areaPisoMap = Object.fromEntries(areas.map((a) => [a.nombre, a.piso]));
   const getPiso = (areaNombre) => areaPisoMap[areaNombre];
-  const [openManual, setOpenManual] = useState(false);
   const [detalleRow, setDetalleRow] = useState(null);
-  const [editRow, setEditRow] = useState(null);
   const [exportAnchor, setExportAnchor] = useState(null);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
   const [activoCard, setActivoCard] = useState("");
-  const [confirmEliminar, setConfirmEliminar] = useState(null);
-  const [snack, setSnack] = useState({ open: false, mensaje: "", severity: "success" });
 
   useEffect(() => {
     (async () => {
@@ -134,8 +94,6 @@ export default function AsistenciaPage() {
 
   useEffect(() => { cargarRegistros(); }, [vista, fecha, fechaDesde, fechaHasta, mes, anio, filtroArea, filtroPiso, filtroEstado]);
 
-  function filtrar() { cargarRegistros(); }
-
   function limpiar() {
     setVista("dia");
     setFecha(new Date().toISOString().split("T")[0]);
@@ -159,13 +117,12 @@ export default function AsistenciaPage() {
       Área: r.area || "",
       Piso: r.piso || "",
       Fecha: r.fecha || "",
-      "Entrada Mañana": r.entrada1 || "",
-      "Salida Mañana": r.salida1 || "",
-      "Entrada Tarde": r.entrada2 || "",
-      "Salida Tarde": r.salida2 || "",
+      "Entrada AM": r.entrada1 || "",
+      "Salida AM": r.salida1 || "",
+      "Entrada PM": r.entrada2 || "",
+      "Salida PM": r.salida2 || "",
       "Horas Trabajadas": r.horas_trabajadas ? `${r.horas_trabajadas}h` : "",
       "Minutos Tardanza": r.minutos_tardanza || 0,
-      "Horas Extra": r.horas_extra ? `${r.horas_extra}h` : "",
       Marcación: r.tipo_marcacion || "",
       Estado: r.estado || "",
     }));
@@ -175,8 +132,8 @@ export default function AsistenciaPage() {
 
     const colWidths = [
       { wch: 4 }, { wch: 28 }, { wch: 12 }, { wch: 18 }, { wch: 6 },
-      { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 12 },
-      { wch: 16 }, { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 14 },
+      { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
+      { wch: 16 }, { wch: 12 }, { wch: 12 }, { wch: 14 },
     ];
     ws["!cols"] = colWidths;
 
@@ -226,22 +183,6 @@ export default function AsistenciaPage() {
     filtrados = filtrados.filter((r) => r.estado === filtroEstado);
   }
 
-  const resumen = {
-    total: baseCards.length,
-    puntuales: baseCards.filter((r) => r.estado === "puntual").length,
-    tardanzas: baseCards.filter((r) => r.estado === "tardanza").length,
-    ausentes: baseCards.filter((r) => r.estado === "ausente").length,
-    justificados: baseCards.filter((r) => r.estado === "justificado").length,
-  };
-
-  const cards = [
-    { icon: <Users size={20} />, value: resumen.total, label: "Total registros", estadoKey: "", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
-    { icon: <UserCheck size={20} />, value: resumen.puntuales, label: "Puntuales", estadoKey: "puntual", color: COLORES.verdeTexto, bg: COLORES.successClaro },
-    { icon: <Clock size={20} />, value: resumen.tardanzas, label: "Tardanzas", estadoKey: "tardanza", color: COLORES.warningOscuro, bg: COLORES.warningFondo },
-    { icon: <UserX size={20} />, value: resumen.ausentes, label: "Ausentes", estadoKey: "ausente", color: COLORES.danger, bg: COLORES.dangerFondo2 },
-    { icon: <FileText size={20} />, value: resumen.justificados, label: "Justificados", estadoKey: "justificado", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
-  ];
-
   function handleCardClick(estadoKey) {
     if (activoCard === estadoKey) {
       setActivoCard("");
@@ -252,173 +193,44 @@ export default function AsistenciaPage() {
     }
   }
 
-  const handleEliminar = async () => {
-    if (!confirmEliminar) return;
-    try {
-      await eliminarRegistro(confirmEliminar.id);
-      setSnack({ open: true, mensaje: "Registro eliminado correctamente", severity: "success" });
-      setConfirmEliminar(null);
-      cargarRegistros();
-    } catch {
-      setSnack({ open: true, mensaje: "Error al eliminar el registro", severity: "error" });
-    }
-  };
-
   if (loading) return <Loading />;
 
   return (
     <Box sx={{ p: 3, bgcolor: COLORES.grisAzulado, minHeight: "100vh" }}>
       {/* 1. ENCABEZADO */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
-        <Box>
-          <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>
-            Inicio / Gestión del personal / Asistencia
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          startIcon={<Plus size={18} />}
-          onClick={() => setOpenManual(true)}
-          sx={{
-            bgcolor: COLORES.primarioOscuro, borderRadius: "12px", textTransform: "none",
-            fontWeight: 600, fontSize: 14, px: 3.5, py: 1.2, height: 44,
-            "&:hover": { bgcolor: COLORES.primario },
-          }}
-        >
-          Registro manual
-        </Button>
+      <Box sx={{ mb: 3 }}>
+        <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>
+          Inicio / Gestión del personal / Asistencia
+        </Typography>
       </Box>
 
       {/* 2. TARJETAS RESUMEN */}
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(5, 1fr)" }, gap: 2, mb: 3.5 }}>
-        {cards.map((card, i) => (
-          <Paper key={i} elevation={0} onClick={() => handleCardClick(card.estadoKey)}
-            sx={{ p: 2, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", alignItems: "center", gap: 1.5, cursor: "pointer", transition: "all .25s ease", "&:hover": { transform: "translateY(-2px)", boxShadow: "0 4px 15px rgba(0,0,0,.06)" } }}>
-            <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: card.bg, display: "flex", alignItems: "center", justifyContent: "center", color: card.color, flexShrink: 0 }}>
-              {card.icon}
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", letterSpacing: "0.03em" }}>{card.label}</Typography>
-              <Typography sx={{ fontSize: 22, fontWeight: 700, color: card.color, lineHeight: 1.2 }}>{card.value}</Typography>
-            </Box>
-          </Paper>
-        ))}
-      </Box>
+      <ResumenCards
+        filtrados={baseCards}
+        filtroEstado={filtroEstado}
+        activoCard={activoCard}
+        onCardClick={handleCardClick}
+      />
 
       {/* 3. BARRA DE FILTROS */}
-      <Paper elevation={0} sx={{ p: 2, borderRadius: "14px", border: `1px solid ${COLORES.borde}`, mb: 2.5 }}>
-        {/* Header */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1.5 }}>
-          <Filter size={16} color={COLORES.primarioOscuro} />
-          <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}></Typography>
-        </Box>
-
-        {/* Row 1 — Select filters with CSS Grid */}
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 1.5, mb: 1.5 }}>
-          <Box>
-            <Typography sx={{ fontSize: 11, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.4 }}>Vista</Typography>
-            <Select value={vista} onChange={(e) => setVista(e.target.value)} size="small" fullWidth
-              sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
-              <MenuItem value="dia">Día</MenuItem>
-              <MenuItem value="semana">Semana</MenuItem>
-              <MenuItem value="mes">Mes</MenuItem>
-              <MenuItem value="rango">Rango</MenuItem>
-            </Select>
-          </Box>
-          {vista === "mes" && (
-            <>
-              <Box>
-                <Typography sx={{ fontSize: 11, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.4 }}>Mes</Typography>
-                <Select value={mes} onChange={(e) => setMes(Number(e.target.value))} size="small" fullWidth
-                  sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
-                  {["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"].map((m, i) => (
-                    <MenuItem key={i} value={i + 1}>{m}</MenuItem>
-                  ))}
-                </Select>
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: 11, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.4 }}>Año</Typography>
-                <Select value={anio} onChange={(e) => setAnio(Number(e.target.value))} size="small" fullWidth
-                  sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
-                  {[2024, 2025, 2026].map((a) => <MenuItem key={a} value={a}>{a}</MenuItem>)}
-                </Select>
-              </Box>
-            </>
-          )}
-          <Box>
-            <Typography sx={{ fontSize: 11, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.4 }}>Área</Typography>
-            <Select value={filtroArea} onChange={(e) => setFiltroArea(e.target.value)} size="small" fullWidth
-              sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
-              {[{ nombre: "Todas las áreas" }, ...areas].map((a) => <MenuItem key={a.nombre} value={a.nombre}>{a.nombre}</MenuItem>)}
-            </Select>
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: 11, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.4 }}>Piso</Typography>
-            <Select value={filtroPiso} onChange={(e) => setFiltroPiso(e.target.value)} size="small" fullWidth
-              sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
-              <MenuItem value="">Todos</MenuItem>
-              {pisosDisponibles.map((p) => <MenuItem key={p} value={p}>Piso {p}</MenuItem>)}
-            </Select>
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: 11, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.4 }}>Estado</Typography>
-            <Select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} size="small" fullWidth
-              sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
-              {ESTADOS.map((e) => <MenuItem key={e.value} value={e.value}>{e.label}</MenuItem>)}
-            </Select>
-          </Box>
-        </Box>
-
-        {/* Row 2 — Date range + action buttons */}
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr auto" }, gap: 1.5, alignItems: "end" }}>
-          {vista === "dia" && (
-            <TextField label="Fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)}
-              slotProps={{
-                inputLabel: { shrink: true, sx: { fontSize: 12, color: COLORES.textoTerciario, fontWeight: 500 } },
-                input: { startAdornment: <InputAdornment position="start"><CalendarDays size={14} color={COLORES.textoSuave} /></InputAdornment>, sx: { borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris } },
-              }} />
-          )}
-          {(vista === "semana" || vista === "rango") && (
-            <TextField label="Fecha desde" type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)}
-              slotProps={{
-                inputLabel: { shrink: true, sx: { fontSize: 12, color: COLORES.textoTerciario, fontWeight: 500 } },
-                input: { startAdornment: <InputAdornment position="start"><CalendarDays size={14} color={COLORES.textoSuave} /></InputAdornment>, sx: { borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris } },
-              }} />
-          )}
-          {(vista === "semana" || vista === "rango") && (
-            <TextField label="Fecha hasta" type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)}
-              slotProps={{
-                inputLabel: { shrink: true, sx: { fontSize: 12, color: COLORES.textoTerciario, fontWeight: 500 } },
-                input: { startAdornment: <InputAdornment position="start"><CalendarDays size={14} color={COLORES.textoSuave} /></InputAdornment>, sx: { borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris } },
-              }} />
-          )}
-          {vista === "mes" && <Box />}
-          {vista === "mes" && <Box />}
-          <Box sx={{ display: "flex", gap: 0.8, flexWrap: "wrap", justifySelf: { xs: "start", md: "end" }, alignSelf: "end" }}>
-            <Button variant="outlined" onClick={limpiar} startIcon={<X size={14} />}
-                             sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12, height: 40, px: 2, color: COLORES.textoTerciario, borderColor: COLORES.borde, bgcolor: COLORES.fondoBlanco, "&:hover": { borderColor: COLORES.danger, color: COLORES.danger }, whiteSpace: "nowrap" }}>
-              Limpiar
-            </Button>
-            <Button variant="outlined" startIcon={<Download size={14} />} onClick={(e) => setExportAnchor(e.currentTarget)}
-                             sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12, height: 40, px: 2, color: COLORES.textoTerciario, borderColor: COLORES.borde, bgcolor: COLORES.fondoBlanco, "&:hover": { borderColor: COLORES.primarioOscuro, color: COLORES.primarioOscuro }, whiteSpace: "nowrap" }}>
-              Exportar
-            </Button>
-            <Menu anchorEl={exportAnchor} open={Boolean(exportAnchor)} onClose={() => setExportAnchor(null)}
-              transformOrigin={{ horizontal: "right", vertical: "top" }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-              slotProps={{ paper: { sx: { borderRadius: "12px", mt: 0.5, minWidth: 150, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" } } }}>
-              <MenuItem onClick={exportarExcel} sx={{ borderRadius: "8px", mx: 0.5, fontSize: 13, gap: 1 }}>
-                <FileText size={16} /> Exportar Excel
-              </MenuItem>
-              <MenuItem onClick={vistaPreviaPDF} sx={{ borderRadius: "8px", mx: 0.5, fontSize: 13, gap: 1 }}>
-                <FileText size={16} /> Vista previa PDF
-              </MenuItem>
-              <MenuItem onClick={exportarPDF} sx={{ borderRadius: "8px", mx: 0.5, fontSize: 13, gap: 1 }}>
-                <Download size={16} /> Exportar PDF
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
-      </Paper>
+      <FiltrosAsistencia
+        vista={vista} setVista={setVista}
+        fecha={fecha} setFecha={setFecha}
+        fechaDesde={fechaDesde} setFechaDesde={setFechaDesde}
+        fechaHasta={fechaHasta} setFechaHasta={setFechaHasta}
+        mes={mes} setMes={setMes}
+        anio={anio} setAnio={setAnio}
+        filtroArea={filtroArea} setFiltroArea={setFiltroArea}
+        filtroPiso={filtroPiso} setFiltroPiso={setFiltroPiso}
+        filtroEstado={filtroEstado} setFiltroEstado={setFiltroEstado}
+        areas={areas}
+        pisosDisponibles={pisosDisponibles}
+        limpiar={limpiar}
+        exportAnchor={exportAnchor} setExportAnchor={setExportAnchor}
+        exportarExcel={exportarExcel}
+        vistaPreviaPDF={vistaPreviaPDF}
+        exportarPDF={exportarPDF}
+      />
 
       {/* 4. TABLA */}
       <Paper elevation={0} sx={{ borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`, overflow: "hidden" }}>
@@ -428,10 +240,7 @@ export default function AsistenciaPage() {
           <DataTable
             rows={filtrados}
             columns={asistenciaColumns({
-
               getPiso, onDetalle: (row) => setDetalleRow(row),
-              onEditar: (row) => setEditRow(row),
-              onEliminar: (row) => setConfirmEliminar(row),
             })}
             loading={loading}
           />
@@ -445,462 +254,13 @@ export default function AsistenciaPage() {
         row={detalleRow}
       />
 
-      {/* 5b. MODAL EDITAR ASISTENCIA */}
-      <EditarAsistenciaModal
-        open={Boolean(editRow)}
-        onClose={() => setEditRow(null)}
-        row={editRow}
-        onGuardar={async (data) => {
-          try {
-            await actualizarRegistro(editRow.id, data);
-            setEditRow(null);
-            setSnack({ open: true, mensaje: "Registro actualizado correctamente", severity: "success" });
-            cargarRegistros();
-          } catch (err) {
-            setSnack({ open: true, mensaje: "Error al actualizar el registro", severity: "error" });
-          }
-        }}
-      />
-
-      {/* 6. MODAL REGISTRO MANUAL */}
-      <RegistroManualModal
-        open={openManual}
-        onClose={() => setOpenManual(false)}
-        areas={areas}
-        onGuardar={async (data) => {
-          try {
-            await registrarManual(data);
-            setOpenManual(false);
-            cargarRegistros();
-          } catch (err) { console.error(err); }
-        }}
-      />
-
-      {/* 6. MODAL JUSTIFICAR */}
-
-
-      {/* 7. MODAL VISTA PREVIA PDF */}
+      {/* 6. MODAL VISTA PREVIA PDF */}
       <PDFPreviewModal
         open={Boolean(pdfPreviewUrl)}
         onClose={() => setPdfPreviewUrl(null)}
         url={pdfPreviewUrl}
         titulo="Vista previa - Asistencia"
       />
-
-      {/* 8. CONFIRMAR ELIMINAR */}
-      <ConfirmDialog
-        open={!!confirmEliminar}
-        titulo="Eliminar registro"
-        mensaje={`¿Estás seguro de eliminar el registro de "${confirmEliminar?.empleado}" del ${confirmEliminar?.fecha || "esta fecha"}? Esta acción no se puede deshacer.`}
-        onConfirm={handleEliminar}
-        onClose={() => setConfirmEliminar(null)}
-      />
-
-      {/* 9. SNACKBAR FEEDBACK */}
-      <Snackbar
-        open={snack.open}
-        autoHideDuration={4000}
-        onClose={() => setSnack({ ...snack, open: false })}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity={snack.severity} variant="filled" sx={{ borderRadius: "10px" }}>
-          {snack.mensaje}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 }
-
-function DetalleAsistenciaModal({ open, onClose, row }) {
-  if (!open || !row) return null;
-
-  const badgeColors = {
-    puntual: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
-    tardanza: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
-    ausente: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
-    justificado: { bg: COLORES.primarioClaro2, color: COLORES.primarioOscuro },
-  };
-  const ec = badgeColors[row.estado] || { bg: COLORES.fondoGris2, color: COLORES.textoTerciario };
-
-  const esLyM = row.dia_semana && (row.dia_semana === 1 || row.dia_semana === 2);
-  const salidaTardeEsperada = esLyM ? "18:00" : "17:00";
-  const turnos = [
-    { label: "Mañana", entrada: row.entrada1, salida: row.salida1, esperadoE: "07:00", esperadoS: "12:00", color: COLORES.primarioOscuro, bg: COLORES.successClaro },
-    { label: "Tarde", entrada: row.entrada2, salida: row.salida2, esperadoE: "14:00", esperadoS: salidaTardeEsperada, color: COLORES.primarioOscuro, bg: COLORES.successClaro },
-  ];
-
-  const tipoIconMap = {
-    huella: <Fingerprint size={18} />,
-    facial: <CircleArrowOutUpRight size={18} />,
-    tarjeta: <CircleCheckBig size={18} />,
-    manual: <Ban size={18} />,
-  };
-
-  const calculos = [
-    { label: "Horas trabajadas", value: row.horas_trabajadas ? `${row.horas_trabajadas}h` : "—" },
-    { label: "Minutos de tardanza", value: row.minutos_tardanza > 0 ? `${row.minutos_tardanza} min` : "0 min", color: row.minutos_tardanza > 0 ? COLORES.warningOscuro : COLORES.verdeTexto },
-    { label: "Horas extra", value: row.horas_extra > 0 ? `${row.horas_extra}h` : "—", color: row.horas_extra > 0 ? COLORES.primario : COLORES.textoSuave },
-  ];
-
-  return (
-    <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-      <Paper elevation={0} sx={{ position: "relative", borderRadius: "16px", p: 3, width: "100%", maxWidth: 560, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", bgcolor: COLORES.fondoBlanco }}>
-        <IconButton aria-label="Cerrar" onClick={onClose} size="small" sx={{ position: "absolute", top: 12, right: 12, color: COLORES.textoSuave, "&:hover": { color: COLORES.textoTerciario, bgcolor: COLORES.fondoGris2 } }}>
-          <X size={18} />
-        </IconButton>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2.5 }}>
-          <Box>
-            <Typography sx={{ fontSize: 18, fontWeight: 700, color: COLORES.textoPrimario }}>{row.empleado}</Typography>
-            <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario, mt: 0.3 }}>{row.area || "—"} · Piso {row.piso || "—"}</Typography>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Typography sx={{ fontSize: 11, fontWeight: 600, px: 1.2, py: 0.4, borderRadius: "8px", bgcolor: ec.bg, color: ec.color, textTransform: "capitalize" }}>
-              {row.estado}
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Marcaciones */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}>
-          {turnos.map((t) => {
-            const tieneEntrada = !!t.entrada;
-            const tieneSalida = !!t.salida;
-            return (
-              <Paper key={t.label} elevation={0} sx={{ p: 2, borderRadius: "14px", bgcolor: t.bg, border: `1px solid ${COLORES.grisContorno}` }}>
-                <Typography sx={{ fontSize: 12, fontWeight: 700, color: t.color, mb: 1.5, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                  {t.label}
-                </Typography>
-                <Box sx={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 2, alignItems: "center" }}>
-                  <Box>
-                    <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", mb: 0.3 }}>Esperado</Typography>
-                    <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario }}>{t.esperadoE} → {t.esperadoS}</Typography>
-                  </Box>
-                  <Box sx={{ textAlign: "center" }}>
-                    <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", mb: 0.3 }}>vs</Typography>
-                  </Box>
-                  <Box>
-                    <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", mb: 0.3 }}>Real</Typography>
-                    <Typography sx={{ fontSize: 13, fontWeight: 700, color: tieneEntrada || tieneSalida ? COLORES.textoPrimario : COLORES.textoSuave }}>
-                      {tieneEntrada || tieneSalida ? `${t.entrada || "—"} → ${t.salida || "—"}` : "Sin registro"}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Paper>
-            );
-          })}
-        </Box>
-
-        {/* Resumen de cálculos */}
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 3 }}>
-          {calculos.map((c, i) => (
-            <Paper key={i} elevation={0} sx={{ p: 2, borderRadius: "12px", border: `1px solid ${COLORES.grisContorno}`, textAlign: "center" }}>
-              <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase", mb: 0.5 }}>{c.label}</Typography>
-              <Typography sx={{ fontSize: 18, fontWeight: 700, color: c.color || COLORES.textoPrimario }}>{c.value}</Typography>
-            </Paper>
-          ))}
-        </Box>
-
-        {/* Marcación */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, py: 1.5, borderTop: `1px solid ${COLORES.fondoGris2}` }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: "10px", bgcolor: COLORES.fondoGris, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.textoSuave }}>
-            {tipoIconMap[row.tipo_marcacion] || <CircleCheckBig size={18} />}
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase" }}>Tipo de marcación</Typography>
-            <Typography sx={{ fontSize: 14, fontWeight: 500, color: COLORES.textoPrimario, textTransform: "capitalize" }}>{row.tipo_marcacion || "—"}</Typography>
-          </Box>
-        </Box>
-      </Paper>
-    </Box>
-  );
-}
-
-// ── MODAL EDITAR ASISTENCIA ──────────────────────
-function EditarAsistenciaModal({ open, onClose, row, onGuardar }) {
-  const [form, setForm] = useState({});
-  const [guardando, setGuardando] = useState(false);
-
-  useEffect(() => {
-    if (row) {
-      setForm({
-        fecha: row.fecha || "",
-        entrada1: row.entrada1 || "",
-        salida1: row.salida1 || "",
-        entrada2: row.entrada2 || "",
-        salida2: row.salida2 || "",
-        tipo_marcacion: row.tipo_marcacion || "manual",
-        estado: row.estado || "puntual",
-        observacion: row.observacion || "",
-      });
-    }
-  }, [row]);
-
-  if (!open || !row) return null;
-
-  const inputSx = {
-    borderRadius: "10px", fontSize: 13, height: 40, py: 0,
-    background: COLORES.fondoBlanco,
-    "& fieldset": { borderColor: COLORES.textoPrimario },
-    "&:hover fieldset": { borderColor: COLORES.textoPrimario },
-    "&.Mui-focused fieldset": { borderColor: COLORES.textoPrimario },
-  };
-
-  return (
-    <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-      <Paper elevation={0} sx={{ position: "relative", borderRadius: "16px", p: 3, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", bgcolor: COLORES.fondoBlanco }}>
-        <IconButton aria-label="Cerrar" onClick={onClose} size="small" sx={{ position: "absolute", top: 12, right: 12, color: COLORES.textoSuave, "&:hover": { color: COLORES.textoTerciario, bgcolor: COLORES.fondoGris2 } }}>
-          <X size={18} />
-        </IconButton>
-        <Typography sx={{ fontSize: 17, fontWeight: 700, color: COLORES.textoPrimario, mb: 2.5 }}>Editar registro de asistencia</Typography>
-
-        <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario, mb: 2 }}>
-          {row.empleado} — {row.area || ""} · {row.fecha || ""}
-        </Typography>
-
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Fecha</Typography>
-            <TextField type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
-          </Box>
-
-          {/* TURNO MAÑANA */}
-          <Box sx={{ bgcolor: COLORES.fondoBlanco, borderRadius: "12px", p: 2 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.primarioOscuro, mb: 1.5 }}>Turno mañana</Typography>
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-              <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Entrada</Typography>
-                <TextField type="time" value={form.entrada1} onChange={(e) => setForm({ ...form, entrada1: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Salida</Typography>
-                <TextField type="time" value={form.salida1} onChange={(e) => setForm({ ...form, salida1: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
-              </Box>
-            </Box>
-          </Box>
-
-          {/* TURNO TARDE */}
-          <Box sx={{ bgcolor: COLORES.fondoBlanco, borderRadius: "12px", p: 2 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.primarioOscuro, mb: 1.5 }}>Turno tarde</Typography>
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-              <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Entrada</Typography>
-                <TextField type="time" value={form.entrada2} onChange={(e) => setForm({ ...form, entrada2: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Salida</Typography>
-                <TextField type="time" value={form.salida2} onChange={(e) => setForm({ ...form, salida2: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
-              </Box>
-            </Box>
-          </Box>
-
-          {/* ESTADO */}
-          <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Estado</Typography>
-            <Select value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })} size="small" fullWidth sx={inputSx}>
-              <MenuItem value="puntual">Puntual</MenuItem>
-              <MenuItem value="tardanza">Tardanza</MenuItem>
-              <MenuItem value="ausente">Ausente</MenuItem>
-              <MenuItem value="justificado">Justificado</MenuItem>
-            </Select>
-          </Box>
-
-          {/* TIPO MARCACIÓN */}
-          <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Tipo de marcación</Typography>
-            <Select value={form.tipo_marcacion} onChange={(e) => setForm({ ...form, tipo_marcacion: e.target.value })} size="small" fullWidth sx={inputSx}>
-              <MenuItem value="manual">Manual</MenuItem>
-              <MenuItem value="huella">Huella</MenuItem>
-              <MenuItem value="facial">Facial</MenuItem>
-              <MenuItem value="tarjeta">Tarjeta</MenuItem>
-            </Select>
-          </Box>
-
-          {/* OBSERVACIÓN */}
-          <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario, mb: 0.6 }}>Observación</Typography>
-            <TextField multiline rows={2} value={form.observacion} onChange={(e) => setForm({ ...form, observacion: e.target.value })} fullWidth slotProps={{ input: { sx: { ...inputSx, height: "auto", py: 1 } } }} />
-          </Box>
-
-          <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end", mt: 1 }}>
-            <Button onClick={onClose} variant="outlined" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 3, color: COLORES.textoTerciario, borderColor: COLORES.grisContorno, "&:hover": { borderColor: COLORES.primarioOscuro } }}>
-              Cancelar
-            </Button>
-            <Button
-              disabled={guardando}
-              onClick={async () => {
-                setGuardando(true);
-                await onGuardar(form);
-                setGuardando(false);
-              }}
-              variant="contained"
-              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 3, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } }}
-            >
-              {guardando ? "Guardando..." : "Guardar cambios"}
-            </Button>
-          </Box>
-        </Box>
-      </Paper>
-    </Box>
-  );
-}
-
-function RegistroManualModal({ open, onClose, onGuardar, areas = [] }) {
-  const [form, setForm] = useState({
-    usuario_id: "", fecha: new Date().toISOString().split("T")[0],
-    entrada1: "07:00", salida1: "12:00", entrada2: "14:00", salida2: "17:00",
-    tipo_marcacion: "manual", observacion: "",
-  });
-  const [empleados, setEmpleados] = useState([]);
-
-  useEffect(() => {
-    if (!open) return;
-    setForm({ usuario_id: "", fecha: new Date().toISOString().split("T")[0], entrada1: "07:00", salida1: "12:00", entrada2: "14:00", salida2: "17:00", tipo_marcacion: "manual", observacion: "" });
-    (async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await fetch("/api/empleados", { headers: { Authorization: `Bearer ${token}` } });
-        const data = await res.json();
-        setEmpleados(data.empleados || []);
-      } catch { setEmpleados([]); }
-    })();
-  }, [open]);
-
-  if (!open) return null;
-
-  const inputSx = {
-    borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoBlanco,
-    "& fieldset": { borderColor: COLORES.textoPrimario },
-    "&:hover fieldset": { borderColor: COLORES.textoPrimario },
-    "&.Mui-focused fieldset": { borderColor: COLORES.textoPrimario },
-  };
-
-  const labelSx = { fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.6 };
-
-  return (
-    <Box sx={{ position: "fixed", inset: 0, bgcolor: "rgba(17, 24, 39, 0.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-      <Paper elevation={0} sx={{ position: "relative", borderRadius: "16px", width: "100%", maxWidth: 760, maxHeight: "90vh", overflow: "auto", boxShadow: "0 8px 30px rgba(0,0,0,0.12)", bgcolor: COLORES.fondoBlanco }}>
-        {/* HEADER */}
-        <Box sx={{ p: 3, pb: 2.5, pr: 6 }}>
-          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
-            <Box sx={{ width: 42, height: 42, borderRadius: "12px", bgcolor: COLORES.primarioClaro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <ClipboardCheck size={22} color={COLORES.primarioOscuro} />
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: 17, fontWeight: 700, color: COLORES.textoPrimario }}>Registro manual</Typography>
-              <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario, mt: 0.5, lineHeight: 1.5 }}>
-                Registra manualmente una asistencia cuando el empleado no pudo marcar normalmente.
-              </Typography>
-            </Box>
-          </Box>
-          <IconButton aria-label="Cerrar" onClick={onClose} size="small" sx={{ position: "absolute", top: 14, right: 14, color: COLORES.textoSuave, "&:hover": { color: COLORES.textoTerciario, bgcolor: COLORES.fondoGris2 } }}>
-            <X size={18} />
-          </IconButton>
-        </Box>
-        <Divider sx={{ borderColor: COLORES.fondoGris2 }} />
-
-        {/* BODY */}
-        <Box sx={{ p: 3, pt: 2.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
-          {/* Fila 1: Empleado + Fecha */}
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 170px" }, gap: 2 }}>
-            <Box>
-              <Typography sx={labelSx}>Empleado</Typography>
-              <Autocomplete
-                options={empleados}
-                getOptionLabel={(e) => `${e.nombre} ${e.apellido || ""} — ${e.cedula}`}
-                isOptionEqualToValue={(e, v) => e.id === v.id}
-                onChange={(_, value) => setForm({ ...form, usuario_id: value?.id || "" })}
-                noOptionsText="Sin resultados"
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    aria-label="Buscar empleado"
-                    placeholder="Buscar por nombre o cédula..."
-                    InputProps={{
-                      ...params.InputProps,
-                      startAdornment: <Search size={16} style={{ color: COLORES.textoSuave, marginRight: 4 }} />,
-                      sx: { borderRadius: "10px", fontSize: 13, height: 40, py: 0, bgcolor: COLORES.fondoBlanco, "& fieldset": { borderColor: COLORES.textoPrimario } },
-                    }}
-                  />
-                )}
-              />
-            </Box>
-            <Box>
-              <Typography sx={labelSx}>Fecha</Typography>
-              <TextField type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
-            </Box>
-          </Box>
-
-          {/* JORNADAS (lado a lado) */}
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
-            {/* JORNADA MAÑANA */}
-            <Box sx={{ border: `1px solid ${COLORES.borde}`, borderRadius: "14px", p: 2.5, bgcolor: COLORES.fondoBlanco }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-                <Box sx={{ width: 36, height: 36, borderRadius: "50%", bgcolor: COLORES.primarioClaro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Sun size={17} color={COLORES.primarioOscuro} />
-                </Box>
-                <Box>
-                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: COLORES.textoPrimario }}>Jornada mañana</Typography>
-                  <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>Primer bloque de trabajo</Typography>
-                </Box>
-              </Box>
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
-                <Box>
-                  <Typography sx={labelSx}>Entrada</Typography>
-                  <TextField type="time" value={form.entrada1} onChange={(e) => setForm({ ...form, entrada1: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
-                </Box>
-                <Box>
-                  <Typography sx={labelSx}>Salida</Typography>
-                  <TextField type="time" value={form.salida1} onChange={(e) => setForm({ ...form, salida1: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
-                </Box>
-              </Box>
-            </Box>
-
-            {/* JORNADA TARDE */}
-            <Box sx={{ border: `1px solid ${COLORES.borde}`, borderRadius: "14px", p: 2.5, bgcolor: COLORES.fondoBlanco }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-                <Box sx={{ width: 36, height: 36, borderRadius: "50%", bgcolor: COLORES.primarioClaro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Moon size={17} color={COLORES.primarioOscuro} />
-                </Box>
-                <Box>
-                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: COLORES.textoPrimario }}>Jornada tarde</Typography>
-                  <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>Segundo bloque de trabajo</Typography>
-                </Box>
-              </Box>
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
-                <Box>
-                  <Typography sx={labelSx}>Entrada</Typography>
-                  <TextField type="time" value={form.entrada2} onChange={(e) => setForm({ ...form, entrada2: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
-                </Box>
-                <Box>
-                  <Typography sx={labelSx}>Salida</Typography>
-                  <TextField type="time" value={form.salida2} onChange={(e) => setForm({ ...form, salida2: e.target.value })} fullWidth slotProps={{ input: { sx: inputSx } }} />
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-
-          {/* OBSERVACIÓN */}
-          <Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.6 }}>
-              <Typography sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario }}>Observación</Typography>
-              <Typography sx={{ fontSize: 11, color: COLORES.textoSuave }}>Opcional</Typography>
-            </Box>
-            <TextField multiline minRows={3} value={form.observacion} onChange={(e) => setForm({ ...form, observacion: e.target.value })} placeholder="Agregar una observación sobre este registro..." fullWidth slotProps={{ input: { sx: { ...inputSx, height: "auto", py: 1.5, resize: "vertical", alignItems: "flex-start" } } }} />
-          </Box>
-        </Box>
-
-        {/* FOOTER */}
-        <Box sx={{ p: 3, pt: 2, borderTop: `1px solid ${COLORES.fondoGris2}`, display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
-          <Button onClick={onClose} variant="outlined" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 42, px: 3, color: COLORES.textoTerciario, borderColor: COLORES.borde2, bgcolor: COLORES.fondoBlanco, "&:hover": { borderColor: COLORES.textoSuave, bgcolor: COLORES.fondoGris } }}>
-            Cancelar
-          </Button>
-          <Button onClick={() => onGuardar(form)} variant="contained" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 42, px: 3.5, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } }}>
-            Guardar registro
-          </Button>
-        </Box>
-      </Paper>
-    </Box>
-  );
-}
-
-

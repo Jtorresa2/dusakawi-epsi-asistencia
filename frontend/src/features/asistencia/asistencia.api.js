@@ -11,24 +11,3 @@ export const obtenerRegistros = (params = {}) => {
   const qs = query.toString();
   return apiFetch(`/asistencia${qs ? `?${qs}` : ""}`);
 };
-
-export const registrarManual = (data) =>
-  apiFetch("/asistencia/manual", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-
-export const justificarAusencia = (id, data) =>
-  apiFetch(`/asistencia/${id}/justificar`, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
-
-export const eliminarRegistro = (id) =>
-  apiFetch(`/asistencia/${id}`, { method: "DELETE" });
-
-export const actualizarRegistro = (id, data) =>
-  apiFetch(`/asistencia/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });

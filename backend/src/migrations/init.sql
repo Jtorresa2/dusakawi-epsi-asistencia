@@ -153,8 +153,10 @@ CREATE TABLE IF NOT EXISTS novedades (
     fecha_desde           DATE NOT NULL,
     fecha_hasta           DATE NOT NULL,
     motivo                TEXT NOT NULL,
-    tipo                  VARCHAR(20) NOT NULL DEFAULT 'completo'
-                          CHECK (tipo IN ('completo', 'mañana', 'tarde', 'horas', 'comision')),
+    tipo_novedad          VARCHAR(30) NOT NULL DEFAULT 'permiso'
+                          CHECK (tipo_novedad IN ('permiso', 'vacaciones', 'incapacidad', 'comision', 'licencia', 'suspension')),
+    tipo                  VARCHAR(20) NOT NULL DEFAULT 'dia_completo'
+                          CHECK (tipo IN ('dia_completo', 'horas', 'manana', 'tarde')),
     hora_desde            TIME,
     hora_hasta            TIME,
     registrado_por        INTEGER REFERENCES usuarios(id),

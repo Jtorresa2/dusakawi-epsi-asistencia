@@ -400,9 +400,17 @@ export default function PersonalPage() {
       </Paper>
 
       {/* TABLA PRINCIPAL */}
-      <Paper elevation={0} sx={{ borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`, overflow: "visible" }}>
-        <TableContainer sx={{ overflowX: "auto" }}>
-          <Table>
+      <Paper elevation={0} sx={{ borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`, overflow: "hidden" }}>
+        <TableContainer sx={{
+          overflowX: "auto",
+          "&::-webkit-scrollbar": { height: 8 },
+          "&::-webkit-scrollbar-track": { background: COLORES.primarioClaro, borderRadius: 4 },
+          "&::-webkit-scrollbar-thumb": { background: COLORES.acento, borderRadius: 4 },
+          "&::-webkit-scrollbar-thumb:hover": { background: COLORES.acento },
+          scrollbarWidth: "thin",
+          scrollbarColor: `${COLORES.acento} ${COLORES.primarioClaro}`,
+        }}>
+          <Table sx={{ minWidth: { xs: 780, md: 1250 } }}>
             <TableHead>
               <TableRow>
                 {["", "Colaborador", "Documento", "Cargo", "Área / Piso", "Rol", "Usuario", "Último acceso", "Inas.", "Tard.", "Estado", "Acciones"].map((h) => (

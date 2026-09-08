@@ -24,7 +24,7 @@ function getDateRange(periodo) {
       const last = `${yyyy}-${mm}-${String(ultimoDia).padStart(2, '0')}`;
       return { start: first, end: last };
     }
-    case 'Último año':
+    case '├Ültimo a├▒o':
       return { start: `${yyyy - 1}-${mm}-${dd}`, end: hoyStr };
     default: // Hoy
       return { start: hoyStr, end: hoyStr };
@@ -36,8 +36,8 @@ exports.getIndicadores = async (req, res) => {
     const periodo = req.query.periodo || 'Hoy';
     const r = getDateRange(periodo);
 
-    // Indicadores filtrados por período
-    const [indicadores] = await pool.query(`
+    // Indicadores filtrados por per├¡odo
+    const { rows: indicadores } = await pool.query(`
       SELECT 
         COUNT(DISTINCT CASE WHEN a.estado = 'puntual' OR a.estado = 'tardanza' THEN a.usuario_id END) AS presentes_hoy,
         COUNT(DISTINCT CASE WHEN a.estado = 'ausente' THEN a.usuario_id END) AS ausentes_hoy,
@@ -47,21 +47,23 @@ exports.getIndicadores = async (req, res) => {
       WHERE a.fecha BETWEEN '${r.start}' AND '${r.end}'
     `);
 
-    // Horas extra en el período (usando columna calculada)
-    const [extras] = await pool.query(`
-      SELECT COALESCE(SUM(a.horas_extra), 0) AS horas_extras
-      FROM asistencia a
-      WHERE a.fecha BETWEEN '${r.start}' AND '${r.end}'
-    `);
 
-    // Permisos/incidencias aprobadas en el período
-    const [permisos] = await pool.query(`
+
+    // Permisos/incidencias aprobadas en el per├¡odo
+    const { rows: permisos } = await pool.query(`
       SELECT COUNT(*) AS total FROM incidencias
       WHERE estado = 'aprobado'
         AND fecha BETWEEN '${r.start}' AND '${r.end}'
     `);
 
-    const [asistenciaHoy] = await pool.query(`
+    // Total de personas registradas (todos los usuarios activos)
+    const { rows: totalRegistrados } = await pool.query(`
+      SELECT COUNT(*) AS total
+      FROM usuarios u
+      WHERE u.activo = true
+    `);
+
+    const { rows: asistenciaHoy } = await pool.query(`
       SELECT a.id, u.nombre, u.apellido, a.fecha, a.estado,
         a.fecha_hora_entrada, a.fecha_hora_salida_manana, a.fecha_hora_entrada_tarde, a.fecha_hora_salida,
         a.horas_trabajadas, a.minutos_tardanza
@@ -71,7 +73,7 @@ exports.getIndicadores = async (req, res) => {
       ORDER BY a.fecha_hora_entrada
       LIMIT 10
     `);
-    const [semanal] = await pool.query(`
+    const { rows: semanal } = await pool.query(`
       SELECT 
         TRIM(TO_CHAR(fecha, 'Day')) AS dia,
         SUM((estado != 'ausente')::int) AS presentes,
@@ -81,7 +83,7 @@ exports.getIndicadores = async (req, res) => {
       GROUP BY fecha, TRIM(TO_CHAR(fecha, 'Day'))
       ORDER BY fecha
     `);
-    const [mensual] = await pool.query(`
+    const { rows: mensual } = await pool.query(`
       SELECT 
         EXTRACT(MONTH FROM fecha) AS mes,
         ROUND(SUM((estado = 'puntual')::int) / COUNT(*) * 100, 1) AS puntualidad,
@@ -99,8 +101,8 @@ exports.getIndicadores = async (req, res) => {
         presentes_hoy: ind.presentes_hoy || 0,
         ausentes_hoy: ind.ausentes_hoy || 0,
         tardanzas_hoy: ind.tardanzas_hoy || 0,
-        horas_extras_hoy: extras[0]?.horas_extras || 0,
         permisos_hoy: permisos[0]?.total || 0,
+        total_registrados: totalRegistrados[0]?.total || 0,
       },
       registros: asistenciaHoy,
       semanal,
@@ -114,7 +116,7 @@ exports.getIndicadores = async (req, res) => {
 
 exports.getResumenPorArea = async (req, res) => {
   try {
-    const [rows] = await pool.query(`
+    const { rows } = await pool.query(`
       SELECT
         ar.id,
         ar.nombre AS area,
@@ -144,7 +146,7 @@ exports.getResumenPorArea = async (req, res) => {
 
     res.json(data);
   } catch (err) {
-    console.error('Resumen por área error:', err);
+    console.error('Resumen por ├írea error:', err);
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
   }
 };

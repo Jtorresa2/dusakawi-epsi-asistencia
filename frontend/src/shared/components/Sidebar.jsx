@@ -84,6 +84,7 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
     <NavLink
       key={item.path}
       to={item.path}
+      title={!abierto ? item.label : undefined}
       onClick={() => { if (isMobile) setAbierto(false); }}
       style={({ isActive }) => ({
         display: "flex",
@@ -111,7 +112,7 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
       return (
         <div key={grupo.section} style={{ marginBottom: 20 }}>
           <div style={{
-            color: "rgba(255,255,255,.35)",
+            color: "rgba(255,255,255,.65)",
             fontSize: 10, fontWeight: 700,
             letterSpacing: "1.5px", marginBottom: 8,
             paddingLeft: 12,
@@ -134,7 +135,7 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
             boxSizing: "border-box",
             border: "none",
             background: "transparent",
-            color: "rgba(255,255,255,.35)",
+            color: "rgba(255,255,255,.65)",
             fontSize: 10, fontWeight: 700,
             letterSpacing: "1.5px",
             marginBottom: 8,
@@ -209,6 +210,7 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
       </div>
 
       <div ref={menuRef} style={{
+        position: "relative",
         borderTop: "1px solid rgba(255,255,255,.08)",
         padding: abierto ? 16 : "16px 0",
       }}>
@@ -238,10 +240,20 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
           )}
         </button>
         {menuAbierto && abierto && (
-          <div style={{ marginTop: 10, borderRadius: 10, background: COLORES.fondoBlanco, overflow: "hidden" }}>
+          <div style={{
+            position: "absolute",
+            bottom: 68,
+            left: 16,
+            right: 16,
+            borderRadius: 10,
+            background: COLORES.fondoBlanco,
+            boxShadow: "0 10px 25px -5px rgba(0,0,0,0.3)",
+            overflow: "hidden",
+            zIndex: 10,
+          }}>
             <button onClick={handleLogout} style={{
               width: "100%", border: "none", background: "transparent",
-              padding: 11, cursor: "pointer", color: COLORES.danger, fontSize: 13, fontWeight: 500,
+              padding: 11, cursor: "pointer", color: COLORES.danger, fontSize: 13, fontWeight: 600,
             }}>
               Cerrar sesión
             </button>

@@ -13,65 +13,56 @@ exports.getRegistros = async (req, res) => {
         TO_CHAR(a.fecha_hora_salida_manana, 'HH24:MI') AS salida1,
         TO_CHAR(a.fecha_hora_entrada_tarde, 'HH24:MI') AS entrada2,
         TO_CHAR(a.fecha_hora_salida, 'HH24:MI') AS salida2,
-        a.horas_trabajadas, a.horas_extra, a.minutos_tardanza,
+        a.horas_trabajadas, a.minutos_tardanza,
         a.tipo_marcacion, a.estado, a.observacion,
-        EXTRACT(DOW FROM a.fecha) + 1 AS dia_semana
+        CASE WHEN a.fecha_hora_entrada IS NOT NULL
+               AND a.fecha_hora_salida_manana IS NOT NULL
+               AND a.fecha_hora_entrada_tarde IS NOT NULL
+               AND a.fecha_hora_salida IS NOT NULL
+             THEN 'completa' ELSE 'abierta' END AS marcacion_estado,
+        EXTRACT(DOW FROM a.fecha) + 1 AS dia_semana,
+        h.nombre AS horario_nombre, h.modalidad AS horario_modalidad,
+        TO_CHAR(hd.hora_entrada_manana, 'HH24:MI') AS esperado_entrada_manana,
+        TO_CHAR(hd.hora_salida_manana, 'HH24:MI') AS esperado_salida_manana,
+        TO_CHAR(hd.hora_entrada_tarde, 'HH24:MI') AS esperado_entrada_tarde,
+        TO_CHAR(hd.hora_salida_tarde, 'HH24:MI') AS esperado_salida_tarde
       FROM asistencia a
       JOIN usuarios u ON a.usuario_id = u.id
       JOIN areas ar ON u.area_id = ar.id
+      LEFT JOIN horarios h ON u.horario_id = h.id
+      LEFT JOIN horario_detalle hd ON hd.horario_id = u.horario_id
+        AND hd.dia_semana = CASE EXTRACT(DOW FROM a.fecha)
+          WHEN 0 THEN 'Domingo'
+          WHEN 1 THEN 'Lunes'
+          WHEN 2 THEN 'Martes'
+          WHEN 3 THEN 'Miércoles'
+          WHEN 4 THEN 'Jueves'
+          WHEN 5 THEN 'Viernes'
+          WHEN 6 THEN 'Sábado'
+        END
       WHERE 1=1
     `;
 
     const params = [];
 
     if (fecha_desde && fecha_hasta) {
-      query += ` AND a.fecha BETWEEN ? AND ?`;
+      query += ` AND a.fecha BETWEEN $1 AND $2`;
       params.push(fecha_desde, fecha_hasta);
     } else if (fecha) {
-      query += ` AND a.fecha = ?`;
+      query += ` AND a.fecha = $1`;
       params.push(fecha);
     } else {
       query += ` AND a.fecha = CURRENT_DATE`;
     }
 
-    if (area)   { query += ` AND ar.nombre LIKE ?`; params.push(`%${area}%`); }
-    if (piso)   { query += ` AND ar.piso = ?`;      params.push(piso); }
-    if (estado) { query += ` AND a.estado = ?`;     params.push(estado); }
+    if (area)   { query += ` AND ar.nombre LIKE $${params.length + 1}`; params.push(`%${area}%`); }
+    if (piso)   { query += ` AND ar.piso = $${params.length + 1}`;      params.push(piso); }
+    if (estado) { query += ` AND a.estado = $${params.length + 1}`;     params.push(estado); }
 
     query += ` ORDER BY a.fecha DESC, a.fecha_hora_entrada DESC`;
 
-    const [rows] = await pool.query(query, params);
+    const { rows } = await pool.query(query, params);
     res.json({ registros: rows });
-  } catch (err) {
-    res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
-  }
-};
-
-exports.registrarManual = async (req, res) => {
-  try {
-    const { usuario_id, fecha, entrada1, salida1, entrada2, salida2, tipo_marcacion, observacion } = req.body;
-    const targetId = usuario_id || req.body.empleado_id; // backward compat
-
-    const fecha_e1 = `${fecha} ${entrada1}:00`;
-    const fecha_s1 = salida1 ? `${fecha} ${salida1}:00` : null;
-    const fecha_e2 = entrada2 ? `${fecha} ${entrada2}:00` : null;
-    const fecha_s2 = salida2 ? `${fecha} ${salida2}:00` : null;
-
-    await pool.query(
-      `INSERT INTO asistencia
-        (usuario_id, fecha, fecha_hora_entrada, fecha_hora_salida_manana, fecha_hora_entrada_tarde, fecha_hora_salida, tipo_marcacion, estado, observacion)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'puntual', ?)
-       ON CONFLICT (usuario_id, fecha) DO UPDATE SET
-        fecha_hora_entrada = EXCLUDED.fecha_hora_entrada,
-        fecha_hora_salida_manana = EXCLUDED.fecha_hora_salida_manana,
-        fecha_hora_entrada_tarde = EXCLUDED.fecha_hora_entrada_tarde,
-        fecha_hora_salida = EXCLUDED.fecha_hora_salida,
-        tipo_marcacion = EXCLUDED.tipo_marcacion,
-        observacion = EXCLUDED.observacion`,
-      [targetId, fecha, fecha_e1, fecha_s1, fecha_e2, fecha_s2, tipo_marcacion, observacion]
-    );
-
-    res.json({ mensaje: 'Registro guardado correctamente' });
   } catch (err) {
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
   }
@@ -86,7 +77,7 @@ exports.getMiAsistencia = async (req, res) => {
       return res.status(400).json({ mensaje: 'Usuario no identificado' });
     }
 
-    const [rows] = await pool.query(`
+    const { rows } = await pool.query(`
       SELECT
         a.fecha,
         TO_CHAR(a.fecha_hora_entrada, 'HH24:MI') AS entrada1,
@@ -96,9 +87,9 @@ exports.getMiAsistencia = async (req, res) => {
         a.horas_trabajadas, a.estado,
         EXTRACT(DOW FROM a.fecha) + 1 AS dia_semana
       FROM asistencia a
-      WHERE a.usuario_id = ?
-        AND EXTRACT(YEAR FROM a.fecha) = ?
-        AND EXTRACT(MONTH FROM a.fecha) = ?
+      WHERE a.usuario_id = $1
+        AND EXTRACT(YEAR FROM a.fecha) = $2
+        AND EXTRACT(MONTH FROM a.fecha) = $3
       ORDER BY a.fecha DESC
     `, [usuarioId, anio, mes]);
 
@@ -113,67 +104,6 @@ exports.getMiAsistencia = async (req, res) => {
 
     res.json({ registros });
   } catch (err) {
-    res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
-  }
-};
-
-exports.justificarAusencia = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { observacion } = req.body;
-
-    await pool.query(
-      `UPDATE asistencia SET estado = 'justificado', observacion = ? WHERE id = ?`,
-      [observacion, id]
-    );
-
-    res.json({ mensaje: 'Ausencia justificada correctamente' });
-  } catch (err) {
-    res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
-  }
-};
-
-exports.eliminarRegistro = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await pool.query('DELETE FROM asistencia WHERE id = ?', [id]);
-    res.json({ mensaje: 'Registro eliminado correctamente' });
-  } catch (err) {
-    res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
-  }
-};
-
-exports.actualizarRegistro = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { entrada1, salida1, entrada2, salida2, fecha, tipo_marcacion, estado, observacion } = req.body;
-
-    if (!fecha) {
-      return res.status(400).json({ mensaje: 'Fecha requerida' });
-    }
-
-    const fecha_e1 = entrada1 ? `${fecha} ${entrada1}:00` : null;
-    const fecha_s1 = salida1 ? `${fecha} ${salida1}:00` : null;
-    const fecha_e2 = entrada2 ? `${fecha} ${entrada2}:00` : null;
-    const fecha_s2 = salida2 ? `${fecha} ${salida2}:00` : null;
-
-    await pool.query(
-      `UPDATE asistencia SET
-        fecha = ?,
-        fecha_hora_entrada = ?,
-        fecha_hora_salida_manana = ?,
-        fecha_hora_entrada_tarde = ?,
-        fecha_hora_salida = ?,
-        tipo_marcacion = ?,
-        estado = ?,
-        observacion = ?
-      WHERE id = ?`,
-      [fecha, fecha_e1, fecha_s1, fecha_e2, fecha_s2, tipo_marcacion, estado, observacion, id]
-    );
-
-    res.json({ mensaje: 'Registro actualizado correctamente' });
-  } catch (err) {
-    console.error(err);
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
   }
 };
