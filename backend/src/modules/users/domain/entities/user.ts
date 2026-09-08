@@ -32,7 +32,7 @@ export class User extends GenericEntity {
     super(metadata);
   }
 
-  get password(): HashedPassword {
+  get passwordHash(): HashedPassword {
     return this._passwordHash;
   }
 

@@ -19,7 +19,7 @@ export class LoginQueryHandler {
 
     const isPasswordValid = await this.passwordHasher.verify(
       request.password,
-      user.password,
+      user.passwordHash,
     );
 
     if (!isPasswordValid) {

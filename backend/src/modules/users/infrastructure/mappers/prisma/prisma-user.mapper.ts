@@ -76,7 +76,7 @@ export class PrismaUserMapper {
     return {
       ...PrismaUserMapper.basicData(entity),
       email: entity.email.value,
-      password_hash: entity.password.value,
+      password_hash: entity.passwordHash.value,
       username: entity.username.value,
       id: entity.metadata.id,
       created_at: entity.metadata.createdAt,
