@@ -1,10 +1,10 @@
-import { prisma } from '@config/database/prisma/prisma.js';
-import type { Uuid } from '@shared/types/uuid.js';
-import type { DataString } from '@shared/value-objects/data-string.js';
-import type { Role } from '../../../../domain/entities/role.js';
-import type { RoleRepository } from '../../../../domain/repositories/role-repository.js';
-import { PrismaRoleMapper } from '../../../mappers/prisma/prisma-role.mapper.js';
-import type { Prisma } from '@config/database/prisma/generated/client.js';
+import { prisma } from '@config/database/prisma/prisma';
+import type { Prisma } from '@config/database/prisma/generated/client';
+import type { Uuid } from '@shared/types/uuid';
+import type { DataString } from '@shared/value-objects/data-string';
+import { Role } from '@modules/users/domain/entities/role';
+import type { RoleRepository } from '@modules/users/domain/repositories/role-repository';
+import { PrismaRoleMapper } from '@modules/users/infrastructure/mappers/prisma/prisma-role.mapper';
 
 export class PrismaRoleRepository implements RoleRepository {
   private async findRoleByUniqueInput(

@@ -1,7 +1,7 @@
-import { GenericEntity } from '@shared/entities/generic-entity.js';
-import { DataString } from '@shared/value-objects/data-string.js';
-import { Floor } from './floor.js';
-import type { Metadata } from '@shared/types/metadata.js';
+import { GenericEntity } from '@shared/entities/generic-entity';
+import { DataString } from '@shared/value-objects/data-string';
+import { Floor } from './floor';
+import type { Metadata } from '@shared/types/metadata';
 
 export class Area extends GenericEntity {
   constructor(

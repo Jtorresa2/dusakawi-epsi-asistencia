@@ -1,9 +1,9 @@
-import { Prisma } from '@config/database/prisma/generated/client.js';
+import { Prisma } from '@config/database/prisma/generated/client';
+import type { Uuid } from '@shared/types/uuid';
 import {
   DocumentType,
   DocumentTypeName,
-} from '../../../domain/entities/document-type.js';
-import type { Uuid } from '@shared/types/uuid.js';
+} from '@modules/users/domain/entities/document-type';
 
 type PrismaDocumentType = Prisma.document_typesGetPayload<{}>;
 

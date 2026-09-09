@@ -1,5 +1,4 @@
-import type { Uuid } from '@shared/types/uuid.js';
-import type { WorkData } from '../../../domain/entities/user.js';
+import type { Uuid } from '@shared/types/uuid';
 
 export interface UpdateWorkDataCommandDto {
   id: Uuid;

@@ -1,18 +1,14 @@
 import { type AwilixContainer, asClass } from 'awilix';
-import { DocumentDetailsCreator } from '../domain/services/document-details-creator.js';
-import { PrismaUserRepository } from './persistence/repositories/prisma/prisma-user-repository.js';
-import { RegisterCommandHandler } from '../../auth/application/use-cases/register/register-command.handler.js';
-import { PrismaDocumentTypeRepository } from './persistence/repositories/prisma/prisma-document-type-repository.js';
-import { PrismaPositionRepository } from './persistence/repositories/prisma/prisma-position-repository.js';
-import { PrismaRoleRepository } from './persistence/repositories/prisma/prisma-role-repository.js';
-import { JwtHandler } from '../../auth/infrastructure/security/jwt/jwt.handler.js';
-import { BcryptjsPasswordHasher } from '../../auth/infrastructure/security/bcryptjs-password-hasher.js';
-import { LoginQueryHandler } from '../../auth/application/use-cases/login/login-query.handler.js';
-import { GetUserQueryHandler } from '../application/use-cases/get-user/get-user-query.handler.js';
-import { DeleteUserCommandHandler } from '../application/use-cases/delete-user/delete-user-command.handler.js';
-import { GetUsersQueryHandler } from '../application/use-cases/get-users/get-users-query.handler.js';
-import { UpdateBasicDataCommandHandler } from '../application/use-cases/update-basic-data/update-basic-data-command.handler.js';
-import { UpdateWorkDataCommandHandler } from '../application/use-cases/update-work-data/update-work-data-command.handler.js';
+import { DocumentDetailsCreator } from '../domain/services/document-details-creator';
+import { PrismaUserRepository } from './persistence/repositories/prisma/prisma-user-repository';
+import { PrismaDocumentTypeRepository } from './persistence/repositories/prisma/prisma-document-type-repository';
+import { PrismaPositionRepository } from './persistence/repositories/prisma/prisma-position-repository';
+import { PrismaRoleRepository } from './persistence/repositories/prisma/prisma-role-repository';
+import { GetUserQueryHandler } from '../application/use-cases/get-user/get-user-query.handler';
+import { DeleteUserCommandHandler } from '../application/use-cases/delete-user/delete-user-command.handler';
+import { GetUsersQueryHandler } from '../application/use-cases/get-users/get-users-query.handler';
+import { UpdateBasicDataCommandHandler } from '../application/use-cases/update-basic-data/update-basic-data-command.handler';
+import { UpdateWorkDataCommandHandler } from '../application/use-cases/update-work-data/update-work-data-command.handler';
 
 export function registerUserModule(container: AwilixContainer) {
   container.register({
@@ -24,12 +20,8 @@ export function registerUserModule(container: AwilixContainer) {
 
     // services
     documentDetailsCreator: asClass(DocumentDetailsCreator).singleton(),
-    tokenHandler: asClass(JwtHandler).singleton(),
-    passwordHasher: asClass(BcryptjsPasswordHasher).singleton(),
 
     // use-cases
-    registerCommandHandler: asClass(RegisterCommandHandler).scoped(),
-    loginQueryHandler: asClass(LoginQueryHandler).scoped(),
     getUserQueryHandler: asClass(GetUserQueryHandler).scoped(),
     getUsersQueryHandler: asClass(GetUsersQueryHandler).scoped(),
     deleteUserCommandHandler: asClass(DeleteUserCommandHandler).scoped(),

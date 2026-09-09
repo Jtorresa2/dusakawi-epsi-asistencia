@@ -1,11 +1,11 @@
-import type { Uuid } from '@shared/types/uuid.js';
-import type { User } from '../../../../domain/entities/user.js';
-import type { UserRepository } from '../../../../domain/repositories/user-repository.js';
-import { prisma } from '@config/database/prisma/prisma.js';
-import { PrismaUserMapper } from '../../../mappers/prisma/prisma-user.mapper.js';
-import type { Prisma } from '@config/database/prisma/generated/client.js';
-import type { PagedListResponse } from '@shared/types/paged-list-response.js';
-import type { FindAllOptions } from '@shared/repositories/generic-repository.js';
+import type { Uuid } from '@shared/types/uuid';
+import { prisma } from '@config/database/prisma/prisma';
+import type { Prisma } from '@config/database/prisma/generated/client';
+import type { PagedListResponse } from '@shared/types/paged-list-response';
+import type { FindAllOptions } from '@shared/repositories/generic-repository';
+import { User } from '@modules/users/domain/entities/user';
+import type { UserRepository } from '@modules/users/domain/repositories/user-repository';
+import { PrismaUserMapper } from '@modules/users/infrastructure/mappers/prisma/prisma-user.mapper';
 
 export class PrismaUserRepository implements UserRepository {
   private readonly includeEntities = {

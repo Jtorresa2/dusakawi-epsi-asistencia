@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
-import type { Uuid } from '@shared/types/uuid';
 import { Environment } from '@config/environment';
-import type { Role } from '@modules/users/domain/entities/role';
+import type { Uuid } from '@shared/types/uuid';
+import { Role } from '@modules/users/domain/entities/role';
 import type { TokenHandler } from '@modules/auth/domain/interfaces/token.handler';
 
 export class JwtHandler implements TokenHandler {

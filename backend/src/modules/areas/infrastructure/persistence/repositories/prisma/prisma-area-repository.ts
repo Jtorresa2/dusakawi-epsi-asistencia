@@ -1,8 +1,8 @@
-import { prisma } from '@config/database/prisma/prisma.js';
-import type { Uuid } from '@shared/types/uuid.js';
-import type { Area } from '../../../../domain/entities/area.js';
-import type { AreaRepository } from '../../../../domain/repositories/area-repository.js';
-import { PrismaAreaMapper } from '../../../mappers/prisma/prisma-area-mapper.js';
+import { prisma } from '@config/database/prisma/prisma';
+import type { Uuid } from '@shared/types/uuid';
+import type { Area } from '@modules/areas/domain/entities/area';
+import type { AreaRepository } from '@modules/areas/domain/repositories/area-repository';
+import { PrismaAreaMapper } from '@modules/areas/infrastructure/mappers/prisma/prisma-area-mapper';
 
 export class PrismaAreaRepository implements AreaRepository {
   private readonly includeEntities = { floors: true };

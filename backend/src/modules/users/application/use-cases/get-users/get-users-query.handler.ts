@@ -1,8 +1,8 @@
-import { PagedListDto } from '@shared/dtos/paged-list.dto.js';
-import type { UserRepository } from '../../../domain/repositories/user-repository.js';
-import type { UserDetailsDto } from '../../common/dtos/user-details.dto.js';
-import { UserMapper } from '../../mappers/user.mapper.js';
-import type { GetUsersQueryDto } from './get-users-query.dto.js';
+import { PagedListDto } from '@shared/dtos/paged-list.dto';
+import type { UserRepository } from '@modules/users/domain/repositories/user-repository';
+import { UserMapper } from '../../mappers/user.mapper';
+import type { GetUsersQueryDto } from './get-users-query.dto';
+import type { UserDetailsDto } from '../../common/dtos/user-details.dto';
 
 export class GetUsersQueryHandler {
   constructor(private readonly userRepository: UserRepository) {}

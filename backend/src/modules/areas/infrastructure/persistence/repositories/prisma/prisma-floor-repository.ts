@@ -1,8 +1,8 @@
-import { prisma } from '@config/database/prisma/prisma.js';
-import type { Uuid } from '@shared/types/uuid.js';
-import type { FloorRepository } from '../../../../domain/repositories/floor-repository.js';
-import type { Floor } from '../../../../domain/entities/floor.js';
-import { PrismaFloorMapper } from '../../../mappers/prisma/prisma-floor.mapper.js';
+import { prisma } from '@config/database/prisma/prisma';
+import type { Uuid } from '@shared/types/uuid';
+import type { Floor } from '@modules/areas/domain/entities/floor';
+import type { FloorRepository } from '@modules/areas/domain/repositories/floor-repository';
+import { PrismaFloorMapper } from '@modules/areas/infrastructure/mappers/prisma/prisma-floor.mapper';
 
 export class PrismaFloorRepository implements FloorRepository {
   async create(entity: Floor): Promise<void> {

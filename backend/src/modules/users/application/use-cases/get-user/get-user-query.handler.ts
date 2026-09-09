@@ -1,8 +1,8 @@
-import { NotFoundError } from '@shared/errors/errors.js';
-import type { UserRepository } from '../../../domain/repositories/user-repository.js';
-import type { GetUserQueryDto } from './get-user-query.dto.js';
-import { UserMapper } from '../../mappers/user.mapper.js';
-import type { GetUserQueryResponseDto } from './get-user-query-response.dto.js';
+import { NotFoundError } from '@shared/errors/errors';
+import type { UserRepository } from '@modules/users/domain/repositories/user-repository';
+import type { GetUserQueryDto } from './get-user-query.dto';
+import type { GetUserQueryResponseDto } from './get-user-query-response.dto';
+import { UserMapper } from '../../mappers/user.mapper';
 
 export class GetUserQueryHandler {
   constructor(private userRepository: UserRepository) {}

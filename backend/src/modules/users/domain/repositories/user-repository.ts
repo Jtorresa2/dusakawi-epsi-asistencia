@@ -1,5 +1,5 @@
-import type { GenericRepository } from '@shared/repositories/generic-repository.js';
-import { User } from '../entities/user.js';
+import type { GenericRepository } from '@shared/repositories/generic-repository';
+import { User } from '../entities/user';
 
 export interface UserRepository extends GenericRepository<User> {
   getUserByUsername(username: string): Promise<User | null>;

@@ -1,4 +1,4 @@
-import { ValidationError } from '@shared/errors/errors.js';
+import { ValidationError } from '@shared/errors/errors';
 
 export class DocumentNumber {
   private static readonly DOCUMENT_NUMBER_REGEX = /^[1-9][0-9]{5,9}$/;

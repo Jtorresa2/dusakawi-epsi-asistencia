@@ -1,7 +1,7 @@
-import { Prisma } from '@config/database/prisma/generated/client.js';
-import { DataString } from '@shared/value-objects/data-string.js';
-import { Role } from '../../../domain/entities/role.js';
-import type { Uuid } from '@shared/types/uuid.js';
+import { Prisma } from '@config/database/prisma/generated/client';
+import type { Uuid } from '@shared/types/uuid';
+import { DataString } from '@shared/value-objects/data-string';
+import { Role } from '@modules/users/domain/entities/role';
 
 type PrismaRole = Prisma.rolesGetPayload<{}>;
 

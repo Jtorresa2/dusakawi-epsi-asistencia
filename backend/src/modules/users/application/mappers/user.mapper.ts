@@ -1,5 +1,5 @@
-import type { User } from '../../domain/entities/user.js';
-import type { UserDetailsDto } from '../common/dtos/user-details.dto.js';
+import { User } from '@modules/users/domain/entities/user';
+import type { UserDetailsDto } from '../common/dtos/user-details.dto';
 
 export class UserMapper {
   static toUserResponseDto(user: User): UserDetailsDto {

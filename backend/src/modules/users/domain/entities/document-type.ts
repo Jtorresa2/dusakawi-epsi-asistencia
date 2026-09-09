@@ -1,5 +1,5 @@
-import { GenericEntity } from '@shared/entities/generic-entity.js';
-import type { Metadata } from '@shared/types/metadata.js';
+import { GenericEntity } from '@shared/entities/generic-entity';
+import type { Metadata } from '@shared/types/metadata';
 
 export const enum DocumentTypeName {
   ID = 'Cédula de ciudadanía',

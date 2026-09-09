@@ -1,9 +1,9 @@
-import type { Uuid } from '@shared/types/uuid.js';
-import { DocumentDetails } from '../value-objects/document-details.js';
-import type { DocumentTypeRepository } from '../repositories/document-type-repository.js';
-import { DocumentNumber } from '../value-objects/document-number.js';
-import { DataString } from '@shared/value-objects/data-string.js';
-import { ValidationError } from '@shared/errors/errors.js';
+import type { Uuid } from '@shared/types/uuid';
+import { DocumentDetails } from '../value-objects/document-details';
+import type { DocumentTypeRepository } from '../repositories/document-type-repository';
+import { DocumentNumber } from '../value-objects/document-number';
+import { DataString } from '@shared/value-objects/data-string';
+import { ValidationError } from '@shared/errors/errors';
 
 export class DocumentDetailsCreator {
   constructor(

@@ -1,5 +1,5 @@
 import type { Express } from 'express';
-import userRouter from './routes/users.routes.js';
+import userRouter from './routes/users.routes';
 
 const users = {
   addRoutes: (app: Express) => {

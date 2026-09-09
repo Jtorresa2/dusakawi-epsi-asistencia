@@ -1,4 +1,4 @@
-import { ValidationError } from '@shared/errors/errors.js';
+import { ValidationError } from '@shared/errors/errors';
 
 export class PlainPassword {
   private static readonly PASSWORD_REGEX =

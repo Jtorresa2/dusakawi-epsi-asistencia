@@ -1,7 +1,7 @@
-import { NotFoundError } from '@shared/errors/errors.js';
-import type { UserRepository } from '../../../domain/repositories/user-repository.js';
-import type { UpdateBasicDataCommandDto } from './update-basic-data-command.dto.js';
-import type { DocumentDetailsCreator } from '../../../domain/services/document-details-creator.js';
+import { NotFoundError } from '@shared/errors/errors';
+import type { UserRepository } from '@modules/users/domain/repositories/user-repository';
+import type { DocumentDetailsCreator } from '@modules/users/domain/services/document-details-creator';
+import type { UpdateBasicDataCommandDto } from './update-basic-data-command.dto';
 
 export class UpdateBasicDataCommandHandler {
   constructor(

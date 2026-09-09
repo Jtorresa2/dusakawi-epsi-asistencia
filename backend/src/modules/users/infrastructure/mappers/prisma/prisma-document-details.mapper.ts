@@ -1,8 +1,8 @@
-import { Prisma } from '@config/database/prisma/generated/client.js';
-import { DataString } from '@shared/value-objects/data-string.js';
-import { DocumentDetails } from '../../../domain/value-objects/document-details.js';
-import { DocumentNumber } from '../../../domain/value-objects/document-number.js';
-import { PrismaDocumentTypeMapper } from './prisma-document-type.mapper.js';
+import { Prisma } from '@config/database/prisma/generated/client';
+import { DataString } from '@shared/value-objects/data-string';
+import { DocumentDetails } from '@modules/users/domain/value-objects/document-details';
+import { DocumentNumber } from '@modules/users/domain/value-objects/document-number';
+import { PrismaDocumentTypeMapper } from './prisma-document-type.mapper';
 
 type PrismaDocumentDetails = Prisma.document_detailsGetPayload<{
   include: {

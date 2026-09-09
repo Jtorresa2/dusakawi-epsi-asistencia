@@ -1,11 +1,11 @@
 import type { Request, Response } from 'express';
-import type { Uuid } from '@shared/types/uuid.js';
-import type { GetUserQueryHandler } from '../../application/use-cases/get-user/get-user-query.handler.js';
-import type { DeleteUserCommandHandler } from '../../application/use-cases/delete-user/delete-user-command.handler.js';
-import type { GetUsersQueryHandler } from '../../application/use-cases/get-users/get-users-query.handler.js';
-import type { GetUsersQueryDto } from '../../application/use-cases/get-users/get-users-query.dto.js';
-import type { UpdateBasicDataCommandHandler } from '../../application/use-cases/update-basic-data/update-basic-data-command.handler.js';
-import type { UpdateWorkDataCommandHandler } from '../../application/use-cases/update-work-data/update-work-data-command.handler.js';
+import type { Uuid } from '@shared/types/uuid';
+import type { DeleteUserCommandHandler } from '@modules/users/application/use-cases/delete-user/delete-user-command.handler';
+import type { GetUserQueryHandler } from '@modules/users/application/use-cases/get-user/get-user-query.handler';
+import type { GetUsersQueryDto } from '@modules/users/application/use-cases/get-users/get-users-query.dto';
+import type { GetUsersQueryHandler } from '@modules/users/application/use-cases/get-users/get-users-query.handler';
+import type { UpdateBasicDataCommandHandler } from '@modules/users/application/use-cases/update-basic-data/update-basic-data-command.handler';
+import type { UpdateWorkDataCommandHandler } from '@modules/users/application/use-cases/update-work-data/update-work-data-command.handler';
 
 const getUser = async (req: Request<{ id: Uuid }>, res: Response) => {
   const handler = req.container.resolve<GetUserQueryHandler>(

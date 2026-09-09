@@ -1,12 +1,12 @@
-import type { Uuid } from '@shared/types/uuid.js';
+import { prisma } from '@config/database/prisma/prisma';
+import type { Prisma } from '@config/database/prisma/generated/client';
+import type { Uuid } from '@shared/types/uuid';
 import type {
   DocumentTypeName,
   DocumentType,
-} from '../../../../domain/entities/document-type.js';
-import type { DocumentTypeRepository } from '../../../../domain/repositories/document-type-repository.js';
-import { prisma } from '@config/database/prisma/prisma.js';
-import { PrismaDocumentTypeMapper } from '../../../mappers/prisma/prisma-document-type.mapper.js';
-import type { Prisma } from '@config/database/prisma/generated/client.js';
+} from '@modules/users/domain/entities/document-type';
+import type { DocumentTypeRepository } from '@modules/users/domain/repositories/document-type-repository';
+import { PrismaDocumentTypeMapper } from '@modules/users/infrastructure/mappers/prisma/prisma-document-type.mapper';
 
 export class PrismaDocumentTypeRepository implements DocumentTypeRepository {
   private async findDocumentTypeByUniqueInput(

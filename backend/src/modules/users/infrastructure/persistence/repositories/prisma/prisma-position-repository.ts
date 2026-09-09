@@ -1,10 +1,10 @@
-import type { Uuid } from '@shared/types/uuid.js';
-import type { Prisma } from '@config/database/prisma/generated/client.js';
-import { prisma } from '@config/database/prisma/prisma.js';
-import type { Position } from '../../../../domain/entities/position.js';
-import type { PositionRepository } from '../../../../domain/repositories/position-repository.js';
-import type { DataString } from '@shared/value-objects/data-string.js';
-import { PrismaPositionMapper } from '../../../mappers/prisma/prisma-position.mapper.js';
+import type { Prisma } from '@config/database/prisma/generated/client';
+import { prisma } from '@config/database/prisma/prisma';
+import type { Uuid } from '@shared/types/uuid';
+import type { DataString } from '@shared/value-objects/data-string';
+import type { PositionRepository } from '@modules/users/domain/repositories/position-repository';
+import type { Position } from '@modules/users/domain/entities/position';
+import { PrismaPositionMapper } from '@modules/users/infrastructure/mappers/prisma/prisma-position.mapper';
 
 export class PrismaPositionRepository implements PositionRepository {
   private async findPositionByUniqueInput(

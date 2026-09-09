@@ -1,12 +1,12 @@
-import { Prisma } from '@config/database/prisma/generated/client.js';
-import { User } from '../../../domain/entities/user.js';
-import type { Uuid } from '@shared/types/uuid.js';
-import { PrismaDocumentDetailsMapper } from './prisma-document-details.mapper.js';
-import { PrismaPositionMapper } from './prisma-position.mapper.js';
-import { HashedPassword } from '../../../domain/value-objects/hashed-password.js';
-import { PrismaAreaMapper } from '../../../../areas/infrastructure/mappers/prisma/prisma-area-mapper.js';
-import { PrismaRoleMapper } from './prisma-role.mapper.js';
-import { UserDatabaseBuilder } from '../../../domain/builders/user-builder/user-database-builder.js';
+import { Prisma } from '@config/database/prisma/generated/client';
+import type { Uuid } from '@shared/types/uuid';
+import { PrismaDocumentDetailsMapper } from './prisma-document-details.mapper';
+import { PrismaPositionMapper } from './prisma-position.mapper';
+import { PrismaAreaMapper } from '@modules/areas/infrastructure/mappers/prisma/prisma-area-mapper';
+import { PrismaRoleMapper } from './prisma-role.mapper';
+import { UserDatabaseBuilder } from '@modules/users/domain/builders/user-builder/user-database-builder';
+import { User } from '@modules/users/domain/entities/user';
+import { HashedPassword } from '@modules/users/domain/value-objects/hashed-password';
 
 type PrismaUser = Prisma.usersGetPayload<{
   include: {

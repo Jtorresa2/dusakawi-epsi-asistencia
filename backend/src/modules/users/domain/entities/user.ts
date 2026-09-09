@@ -1,13 +1,13 @@
-import { Area } from '../../../areas/domain/entities/area.js';
-import { DataString } from '@shared/value-objects/data-string.js';
-import { DocumentDetails } from '../value-objects/document-details.js';
-import { Email } from '../value-objects/email.js';
-import { GenericEntity } from '@shared/entities/generic-entity.js';
-import { HashedPassword } from '../value-objects/hashed-password.js';
-import { Name } from '../value-objects/name.js';
-import { Position } from './position.js';
-import { Role } from './role.js';
-import type { Metadata } from '@shared/types/metadata.js';
+import { Area } from '@modules/areas/domain/entities/area';
+import { DataString } from '@shared/value-objects/data-string';
+import { DocumentDetails } from '../value-objects/document-details';
+import { Email } from '../value-objects/email';
+import { GenericEntity } from '@shared/entities/generic-entity';
+import { HashedPassword } from '../value-objects/hashed-password';
+import { Name } from '../value-objects/name';
+import { Position } from './position';
+import { Role } from './role';
+import type { Metadata } from '@shared/types/metadata';
 
 export interface BasicData {
   documentDetails?: DocumentDetails;
