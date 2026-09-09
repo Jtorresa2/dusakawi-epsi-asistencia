@@ -5,10 +5,10 @@ import {
   type AwilixContainer,
 } from 'awilix';
 import { prisma } from './database/prisma/prisma.js';
-import { registerUserModule } from '@modules/users/infrastructure/user.registry.js';
-import { registerAreaModule } from '@modules/areas/infrastructure/area.registry.js';
+import { registerUsersModule } from '@modules/users/infrastructure/user.registry.js';
+import { registerAreasModule } from '@modules/areas/infrastructure/area.registry.js';
 import { registerAuthModule } from '@modules/auth/infrastructure/auth.registry.js';
-import { registerPositionModule } from '@modules/positions/infrastructure/position.registry.js';
+import { registerPositionsModule } from '@modules/positions/infrastructure/position.registry.js';
 import { registerDocumentTypesModule } from '@modules/document-types/infrastructure/document-types.registry.js';
 
 export function buildContainer(): AwilixContainer {
@@ -22,9 +22,9 @@ export function buildContainer(): AwilixContainer {
   });
 
   registerAuthModule(container);
-  registerUserModule(container);
-  registerAreaModule(container);
-  registerPositionModule(container);
+  registerUsersModule(container);
+  registerAreasModule(container);
+  registerPositionsModule(container);
   registerDocumentTypesModule(container);
 
   return container;

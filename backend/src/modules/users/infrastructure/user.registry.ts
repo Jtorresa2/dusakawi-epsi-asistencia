@@ -8,7 +8,7 @@ import { GetUsersQueryHandler } from '../application/use-cases/get-users/get-use
 import { UpdateBasicDataCommandHandler } from '../application/use-cases/update-basic-data/update-basic-data-command.handler';
 import { UpdateWorkDataCommandHandler } from '../application/use-cases/update-work-data/update-work-data-command.handler';
 
-export function registerUserModule(container: AwilixContainer) {
+export function registerUsersModule(container: AwilixContainer) {
   container.register({
     // repositories
     roleRepository: asClass(PrismaRoleRepository).singleton(),

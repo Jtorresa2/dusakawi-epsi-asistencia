@@ -2,7 +2,7 @@ import { type AwilixContainer, asClass } from 'awilix';
 import { PrismaFloorRepository } from './persistence/repositories/prisma/prisma-floor-repository';
 import { PrismaAreaRepository } from './persistence/repositories/prisma/prisma-area-repository';
 
-export function registerAreaModule(container: AwilixContainer) {
+export function registerAreasModule(container: AwilixContainer) {
   container.register({
     // repositories
     areaRepository: asClass(PrismaAreaRepository).singleton(),
