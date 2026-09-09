@@ -4,7 +4,7 @@ import { DocumentDetails } from '../../value-objects/document-details';
 import { Email } from '../../value-objects/email';
 import { HashedPassword } from '../../value-objects/hashed-password';
 import { Name } from '../../value-objects/name';
-import { Position } from '../../entities/position';
+import { Position } from '@modules/positions/domain/entities/position';
 import { Role } from '../../entities/role';
 import { User } from '../../entities/user';
 import type { UserBuilder } from '../../interfaces/user-builder';

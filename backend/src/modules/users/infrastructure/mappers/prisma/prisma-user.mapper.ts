@@ -1,7 +1,7 @@
 import { Prisma } from '@config/database/prisma/generated/client';
 import type { Uuid } from '@shared/types/uuid';
 import { PrismaDocumentDetailsMapper } from './prisma-document-details.mapper';
-import { PrismaPositionMapper } from './prisma-position.mapper';
+import { PrismaPositionMapper } from '@modules/positions/infrastructure/mappers/prisma/prisma-position.mapper';
 import { PrismaAreaMapper } from '@modules/areas/infrastructure/mappers/prisma/prisma-area-mapper';
 import { PrismaRoleMapper } from './prisma-role.mapper';
 import { UserDatabaseBuilder } from '@modules/users/domain/builders/user-builder/user-database-builder';

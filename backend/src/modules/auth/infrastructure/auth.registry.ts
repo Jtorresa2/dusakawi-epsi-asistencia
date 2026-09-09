@@ -4,7 +4,7 @@ import { BcryptjsPasswordHasher } from './security/bcryptjs-password-hasher';
 import { RegisterCommandHandler } from '../application/use-cases/register/register-command.handler';
 import { LoginQueryHandler } from '../application/use-cases/login/login-query.handler';
 
-export function registerUserModule(container: AwilixContainer) {
+export function registerAuthModule(container: AwilixContainer) {
   container.register({
     // services
     tokenHandler: asClass(JwtHandler).singleton(),

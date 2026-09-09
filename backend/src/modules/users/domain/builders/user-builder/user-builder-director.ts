@@ -1,11 +1,11 @@
+import type { Metadata } from '@shared/types/metadata';
 import { Area } from '@modules/areas/domain/entities/area';
 import { DocumentDetails } from '../../value-objects/document-details';
-import { Position } from '../../entities/position';
+import { Position } from '@modules/positions/domain/entities/position';
 import { Role } from '../../entities/role';
 import { User } from '../../entities/user';
 import { HashedPassword } from '../../value-objects/hashed-password';
 import type { UserBuilder } from '../../interfaces/user-builder';
-import type { Metadata } from '@shared/types/metadata';
 
 export class UserBuilderDirector {
   constructor(private userBuilder: UserBuilder) {}

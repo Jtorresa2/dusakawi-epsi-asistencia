@@ -1,6 +1,6 @@
 import type { Metadata } from '@shared/types/metadata';
 import { Area } from '@modules/areas/domain/entities/area';
-import { Position } from '../entities/position';
+import { Position } from '@modules/positions/domain/entities/position';
 import { Role } from '../entities/role';
 import { User } from '../entities/user';
 import { DocumentDetails } from '../value-objects/document-details';

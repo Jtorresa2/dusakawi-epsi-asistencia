@@ -1,7 +1,7 @@
 import { Prisma } from '@config/database/prisma/generated/client';
 import type { Uuid } from '@shared/types/uuid';
 import { DataString } from '@shared/value-objects/data-string';
-import { Position } from '@modules/users/domain/entities/position';
+import { Position } from '@modules/positions/domain/entities/position';
 
 type PrismaPosition = Prisma.positionsGetPayload<{}>;
 

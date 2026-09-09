@@ -2,9 +2,9 @@ import type { Prisma } from '@config/database/prisma/generated/client';
 import { prisma } from '@config/database/prisma/prisma';
 import type { Uuid } from '@shared/types/uuid';
 import type { DataString } from '@shared/value-objects/data-string';
-import type { PositionRepository } from '@modules/users/domain/repositories/position-repository';
-import type { Position } from '@modules/users/domain/entities/position';
-import { PrismaPositionMapper } from '@modules/users/infrastructure/mappers/prisma/prisma-position.mapper';
+import type { PositionRepository } from '@modules/positions/domain/repositories/position-repository';
+import type { Position } from '@modules/positions/domain/entities/position';
+import { PrismaPositionMapper } from '@modules/positions/infrastructure/mappers/prisma/prisma-position.mapper';
 
 export class PrismaPositionRepository implements PositionRepository {
   private async findPositionByUniqueInput(

@@ -5,7 +5,7 @@ import { Email } from '../value-objects/email';
 import { GenericEntity } from '@shared/entities/generic-entity';
 import { HashedPassword } from '../value-objects/hashed-password';
 import { Name } from '../value-objects/name';
-import { Position } from './position';
+import { Position } from '@modules/positions/domain/entities/position';
 import { Role } from './role';
 import type { Metadata } from '@shared/types/metadata';
 

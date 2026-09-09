@@ -1,7 +1,7 @@
 import { NotFoundError } from '@shared/errors/errors';
 import type { WorkData } from '@modules/users/domain/entities/user';
 import type { AreaRepository } from '@modules/areas/domain/repositories/area-repository';
-import type { PositionRepository } from '@modules/users/domain/repositories/position-repository';
+import type { PositionRepository } from '@modules/positions/domain/repositories/position-repository';
 import type { RoleRepository } from '@modules/users/domain/repositories/role-repository';
 import type { UserRepository } from '@modules/users/domain/repositories/user-repository';
 import type { UpdateWorkDataCommandDto } from './update-work-data-command.dto';
