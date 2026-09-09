@@ -1,7 +1,6 @@
 import { type AwilixContainer, asClass } from 'awilix';
 import { DocumentDetailsCreator } from '../domain/services/document-details-creator';
 import { PrismaUserRepository } from './persistence/repositories/prisma/prisma-user-repository';
-import { PrismaDocumentTypeRepository } from './persistence/repositories/prisma/prisma-document-type-repository';
 import { PrismaRoleRepository } from './persistence/repositories/prisma/prisma-role-repository';
 import { GetUserQueryHandler } from '../application/use-cases/get-user/get-user-query.handler';
 import { DeleteUserCommandHandler } from '../application/use-cases/delete-user/delete-user-command.handler';
@@ -12,7 +11,6 @@ import { UpdateWorkDataCommandHandler } from '../application/use-cases/update-wo
 export function registerUserModule(container: AwilixContainer) {
   container.register({
     // repositories
-    documentTypeRepository: asClass(PrismaDocumentTypeRepository).singleton(),
     roleRepository: asClass(PrismaRoleRepository).singleton(),
     userRepository: asClass(PrismaUserRepository).singleton(),
 

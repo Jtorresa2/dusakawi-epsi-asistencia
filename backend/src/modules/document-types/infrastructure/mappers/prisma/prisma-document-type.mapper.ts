@@ -3,7 +3,7 @@ import type { Uuid } from '@shared/types/uuid';
 import {
   DocumentType,
   DocumentTypeName,
-} from '@modules/users/domain/entities/document-type';
+} from '@modules/document-types/domain/entities/document-type';
 
 type PrismaDocumentType = Prisma.document_typesGetPayload<{}>;
 

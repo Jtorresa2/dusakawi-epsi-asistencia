@@ -1,6 +1,6 @@
 import type { Uuid } from '@shared/types/uuid';
 import { DocumentDetails } from '../value-objects/document-details';
-import type { DocumentTypeRepository } from '../repositories/document-type-repository';
+import type { DocumentTypeRepository } from '@modules/document-types/domain/repositories/document-type-repository';
 import { DocumentNumber } from '../value-objects/document-number';
 import { DataString } from '@shared/value-objects/data-string';
 import { ValidationError } from '@shared/errors/errors';

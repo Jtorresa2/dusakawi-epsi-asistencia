@@ -4,9 +4,9 @@ import type { Uuid } from '@shared/types/uuid';
 import type {
   DocumentTypeName,
   DocumentType,
-} from '@modules/users/domain/entities/document-type';
-import type { DocumentTypeRepository } from '@modules/users/domain/repositories/document-type-repository';
-import { PrismaDocumentTypeMapper } from '@modules/users/infrastructure/mappers/prisma/prisma-document-type.mapper';
+} from '@modules/document-types/domain/entities/document-type';
+import type { DocumentTypeRepository } from '@modules/document-types/domain/repositories/document-type-repository';
+import { PrismaDocumentTypeMapper } from '@modules/document-types/infrastructure/mappers/prisma/prisma-document-type.mapper';
 
 export class PrismaDocumentTypeRepository implements DocumentTypeRepository {
   private async findDocumentTypeByUniqueInput(
