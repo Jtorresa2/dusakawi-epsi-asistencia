@@ -5,6 +5,7 @@ import type { DeleteUserCommandHandler } from '../../application/use-cases/delet
 import type { GetUsersQueryHandler } from '../../application/use-cases/get-users/get-users-query.handler.js';
 import type { GetUsersQueryDto } from '../../application/use-cases/get-users/get-users-query.dto.js';
 import type { UpdateUserBasicDataCommandHandler } from '../../application/use-cases/update-user-basic-data/update-user-basic-data-command.handler.js';
+import type { UpdateWorkDataCommandHandler } from '../../application/use-cases/update-work-data/update-work-data-command.handler.js';
 
 const getUser = async (req: Request<{ id: Uuid }>, res: Response) => {
   const handler = req.container.resolve<GetUserQueryHandler>(
@@ -46,6 +47,21 @@ const updateUserBasicData = async (
   res.sendStatus(204);
 };
 
+const updateUserWorkData = async (
+  req: Request<{ id: Uuid }>,
+  res: Response,
+) => {
+  const handler = req.container.resolve<UpdateWorkDataCommandHandler>(
+    'updateWorkDataCommandHandler',
+  );
+
+  const { id } = req.params;
+
+  await handler.handle({ id, ...req.body });
+
+  res.sendStatus(204);
+};
+
 const deleteUser = async (req: Request<{ id: Uuid }>, res: Response) => {
   const handler = req.container.resolve<DeleteUserCommandHandler>(
     'deleteUserCommandHandler',
@@ -61,5 +77,6 @@ export default {
   getUser,
   getUsers,
   updateUserBasicData,
+  updateUserWorkData,
   deleteUser,
 };

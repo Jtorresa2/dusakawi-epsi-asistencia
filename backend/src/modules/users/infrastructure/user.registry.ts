@@ -12,6 +12,7 @@ import { GetUserQueryHandler } from '../application/use-cases/get-user/get-user-
 import { DeleteUserCommandHandler } from '../application/use-cases/delete-user/delete-user-command.handler.js';
 import { GetUsersQueryHandler } from '../application/use-cases/get-users/get-users-query.handler.js';
 import { UpdateUserBasicDataCommandHandler } from '../application/use-cases/update-user-basic-data/update-user-basic-data-command.handler.js';
+import { UpdateWorkDataCommandHandler } from '../application/use-cases/update-work-data/update-work-data-command.handler.js';
 
 export function registerUserModule(container: AwilixContainer) {
   container.register({
@@ -34,6 +35,9 @@ export function registerUserModule(container: AwilixContainer) {
     deleteUserCommandHandler: asClass(DeleteUserCommandHandler).scoped(),
     updateUserBasicDataCommandHandler: asClass(
       UpdateUserBasicDataCommandHandler,
+    ).scoped(),
+    updateWorkDataCommandHandler: asClass(
+      UpdateWorkDataCommandHandler,
     ).scoped(),
   });
 }

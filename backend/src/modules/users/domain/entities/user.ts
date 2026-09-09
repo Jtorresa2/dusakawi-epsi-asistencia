@@ -22,6 +22,12 @@ export interface BasicData {
   phone?: string;
 }
 
+export interface WorkData {
+  position?: Position;
+  area?: Area;
+  roles?: Role[];
+}
+
 export class User extends GenericEntity {
   constructor(
     private _documentDetails: DocumentDetails,
@@ -31,12 +37,12 @@ export class User extends GenericEntity {
     private _placeOfBirth: DataString,
     private _address: DataString,
     private _cell: DataString,
-    public readonly position: Position,
-    public readonly area: Area,
-    public readonly username: DataString,
+    private _position: Position,
+    private _area: Area,
+    private _username: DataString,
     private _passwordHash: HashedPassword,
-    public readonly email: Email,
-    public readonly roles: Role[],
+    private _email: Email,
+    private _roles: Role[],
     private _middleName?: Name,
     private _secondSurname?: Name,
     private _phone?: DataString,
@@ -89,8 +95,28 @@ export class User extends GenericEntity {
     return this._phone;
   }
 
-  changePassword(passwordHash: HashedPassword) {
-    this._passwordHash = passwordHash;
+  get position(): Position {
+    return this._position;
+  }
+
+  get area(): Area {
+    return this._area;
+  }
+
+  get username(): DataString {
+    return this._username;
+  }
+
+  get email(): Email {
+    return this._email;
+  }
+
+  get roles(): Role[] {
+    return this._roles;
+  }
+
+  role(name: string): Role | undefined {
+    return this._roles.find((role) => role.name.value === name);
   }
 
   changeBasicData(basicData: BasicData) {
@@ -121,6 +147,13 @@ export class User extends GenericEntity {
       ? DataString.create(basicData.phone)
       : this._phone;
 
+    this.metadata.updatedAt = new Date();
+  }
+
+  changeWorkData(workData: WorkData) {
+    this._position = workData.position ?? this._position;
+    this._area = workData.area ?? this._area;
+    this._roles = workData.roles ?? this._roles;
     this.metadata.updatedAt = new Date();
   }
 }
