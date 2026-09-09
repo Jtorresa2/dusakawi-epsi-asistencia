@@ -1,13 +1,13 @@
 import { type AwilixContainer, asClass } from 'awilix';
 import { DocumentDetailsCreator } from '../domain/services/document-details-creator.js';
 import { PrismaUserRepository } from './persistence/repositories/prisma/prisma-user-repository.js';
-import { RegisterCommandHandler } from '../application/use-cases/register/register-command.handler.js';
+import { RegisterCommandHandler } from '../../auth/application/use-cases/register/register-command.handler.js';
 import { PrismaDocumentTypeRepository } from './persistence/repositories/prisma/prisma-document-type-repository.js';
 import { PrismaPositionRepository } from './persistence/repositories/prisma/prisma-position-repository.js';
 import { PrismaRoleRepository } from './persistence/repositories/prisma/prisma-role-repository.js';
-import { JwtHandler } from './security/jwt/jwt.handler.js';
-import { BcryptjsPasswordHasher } from './security/bcryptjs-password-hasher.js';
-import { LoginQueryHandler } from '../application/use-cases/login/login-query.handler.js';
+import { JwtHandler } from '../../auth/infrastructure/security/jwt/jwt.handler.js';
+import { BcryptjsPasswordHasher } from '../../auth/infrastructure/security/bcryptjs-password-hasher.js';
+import { LoginQueryHandler } from '../../auth/application/use-cases/login/login-query.handler.js';
 import { GetUserQueryHandler } from '../application/use-cases/get-user/get-user-query.handler.js';
 import { DeleteUserCommandHandler } from '../application/use-cases/delete-user/delete-user-command.handler.js';
 import { GetUsersQueryHandler } from '../application/use-cases/get-users/get-users-query.handler.js';

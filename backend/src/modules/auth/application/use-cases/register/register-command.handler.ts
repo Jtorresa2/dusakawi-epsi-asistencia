@@ -1,15 +1,15 @@
-import type { AreaRepository } from '../../../../areas/domain/repositories/area-repository.js';
-import type { PasswordHasher } from '../../../domain/interfaces/password-hasher.js';
-import type { PositionRepository } from '../../../domain/repositories/position-repository.js';
-import type { RegisterCommandDto } from './register-command.dto.js';
-import type { RoleRepository } from '../../../domain/repositories/role-repository.js';
-import { UserDatabaseBuilder } from '../../../domain/builders/user-builder/user-database-builder.js';
-import { UserBuilderDirector } from '../../../domain/builders/user-builder/user-builder-director.js';
-import type { UserRepository } from '../../../domain/repositories/user-repository.js';
-import { DocumentDetailsCreator } from '../../../domain/services/document-details-creator.js';
-import type { GenericResponseDto } from '@shared/dtos/generic-response.dto.js';
-import { ConflictError, NotFoundError } from '@shared/errors/errors.js';
-import { PlainPassword } from '../../../domain/value-objects/plain-password.js';
+import type { AreaRepository } from '@modules/areas/domain/repositories/area-repository';
+import type { PositionRepository } from '@modules/users/domain/repositories/position-repository';
+import type { RegisterCommandDto } from './register-command.dto';
+import type { RoleRepository } from '@modules/users/domain/repositories/role-repository';
+import { UserDatabaseBuilder } from '@modules/users/domain/builders/user-builder/user-database-builder';
+import { UserBuilderDirector } from '@modules/users/domain/builders/user-builder/user-builder-director';
+import type { UserRepository } from '@modules/users/domain/repositories/user-repository';
+import { DocumentDetailsCreator } from '@modules/users/domain/services/document-details-creator';
+import type { GenericResponseDto } from '@shared/dtos/generic-response.dto';
+import { ConflictError, NotFoundError } from '@shared/errors/errors';
+import { PlainPassword } from '@modules/users/domain/value-objects/plain-password';
+import type { PasswordHasher } from '@modules/auth/domain/interfaces/password-hasher';
 
 export class RegisterCommandHandler {
   constructor(

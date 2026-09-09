@@ -4,12 +4,13 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Environment } from '@config/environment.js';
-import users from './modules/users/presentation/user.presentation.js';
-import { buildContainer } from '@config/injections.js';
 import { containerScopeMiddleware } from '@config/express/middlewares/container-scope.middleware.js';
 import { ExpressProblemDetailsMapper } from '@config/express/mappers/express-problem-details.mapper.js';
+import { buildContainer } from '@config/injections.js';
 import { createErrorHandler } from '@config/express/middlewares/error-handler.middleware.js';
 import { httpErrorRegistry } from '@shared/http/errors/http-error-registry.config.js';
+import auth from '@modules/auth/presentation/auth.presentation.js';
+import users from '@modules/users/presentation/user.presentation.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,6 +27,7 @@ app.use(cors());
 // Rutas
 // =======================
 
+auth.addRoutes(app);
 users.addRoutes(app);
 
 // =======================

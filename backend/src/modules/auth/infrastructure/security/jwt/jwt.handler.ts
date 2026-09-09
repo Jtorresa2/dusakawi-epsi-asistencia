@@ -1,8 +1,8 @@
-import type { Uuid } from '@shared/types/uuid.js';
-import { Environment } from '@config/environment.js';
 import jwt from 'jsonwebtoken';
-import type { Role } from '../../../../users/domain/entities/role.js';
-import type { TokenHandler } from '../../../domain/interfaces/token.handler.js';
+import type { Uuid } from '@shared/types/uuid';
+import { Environment } from '@config/environment';
+import type { Role } from '@modules/users/domain/entities/role';
+import type { TokenHandler } from '@modules/auth/domain/interfaces/token.handler';
 
 export class JwtHandler implements TokenHandler {
   createToken(id: Uuid, roles: Role[]): string {

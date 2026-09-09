@@ -1,9 +1,9 @@
-import { NotFoundError } from '@shared/errors/errors.js';
-import type { PasswordHasher } from '../../../domain/interfaces/password-hasher.js';
-import type { TokenHandler } from '../../../domain/interfaces/token.handler.js';
-import type { UserRepository } from '../../../domain/repositories/user-repository.js';
-import type { AuthResposeDto } from '../../common/dtos/auth-response.dto.js';
-import type { LoginQueryDto } from './login-query.dto.js';
+import { NotFoundError } from '@shared/errors/errors';
+import type { UserRepository } from '@modules/users/domain/repositories/user-repository';
+import type { PasswordHasher } from '@modules/auth/domain/interfaces/password-hasher';
+import type { TokenHandler } from '@modules/auth/domain/interfaces/token.handler';
+import type { AuthResposeDto } from '../../common/dtos/auth-response.dto';
+import type { LoginQueryDto } from './login-query.dto';
 
 export class LoginQueryHandler {
   constructor(

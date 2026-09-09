@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
-import type { PasswordHasher } from '../../domain/interfaces/password-hasher.js';
-import { HashedPassword } from '../../domain/value-objects/hashed-password.js';
-import type { PlainPassword } from '../../domain/value-objects/plain-password.js';
+import type { PasswordHasher } from '@modules/auth/domain/interfaces/password-hasher';
+import type { PlainPassword } from '@modules/users/domain/value-objects/plain-password';
+import { HashedPassword } from '@modules/users/domain/value-objects/hashed-password';
 
 export class BcryptjsPasswordHasher implements PasswordHasher {
   private readonly saltRounds = 10;
