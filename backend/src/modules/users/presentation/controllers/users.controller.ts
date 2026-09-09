@@ -4,7 +4,7 @@ import type { GetUserQueryHandler } from '../../application/use-cases/get-user/g
 import type { DeleteUserCommandHandler } from '../../application/use-cases/delete-user/delete-user-command.handler.js';
 import type { GetUsersQueryHandler } from '../../application/use-cases/get-users/get-users-query.handler.js';
 import type { GetUsersQueryDto } from '../../application/use-cases/get-users/get-users-query.dto.js';
-import type { UpdateUserBasicDataCommandHandler } from '../../application/use-cases/update-user-basic-data/update-user-basic-data-command.handler.js';
+import type { UpdateBasicDataCommandHandler } from '../../application/use-cases/update-basic-data/update-basic-data-command.handler.js';
 import type { UpdateWorkDataCommandHandler } from '../../application/use-cases/update-work-data/update-work-data-command.handler.js';
 
 const getUser = async (req: Request<{ id: Uuid }>, res: Response) => {
@@ -32,12 +32,9 @@ const getUsers = async (req: Request<GetUsersQueryDto>, res: Response) => {
   res.json(result);
 };
 
-const updateUserBasicData = async (
-  req: Request<{ id: Uuid }>,
-  res: Response,
-) => {
-  const handler = req.container.resolve<UpdateUserBasicDataCommandHandler>(
-    'updateUserBasicDataCommandHandler',
+const updateBasicData = async (req: Request<{ id: Uuid }>, res: Response) => {
+  const handler = req.container.resolve<UpdateBasicDataCommandHandler>(
+    'updateBasicDataCommandHandler',
   );
 
   const { id } = req.params;
@@ -76,7 +73,7 @@ const deleteUser = async (req: Request<{ id: Uuid }>, res: Response) => {
 export default {
   getUser,
   getUsers,
-  updateUserBasicData,
+  updateBasicData,
   updateUserWorkData,
   deleteUser,
 };

@@ -5,7 +5,7 @@ const userRouter = Router();
 
 userRouter.get('/:id', userController.getUser);
 userRouter.get('/', userController.getUsers);
-userRouter.put('/:id/basic-data', userController.updateUserBasicData);
+userRouter.put('/:id/basic-data', userController.updateBasicData);
 userRouter.put('/:id/work-data', userController.updateUserWorkData);
 userRouter.delete('/:id', userController.deleteUser);
 

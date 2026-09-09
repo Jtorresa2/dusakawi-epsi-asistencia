@@ -1,15 +1,15 @@
 import { NotFoundError } from '@shared/errors/errors.js';
 import type { UserRepository } from '../../../domain/repositories/user-repository.js';
-import type { UpdateUserBasicDataCommandDto } from './update-user-basic-data-command.dto.js';
+import type { UpdateBasicDataCommandDto } from './update-basic-data-command.dto.js';
 import type { DocumentDetailsCreator } from '../../../domain/services/document-details-creator.js';
 
-export class UpdateUserBasicDataCommandHandler {
+export class UpdateBasicDataCommandHandler {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly documentDetailsCreator: DocumentDetailsCreator,
   ) {}
 
-  async handle(request: UpdateUserBasicDataCommandDto): Promise<void> {
+  async handle(request: UpdateBasicDataCommandDto): Promise<void> {
     const user = await this.userRepository.findById(request.id);
     if (!user) throw new NotFoundError('user');
 

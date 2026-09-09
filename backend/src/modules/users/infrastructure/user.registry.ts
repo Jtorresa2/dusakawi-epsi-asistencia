@@ -11,7 +11,7 @@ import { LoginQueryHandler } from '../application/use-cases/login/login-query.ha
 import { GetUserQueryHandler } from '../application/use-cases/get-user/get-user-query.handler.js';
 import { DeleteUserCommandHandler } from '../application/use-cases/delete-user/delete-user-command.handler.js';
 import { GetUsersQueryHandler } from '../application/use-cases/get-users/get-users-query.handler.js';
-import { UpdateUserBasicDataCommandHandler } from '../application/use-cases/update-user-basic-data/update-user-basic-data-command.handler.js';
+import { UpdateBasicDataCommandHandler } from '../application/use-cases/update-basic-data/update-basic-data-command.handler.js';
 import { UpdateWorkDataCommandHandler } from '../application/use-cases/update-work-data/update-work-data-command.handler.js';
 
 export function registerUserModule(container: AwilixContainer) {
@@ -33,8 +33,8 @@ export function registerUserModule(container: AwilixContainer) {
     getUserQueryHandler: asClass(GetUserQueryHandler).scoped(),
     getUsersQueryHandler: asClass(GetUsersQueryHandler).scoped(),
     deleteUserCommandHandler: asClass(DeleteUserCommandHandler).scoped(),
-    updateUserBasicDataCommandHandler: asClass(
-      UpdateUserBasicDataCommandHandler,
+    updateBasicDataCommandHandler: asClass(
+      UpdateBasicDataCommandHandler,
     ).scoped(),
     updateWorkDataCommandHandler: asClass(
       UpdateWorkDataCommandHandler,
