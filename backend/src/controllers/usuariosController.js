@@ -1,6 +1,7 @@
-﻿const pool = require('../config/db');
+const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
-const { enviarCredenciales } = require('../services/emailService');
+const crypto = require('crypto');
+const { enviarResetPassword } = require('../services/emailService');
 const personalService = require('../services/personalService');
 
 exports.getUsuarios = async (req, res) => {
@@ -45,22 +46,30 @@ exports.crearUsuario = async (req, res) => {
       password,
     });
 
-    // Send credentials email if correo is provided
+    // Send magic link email if correo is provided
     const correoFinal = correo || req.body.correo;
     if (correoFinal) {
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const tokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
+      
+      await pool.query(
+        `INSERT INTO password_reset_tokens (usuario_id, token_hash, expira_en)
+         VALUES ($1, $2, now() + interval '7 days')`,
+        [result.id, tokenHash]
+      );
+
       const link = process.env.FRONTEND_URL || 'http://localhost:3000';
-      await enviarCredenciales({
+      await enviarResetPassword({
         email: correoFinal,
         nombre: `${nombre} ${apellido}`,
         username: result.username,
-        password: result.password,
-        link: `${link}/cambiar-password`,
+        link: `${link}/restablecer-contrasena?token=${resetToken}`,
+        primerIngreso: true
       });
     }
 
     res.json({
       mensaje: 'Usuario creado correctamente',
-      password: result.password,
       password_reset_required: 1,
     });
   } catch (err) {
@@ -127,7 +136,7 @@ exports.generarMasivos = async (req, res) => {
         counter++;
       }
 
-      const pass = user.cedula || `${user.nombre.toLowerCase()}.${user.apellido.toLowerCase()}`;
+      const pass = crypto.randomBytes(32).toString("hex"); // Generate random password instead of cedula
       const hash = await bcrypt.hash(pass, 10);
       await pool.query(
         `UPDATE usuarios SET username = $1, password_hash = $2, password_reset_required = 1 WHERE id = $3`,
@@ -135,21 +144,30 @@ exports.generarMasivos = async (req, res) => {
       );
       creados++;
 
+      let r = null;
       if (user.correo) {
-        const r = await enviarCredenciales({
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        const tokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
+        
+        await pool.query(
+          `INSERT INTO password_reset_tokens (usuario_id, token_hash, expira_en)
+           VALUES ($1, $2, now() + interval '7 days')`,
+          [user.id, tokenHash]
+        );
+
+        r = await enviarResetPassword({
           email: user.correo,
           nombre: `${user.nombre} ${user.apellido}`,
           username: finalUser,
-          password: pass,
-          link: `${link}/cambiar-password`,
+          link: `${link}/restablecer-contrasena?token=${resetToken}`,
+          primerIngreso: true
         });
-        if (r.enviado) emailsOk++; else emailsFail++;
+        if (r && r.enviado) emailsOk++; else emailsFail++;
       }
 
       resultados.push({
         empleado: `${user.nombre} ${user.apellido}`,
         username: finalUser,
-        password: pass,
         correo: user.correo || 'SIN CORREO',
         email_enviado: !!(user.correo && r?.enviado),
       });

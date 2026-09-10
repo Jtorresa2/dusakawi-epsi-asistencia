@@ -185,14 +185,7 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
             </div>
           )}
         </div>
-        {abierto && !isMobile && (
-          <button onClick={() => setAbierto(false)} style={{
-            border: "none", background: "rgba(255,255,255,.1)",
-            color: COLORES.fondoBlanco, borderRadius: 8, width: 30, height: 30,
-            cursor: "pointer", fontSize: 16, display: "flex",
-            alignItems: "center", justifyContent: "center",
-          }}>✕</button>
-        )}
+
       </div>
 
       <style>{scrollStyle}</style>

@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const auth = require('../middlewares/authMiddleware');
+const rol = require('../middlewares/rol');
 const {
   getReporteDiario,
   getReporteMensual,
@@ -31,6 +32,6 @@ router.get('/empleados',   auth, getReporteEmpleados);
 router.get('/marcaciones', auth, getReporteMarcaciones);
 
 router.get('/historial',      auth, getHistorial);
-router.post('/historial',     auth, guardarHistorial);
+router.post('/historial',     auth, rol("admin", "talento_humano"), guardarHistorial);
 
 module.exports = router;

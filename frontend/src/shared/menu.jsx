@@ -18,6 +18,7 @@ import {
 const SECCIONES = {
   GENERAL: {
     section: "GENERAL",
+    accordion: true,
     items: [
       { label: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={18} /> }
     ]
@@ -58,6 +59,7 @@ const SECCIONES = {
   },
   MI_CUENTA: {
     section: "MI CUENTA",
+    accordion: true,
     items: [
       { label: "Mi perfil", path: "/perfil", icon: <User size={18} /> }
     ]

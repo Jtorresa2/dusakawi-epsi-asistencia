@@ -2,7 +2,7 @@
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const db = require("../config/db");
-const { enviarResetPassword } = require("../services/emailService");
+const { enviarResetPassword, enviarCredenciales } = require("../services/emailService");
 
 exports.login = async (req, res) => {
   try {
@@ -21,7 +21,8 @@ exports.login = async (req, res) => {
           u.password_reset_required,
           r.nombre AS rol,
           u.nombre,
-          u.apellido
+          u.apellido,
+          u.correo
       FROM usuarios u
       LEFT JOIN roles r ON u.rol_id = r.id
       WHERE u.username = $1
@@ -45,32 +46,50 @@ exports.login = async (req, res) => {
 
     const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
 
-    // Forced password reset: refuse a normal session (403) but still issue a
-    // token so the frontend can authenticate against /auth/cambiar-password.
-    // Placed AFTER the password check on purpose: no token is ever issued
-    // without proof of the credentials, and the reset-required status is not
-    // leaked through a distinct pre-auth response code.
+    // Forced password reset: the user MUST change their password before
+    // accessing the system. Generate a reset token, send it via email,
+    // and return a message only — NO JWT is issued.
     if (user.password_reset_required) {
-      const resetToken = jwt.sign(
-        {
-          id: user.id,
-          username: user.username,
-          nombre: `${user.nombre} ${user.apellido}`,
-          rol: rolesMap[user.rol] || user.rol,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "8h" }
+      // The user already proved their identity with the correct password.
+      // If there is no email on file, the only exit is a manual reset by
+      // an administrator — tell them clearly.
+      if (!user.correo || !String(user.correo).trim()) {
+        return res.status(403).json({
+          mensaje: "Tu cuenta requiere cambiar la contrasena, pero no tienes un correo asociado. Contacta al administrador para obtener acceso.",
+          password_reset_required: true,
+        });
+      }
+
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const tokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+      // Invalidate any previous reset tokens for this user
+      await db.query(
+        "UPDATE password_reset_tokens SET usado = true WHERE usuario_id = $1 AND usado = false",
+        [user.id]
       );
+
+      // Store the new reset token (expires in 30 minutes)
+      await db.query(
+        `INSERT INTO password_reset_tokens (usuario_id, token_hash, expira_en)
+         VALUES ($1, $2, now() + interval '30 minutes')`,
+        [user.id, tokenHash]
+      );
+
+      // Send email with the reset link
+      const link = `${process.env.FRONTEND_URL || "http://localhost:3000"}/restablecer-contrasena?token=${resetToken}`;
+      await enviarResetPassword({
+        email: user.correo,
+        nombre: `${user.nombre} ${user.apellido}`,
+        username: user.username,
+        link,
+        primerIngreso: true,
+      });
+
+      // Return a generic message — do NOT reveal whether the email was sent
       return res.status(403).json({
-        mensaje: "Debe cambiar su contrasena antes de continuar",
+        mensaje: "Se envio un enlace de restablecimiento a tu correo electronico. Debes cambiar tu contrasena antes de acceder al sistema.",
         password_reset_required: true,
-        token: resetToken,
-        user: {
-          id: user.id,
-          username: user.username,
-          nombre: `${user.nombre} ${user.apellido}`,
-          rol: user.rol,
-        },
       });
     }
 

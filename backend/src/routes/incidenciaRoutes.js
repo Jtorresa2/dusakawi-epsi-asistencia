@@ -4,17 +4,18 @@ const auth = require("../middlewares/authMiddleware");
 const rol = require("../middlewares/rol");
 const upload = require("../middlewares/upload");
 const uploadFirma = require("../middlewares/uploadFirma");
+const { validarArchivo, TIPOS_INCIDENCIA, TIPOS_FIRMA } = require("../middlewares/validarArchivo");
 const incidenciaController = require("../controllers/incidenciaController");
 
-router.post("/", auth, upload.single("evidencia"), incidenciaController.crear);
+router.post("/", auth, upload.single("evidencia"), validarArchivo(TIPOS_INCIDENCIA), incidenciaController.crear);
 router.get("/stats", auth, rol("admin", "talento_humano"), incidenciaController.obtenerStats);
 router.get("/activity", auth, rol("admin", "talento_humano"), incidenciaController.obtenerActividad);
 router.get("/", auth, incidenciaController.obtenerTodas);
 router.get("/:id", auth, incidenciaController.obtenerPorId);
 router.put("/:id/aprobar", auth, rol("admin", "talento_humano"), incidenciaController.aprobar);
-router.put("/:id/aprobar-con-firma", auth, rol("admin", "talento_humano"), uploadFirma.single("archivo_firmado"), incidenciaController.aprobarConFirma);
+router.put("/:id/aprobar-con-firma", auth, rol("admin", "talento_humano"), uploadFirma.single("archivo_firmado"), validarArchivo(TIPOS_FIRMA), incidenciaController.aprobarConFirma);
 router.put("/:id/rechazar", auth, rol("admin", "talento_humano"), incidenciaController.rechazar);
 router.put("/:id/solicitar-correccion", auth, rol("admin", "talento_humano"), incidenciaController.solicitarCorreccion);
-router.delete("/:id", auth, incidenciaController.eliminar);
+router.delete("/:id", auth, rol("admin", "talento_humano"), incidenciaController.eliminar);
 
 module.exports = router;

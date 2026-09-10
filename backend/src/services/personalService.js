@@ -110,11 +110,9 @@ exports.crear = async (data) => {
     counter++;
   }
 
-  // Auto-generate password from cedula if not provided
-  const password = data.password || cedula;
-  if (!password) {
-    throw new Error("Se requiere cedula o password para generar la contraseña");
-  }
+  // Auto-generate a secure random password if not provided
+  const crypto = require("crypto");
+  const password = data.password || crypto.randomBytes(32).toString("hex");
   const hash = await bcrypt.hash(password, 10);
 
   const { rows: [nuevo] } = await db.query(

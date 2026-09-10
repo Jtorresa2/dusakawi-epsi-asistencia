@@ -5,6 +5,7 @@ import { COLORES } from "../../../shared/constants/colores.js";
 export default function LoginPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ usuario: "", password: "" });
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
   useEffect(() => {
     localStorage.clear();
@@ -21,14 +22,9 @@ export default function LoginPage() {
     const data = await res.json();
 
     if (!res.ok) {
-      // Forced password reset: the server refuses a normal session (403) but
-      // still returns a token, so send the user to the change-password flow.
-      if (res.status === 403 && data.password_reset_required && data.token) {
-        localStorage.setItem("token", data.token);
-        const resetUser = data.user || { username: form.usuario };
-        const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
-        localStorage.setItem("usuario", JSON.stringify({ ...resetUser, rol: rolesMap[resetUser.rol] || resetUser.rol }));
-        navigate("/cambiar-password");
+      // Forced password reset: server sent a reset email, show message
+      if (res.status === 403 && data.password_reset_required) {
+        setResetEmailSent(true);
         return;
       }
       alert(data.mensaje || "Error en login");
@@ -39,13 +35,7 @@ export default function LoginPage() {
     const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
     const user = { ...data.user, rol: rolesMap[data.user.rol] || data.user.rol };
     localStorage.setItem("usuario", JSON.stringify(user));
-
-    // Si debe cambiar contrasena, redirigir
-    if (data.password_reset_required) {
-      navigate("/cambiar-password");
-    } else {
-      navigate("/dashboard");
-    }
+    navigate("/dashboard");
 
   } catch (error) {
     console.error(error);
@@ -102,71 +92,101 @@ export default function LoginPage() {
           width: "100%", boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
           border: `1px solid ${COLORES.primarioClaro}`
         }}>
-          <div style={{ marginBottom: "1rem" }}>
-            <label style={{ fontSize: "14px", fontWeight: 600, color: COLORES.grisOscuro, display: "block", marginBottom: "6px" }}>
-              Usuario
-            </label>
-            <input
-              type="text"
-              placeholder="Ingresa tu usuario"
-              value={form.usuario}
-              onChange={e => setForm({ ...form, usuario: e.target.value })}
-              onKeyDown={handleKeyDown}
-              style={{
-                width: "100%", padding: "11px 14px", borderRadius: "8px",
-                border: `1px solid ${COLORES.grisSuave}`, fontSize: "14px", outline: "none",
-                color: COLORES.grisCasiNegro, boxSizing: "border-box"
-              }}
-              onFocus={e => e.target.style.borderColor = COLORES.primario}
-              onBlur={e => e.target.style.borderColor = COLORES.grisSuave}
-            />
-          </div>
+          {resetEmailSent ? (
+            <div style={{ textAlign: "center" }}>
+              <div style={{
+                background: COLORES.successClaro, color: COLORES.primarioOscuro, padding: "14px 18px",
+                borderRadius: "8px", fontSize: "14px", marginBottom: "1.5rem", textAlign: "center",
+                lineHeight: "1.5"
+              }}>
+                <p style={{ margin: "0 0 8px", fontWeight: 600 }}>Enlace de restablecimiento enviado</p>
+                <p style={{ margin: 0 }}>
+                  Se envio un enlace a tu correo electronico para cambiar tu contrasena.
+                  Debes completar ese proceso antes de poder acceder al sistema.
+                </p>
+              </div>
+              <button
+                onClick={() => setResetEmailSent(false)}
+                style={{
+                  width: "100%", padding: "13px", borderRadius: "8px",
+                  border: "none", background: COLORES.primario, color: COLORES.fondoBlanco,
+                  fontSize: "15px", fontWeight: 600, cursor: "pointer"
+                }}
+                onMouseEnter={e => e.target.style.background = COLORES.primarioOscuro}
+                onMouseLeave={e => e.target.style.background = COLORES.primario}
+              >
+                Volver al login
+              </button>
+            </div>
+          ) : (
+            <>
+              <div style={{ marginBottom: "1rem" }}>
+                <label style={{ fontSize: "14px", fontWeight: 600, color: COLORES.grisOscuro, display: "block", marginBottom: "6px" }}>
+                  Usuario
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ingresa tu usuario"
+                  value={form.usuario}
+                  onChange={e => setForm({ ...form, usuario: e.target.value })}
+                  onKeyDown={handleKeyDown}
+                  style={{
+                    width: "100%", padding: "11px 14px", borderRadius: "8px",
+                    border: `1px solid ${COLORES.grisSuave}`, fontSize: "14px", outline: "none",
+                    color: COLORES.grisCasiNegro, boxSizing: "border-box"
+                  }}
+                  onFocus={e => e.target.style.borderColor = COLORES.primario}
+                  onBlur={e => e.target.style.borderColor = COLORES.grisSuave}
+                />
+              </div>
 
-          <div style={{ marginBottom: "1.5rem" }}>
-            <label style={{ fontSize: "14px", fontWeight: 600, color: COLORES.grisOscuro, display: "block", marginBottom: "6px" }}>
-              Contrasena
-            </label>
-            <input
-              type="password"
-              placeholder="Ingresa tu contrasena"
-              value={form.password}
-              onChange={e => setForm({ ...form, password: e.target.value })}
-              onKeyDown={handleKeyDown}
-              style={{
-                width: "100%", padding: "11px 14px", borderRadius: "8px",
-                border: `1px solid ${COLORES.grisSuave}`, fontSize: "14px", outline: "none",
-                color: COLORES.grisCasiNegro, boxSizing: "border-box"
-              }}
-              onFocus={e => e.target.style.borderColor = COLORES.primario}
-              onBlur={e => e.target.style.borderColor = COLORES.grisSuave}
-            />
-          </div>
+              <div style={{ marginBottom: "1.5rem" }}>
+                <label style={{ fontSize: "14px", fontWeight: 600, color: COLORES.grisOscuro, display: "block", marginBottom: "6px" }}>
+                  Contrasena
+                </label>
+                <input
+                  type="password"
+                  placeholder="Ingresa tu contrasena"
+                  value={form.password}
+                  onChange={e => setForm({ ...form, password: e.target.value })}
+                  onKeyDown={handleKeyDown}
+                  style={{
+                    width: "100%", padding: "11px 14px", borderRadius: "8px",
+                    border: `1px solid ${COLORES.grisSuave}`, fontSize: "14px", outline: "none",
+                    color: COLORES.grisCasiNegro, boxSizing: "border-box"
+                  }}
+                  onFocus={e => e.target.style.borderColor = COLORES.primario}
+                  onBlur={e => e.target.style.borderColor = COLORES.grisSuave}
+                />
+              </div>
 
-          <button
-            onClick={handleLogin}
-            style={{
-              width: "100%", padding: "13px", borderRadius: "8px",
-              border: "none", background: COLORES.primario, color: COLORES.fondoBlanco,
-              fontSize: "15px", fontWeight: 600, cursor: "pointer"
-            }}
-            onMouseEnter={e => e.target.style.background = COLORES.primarioOscuro}
-            onMouseLeave={e => e.target.style.background = COLORES.primario}
-          >
-            Acceder al sistema
-          </button>
+              <button
+                onClick={handleLogin}
+                style={{
+                  width: "100%", padding: "13px", borderRadius: "8px",
+                  border: "none", background: COLORES.primario, color: COLORES.fondoBlanco,
+                  fontSize: "15px", fontWeight: 600, cursor: "pointer"
+                }}
+                onMouseEnter={e => e.target.style.background = COLORES.primarioOscuro}
+                onMouseLeave={e => e.target.style.background = COLORES.primario}
+              >
+                Acceder al sistema
+              </button>
 
-          <div style={{ textAlign: "center", marginTop: "1rem" }}>
-            <Link
-              to="/olvide-contrasena"
-              style={{
-                background: "none", border: "none", color: COLORES.primario,
-                fontSize: "13px", cursor: "pointer", textDecoration: "underline",
-                padding: "4px"
-              }}
-            >
-              ¿Olvidaste tu contrasena?
-            </Link>
-          </div>
+              <div style={{ textAlign: "center", marginTop: "1rem" }}>
+                <Link
+                  to="/olvide-contrasena"
+                  style={{
+                    background: "none", border: "none", color: COLORES.primario,
+                    fontSize: "13px", cursor: "pointer", textDecoration: "underline",
+                    padding: "4px"
+                  }}
+                >
+                  ¿Olvidaste tu contrasena?
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

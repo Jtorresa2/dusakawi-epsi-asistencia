@@ -17,7 +17,6 @@ import ErrorBoundary from "./shared/components/ErrorBoundary";
 
 // Route-level code splitting: cada página se descarga bajo demanda,
 // el chunk inicial solo lleva login + núcleo MUI.
-const CambiarPasswordPage = lazy(() => import("./features/cambiarPassword/pages/CambiarPasswordPage"));
 const OlvideContrasenaPage = lazy(() => import("./features/login/pages/OlvideContrasenaPage"));
 const RestablecerContrasenaPage = lazy(() => import("./features/login/pages/RestablecerContrasenaPage"));
 const DashboardPage = lazy(() => import("./features/dashboard/pages/DashboardPage"));
@@ -77,7 +76,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/cambiar-password" element={<Suspense fallback={routeFallback}><CambiarPasswordPage /></Suspense>} />
         <Route path="/olvide-contrasena" element={<Suspense fallback={routeFallback}><OlvideContrasenaPage /></Suspense>} />
         <Route path="/restablecer-contrasena" element={<Suspense fallback={routeFallback}><RestablecerContrasenaPage /></Suspense>} />
 
