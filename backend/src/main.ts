@@ -11,6 +11,7 @@ import { createErrorHandler } from '@config/express/middlewares/error-handler.mi
 import { httpErrorRegistry } from '@shared/http/errors/http-error-registry.config.js';
 import auth from '@modules/auth/presentation/auth.presentation.js';
 import users from '@modules/users/presentation/user.presentation.js';
+import areas from '@modules/areas/presentation/areas.presentation';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,6 +30,7 @@ app.use(cors());
 
 auth.addRoutes(app);
 users.addRoutes(app);
+areas.addRoutes(app);
 
 // =======================
 
