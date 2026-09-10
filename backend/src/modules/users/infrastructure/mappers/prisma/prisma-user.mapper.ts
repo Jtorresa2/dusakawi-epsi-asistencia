@@ -87,11 +87,9 @@ export class PrismaUserMapper {
         create: PrismaDocumentDetailsMapper.toCreate(entity.documentDetails),
       },
       user_roles: {
-        create: entity.roles.map((role) => {
-          return {
-            roles: { connect: { id: role.metadata.id } },
-          };
-        }),
+        create: entity.roles.map((role) => ({
+          roles: { connect: { id: role.metadata.id } },
+        })),
       },
     };
   }
@@ -104,6 +102,12 @@ export class PrismaUserMapper {
       area: { connect: { id: entity.area.metadata.id } },
       document_details: {
         update: PrismaDocumentDetailsMapper.toUpdate(entity.documentDetails),
+      },
+      user_roles: {
+        deleteMany: {},
+        create: entity.roles.map((role) => ({
+          roles: { connect: { id: role.metadata.id } },
+        })),
       },
     };
   }
