@@ -1,12 +1,7 @@
 import { GenericEntity } from '@shared/entities/generic-entity.js';
+import type { FindAllOptions } from '@shared/types/find-all-options';
 import type { PagedListResponse } from '@shared/types/paged-list-response.js';
 import type { Uuid } from '@shared/types/uuid.js';
-
-export interface FindAllOptions {
-  page?: number;
-  limit?: number;
-  query?: string;
-}
 
 export interface GenericRepository<T extends GenericEntity> {
   create(entity: T): Promise<void>;

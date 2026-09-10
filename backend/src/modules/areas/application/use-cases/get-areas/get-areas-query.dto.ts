@@ -1,3 +1,3 @@
-import type { FindAllOptions } from '@shared/repositories/generic-repository';
+import type { FindAllOptions } from '@shared/types/find-all-options';
 
 export interface GetAreasQueryDto extends FindAllOptions {}

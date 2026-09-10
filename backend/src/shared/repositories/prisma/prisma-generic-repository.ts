@@ -1,8 +1,9 @@
-import type { GenericEntity } from '@shared/entities/generic-entity';
-import type { FindAllOptions, GenericRepository } from '../generic-repository';
-import type { PagedListResponse } from '@shared/types/paged-list-response';
 import type { Uuid } from '@shared/types/uuid';
 import type { PrismaCrudDelegate } from '@config/database/prisma/delegate';
+import type { GenericEntity } from '@shared/entities/generic-entity';
+import type { PagedListResponse } from '@shared/types/paged-list-response';
+import type { FindAllOptions } from '@shared/types/find-all-options';
+import type { GenericRepository } from '../generic-repository';
 
 export interface EntityMapper<TEntity, TModel, TCreateInput, TUpdateInput> {
   toDomain(model: TModel): TEntity;
