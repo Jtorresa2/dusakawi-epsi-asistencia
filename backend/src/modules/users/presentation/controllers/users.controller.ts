@@ -24,8 +24,8 @@ const getUsers = async (req: Request<GetUsersQueryDto>, res: Response) => {
   );
 
   const result = await handler.handle({
-    limit: Number(req.query.limit),
-    page: Number(req.query.page),
+    limit: Number(req.query.limit ?? 10),
+    page: Number(req.query.page ?? 1),
     query: typeof req.query.query === 'string' ? req.query.query : undefined,
   });
 
