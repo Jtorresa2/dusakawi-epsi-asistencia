@@ -1,5 +1,3 @@
-export interface GetUsersQueryDto {
-  page: number;
-  limit: number;
-  query?: string;
-}
+import type { FindAllOptions } from '@shared/types/find-all-options';
+
+export interface GetUsersQueryDto extends FindAllOptions {}
