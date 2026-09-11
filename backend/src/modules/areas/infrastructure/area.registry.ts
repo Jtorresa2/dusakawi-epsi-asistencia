@@ -5,6 +5,7 @@ import { GetAreaQueryHandler } from '../application/use-cases/get-area/get-area-
 import { GetAreasQueryHandler } from '../application/use-cases/get-areas/get-areas-query.handler';
 import { CreateAreaCommandHandler } from '../application/use-cases/create-area/create-area-command.handler';
 import { DeleteAreaCommandHandler } from '../application/use-cases/delete-area/delete-area-command.handler';
+import { UpdateAreaCommandHandler } from '../application/use-cases/update-area/update-area-command.handler';
 
 export function registerAreasModule(container: AwilixContainer) {
   container.register({
@@ -17,5 +18,6 @@ export function registerAreasModule(container: AwilixContainer) {
     getAreasQueryHandler: asClass(GetAreasQueryHandler).scoped(),
     createAreaCommandHandler: asClass(CreateAreaCommandHandler).scoped(),
     deleteAreaCommandHandler: asClass(DeleteAreaCommandHandler).scoped(),
+    updateAreaCommandHandler: asClass(UpdateAreaCommandHandler).scoped(),
   });
 }
