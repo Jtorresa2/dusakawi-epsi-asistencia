@@ -3,6 +3,7 @@ import { PrismaFloorRepository } from './persistence/repositories/prisma/prisma-
 import { PrismaAreaRepository } from './persistence/repositories/prisma/prisma-area-repository';
 import { GetAreaQueryHandler } from '../application/use-cases/get-area/get-area-query.handler';
 import { GetAreasQueryHandler } from '../application/use-cases/get-areas/get-areas-query.handler';
+import { CreateAreaCommandHandler } from '../application/use-cases/create-area/create-area-command.handler';
 
 export function registerAreasModule(container: AwilixContainer) {
   container.register({
@@ -13,5 +14,6 @@ export function registerAreasModule(container: AwilixContainer) {
     // use-cases
     getAreaQueryHandler: asClass(GetAreaQueryHandler).scoped(),
     getAreasQueryHandler: asClass(GetAreasQueryHandler).scoped(),
+    createAreaCommandHandler: asClass(CreateAreaCommandHandler).scoped(),
   });
 }

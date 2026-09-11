@@ -3,6 +3,7 @@ import type { Uuid } from '@shared/types/uuid';
 import type { GetAreaQueryHandler } from '@modules/areas/application/use-cases/get-area/get-area-query.handler';
 import type { GetAreasQueryHandler } from '@modules/areas/application/use-cases/get-areas/get-areas-query.handler';
 import type { GetAreasQueryDto } from '@modules/areas/application/use-cases/get-areas/get-areas-query.dto';
+import type { CreateAreaCommandHandler } from '@modules/areas/application/use-cases/create-area/create-area-command.handler';
 
 const getArea = async (req: Request<{ id: Uuid }>, res: Response) => {
   const handler = req.container.resolve<GetAreaQueryHandler>(
@@ -29,4 +30,13 @@ const getAreas = async (req: Request<GetAreasQueryDto>, res: Response) => {
   res.json(result);
 };
 
-export default { getArea, getAreas };
+const createArea = async (req: Request, res: Response) => {
+  const handler = req.container.resolve<CreateAreaCommandHandler>(
+    'createAreaCommandHandler',
+  );
+
+  const result = await handler.handle(req.body);
+  return res.status(201).json(result);
+};
+
+export default { getArea, getAreas, createArea };

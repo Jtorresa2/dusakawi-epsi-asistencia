@@ -1,3 +1,4 @@
+import type { Uuid } from '@shared/types/uuid';
 import { prisma } from '@config/database/prisma/prisma';
 import { Prisma } from '@config/database/prisma/generated/client';
 import { PrismaGenericRepository } from '@shared/repositories/prisma/prisma-generic-repository';
@@ -22,6 +23,10 @@ export class PrismaAreaRepository
 {
   constructor() {
     super(asCrudDelegate(prisma.areas), PrismaAreaMapper, includeEntities);
+  }
+
+  async areaExists(name: string): Promise<boolean> {
+    return (await prisma.areas.count({ where: { name } })) > 0;
   }
 
   protected buildSearchWhere(query: string): Prisma.areasWhereInput {

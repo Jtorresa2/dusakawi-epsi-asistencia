@@ -8,7 +8,7 @@ export class Area extends GenericEntity {
     public readonly floor: Floor,
     public readonly name: DataString,
     public readonly description: DataString | null = null,
-    metadata: Metadata | null,
+    metadata?: Metadata | null,
   ) {
     super(metadata);
   }
