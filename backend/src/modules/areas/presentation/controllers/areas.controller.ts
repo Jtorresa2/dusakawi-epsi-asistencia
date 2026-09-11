@@ -4,6 +4,7 @@ import type { GetAreaQueryHandler } from '@modules/areas/application/use-cases/g
 import type { GetAreasQueryHandler } from '@modules/areas/application/use-cases/get-areas/get-areas-query.handler';
 import type { GetAreasQueryDto } from '@modules/areas/application/use-cases/get-areas/get-areas-query.dto';
 import type { CreateAreaCommandHandler } from '@modules/areas/application/use-cases/create-area/create-area-command.handler';
+import type { DeleteAreaCommandHandler } from '@modules/areas/application/use-cases/delete-area/delete-area-command.handler';
 
 const getArea = async (req: Request<{ id: Uuid }>, res: Response) => {
   const handler = req.container.resolve<GetAreaQueryHandler>(
@@ -39,4 +40,15 @@ const createArea = async (req: Request, res: Response) => {
   return res.status(201).json(result);
 };
 
-export default { getArea, getAreas, createArea };
+const deleteArea = async (req: Request<{ id: Uuid }>, res: Response) => {
+  const handler = req.container.resolve<DeleteAreaCommandHandler>(
+    'deleteAreaCommandHandler',
+  );
+
+  const { id } = req.params;
+  await handler.handle({ id });
+
+  return res.sendStatus(204);
+};
+
+export default { getArea, getAreas, createArea, deleteArea };
