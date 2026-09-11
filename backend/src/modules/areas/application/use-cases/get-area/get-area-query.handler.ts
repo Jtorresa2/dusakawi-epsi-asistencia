@@ -1,3 +1,4 @@
+import { NotFoundError } from '@shared/errors/errors';
 import type { AreaRepository } from '@modules/areas/domain/repositories/area-repository';
 import type { GetAreaQueryDto } from './get-area-query.dto';
 import type { GetAreaQueryResponseDto } from './get-area-query-response.dto';
@@ -8,7 +9,7 @@ export class GetAreaQueryHandler {
 
   async handle(request: GetAreaQueryDto): Promise<GetAreaQueryResponseDto> {
     const area = await this.areaRepository.findById(request.id);
-    if (!area) throw new Error('area');
+    if (!area) throw new NotFoundError('area');
 
     return {
       area: AreaMapper.toAreaResponseDto(area),
