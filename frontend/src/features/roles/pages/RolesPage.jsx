@@ -40,7 +40,7 @@ export default function RolesPage() {
         lista.map(async (r) => {
           try {
             const res = await obtenerPermisosRol(r.id);
-            mapa[r.id] = new Set(res.permisos || []);
+            mapa[r.id] = new Set(res.permissions || []);
           } catch {
             mapa[r.id] = new Set();
           }

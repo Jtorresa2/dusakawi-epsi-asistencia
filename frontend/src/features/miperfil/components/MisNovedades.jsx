@@ -9,19 +9,19 @@ import { apiFetch } from "../../../shared/api/api";
 import { COLORES } from "../../../shared/constants/colores.js";
 
 const tipoNovedadConfig = {
-  permiso: { label: "Permiso", color: COLORES.primario, bg: COLORES.primarioClaro2, icon: <FileText size={14} /> },
-  vacaciones: { label: "Vacaciones", color: COLORES.primario, bg: COLORES.primarioClaro, icon: <CalendarDays size={14} /> },
-  incapacidad: { label: "Incapacidad", color: COLORES.danger, bg: COLORES.dangerFondo, icon: <AlertCircle size={14} /> },
-  comision: { label: "Comisión", color: COLORES.danger, bg: COLORES.dangerFondo2, icon: <UserCheck size={14} /> },
-  licencia: { label: "Licencia", color: COLORES.verdeTexto, bg: COLORES.successClaro, icon: <FileText size={14} /> },
+  permission: { label: "Permiso", color: COLORES.primario, bg: COLORES.primarioClaro2, icon: <FileText size={14} /> },
+  vacation: { label: "Vacaciones", color: COLORES.primario, bg: COLORES.primarioClaro, icon: <CalendarDays size={14} /> },
+  sick_leave: { label: "Incapacidad", color: COLORES.danger, bg: COLORES.dangerFondo, icon: <AlertCircle size={14} /> },
+  commission: { label: "Comisión", color: COLORES.danger, bg: COLORES.dangerFondo2, icon: <UserCheck size={14} /> },
+  license: { label: "Licencia", color: COLORES.verdeTexto, bg: COLORES.successClaro, icon: <FileText size={14} /> },
   suspension: { label: "Suspensión", color: COLORES.textoTerciario, bg: COLORES.fondoGris2, icon: <ShieldAlert size={14} /> },
 };
 
 const modalidadConfig = {
-  dia_completo: { label: "Día completo", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro, icon: <CalendarDays size={14} /> },
-  manana: { label: "Solo mañana", color: COLORES.warningOscuro, bg: COLORES.warningFondo, icon: <Sun size={14} /> },
-  tarde: { label: "Solo tarde", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro, icon: <Moon size={14} /> },
-  horas: { label: "Por horas", color: COLORES.primario, bg: COLORES.primarioClaro2, icon: <Clock size={14} /> },
+  full_day: { label: "Día completo", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro, icon: <CalendarDays size={14} /> },
+  morning: { label: "Solo mañana", color: COLORES.warningOscuro, bg: COLORES.warningFondo, icon: <Sun size={14} /> },
+  afternoon: { label: "Solo tarde", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro, icon: <Moon size={14} /> },
+  hours: { label: "Por horas", color: COLORES.primario, bg: COLORES.primarioClaro2, icon: <Clock size={14} /> },
 };
 
 export default function MisNovedades({ empleadoId, maxItems = 10, sx }) {
@@ -50,9 +50,9 @@ export default function MisNovedades({ empleadoId, maxItems = 10, sx }) {
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
           {visible.map((p) => {
-            const tc = tipoNovedadConfig[p.tipo_novedad || "permiso"] || tipoNovedadConfig.permiso;
-            const dc = modalidadConfig[p.tipo || "dia_completo"] || modalidadConfig.dia_completo;
-            const estadoLabel = p.estado === "rechazado" ? "Rechazado" : p.estado === "pendiente" ? "Pendiente" : "";
+            const tc = tipoNovedadConfig[p.tipo_novedad || "permission"] || tipoNovedadConfig.permission;
+            const dc = modalidadConfig[p.tipo || "full_day"] || modalidadConfig.full_day;
+            const estadoLabel = p.estado === "rejected" ? "Rechazado" : p.estado === "pending" ? "Pendiente" : "";
             return (
               <Paper key={p.id} elevation={0} sx={{ p: 1, borderRadius: "8px", border: `1px solid ${COLORES.grisContorno}`,
                 display: "flex", alignItems: "center", gap: 1 }}>
@@ -70,8 +70,8 @@ export default function MisNovedades({ empleadoId, maxItems = 10, sx }) {
                 {estadoLabel && (
                   <Chip label={estadoLabel} size="small"
                     sx={{ fontWeight: 600, fontSize: 9, height: 18,
-                      bgcolor: p.estado === "rechazado" ? COLORES.dangerFondo : COLORES.warningFondo,
-                      color: p.estado === "rechazado" ? COLORES.danger : COLORES.warningOscuro,
+                      bgcolor: p.estado === "rejected" ? COLORES.dangerFondo : COLORES.warningFondo,
+                      color: p.estado === "rejected" ? COLORES.danger : COLORES.warningOscuro,
                       borderRadius: "5px" }} />
                 )}
               </Paper>

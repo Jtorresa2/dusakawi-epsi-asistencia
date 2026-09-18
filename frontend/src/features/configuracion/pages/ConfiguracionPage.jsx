@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import {
   Box, Paper, Typography, Tabs, Tab, TextField, Switch, Button,
   Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions,
-  IconButton, Divider, FormControlLabel,
+  IconButton, Divider, FormControlLabel, Table, TableHead, TableBody,
+  TableRow, TableCell, Checkbox, Chip, CircularProgress,
 } from "@mui/material";
 import {
   Clock, Fingerprint, Shield, Bell, Settings, RotateCcw, Save,
-  Lock, X,
+  Lock, X, Mail,
 } from "lucide-react";
-import { obtenerConfig, actualizarConfig } from "../config.api";
+import { obtenerConfig, actualizarConfig, obtenerPendientesEmail, enviarEmailAcceso } from "../config.api";
 import { COLORES } from "../../../shared/constants/colores.js";
 import { PALETA } from "../../../shared/constants/paleta.js";
 
@@ -18,6 +19,7 @@ const TABS = [
   { id: "marcacion", label: "Marcación", icon: <Fingerprint size={17} /> },
   { id: "seguridad", label: "Seguridad", icon: <Shield size={17} /> },
   { id: "notificaciones", label: "Notificaciones", icon: <Bell size={17} /> },
+  { id: "correo", label: "Correo", icon: <Mail size={17} /> },
   { id: "general", label: "General", icon: <Settings size={17} /> },
 ];
 
@@ -99,12 +101,49 @@ function ConfigCard({ icon, titulo, descripcion, control }) {
   );
 }
 
+// ─── Helpers para la pestaña Correo ──────────────────────────────────────────
+const formatearFecha = (iso) => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+  return `${dd}/${mm}/${yy} ${hh}:${mi}`;
+};
+
+const ESTADO_INFO = {
+  sin_enviar: { label: "Sin enviar", bg: COLORES.fondoGris, color: COLORES.textoTerciario },
+  enviado: { label: "Enviado", bg: COLORES.primarioClaro, color: COLORES.primarioOscuro },
+  expirado: { label: "Expirado", bg: "#FDEBEB", color: "#B3261E" },
+  aceptado: { label: "Aceptado", bg: "#E6F4EA", color: "#1E7B34" },
+};
+
+function EstadoChip({ estado }) {
+  const info = ESTADO_INFO[estado] || ESTADO_INFO.sin_enviar;
+  return (
+    <Chip
+      label={info.label}
+      size="small"
+      sx={{ fontSize: 11, fontWeight: 700, bgcolor: info.bg, color: info.color, borderRadius: "8px" }}
+    />
+  );
+}
+
 export default function ConfiguracionPage() {
   const [tab, setTab] = useState("asistencia");
   const [form, setForm] = useState({ ...DEFAULT_CONFIG });
   const [guardando, setGuardando] = useState(false);
   const [snack, setSnack] = useState(null);
   const [modalPolitica, setModalPolitica] = useState(false);
+  const [pendientes, setPendientes] = useState([]);
+  const [seleccionados, setSeleccionados] = useState([]);
+  const [cargandoPendientes, setCargandoPendientes] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [snackCorreo, setSnackCorreo] = useState(null);
+  const [filtroCorreo, setFiltroCorreo] = useState("todos");
 
   useEffect(() => {
     (async () => {
@@ -135,6 +174,92 @@ export default function ConfiguracionPage() {
   const restablecer = () => {
     setForm({ ...DEFAULT_CONFIG });
     setSnack({ type: "info", msg: "Valores predeterminados restaurados. Presiona Guardar para aplicarlos." });
+  };
+
+  const cargarPendientes = async () => {
+    setCargandoPendientes(true);
+    try {
+      const data = await obtenerPendientesEmail();
+      setPendientes(data.pendientes || []);
+    } catch {
+      setSnackCorreo({ type: "error", msg: "Error al cargar los empleados pendientes" });
+    } finally {
+      setCargandoPendientes(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarPendientes();
+  }, []);
+
+  const mostrarResumenCorreo = (res) => {
+    const enviados = res.enviados ?? 0;
+    const fallidos = res.fallidos ?? 0;
+    const sinCorreo = res.sin_correo ?? 0;
+    setSnackCorreo({
+      type: fallidos === 0 ? "success" : "warning",
+      msg: `${enviados} enviados, ${fallidos} fallidos, ${sinCorreo} sin correo`,
+    });
+  };
+
+  const enviarTodos = async () => {
+    if (!window.confirm("¿Enviar el enlace de acceso a todos los empleados pendientes?")) return;
+    setEnviando(true);
+    try {
+      const res = await enviarEmailAcceso({ todos: true });
+      mostrarResumenCorreo(res);
+      await cargarPendientes();
+      setSeleccionados([]);
+    } catch {
+      setSnackCorreo({ type: "error", msg: "Error al enviar los correos" });
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  const enviarSeleccionados = async () => {
+    if (!window.confirm(`¿Enviar el enlace de acceso a ${seleccionados.length} empleado(s)?`)) return;
+    setEnviando(true);
+    try {
+      const res = await enviarEmailAcceso({ userIds: seleccionados });
+      mostrarResumenCorreo(res);
+      await cargarPendientes();
+      setSeleccionados([]);
+    } catch {
+      setSnackCorreo({ type: "error", msg: "Error al enviar los correos" });
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  const alternarSeleccion = (id) => {
+    setSeleccionados((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const alternarSeleccionTodos = () => {
+    const accionables = pendientes.filter((p) => p.estado !== "aceptado");
+    if (seleccionados.length === accionables.length) setSeleccionados([]);
+    else setSeleccionados(accionables.map((p) => p.id));
+  };
+
+  const pendientesVisibles = pendientes.filter((p) =>
+    filtroCorreo === "todos" ? true : p.estado === filtroCorreo
+  );
+
+  const reenviarIndividual = async (p) => {
+    if (!window.confirm(`¿Reenviar el enlace de acceso a ${p.nombre}?`)) return;
+    setEnviando(true);
+    try {
+      const res = await enviarEmailAcceso({ userIds: [p.id] });
+      mostrarResumenCorreo(res);
+      await cargarPendientes();
+    } catch {
+      setSnackCorreo({ type: "error", msg: "Error al enviar el correo" });
+    } finally {
+      setEnviando(false);
+    }
   };
 
   const campoMin = (clave, label) => (
@@ -326,6 +451,170 @@ export default function ConfiguracionPage() {
             </Box>
           )}
 
+          {tab === "correo" && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2, flexWrap: "wrap" }}>
+                <Box sx={{ flex: 1, minWidth: 260 }}>
+                  <Typography sx={{ fontSize: 15, fontWeight: 700, color: COLORES.textoPrimario }}>
+                    Envios de enlace de acceso
+                  </Typography>
+                  <Typography sx={{ fontSize: 12.5, color: COLORES.textoTerciario, mt: 0.4, lineHeight: 1.5 }}>
+                    Controla el envio del enlace para crear contrasena. Cuando caduca, puedes reenviarlo.
+                  </Typography>
+                  {!cargandoPendientes && (
+                    <Typography sx={{ fontSize: 12, color: COLORES.primarioOscuro, fontWeight: 600, mt: 0.75 }}>
+                      {pendientes.filter((p) => p.estado !== "aceptado").length === 0
+                        ? "No hay empleados pendientes"
+                        : `${pendientes.filter((p) => p.estado !== "aceptado").length} empleado(s) pendiente(s)`}
+                    </Typography>
+                  )}
+                </Box>
+                <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<Mail size={16} />}
+                    disabled={!pendientes.filter((p) => p.estado !== "aceptado").length || enviando}
+                    onClick={enviarTodos}
+                    sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } }}
+                  >
+                    {enviando ? "Enviando..." : "Enviar a todos"}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<Mail size={16} />}
+                    disabled={!seleccionados.length || enviando}
+                    onClick={enviarSeleccionados}
+                    sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, color: COLORES.primarioOscuro, borderColor: COLORES.grisContorno, "&:hover": { borderColor: COLORES.primarioOscuro, bgcolor: COLORES.fondoGris } }}
+                  >
+                    Enviar seleccionados ({seleccionados.length})
+                  </Button>
+                </Box>
+              </Box>
+
+              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                {[
+                  { id: "todos", label: "Todos" },
+                  { id: "sin_enviar", label: "Sin enviar" },
+                  { id: "enviado", label: "Enviados" },
+                  { id: "expirado", label: "Expirados" },
+                  { id: "aceptado", label: "Aceptados" },
+                ].map((f) => (
+                  <Chip
+                    key={f.id}
+                    label={f.label}
+                    onClick={() => setFiltroCorreo(f.id)}
+                    sx={{
+                      fontSize: 12, fontWeight: 600, cursor: "pointer", borderRadius: "8px",
+                      bgcolor: filtroCorreo === f.id ? COLORES.primarioOscuro : COLORES.fondoGris,
+                      color: filtroCorreo === f.id ? "#fff" : COLORES.textoTerciario,
+                      "&:hover": { bgcolor: filtroCorreo === f.id ? COLORES.primarioOscuro : COLORES.grisContorno },
+                    }}
+                  />
+                ))}
+              </Box>
+
+              <Paper elevation={0} sx={{ borderRadius: "14px", border: `1px solid ${COLORES.grisContorno}`, overflow: "hidden", bgcolor: COLORES.fondoBlanco }}>
+                {cargandoPendientes ? (
+                  <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 6 }}>
+                    <CircularProgress size={28} sx={{ color: COLORES.primarioOscuro }} />
+                  </Box>
+                ) : (
+                  <Box sx={{ overflowX: "auto" }}>
+                    <Table sx={{ minWidth: 760 }}>
+                      <TableHead>
+                        <TableRow sx={{ bgcolor: COLORES.fondoGris }}>
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              aria-label="Seleccionar todos"
+                              indeterminate={seleccionados.length > 0 && seleccionados.length < pendientes.filter((p) => p.estado !== "aceptado").length}
+                              checked={pendientes.length > 0 && seleccionados.length === pendientes.filter((p) => p.estado !== "aceptado").length}
+                              onChange={alternarSeleccionTodos}
+                              disabled={!pendientes.filter((p) => p.estado !== "aceptado").length || enviando}
+                            />
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, fontSize: 12, color: COLORES.textoTerciario, letterSpacing: "0.03em", textTransform: "uppercase" }}>
+                            Nombre
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, fontSize: 12, color: COLORES.textoTerciario, letterSpacing: "0.03em", textTransform: "uppercase" }}>
+                            Usuario
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, fontSize: 12, color: COLORES.textoTerciario, letterSpacing: "0.03em", textTransform: "uppercase" }}>
+                            Email
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, fontSize: 12, color: COLORES.textoTerciario, letterSpacing: "0.03em", textTransform: "uppercase" }}>
+                            Rol
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, fontSize: 12, color: COLORES.textoTerciario, letterSpacing: "0.03em", textTransform: "uppercase" }}>
+                            Estado
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, fontSize: 12, color: COLORES.textoTerciario, letterSpacing: "0.03em", textTransform: "uppercase" }}>
+                            Enviado el
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, fontSize: 12, color: COLORES.textoTerciario, letterSpacing: "0.03em", textTransform: "uppercase" }}>
+                            Expira
+                          </TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 600, fontSize: 12, color: COLORES.textoTerciario, letterSpacing: "0.03em", textTransform: "uppercase" }}>
+                            Accion
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {pendientesVisibles.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={9} align="center" sx={{ py: 5, color: COLORES.textoTerciario, fontSize: 13 }}>
+                              No hay empleados en este filtro
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          pendientesVisibles.map((p) => {
+                            const accionable = p.estado !== "aceptado";
+                            return (
+                              <TableRow key={p.id} hover selected={seleccionados.includes(p.id)}>
+                                <TableCell padding="checkbox">
+                                  {accionable && (
+                                    <Checkbox
+                                      aria-label={`Seleccionar ${p.nombre}`}
+                                      checked={seleccionados.includes(p.id)}
+                                      onChange={() => alternarSeleccion(p.id)}
+                                      disabled={enviando}
+                                    />
+                                  )}
+                                </TableCell>
+                                <TableCell sx={{ fontSize: 13.5, fontWeight: 600, color: COLORES.textoPrimario }}>{p.nombre}</TableCell>
+                                <TableCell sx={{ fontSize: 13, color: COLORES.textoTerciario }}>{p.username}</TableCell>
+                                <TableCell sx={{ fontSize: 13, color: COLORES.textoTerciario }}>{p.email || "—"}</TableCell>
+                                <TableCell sx={{ fontSize: 13, color: COLORES.textoTerciario }}>{p.rol || "—"}</TableCell>
+                                <TableCell>
+                                  <EstadoChip estado={p.estado} />
+                                </TableCell>
+                                <TableCell sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>{formatearFecha(p.ultimo_envio)}</TableCell>
+                                <TableCell sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>{formatearFecha(p.expira)}</TableCell>
+                                <TableCell align="right">
+                                  {accionable && (
+                                    <Button
+                                      size="small"
+                                      variant="text"
+                                      startIcon={<Mail size={14} />}
+                                      disabled={enviando}
+                                      onClick={() => reenviarIndividual(p)}
+                                      sx={{ fontSize: 12, fontWeight: 600, textTransform: "none", color: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primarioClaro } }}
+                                    >
+                                      {p.estado === "sin_enviar" ? "Enviar" : "Reenviar"}
+                                    </Button>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
+                        )}
+                      </TableBody>
+                    </Table>
+                  </Box>
+                )}
+              </Paper>
+            </Box>
+          )}
+
           {tab === "general" && (
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", xl: "1fr 1fr 1fr" }, gap: 1.75 }}>
               {[
@@ -357,24 +646,26 @@ export default function ConfiguracionPage() {
         </Box>
 
         {/* ACCIONES */}
-        <Box sx={{ px: 2.5, py: 2, borderTop: `1px solid ${COLORES.grisContorno}`, display: "flex", justifyContent: "flex-end", gap: 1.5, flexWrap: "wrap", bgcolor: COLORES.fondoBlanco }}>
-          <Button
-            startIcon={<RotateCcw size={16} />}
-            onClick={restablecer}
-            sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, color: COLORES.textoTerciario, borderColor: COLORES.grisContorno, "&:hover": { borderColor: COLORES.textoSuave, bgcolor: COLORES.fondoGris } }}
-          >
-            Restablecer valores predeterminados
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<Save size={16} />}
-            onClick={guardar}
-            disabled={guardando}
-            sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 3, height: 42, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } }}
-          >
-            {guardando ? "Guardando..." : "Guardar cambios"}
-          </Button>
-        </Box>
+        {tab !== "correo" && (
+          <Box sx={{ px: 2.5, py: 2, borderTop: `1px solid ${COLORES.grisContorno}`, display: "flex", justifyContent: "flex-end", gap: 1.5, flexWrap: "wrap", bgcolor: COLORES.fondoBlanco }}>
+            <Button
+              startIcon={<RotateCcw size={16} />}
+              onClick={restablecer}
+              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, color: COLORES.textoTerciario, borderColor: COLORES.grisContorno, "&:hover": { borderColor: COLORES.textoSuave, bgcolor: COLORES.fondoGris } }}
+            >
+              Restablecer valores predeterminados
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<Save size={16} />}
+              onClick={guardar}
+              disabled={guardando}
+              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 3, height: 42, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } }}
+            >
+              {guardando ? "Guardando..." : "Guardar cambios"}
+            </Button>
+          </Box>
+        )}
       </Paper>
 
       {/* MODAL POLÍTICA DE CONTRASEÑAS */}
@@ -573,6 +864,9 @@ export default function ConfiguracionPage() {
       {/* SNACKBAR */}
       <Snackbar open={!!snack} autoHideDuration={4000} onClose={() => setSnack(null)} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
         {snack ? <Alert severity={snack.type} sx={{ borderRadius: "10px" }}>{snack.msg}</Alert> : undefined}
+      </Snackbar>
+      <Snackbar open={!!snackCorreo} autoHideDuration={5000} onClose={() => setSnackCorreo(null)} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+        {snackCorreo ? <Alert severity={snackCorreo.type} sx={{ borderRadius: "10px" }}>{snackCorreo.msg}</Alert> : undefined}
       </Snackbar>
     </Box>
   );

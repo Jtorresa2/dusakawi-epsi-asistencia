@@ -9,3 +9,11 @@ export const actualizarConfig = (data) =>
   });
 
 export const respaldarBD = () => apiFetch("/config/respaldar");
+
+export const obtenerPendientesEmail = () => apiFetch("/usuarios/pendientes-email");
+
+export const enviarEmailAcceso = (payload) =>
+  apiFetch("/usuarios/enviar-email-acceso", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });

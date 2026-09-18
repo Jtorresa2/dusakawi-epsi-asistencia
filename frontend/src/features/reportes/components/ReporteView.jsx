@@ -19,12 +19,11 @@ const API_MAP = {
 };
 
 const TIPOS_INC = [
-  {value:"falla_biometrica",label:"Falla biométrica"},
-  {value:"tardanza_justificada",label:"Tardanza justificada"},
-  {value:"otro",label:"Otro"},
+  {value:"biometric_failure",label:"Falla biométrica"},
+  {value:"other",label:"Otro"},
 ];
-const EST_ASIS = ["puntual","tardanza","ausente","justificado"];
-const EST_INC = ["pendiente","aprobado","rechazado"];
+const EST_ASIS = ["on_time","late","absent","justified"];
+const EST_INC = ["pending","approved","rejected"];
 const EST_EMP = [{value:"1",label:"Activo"},{value:"0",label:"Inactivo"}];
 
 const MESES = [

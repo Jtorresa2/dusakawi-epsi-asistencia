@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { COLORES } from "../../../shared/constants/colores.js";
 
@@ -13,6 +13,31 @@ export default function RestablecerContrasenaPage() {
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
   const [exito, setExito] = useState(false);
+  const [estado, setEstado] = useState(token ? "cargando" : "invalido");
+  const [motivo, setMotivo] = useState("");
+
+  // Validate the token BEFORE showing the form: a used/expired link must
+  // show a message instead of the password form.
+  useEffect(() => {
+    let activo = true;
+    if (!token) {
+      setEstado("invalido");
+      return;
+    }
+    (async () => {
+      try {
+        const res = await fetch(`${API}/auth/validar-token-reset?token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+        if (!activo) return;
+        setEstado(data.valido ? "valido" : "invalido");
+        setMotivo(data.motivo || "invalido");
+      } catch {
+        if (!activo) return;
+        setEstado("valido"); // no bloquees por error de red; el submit valida igual
+      }
+    })();
+    return () => { activo = false; };
+  }, [token]);
 
   const handleSubmit = async () => {
     setError("");
@@ -100,6 +125,32 @@ export default function RestablecerContrasenaPage() {
                 borderRadius: "8px", fontSize: "13px", marginBottom: "1rem", textAlign: "center"
               }}>
                 Contrasena restablecida exitosamente. Ya puedes iniciar sesion con tu nueva contrasena.
+              </div>
+              <button
+                onClick={() => navigate("/login")}
+                style={{
+                  width: "100%", padding: "13px", borderRadius: "8px",
+                  border: "none", background: COLORES.primario, color: COLORES.fondoBlanco,
+                  fontSize: "15px", fontWeight: 600, cursor: "pointer"
+                }}
+                onMouseEnter={e => e.target.style.background = COLORES.primarioOscuro}
+                onMouseLeave={e => e.target.style.background = COLORES.primario}
+              >
+                Ir al inicio de sesion
+              </button>
+            </div>
+          ) : estado === "cargando" ? (
+            <div style={{ textAlign: "center", padding: "1rem 0" }}>
+              Validando enlace...
+            </div>
+          ) : estado === "invalido" ? (
+            <div style={{ textAlign: "center" }}>
+              <div style={{ background: COLORES.dangerFondo2, color: COLORES.danger, padding: "10px 14px", borderRadius: "8px", fontSize: "13px", marginBottom: "1rem", textAlign: "center" }}>
+                {motivo === "usado"
+                  ? "Este enlace ya fue utilizado. Solo puede usarse una vez."
+                  : motivo === "expirado"
+                    ? "Este enlace ha expirado. Solicita uno nuevo."
+                    : "Enlace inválido."}
               </div>
               <button
                 onClick={() => navigate("/login")}

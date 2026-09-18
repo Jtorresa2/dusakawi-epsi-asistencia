@@ -3,16 +3,19 @@ import { CircleArrowOutUpRight, CircleCheckBig, Ban, Clock, Fingerprint, Eye } f
 import { COLORES } from "../../../shared/constants/colores.js";
 
 const badgeColors = {
-  puntual: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
-  tardanza: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
-  ausente: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
-  justificado: { bg: COLORES.primarioClaro2, color: COLORES.primarioOscuro },
+  on_time: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
+  late: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+  absent: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
+  justified: { bg: COLORES.primarioClaro2, color: COLORES.primarioOscuro },
 };
 
 const jornadaBadgeColors = {
-  completa: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
-  abierta: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+  complete: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
+  open: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
 };
+
+const estadoLabels = { on_time: "Puntual", late: "Tardanza", absent: "Ausente", justified: "Justificado" };
+const jornadaLabels = { complete: "Completa", open: "Abierta" };
 
 const tipoIcon = {
   huella: <Fingerprint size={14} />,
@@ -159,7 +162,7 @@ export const asistenciaColumns = ({ getPiso, onDetalle }) => [
     sortable: false,
     renderCell: ({ value }) => {
       const c = jornadaBadgeColors[value] || { bg: COLORES.fondoGris2, color: COLORES.textoTerciario };
-      return <Badge label={value || "—"} bg={c.bg} color={c.color} />;
+      return <Badge label={jornadaLabels[value] || value || "—"} bg={c.bg} color={c.color} />;
     },
   },
   {
@@ -168,7 +171,7 @@ export const asistenciaColumns = ({ getPiso, onDetalle }) => [
     width: 95,
     renderCell: ({ value }) => {
       const c = badgeColors[value] || { bg: COLORES.fondoGris2, color: COLORES.textoTerciario };
-      return <Badge label={value || "—"} bg={c.bg} color={c.color} />;
+      return <Badge label={estadoLabels[value] || value || "—"} bg={c.bg} color={c.color} />;
     },
   },
   {

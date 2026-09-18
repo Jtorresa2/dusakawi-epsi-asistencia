@@ -2,6 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { menuPorRol } from "../menu";
+import { usePermissions, puedeConjunto, refreshPermissions } from "../permissions";
 import { COLORES } from "../constants/colores.js";
 
 const EXPANDIDO = 260;
@@ -21,14 +22,26 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
   const [menuAbierto, setMenuAbierto] = useState(false);
   const menuRef = useRef(null);
   const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
-  const menu = menuPorRol[usuario.rol] || [];
+  const perms = usePermissions();
+  const menuBase = menuPorRol[usuario.rol] || [];
+
+  // Once the user's permissions are loaded, keep only items whose module the
+  // user can `ver`. Before loading, fall back to the role-based menu.
+  const menu = perms
+    ? menuBase
+        .map((grupo) => ({
+          ...grupo,
+          items: grupo.items.filter((item) => !item.modulo || puedeConjunto(perms, item.modulo, "ver")),
+        }))
+        .filter((grupo) => grupo.items.length > 0)
+    : menuBase;
 
   const [seccionesAbiertas, setSeccionesAbiertas] = useState(() => {
     const inicial = {};
-    menu.forEach((grupo) => {
+    menuBase.forEach((grupo) => {
       inicial[grupo.section] = false;
     });
-    const grupoActivo = menu.find((grupo) =>
+    const grupoActivo = menuBase.find((grupo) =>
       grupo.items.some((item) => item.path === location.pathname)
     );
     if (grupoActivo) inicial[grupoActivo.section] = true;
@@ -50,6 +63,7 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
+    refreshPermissions(true);
     navigate("/login");
   };
 

@@ -32,17 +32,19 @@ export default function DetalleAsistenciaModal({ open, onClose, row }) {
   if (!open || !row) return null;
 
   const badgeColors = {
-    puntual: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
-    tardanza: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
-    ausente: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
-    justificado: { bg: COLORES.primarioClaro2, color: COLORES.primarioOscuro },
+    on_time: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
+    late: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+    absent: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
+    justified: { bg: COLORES.primarioClaro2, color: COLORES.primarioOscuro },
   };
   const ec = badgeColors[row.estado] || { bg: COLORES.fondoGris2, color: COLORES.textoTerciario };
   const jornadaBadgeColors = {
-    completa: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
-    abierta: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+    complete: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
+    open: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
   };
   const jc = jornadaBadgeColors[row.marcacion_estado] || { bg: COLORES.fondoGris2, color: COLORES.textoTerciario };
+  const estadoLabel = { on_time: "Puntual", late: "Tardanza", absent: "Ausente", justified: "Justificado" }[row.estado] || row.estado;
+  const jornadaLabel = { complete: "Completa", open: "Abierta" }[row.marcacion_estado] || row.marcacion_estado;
 
   const turnos = [
     {
@@ -61,7 +63,7 @@ export default function DetalleAsistenciaModal({ open, onClose, row }) {
       esperadoE: row.esperado_entrada_tarde,
       esperadoS: row.esperado_salida_tarde,
     },
-  ].filter((t) => t.esperadoE || t.esperadoS);
+  ].filter((t) => t.entrada || t.salida || t.esperadoE || t.esperadoS);
 
   const calculos = [
     {
@@ -135,7 +137,7 @@ export default function DetalleAsistenciaModal({ open, onClose, row }) {
                 textTransform: "capitalize",
               }}
             >
-              {row.marcacion_estado}
+              {jornadaLabel}
             </Typography>
           )}
           <Typography
@@ -150,7 +152,7 @@ export default function DetalleAsistenciaModal({ open, onClose, row }) {
               textTransform: "capitalize",
             }}
           >
-            {row.estado || "puntual"}
+            {estadoLabel || "—"}
           </Typography>
           <IconButton
             aria-label="Cerrar"
@@ -249,6 +251,11 @@ export default function DetalleAsistenciaModal({ open, onClose, row }) {
             </Box>
           </Box>
 
+          {turnos.length === 0 ? (
+            <Box sx={{ textAlign: "center", py: 2.5, color: COLORES.textoSuave, fontSize: 13, border: `1px dashed ${COLORES.borde}`, borderRadius: "14px", bgcolor: COLORES.fondoBlanco }}>
+              No hay marcaciones (reales ni esperadas) para esta fecha.
+            </Box>
+          ) : (
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
             {turnos.map((t) => {
               const IconoTurno = t.icon;
@@ -306,6 +313,7 @@ export default function DetalleAsistenciaModal({ open, onClose, row }) {
               );
             })}
           </Box>
+          )}
         </Box>
 
         {/* TARJETA 3: MÉTRICAS (KPIs) */}

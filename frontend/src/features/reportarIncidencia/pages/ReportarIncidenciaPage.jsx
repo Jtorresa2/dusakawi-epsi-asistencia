@@ -47,9 +47,9 @@ const INFO_CARDS = [
 ];
 
 const TIPOS = [
-  { value: "falla_biometrica", label: "Falla biométrica", desc: "El lector no reconoció tu huella o no pudiste marcar" },
+  { value: "biometric_failure", label: "Falla biométrica", desc: "El lector no reconoció tu huella o no pudiste marcar" },
   
-  { value: "otro", label: "Otro", desc: "Cualquier otra novedad relacionada con tu asistencia" },
+  { value: "other", label: "Otro", desc: "Cualquier otra novedad relacionada con tu asistencia" },
 ];
 
 function formatSize(bytes) {
@@ -93,7 +93,7 @@ function StepIndicator({ paso }) {
 export default function ReportarIncidenciaPage() {
   const navigate = useNavigate();
   const [paso, setPaso] = useState(1);
-  const [tipo, setTipo] = useState("falla_biometrica");
+  const [tipo, setTipo] = useState("biometric_failure");
   const [descripcion, setDescripcion] = useState("");
   const [archivo, setArchivo] = useState(null);
   const [archivoPreview, setArchivoPreview] = useState(null);
@@ -197,7 +197,7 @@ export default function ReportarIncidenciaPage() {
               sx={{ borderRadius: "10px", textTransform: "none", fontSize: 14, fontWeight: 600, color: COLORES.textoTerciario, borderColor: COLORES.borde2, "&:hover": { borderColor: COLORES.primarioOscuro, color: COLORES.primarioOscuro }, py: 1.2, px: 4 }}>
               Volver al inicio
             </Button>
-            <Button variant="contained" onClick={() => { setPaso(1); setTipo("falla_biometrica"); }}
+            <Button variant="contained" onClick={() => { setPaso(1); setTipo("biometric_failure"); }}
               sx={{ borderRadius: "10px", textTransform: "none", fontSize: 14, fontWeight: 600, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario }, py: 1.2, px: 4 }}>
               Reportar otra incidencia
             </Button>

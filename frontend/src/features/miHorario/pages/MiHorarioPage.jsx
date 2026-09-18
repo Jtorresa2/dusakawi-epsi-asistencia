@@ -43,7 +43,7 @@ export default function MiHorarioPage() {
   const detalles = (horario?.detalles || [])
     .filter((d) => DIAS.includes(d.dia_semana))
     .sort((a, b) => DIAS.indexOf(a.dia_semana) - DIAS.indexOf(b.dia_semana));
-  const esPorHoras = horario?.tipo_jornada === "por_horas";
+  const esPorHoras = horario?.tipo_jornada === "by_hours";
 
   return (
     <Box sx={{ p: 3, bgcolor: COLORES.grisAzulado, minHeight: "100vh" }}>

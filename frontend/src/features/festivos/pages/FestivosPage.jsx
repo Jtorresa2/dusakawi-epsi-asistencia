@@ -10,9 +10,9 @@ import { obtenerFestivos, crearFestivo, eliminarFestivo, actualizarFestivo, gene
 import { COLORES } from "../../../shared/constants/colores.js";
 
 const TIPOS = [
-  { value: "nacional", label: "Nacional" },
+  { value: "national", label: "Nacional" },
   { value: "regional", label: "Regional" },
-  { value: "institucional", label: "Institucional" },
+  { value: "institutional", label: "Institucional" },
 ];
 
 const estiloBtn = {
@@ -71,11 +71,11 @@ const selectMenuSx = {
 export default function FestivosPage() {
   const [festivos, setFestivos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ fecha: "", nombre: "", tipo: "nacional" });
+  const [form, setForm] = useState({ fecha: "", nombre: "", tipo: "national" });
   const [guardando, setGuardando] = useState(false);
   const [dialogEliminar, setDialogEliminar] = useState(null);
   const [dialogEditar, setDialogEditar] = useState(null);
-  const [editForm, setEditForm] = useState({ fecha: "", nombre: "", tipo: "nacional", activo: 1 });
+  const [editForm, setEditForm] = useState({ fecha: "", nombre: "", tipo: "national", activo: 1 });
   const [editando, setEditando] = useState(false);
   const [snack, setSnack] = useState({ open: false, msg: "", severity: "success" });
   const [yearGen, setYearGen] = useState(new Date().getFullYear());
@@ -99,7 +99,7 @@ export default function FestivosPage() {
     try {
       await crearFestivo(form);
       setSnack({ open: true, msg: "Festivo agregado", severity: "success" });
-      setForm({ fecha: "", nombre: "", tipo: "nacional" });
+      setForm({ fecha: "", nombre: "", tipo: "national" });
       await cargar();
     } catch {
       setSnack({ open: true, msg: "Error al guardar el festivo", severity: "error" });
@@ -121,7 +121,7 @@ export default function FestivosPage() {
 
   const abrirEditar = (row) => {
     const d = row.fecha ? new Date(row.fecha).toISOString().split("T")[0] : "";
-    setEditForm({ fecha: d, nombre: row.nombre || "", tipo: row.tipo || "nacional", activo: row.activo ? 1 : 0 });
+    setEditForm({ fecha: d, nombre: row.nombre || "", tipo: row.tipo || "national", activo: row.activo ? 1 : 0 });
     setDialogEditar(row);
   };
 
@@ -340,7 +340,7 @@ export default function FestivosPage() {
               <Box>
                 <Typography sx={labelSx}>Tipo de festivo {asterisco}</Typography>
                 <Select
-                  value={editForm.tipo || "nacional"}
+                  value={editForm.tipo || "national"}
                   onChange={(e) => setEditForm({ ...editForm, tipo: e.target.value })}
                   fullWidth
                   size="small"

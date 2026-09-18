@@ -5,18 +5,18 @@ import { COLORES } from "../../../shared/constants/colores.js";
 export default function ResumenCards({ filtrados, filtroEstado, activoCard, onCardClick }) {
   const resumen = {
     total: filtrados.length,
-    puntuales: filtrados.filter((r) => r.estado === "puntual").length,
-    tardanzas: filtrados.filter((r) => r.estado === "tardanza").length,
-    ausentes: filtrados.filter((r) => r.estado === "ausente").length,
-    justificados: filtrados.filter((r) => r.estado === "justificado").length,
+    puntuales: filtrados.filter((r) => r.estado === "on_time").length,
+    tardanzas: filtrados.filter((r) => r.estado === "late").length,
+    ausentes: filtrados.filter((r) => r.estado === "absent").length,
+    justificados: filtrados.filter((r) => r.estado === "justified").length,
   };
 
   const cards = [
     { icon: <Users size={20} />, value: resumen.total, label: "Total registros", estadoKey: "", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
-    { icon: <UserCheck size={20} />, value: resumen.puntuales, label: "Puntuales", estadoKey: "puntual", color: COLORES.verdeTexto, bg: COLORES.successClaro },
-    { icon: <Clock size={20} />, value: resumen.tardanzas, label: "Tardanzas", estadoKey: "tardanza", color: COLORES.warningOscuro, bg: COLORES.warningFondo },
-    { icon: <UserX size={20} />, value: resumen.ausentes, label: "Ausentes", estadoKey: "ausente", color: COLORES.danger, bg: COLORES.dangerFondo2 },
-    { icon: <FileText size={20} />, value: resumen.justificados, label: "Justificados", estadoKey: "justificado", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
+    { icon: <UserCheck size={20} />, value: resumen.puntuales, label: "Puntuales", estadoKey: "on_time", color: COLORES.verdeTexto, bg: COLORES.successClaro },
+    { icon: <Clock size={20} />, value: resumen.tardanzas, label: "Tardanzas", estadoKey: "late", color: COLORES.warningOscuro, bg: COLORES.warningFondo },
+    { icon: <UserX size={20} />, value: resumen.ausentes, label: "Ausentes", estadoKey: "absent", color: COLORES.danger, bg: COLORES.dangerFondo2 },
+    { icon: <FileText size={20} />, value: resumen.justificados, label: "Justificados", estadoKey: "justified", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
   ];
 
   return (

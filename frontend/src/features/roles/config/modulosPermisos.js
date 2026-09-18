@@ -12,6 +12,7 @@ export const MODULOS_PERMISOS = [
     modulos: [
       { clave: "personal", nombre: "Personal" },
       { clave: "asistencia", nombre: "Asistencia" },
+      { clave: "seguimiento", nombre: "Seguimiento de Asistencia" },
       { clave: "horarios", nombre: "Horarios" },
       { clave: "incidencias", nombre: "Incidencias" },
       { clave: "novedades", nombre: "Novedades Laborales" },
@@ -46,7 +47,12 @@ export const MODULOS_PERMISOS = [
   {
     id: "mi_cuenta",
     titulo: "Mi Cuenta",
-    modulos: [{ clave: "perfil", nombre: "Mi Perfil" }],
+    modulos: [
+      { clave: "perfil", nombre: "Mi Perfil" },
+      { clave: "mi_asistencia", nombre: "Mi Asistencia" },
+      { clave: "reportar_incidencia", nombre: "Reportar Incidencia" },
+      { clave: "mis_solicitudes", nombre: "Mis Solicitudes" },
+    ],
   },
 ];
 

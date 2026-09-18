@@ -58,7 +58,7 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [activo, setActivo] = useState(true);
-  const [tipoJornada, setTipoJornada] = useState("fija");
+  const [tipoJornada, setTipoJornada] = useState("fixed");
   const [controlarTardanzas, setControlarTardanzas] = useState(true);
   const [horasEsperadas, setHorasEsperadas] = useState("");
   const [dias, setDias] = useState([]);
@@ -69,7 +69,7 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
       setNombre("");
       setDescripcion("");
       setActivo(true);
-      setTipoJornada("fija");
+      setTipoJornada("fixed");
       setControlarTardanzas(true);
       setHorasEsperadas("");
       setDias(DIAS.map(diaVacio));
@@ -90,7 +90,7 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
       const res = await crearHorario({
         nombre: nombre.trim(),
         // "Controlar tardanzas" -> estricto | "No controlar tardanzas" -> flexible
-        modalidad: controlarTardanzas ? "estricto" : "flexible",
+        modalidad: controlarTardanzas ? "strict" : "flexible",
         tipo_jornada: tipoJornada,
         descripcion: descripcion.trim() || null,
         horas_esperadas: horasEsperadas || null,
@@ -120,8 +120,8 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
   // Vista previa dinámica
   const vistaPrevia = [
     controlarTardanzas ? "Controlará tardanzas." : "No controlará tardanzas.",
-    tipoJornada === "fija" ? "Utilizará horarios definidos." : "Evaluará horas trabajadas.",
-    tipoJornada === "fija"
+    tipoJornada === "fixed" ? "Utilizará horarios definidos." : "Evaluará horas trabajadas.",
+    tipoJornada === "fixed"
       ? "Permitirá calcular ausencias."
       : "Comparará las horas registradas con las horas esperadas.",
   ];
@@ -197,25 +197,25 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
               Elige el tipo de jornada que aplicarán los empleados.
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <Box sx={tarjetaOpcion(tipoJornada === "fija")} onClick={() => setTipoJornada("fija")}>
+              <Box sx={tarjetaOpcion(tipoJornada === "fixed")} onClick={() => setTipoJornada("fixed")}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 0.5 }}>
                   <Box sx={{ width: 32, height: 32, borderRadius: "9px", bgcolor: PALETA.verdeClaro, color: PALETA.verdeOscuro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <Clock size={16} />
                   </Box>
                   <Typography sx={{ fontSize: 13, fontWeight: 700, color: PALETA.texto }}>Horario fijo</Typography>
-                  {tipoJornada === "fija" && <CheckCircle2 size={15} color={PALETA.verdeOscuro} style={{ marginLeft: "auto" }} />}
+                  {tipoJornada === "fixed" && <CheckCircle2 size={15} color={PALETA.verdeOscuro} style={{ marginLeft: "auto" }} />}
                 </Box>
                 <Typography sx={{ fontSize: 11, color: PALETA.grisTexto, lineHeight: 1.4 }}>
                   El empleado debe cumplir horarios definidos de entrada y salida.
                 </Typography>
               </Box>
-              <Box sx={tarjetaOpcion(tipoJornada === "por_horas")} onClick={() => setTipoJornada("por_horas")}>
+              <Box sx={tarjetaOpcion(tipoJornada === "by_hours")} onClick={() => setTipoJornada("by_hours")}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 0.5 }}>
                   <Box sx={{ width: 32, height: 32, borderRadius: "9px", bgcolor: PALETA.verdeClaro, color: PALETA.verdeOscuro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <Timer size={16} />
                   </Box>
                   <Typography sx={{ fontSize: 13, fontWeight: 700, color: PALETA.texto }}>Jornada por horas</Typography>
-                  {tipoJornada === "por_horas" && <CheckCircle2 size={15} color={PALETA.verdeOscuro} style={{ marginLeft: "auto" }} />}
+                  {tipoJornada === "by_hours" && <CheckCircle2 size={15} color={PALETA.verdeOscuro} style={{ marginLeft: "auto" }} />}
                 </Box>
                 <Typography sx={{ fontSize: 11, color: PALETA.grisTexto, lineHeight: 1.4 }}>
                   El sistema evaluará únicamente las horas trabajadas.
@@ -261,7 +261,7 @@ export default function NuevoHorarioModal({ open, onClose, onNotificar, onReload
         </Box>
 
         {/* CONFIGURACIÓN CONDICIONAL */}
-        {tipoJornada === "fija" ? (
+        {tipoJornada === "fixed" ? (
           <Box sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", bgcolor: COLORES.fondoBlanco, p: 1.75 }}>
             <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: PALETA.texto, mb: 0.25 }}>
               Configuración semanal

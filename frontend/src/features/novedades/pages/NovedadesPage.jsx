@@ -42,7 +42,7 @@ export default function NovedadesPage() {
   const [areaFiltro, setAreaFiltro] = useState("Todas");
   const [busqueda, setBusqueda] = useState("");
 
-  const [form, setForm] = useState({ usuario_id: "", fecha_desde: "", fecha_hasta: "", motivo: "", tipo_novedad: "permiso", modalidad: "dia_completo", hora_desde: "", hora_hasta: "" });
+  const [form, setForm] = useState({ usuario_id: "", fecha_desde: "", fecha_hasta: "", motivo: "", tipo_novedad: "permission", modalidad: "full_day", hora_desde: "", hora_hasta: "" });
   const [guardando, setGuardando] = useState(false);
   const [snack, setSnack] = useState({ open: false, msg: "", severity: "success" });
   const [novedadSeleccionada, setNovedadSeleccionada] = useState(null);
@@ -68,8 +68,8 @@ export default function NovedadesPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "tipo_novedad") {
-      if (value !== "permiso") {
-        setForm({ ...form, tipo_novedad: value, modalidad: "dia_completo", hora_desde: "", hora_hasta: "" });
+      if (value !== "permission") {
+        setForm({ ...form, tipo_novedad: value, modalidad: "full_day", hora_desde: "", hora_hasta: "" });
       } else {
         setForm({ ...form, tipo_novedad: value });
       }
@@ -87,23 +87,23 @@ export default function NovedadesPage() {
       setSnack({ open: true, msg: "La fecha 'hasta' debe ser mayor o igual a 'desde'", severity: "error" });
       return;
     }
-    if (form.modalidad === "horas" && (!form.hora_desde || !form.hora_hasta)) {
+    if (form.modalidad === "hours" && (!form.hora_desde || !form.hora_hasta)) {
       setSnack({ open: true, msg: "Indicá las horas desde y hasta para la novedad por horas", severity: "error" });
       return;
     }
-    if (form.modalidad === "horas" && form.hora_desde >= form.hora_hasta) {
+    if (form.modalidad === "hours" && form.hora_desde >= form.hora_hasta) {
       setSnack({ open: true, msg: "La hora 'hasta' debe ser posterior a 'desde'", severity: "error" });
       return;
     }
     setGuardando(true);
     try {
-      const tipoLabel = { dia_completo: "día completo", horas: "por horas", manana: "solo mañana", tarde: "solo tarde" }[form.modalidad] || "";
+      const tipoLabel = { full_day: "día completo", hours: "por horas", morning: "solo mañana", afternoon: "solo tarde" }[form.modalidad] || "";
       const res = await crearNovedad(form);
       setSnack({
         open: true, severity: "success",
-        msg: `Novedad registrada (${tipoLabel})${res.dias_generados ? form.tipo_novedad === "comision" ? ` — ${res.dias_generados} día(s) en comisión` : ` — ${res.dias_generados} día(s) justificado(s)` : " — el empleado marca la otra mitad normalmente"}`,
+        msg: `Novedad registrada (${tipoLabel})${res.dias_generados ? form.tipo_novedad === "commission" ? ` — ${res.dias_generados} día(s) en comisión` : ` — ${res.dias_generados} día(s) justificado(s)` : " — el empleado marca la otra mitad normalmente"}`,
       });
-      setForm({ usuario_id: "", fecha_desde: "", fecha_hasta: "", motivo: "", tipo_novedad: "permiso", modalidad: "dia_completo", hora_desde: "", hora_hasta: "" });
+      setForm({ usuario_id: "", fecha_desde: "", fecha_hasta: "", motivo: "", tipo_novedad: "permission", modalidad: "full_day", hora_desde: "", hora_hasta: "" });
       const updated = await obtenerNovedades();
       setNovedades(updated.novedades || []);
     } catch {
@@ -155,33 +155,33 @@ export default function NovedadesPage() {
     { field: "motivo", headerName: "Motivo", width: 200 },
     { field: "tipo_novedad", headerName: "Tipo", width: 140,
       renderCell: ({ row }) => {
-        const t = row.tipo_novedad || "permiso";
+        const t = row.tipo_novedad || "permission";
         const cfg = {
-          permiso: { label: "Permiso", color: COLORES.primario, bg: COLORES.primarioClaro2, icon: <FileText size={12} /> },
-          vacaciones: { label: "Vacaciones", color: COLORES.primario, bg: COLORES.primarioClaro, icon: <CalendarDays size={12} /> },
-          incapacidad: { label: "Incapacidad", color: COLORES.danger, bg: COLORES.dangerFondo, icon: <AlertCircle size={12} /> },
-          comision: { label: "Comisión", color: COLORES.danger, bg: COLORES.dangerFondo2, icon: <UserCheck size={12} /> },
-          licencia: { label: "Licencia", color: COLORES.verdeTexto, bg: COLORES.successClaro, icon: <FileText size={12} /> },
+          permission: { label: "Permiso", color: COLORES.primario, bg: COLORES.primarioClaro2, icon: <FileText size={12} /> },
+          vacation: { label: "Vacaciones", color: COLORES.primario, bg: COLORES.primarioClaro, icon: <CalendarDays size={12} /> },
+          sick_leave: { label: "Incapacidad", color: COLORES.danger, bg: COLORES.dangerFondo, icon: <AlertCircle size={12} /> },
+          commission: { label: "Comisión", color: COLORES.danger, bg: COLORES.dangerFondo2, icon: <UserCheck size={12} /> },
+          license: { label: "Licencia", color: COLORES.verdeTexto, bg: COLORES.successClaro, icon: <FileText size={12} /> },
           suspension: { label: "Suspensión", color: COLORES.textoTerciario, bg: COLORES.fondoGris2, icon: <ShieldAlert size={12} /> },
-        }[t] || cfg.permiso;
+        }[t] || { label: t, color: COLORES.textoPrimario, bg: COLORES.fondoGris2, icon: <FileText size={12} /> };
         return <Chip icon={cfg.icon} label={cfg.label} size="small" sx={{ fontWeight: 600, fontSize: 11, bgcolor: cfg.bg, color: cfg.color, borderRadius: "8px" }} />;
       },
     },
     { field: "tipo", headerName: "Modalidad", width: 120,
       renderCell: ({ row }) => {
-        const t = row.tipo || "dia_completo";
+        const t = row.tipo || "full_day";
         const cfg = {
-          dia_completo: { label: "Día completo", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro, icon: <CalendarDays size={12} /> },
-          manana: { label: "Jornada mañana", color: COLORES.warningOscuro, bg: COLORES.warningFondo, icon: <Sun size={12} /> },
-          tarde: { label: "Jornada tarde", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro, icon: <Moon size={12} /> },
-          horas: { label: "Por horas", color: COLORES.primario, bg: COLORES.primarioClaro2, icon: <Clock size={12} /> },
+          full_day: { label: "Día completo", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro, icon: <CalendarDays size={12} /> },
+          morning: { label: "Jornada mañana", color: COLORES.warningOscuro, bg: COLORES.warningFondo, icon: <Sun size={12} /> },
+          afternoon: { label: "Jornada tarde", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro, icon: <Moon size={12} /> },
+          hours: { label: "Por horas", color: COLORES.primario, bg: COLORES.primarioClaro2, icon: <Clock size={12} /> },
         }[t];
         return <Chip icon={cfg?.icon} label={cfg?.label || t} size="small" sx={{ fontWeight: 600, fontSize: 11, bgcolor: cfg?.bg || COLORES.fondoGris2, color: cfg?.color || COLORES.textoPrimario, borderRadius: "8px" }} />;
       },
     },
     { field: "horario", headerName: "Horario", width: 110,
       renderCell: ({ row }) => {
-        if (row.tipo !== "horas" || !row.hora_desde) return "—";
+        if (row.tipo !== "hours" || !row.hora_desde) return "—";
         return `${(row.hora_desde || "").substring(0, 5)} – ${(row.hora_hasta || "").substring(0, 5)}`;
       },
     },
@@ -283,35 +283,35 @@ export default function NovedadesPage() {
             <Typography sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Hasta</Typography>
             <TextField type="date" size="small" name="fecha_hasta" value={form.fecha_hasta}
               onChange={handleChange}
-              disabled={["manana", "tarde"].includes(form.modalidad)}
-              sx={{ width: 160, ...fieldSx, "& .MuiInputBase-root": { opacity: ["manana", "tarde"].includes(form.modalidad) ? 0.6 : 1 } }}
+              disabled={["morning", "afternoon"].includes(form.modalidad)}
+              sx={{ width: 160, ...fieldSx, "& .MuiInputBase-root": { opacity: ["morning", "afternoon"].includes(form.modalidad) ? 0.6 : 1 } }}
               slotProps={{ inputLabel: { shrink: true } }} />
           </Box>
           <Box>
             <Typography sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Tipo de novedad</Typography>
             <TextField select size="small" name="tipo_novedad" value={form.tipo_novedad} onChange={handleChange}
               sx={{ width: 180, ...fieldSx }}>
-              <MenuItem value="permiso"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><FileText size={14} /> Permiso</Box></MenuItem>
-              <MenuItem value="vacaciones"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><CalendarDays size={14} /> Vacaciones</Box></MenuItem>
-              <MenuItem value="incapacidad"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><AlertCircle size={14} /> Incapacidad</Box></MenuItem>
-              <MenuItem value="comision"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><UserCheck size={14} /> Comisión</Box></MenuItem>
-              <MenuItem value="licencia"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><FileText size={14} /> Licencia</Box></MenuItem>
+              <MenuItem value="permission"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><FileText size={14} /> Permiso</Box></MenuItem>
+              <MenuItem value="vacation"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><CalendarDays size={14} /> Vacaciones</Box></MenuItem>
+              <MenuItem value="sick_leave"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><AlertCircle size={14} /> Incapacidad</Box></MenuItem>
+              <MenuItem value="commission"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><UserCheck size={14} /> Comisión</Box></MenuItem>
+              <MenuItem value="license"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><FileText size={14} /> Licencia</Box></MenuItem>
               <MenuItem value="suspension"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><ShieldAlert size={14} /> Suspensión</Box></MenuItem>
             </TextField>
           </Box>
-          {form.tipo_novedad === "permiso" && (
+          {form.tipo_novedad === "permission" && (
             <Box>
               <Typography sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Modalidad</Typography>
               <TextField select size="small" name="modalidad" value={form.modalidad} onChange={handleChange}
                 sx={{ width: 160, ...fieldSx }}>
-                <MenuItem value="dia_completo"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><CalendarDays size={14} /> Día completo</Box></MenuItem>
-                <MenuItem value="horas"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><Clock size={14} /> Por horas</Box></MenuItem>
-                <MenuItem value="manana"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><Sun size={14} />  Jornada mañana </Box></MenuItem>
-                <MenuItem value="tarde"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><Moon size={14} />  Jornada tarde </Box></MenuItem>
+                <MenuItem value="full_day"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><CalendarDays size={14} /> Día completo</Box></MenuItem>
+                <MenuItem value="hours"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><Clock size={14} /> Por horas</Box></MenuItem>
+                <MenuItem value="morning"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><Sun size={14} />  Jornada mañana </Box></MenuItem>
+                <MenuItem value="afternoon"><Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}><Moon size={14} />  Jornada tarde </Box></MenuItem>
               </TextField>
             </Box>
           )}
-          {form.modalidad === "horas" && (
+          {form.modalidad === "hours" && (
             <>
               <Box>
                 <Typography sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Hora inicio</Typography>

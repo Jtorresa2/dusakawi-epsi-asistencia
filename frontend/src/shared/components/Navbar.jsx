@@ -76,7 +76,7 @@ export default function Navbar({ abierto, setAbierto, isMobile }) {
     const cargarAlertas = async () => {
       if (!puedeVerAlertas) return;
       try {
-        const data = await obtenerIncidencias({ estado: "pendiente", prioridad: "alta" });
+        const data = await obtenerIncidencias({ estado: "pending", prioridad: "high" });
         if (montado) setAlertas(Array.isArray(data) ? data : []);
       } catch {
         // silencioso

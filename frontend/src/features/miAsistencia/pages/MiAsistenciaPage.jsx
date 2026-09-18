@@ -8,10 +8,10 @@ import { obtenerPersonalPorId } from "../../personal/personal.api";
 import { COLORES } from "../../../shared/constants/colores.js";
 
 const ESTADO_COLORS = {
-  Puntual: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
-  Tardanza: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
-  Ausente: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
-  Justificado: { bg: COLORES.primarioClaro2, color: COLORES.primarioOscuro },
+  on_time: { label: "Puntual", bg: COLORES.successFondo, color: COLORES.verdeTexto },
+  late: { label: "Tardanza", bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+  absent: { label: "Ausente", bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
+  justified: { label: "Justificado", bg: COLORES.primarioClaro2, color: COLORES.primarioOscuro },
 };
 
 export default function MiAsistenciaPage() {
@@ -47,9 +47,9 @@ export default function MiAsistenciaPage() {
   }, [mes, anio]);
 
   const total = registros.length;
-  const presentes = registros.filter((r) => r.estado === "Puntual" || r.estado === "Tardanza").length;
-  const tardanzas = registros.filter((r) => r.estado === "Tardanza").length;
-  const ausentes = registros.filter((r) => r.estado === "Ausente").length;
+  const presentes = registros.filter((r) => r.estado === "on_time" || r.estado === "late").length;
+  const tardanzas = registros.filter((r) => r.estado === "late").length;
+  const ausentes = registros.filter((r) => r.estado === "absent").length;
 
   const columns = [
     {
@@ -83,8 +83,8 @@ export default function MiAsistenciaPage() {
       flex: 1,
       minWidth: 120,
       renderCell: (params) => {
-        const ec = ESTADO_COLORS[params.value] || { bg: COLORES.fondoGris2, color: COLORES.textoSecundario };
-        return <Chip label={params.value} size="small" sx={{ borderRadius: "8px", fontSize: 12, fontWeight: 600, bgcolor: ec.bg, color: ec.color }} />;
+        const ec = ESTADO_COLORS[params.value] || { label: params.value, bg: COLORES.fondoGris2, color: COLORES.textoSecundario };
+        return <Chip label={ec.label} size="small" sx={{ borderRadius: "8px", fontSize: 12, fontWeight: 600, bgcolor: ec.bg, color: ec.color }} />;
       },
     },
   ];

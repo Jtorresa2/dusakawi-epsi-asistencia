@@ -12,6 +12,7 @@ import { obtenerPersonalPorId, actualizarPersonal } from "../personal.api";
 import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 import { obtenerHorarios, asignarHorario, desasignarHorario } from "../../horarios/horario.api";
+import { onlyDigits } from "../../../shared/validators";
 import { COLORES } from "../../../shared/constants/colores.js";
 
 const MONTHS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -125,15 +126,15 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
       const payload = { ...form };
       let horarioAsignado = null;
       if (editando === "laboral") {
-        payload.area_id = form.area_id ? Number(form.area_id) : null;
-        payload.cargo_id = form.cargo_id ? Number(form.cargo_id) : null;
+        payload.area_id = form.area_id || null;
+        payload.cargo_id = form.cargo_id || null;
         delete payload.horario_id;
         delete payload.area;
         delete payload.cargo;
         if (form.horario_id && String(form.horario_id) !== String(data?.horario_id)) {
           await asignarHorario({
             usuario_id: id,
-            horario_id: Number(form.horario_id),
+            horario_id: form.horario_id,
             motivo: "Asignación desde perfil",
           });
           horarioAsignado = true;
@@ -179,7 +180,8 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
             <TextField
               fullWidth size="small" type={field.type || "text"}
               value={form[field.key] || ""}
-              onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
+              onChange={(e) => setForm({ ...form, [field.key]: ["cedula", "telefono"].includes(field.key) ? onlyDigits(e.target.value) : e.target.value })}
+              slotProps={{ htmlInput: ["cedula", "telefono"].includes(field.key) ? { inputMode: "numeric", maxLength: 15 } : undefined }}
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: 13, background: COLORES.fondoBlanco, "& fieldset": { borderColor: COLORES.textoPrimario }, "&:hover fieldset": { borderColor: COLORES.textoPrimario }, "&.Mui-focused fieldset": { borderColor: COLORES.textoPrimario } } }}
             />
           ) : (

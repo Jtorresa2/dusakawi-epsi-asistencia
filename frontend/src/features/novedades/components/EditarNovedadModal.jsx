@@ -37,25 +37,25 @@ const labelSx = { fontSize: 12, fontWeight: 600, color: PALETA.grisTexto, mb: 0.
 const asterisco = <span style={{ color: PALETA.rojo }}>*</span>;
 
 const TIPOS_NOVEDAD = [
-  { value: "permiso", label: "Permiso", icon: <FileText size={15} /> },
-  { value: "vacaciones", label: "Vacaciones", icon: <CalendarDays size={15} /> },
-  { value: "incapacidad", label: "Incapacidad", icon: <AlertCircle size={15} /> },
-  { value: "comision", label: "Comisión", icon: <UserCheck size={15} /> },
-  { value: "licencia", label: "Licencia", icon: <FileText size={15} /> },
+  { value: "permission", label: "Permiso", icon: <FileText size={15} /> },
+  { value: "vacation", label: "Vacaciones", icon: <CalendarDays size={15} /> },
+  { value: "sick_leave", label: "Incapacidad", icon: <AlertCircle size={15} /> },
+  { value: "commission", label: "Comisión", icon: <UserCheck size={15} /> },
+  { value: "license", label: "Licencia", icon: <FileText size={15} /> },
   { value: "suspension", label: "Suspensión", icon: <ShieldAlert size={15} /> },
 ];
 
 const MODALIDADES = [
-  { value: "dia_completo", label: "Día completo", icon: <CalendarDays size={15} /> },
-  { value: "horas", label: "Por horas", icon: <Clock size={15} /> },
-  { value: "manana", label: "Toda la mañana", icon: <Sun size={15} /> },
-  { value: "tarde", label: "Toda la tarde", icon: <Moon size={15} /> },
+  { value: "full_day", label: "Día completo", icon: <CalendarDays size={15} /> },
+  { value: "hours", label: "Por horas", icon: <Clock size={15} /> },
+  { value: "morning", label: "Toda la mañana", icon: <Sun size={15} /> },
+  { value: "afternoon", label: "Toda la tarde", icon: <Moon size={15} /> },
 ];
 
 export default function EditarNovedadModal({ open, onClose, novedad, empleados, onSaved }) {
   const [form, setForm] = useState({
     usuario_id: "", fecha_desde: "", fecha_hasta: "", motivo: "", observaciones: "",
-    tipo_novedad: "permiso", modalidad: "dia_completo",
+    tipo_novedad: "permission", modalidad: "full_day",
     hora_desde: "", hora_hasta: "",
   });
   const [formInicial, setFormInicial] = useState(null);
@@ -71,8 +71,8 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
         fecha_hasta: novedad.fecha_hasta ? new Date(novedad.fecha_hasta).toISOString().split("T")[0] : "",
         motivo: novedad.motivo || "",
         observaciones: novedad.observaciones || "",
-        tipo_novedad: novedad.tipo_novedad || "permiso",
-        modalidad: novedad.tipo || "dia_completo",
+        tipo_novedad: novedad.tipo_novedad || "permission",
+        modalidad: novedad.tipo || "full_day",
         hora_desde: novedad.hora_desde ? novedad.hora_desde.substring(0, 5) : "",
         hora_hasta: novedad.hora_hasta ? novedad.hora_hasta.substring(0, 5) : "",
       };
@@ -87,8 +87,8 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "tipo_novedad") {
-      if (value !== "permiso") {
-        setForm((prev) => ({ ...prev, tipo_novedad: value, modalidad: "dia_completo", hora_desde: "", hora_hasta: "" }));
+      if (value !== "permission") {
+        setForm((prev) => ({ ...prev, tipo_novedad: value, modalidad: "full_day", hora_desde: "", hora_hasta: "" }));
       } else {
         setForm((prev) => ({ ...prev, tipo_novedad: value }));
       }
@@ -106,7 +106,7 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
     if (form.fecha_desde && form.fecha_hasta && form.fecha_desde > form.fecha_hasta) {
       e.fecha_hasta = "La fecha 'hasta' debe ser mayor o igual a 'desde'";
     }
-    if (form.modalidad === "horas") {
+    if (form.modalidad === "hours") {
       if (!form.hora_desde) e.hora_desde = "Campo obligatorio";
       if (!form.hora_hasta) e.hora_hasta = "Campo obligatorio";
       if (form.hora_desde && form.hora_hasta && form.hora_desde >= form.hora_hasta) {
@@ -221,8 +221,8 @@ export default function EditarNovedadModal({ open, onClose, novedad, empleados, 
           </Box>
 
           {/* FILA 2b — Modalidad (solo permiso) + Horario (solo horas) */}
-          {form.tipo_novedad === "permiso" && (
-            form.modalidad === "horas" ? (
+          {form.tipo_novedad === "permission" && (
+            form.modalidad === "hours" ? (
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" }, gap: 1.5 }}>
                 <Box>
                   <Typography sx={labelSx}>Modalidad {asterisco}</Typography>

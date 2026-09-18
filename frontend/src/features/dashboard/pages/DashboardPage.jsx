@@ -66,7 +66,7 @@ function EmployeeDashboard({ usuario }) {
     : null;
   const horarioNombre = miHorario?.asignado ? miHorario.horario.nombre : "";
   const esFlexible = miHorario?.asignado &&
-    (miHorario.horario.modalidad === "flexible" || miHorario.horario.tipo_jornada === "por_horas");
+    (miHorario.horario.modalidad === "flexible" || miHorario.horario.tipo_jornada === "by_hours");
 
   const myCards = [
     { title: "Mi puntualidad", value: `${data.puntualidad}%`, icon: <Clock3 />, color: COLORES.primario },

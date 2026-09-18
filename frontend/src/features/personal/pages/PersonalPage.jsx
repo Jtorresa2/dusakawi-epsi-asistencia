@@ -6,19 +6,21 @@ import {
   Avatar, Select, MenuItem, InputLabel, FormControl, Switch, FormControlLabel,
   Dialog, DialogTitle, DialogContent, DialogActions, Divider, InputAdornment,
 } from "@mui/material";
-import { Plus, Edit3, Trash2, Eye, Search, X, Users, UserCheck, UserX, Building2, User, Briefcase, KeyRound, RefreshCw, Layers, ShieldCheck, Clock, CalendarDays } from "lucide-react";
+import { Plus, Edit3, Trash2, Eye, Search, X, Users, UserCheck, UserX, Building2, User, Briefcase, KeyRound, UserPlus, Layers, ShieldCheck, Clock, CalendarDays } from "lucide-react";
 import {
   obtenerPersonal, crearPersonal, actualizarPersonal, eliminarPersonal,
   obtenerRoles, generarUsuariosMasivos,
 } from "../personal.api";
 import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
+import { obtenerHorarios, asignarHorario, desasignarHorario } from "../../horarios/horario.api";
 import PersonalPerfilModal from "../components/PersonalPerfilModal";
+import { onlyDigits } from "../../../shared/validators";
 import { COLORES } from "../../../shared/constants/colores.js";
 
 const initialForm = {
   cedula: "", nombre: "", apellido: "", correo: "", telefono: "", fecha_nacimiento: "",
-  area_id: "", cargo_id: "", piso: "", rol_id: "", username: "", password: "", activo: true,
+  area_id: "", cargo_id: "", piso: "", rol_id: "", horario_id: "", username: "", password: "", activo: true,
 };
 
 const ESTADOS_FILTRO = ["Todos", "Activo", "Inactivo"];
@@ -77,18 +79,13 @@ const modalSeccionCard = {
 const modalSeccionTitulo = { fontSize: 13, fontWeight: 700, color: COLORES.textoPrimario, display: "flex", alignItems: "center", gap: 1 };
 const modalSeccionSubtitulo = { fontSize: 11, color: COLORES.textoSuave, mt: 0.25 };
 
-// Genera una contraseña temporal segura
-const generarPasswordTemporal = (len = 10) => {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#";
-  return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-};
-
 export default function PersonalPage() {
   // ─── Datos ────────────────────────────────────────────────────────────────
   const [personal, setPersonal] = useState([]);
   const [roles, setRoles] = useState([]);
   const [areas, setAreas] = useState([]);
   const [cargos, setCargos] = useState([]);
+  const [horarios, setHorarios] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [perfilId, setPerfilId] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -124,6 +121,7 @@ export default function PersonalPage() {
     cargarDatos();
     fetchAreas();
     fetchCargos();
+    fetchHorarios();
   }, [cargoFiltro, areaFiltro]);
 
   const cargarDatos = async () => {
@@ -151,6 +149,10 @@ export default function PersonalPage() {
 
   const fetchCargos = async () => {
     try { setCargos((await obtenerCargos()) || []); } catch {}
+  };
+
+  const fetchHorarios = async () => {
+    try { setHorarios((await obtenerHorarios()) || []); } catch {}
   };
 
   // ─── Toast ────────────────────────────────────────────────────────────────
@@ -200,6 +202,7 @@ export default function PersonalPage() {
       cargo_id: e.cargo_id ? String(e.cargo_id) : "",
       piso: e.piso ?? "",
       rol_id: e.rol_id ? String(e.rol_id) : "",
+      horario_id: e.horario_id ? String(e.horario_id) : "",
       username: e.username || "",
       password: "",
       activo: isActive(e),
@@ -209,10 +212,16 @@ export default function PersonalPage() {
     setModalAbierto(true);
   };
 
-  const handleGenerarPassword = () => {
-    const pwd = generarPasswordTemporal();
-    setForm((f) => ({ ...f, password: pwd }));
-    setConfirmPassword(pwd);
+  const handleGenerarUsuario = () => {
+    // Same formula as the backend: initial + first surname + last 3 digits of the cc.
+    const normalizar = (s) =>
+      s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+    const primeraPalabra = (s) => (s || "").trim().split(/\s+/)[0] || "";
+    const inicial = (normalizar(primeraPalabra(form.nombre)) || "u").charAt(0);
+    const apellidoNorm = normalizar(primeraPalabra(form.apellido) || "usuario").slice(0, 12);
+    const digitos = String(form.cedula || "").replace(/\D/g, "").slice(-3);
+    const sufijo = digitos || String(Math.floor(Math.random() * 900) + 100);
+    setForm((f) => ({ ...f, username: `${inicial}${apellidoNorm}${sufijo}` }));
   };
 
   const handleGuardar = async () => {
@@ -224,20 +233,35 @@ export default function PersonalPage() {
     }
     setGuardando(true);
     try {
+      const { horario_id: horarioSel, ...rest } = form;
       const payload = {
-        ...form,
-        area_id: form.area_id ? Number(form.area_id) : null,
-        cargo_id: form.cargo_id ? Number(form.cargo_id) : null,
-        rol_id: form.rol_id ? Number(form.rol_id) : null,
+        ...rest,
+        area_id: form.area_id || null,
+        cargo_id: form.cargo_id || null,
+        rol_id: form.rol_id || null,
         piso: form.piso !== "" && form.piso !== null ? Number(form.piso) : null,
         activo: form.activo ? 1 : 0,
       };
       if (editando) {
         const res = await actualizarPersonal(editando.id, payload);
+        // Sincroniza el horario asignado (asignar/desasignar) si cambió.
+        const original = editando.horario_id ? String(editando.horario_id) : "";
+        const nuevo = horarioSel || "";
+        if (nuevo !== original) {
+          if (nuevo) await asignarHorario({ usuario_id: editando.id, horario_id: nuevo, motivo: "Asignación desde edición de colaborador" });
+          else await desasignarHorario(editando.id);
+        }
         mostrarToast(res?.mensaje || "Empleado actualizado correctamente", "ok");
       } else {
         const res = await crearPersonal(payload);
-        const extra = res?.password ? ` — Usuario: ${res.username}, Contraseña: ${res.password}` : "";
+        if (horarioSel) {
+          await asignarHorario({ usuario_id: res.id, horario_id: horarioSel, motivo: "Asignación desde creación de colaborador" });
+        }
+        const extra = res?.password
+          ? ` — Usuario: ${res.username}, Contraseña: ${res.password}`
+          : res?.email_enviado
+            ? ` — Usuario: ${res.username}. Le enviamos al correo el link para crear su contraseña`
+            : "";
         mostrarToast(`${res?.mensaje || "Empleado creado correctamente"}${extra}`, "ok");
       }
       setModalAbierto(false);
@@ -321,7 +345,7 @@ export default function PersonalPage() {
       {/* TARJETAS RESUMEN */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" }, gap: 2, mb: 3.5 }}>
         {[
-          { icon: <Users size={20} />, value: personal.length, label: "Total colaboradores", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
+          { icon: <Users size={20} />, value: personal.length, label: "Total empleados", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
           { icon: <UserCheck size={20} />, value: personal.filter((e) => isActive(e)).length, label: "Activos", color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
           { icon: <UserX size={20} />, value: personal.filter((e) => !isActive(e)).length, label: "Inactivos", color: COLORES.danger, bg: COLORES.dangerFondo },
           { icon: <Building2 size={20} />, value: new Set(personal.map((e) => e.area).filter(Boolean)).size, label: "Áreas distintas", color: COLORES.primario, bg: COLORES.primarioClaro },
@@ -342,7 +366,7 @@ export default function PersonalPage() {
       {/* BARRA DE FILTROS */}
       <Paper elevation={0} sx={{ p: 2, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, mb: 3 }}>
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "2fr 1fr 1fr 1fr" }, gap: 1.5, alignItems: "center" }}>
-          <TextField aria-label="Buscar colaborador" placeholder="Buscar colaborador..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
+          <TextField aria-label="Buscar empleado" placeholder="Buscar empleado..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
             slotProps={{
               input: {
                 startAdornment: <Search size={15} style={{ color: COLORES.textoSuave, marginRight: 6 }} />,
@@ -413,10 +437,10 @@ export default function PersonalPage() {
           <Table sx={{ minWidth: { xs: 780, md: 1250 } }}>
             <TableHead>
               <TableRow>
-                {["", "Colaborador", "Documento", "Cargo", "Área / Piso", "Rol", "Usuario", "Último acceso", "Inas.", "Tard.", "Estado", "Acciones"].map((h) => (
+                {["", "Empleado", "Documento", "Cargo", "Área", "Piso", "Rol", "Usuario", "Último acceso", "Inas.", "Tard.", "Estado", "Acciones"].map((h) => (
                   <TableCell key={h} sx={{
                     fontWeight: 600, color: COLORES.textoTerciario, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.5, whiteSpace: "nowrap",
-                    display: h === "Cargo" || h === "Área / Piso" ? { xs: "none", md: "table-cell" }
+                    display: h === "Cargo" || h === "Área" || h === "Piso" ? { xs: "none", md: "table-cell" }
                       : h === "Rol" || h === "Acciones" ? { xs: "none", sm: "table-cell" } : undefined,
                   }}>
                     {h}
@@ -427,11 +451,11 @@ export default function PersonalPage() {
             <TableBody>
               {cargando ? (
                 <TableRow>
-                  <TableCell colSpan={12} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>Cargando...</TableCell>
+                  <TableCell colSpan={13} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>Cargando...</TableCell>
                 </TableRow>
               ) : filtrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={12} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>
+                  <TableCell colSpan={13} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>
                     {busqueda ? "No se encontraron empleados" : "No hay empleados registrados"}
                   </TableCell>
                 </TableRow>
@@ -460,8 +484,11 @@ export default function PersonalPage() {
                       <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap" }}>{e.cedula || "—"}</TableCell>
                       <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, display: { xs: "none", md: "table-cell" } }}>{e.cargo || "—"}</TableCell>
                       <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
-                        {e.area || "—"}{e.piso ? ` / P${e.piso}` : ""}
-                      </TableCell>
+                    {e.area || "—"}
+                  </TableCell>
+                  <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
+                    {e.piso ? `P${e.piso}` : "—"}
+                  </TableCell>
                       <TableCell sx={{ py: 1.2, display: { xs: "none", sm: "table-cell" } }}>
                         <Chip label={e.rol || "Sin rol"} size="small"
                           sx={{ height: 24, fontSize: 11, fontWeight: 600, bgcolor: badge.bg, color: badge.color }} />
@@ -539,10 +566,10 @@ export default function PersonalPage() {
             </Box>
             <Box>
               <Typography sx={{ fontSize: 17, fontWeight: 700, color: COLORES.textoPrimario, lineHeight: 1.2 }}>
-                {editando ? "Editar colaborador" : "Nuevo colaborador"}
+                {editando ? "Editar empleado" : "Nuevo empleado"}
               </Typography>
               <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, mt: 0.15 }}>
-                {editando ? "Actualiza la información del colaborador." : "Registra un nuevo empleado dentro del sistema."}
+                {editando ? "Actualiza la información del empleado." : "Registra un nuevo empleado dentro del sistema."}
               </Typography>
             </Box>
           </Box>
@@ -564,7 +591,7 @@ export default function PersonalPage() {
               </Box>
               <Box>
                 <Typography sx={modalSeccionTitulo}>Información personal</Typography>
-                <Typography sx={modalSeccionSubtitulo}>Datos básicos del colaborador</Typography>
+                <Typography sx={modalSeccionSubtitulo}>Datos básicos del empleado</Typography>
               </Box>
             </Box>
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 1.5 }}>
@@ -575,11 +602,11 @@ export default function PersonalPage() {
                 onChange={(e) => setForm({ ...form, apellido: e.target.value })}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
               <TextField required label="Cédula *" value={form.cedula}
-                onChange={(e) => setForm({ ...form, cedula: e.target.value })}
-                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
+                onChange={(e) => setForm({ ...form, cedula: onlyDigits(e.target.value) })}
+                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, htmlInput: { inputMode: "numeric", maxLength: 15 } }} sx={modalFieldSx} />
               <TextField label="Teléfono" value={form.telefono}
-                onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
+                onChange={(e) => setForm({ ...form, telefono: onlyDigits(e.target.value) })}
+                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, htmlInput: { inputMode: "numeric", maxLength: 15 } }} sx={modalFieldSx} />
               <TextField required label="Correo electrónico *" value={form.correo}
                 onChange={(e) => setForm({ ...form, correo: e.target.value })}
                 error={form.correo.trim() === "" && form.touchedCorreo}
@@ -642,18 +669,23 @@ export default function PersonalPage() {
               </FormControl>
               <FormControl fullWidth>
                 <InputLabel sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>Horario asignado</InputLabel>
-                <Select value="" label="Horario asignado" disabled sx={{ ...modalSelectSx, ...selectIconAdornment }}
-                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Clock size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment> } }}>
+                <Select value={form.horario_id || ""} label="Horario asignado"
+                  onChange={(e) => setForm({ ...form, horario_id: e.target.value })}
+                  sx={{ ...modalSelectSx, ...selectIconAdornment }}
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Clock size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment> }, menu: selectMenuSx }}>
                   <MenuItem value=""><em>Sin asignar</em></MenuItem>
+                  {horarios.map((h) => (
+                    <MenuItem key={h.id} value={String(h.id)}>{h.nombre}</MenuItem>
+                  ))}
                 </Select>
                 <Typography sx={{ fontSize: 10.5, color: COLORES.textoSuave, mt: 0.5 }}>
-                  El horario podrá modificarse posteriormente.
+                  {editando ? "Podés asignar o quitar el horario desde acá." : "Lo podés elegir ahora o modificarlo después."}
                 </Typography>
               </FormControl>
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <FormControlLabel
                   control={<Switch checked={form.activo} onChange={(e) => setForm({ ...form, activo: e.target.checked })} />}
-                  label={form.activo ? "Colaborador activo" : "Colaborador inactivo"}
+                  label={form.activo ? "Empleado activo" : "Empleado inactivo"}
                   sx={{ "& .MuiFormControlLabel-label": { fontSize: 13.5, fontWeight: 500, color: COLORES.textoSecundario } }}
                 />
               </Box>
@@ -675,31 +707,24 @@ export default function PersonalPage() {
               <TextField label="Usuario" value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
                 disabled={!!editando}
-                placeholder="nombre.apellido"
-                helperText={editando ? "El nombre de usuario no se puede cambiar al editar" : "Se genera automáticamente"}
+                autoComplete="off"
+                helperText={editando ? "El nombre de usuario no se puede cambiar al editar" : "Se completa al guardar"}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } } }} sx={modalFieldSx} />
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                 <TextField label="Contraseña temporal" type="password" value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  helperText={editando ? "Dejar vacío para no cambiar" : "Vacío = se usará la cédula"}
+                  autoComplete="new-password"
+                  helperText={editando ? "Dejar vacío para no cambiar" : "Vacío = se envía al correo un link para crearla"}
                   slotProps={{
                     inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } },
                     input: {
                       startAdornment: <InputAdornment position="start"><KeyRound size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment>,
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton size="small" onClick={handleGenerarPassword} disabled={!!editando}
-                            sx={{ color: COLORES.primarioOscuro, bgcolor: COLORES.primarioClaro, borderRadius: "8px", "&:hover": { bgcolor: COLORES.primarioClaro2 } }}
-                            title="Generar contraseña">
-                            <RefreshCw size={14} />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
                     },
                   }} sx={modalFieldSx} />
-                {!editando && (
+                {!editando && form.password !== "" && (
                   <TextField label="Confirmar contraseña" type="password" value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
                     error={confirmPassword !== "" && form.password !== "" && confirmPassword !== form.password}
                     helperText={confirmPassword !== "" && form.password !== "" && confirmPassword !== form.password ? "Las contraseñas no coinciden" : ""}
                     slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } } }} sx={modalFieldSx} />
@@ -707,9 +732,10 @@ export default function PersonalPage() {
               </Box>
             </Box>
             {!editando && (
-              <Button startIcon={<KeyRound size={14} />} onClick={handleGenerarPassword}
+              <Button startIcon={<UserPlus size={14} />} onClick={handleGenerarUsuario}
+                disabled={!form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim()}
                 sx={{ mt: 1.5, borderRadius: "10px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: COLORES.primarioOscuro, bgcolor: COLORES.primarioClaro, px: 2.5, py: 0.75, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}>
-                Generar automáticamente
+                Generar usuario
               </Button>
             )}
           </Box>
@@ -725,7 +751,7 @@ export default function PersonalPage() {
           <Button variant="contained" startIcon={<Plus size={16} />} onClick={handleGuardar}
             disabled={guardando || !form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim() || !form.correo.trim()}
             sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, fontWeight: 600, px: 3.5, py: 0.75, ...verdeBoton }}>
-            {guardando ? "Guardando..." : editando ? "Actualizar colaborador" : "Crear colaborador"}
+            {guardando ? "Guardando..." : editando ? "Actualizar empleado" : "Crear empleado"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -756,7 +782,7 @@ export default function PersonalPage() {
         <DialogContent>
           <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario }}>
             Se crearán usuarios para <strong>{pendientes} empleados</strong> que aún no tienen acceso al sistema.
-            El username se genera automáticamente y la contraseña inicial es la cédula.
+            El username se genera automáticamente y, si no se define, se genera una contraseña segura al crear.
           </Typography>
           {pendientes > 0 && (
             <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario, mt: 1 }}>

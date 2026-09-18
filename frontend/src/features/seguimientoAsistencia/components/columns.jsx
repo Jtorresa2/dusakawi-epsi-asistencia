@@ -10,24 +10,24 @@ import { COLORES } from "../../../shared/constants/colores.js";
  */
 
 export const SITUACION_STYLES = {
-  ausencia: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro, label: "Ausencia" },
-  falta_manana: { bg: COLORES.warningFondo, color: COLORES.warningOscuro, label: "Falta mañana" },
-  falta_tarde: { bg: COLORES.warningFondo, color: COLORES.warningOscuro2, label: "Falta tarde" },
-  salida_no_registrada: { bg: COLORES.primarioClaro, color: COLORES.primarioOscuro, label: "Salida no registrada" },
-  jornada_abierta: { bg: COLORES.fondoGris2, color: COLORES.textoSecundario, label: "Jornada abierta" },
+  absence: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro, label: "Ausencia" },
+  missing_morning: { bg: COLORES.warningFondo, color: COLORES.warningOscuro, label: "Falta mañana" },
+  missing_afternoon: { bg: COLORES.warningFondo, color: COLORES.warningOscuro2, label: "Falta tarde" },
+  unregistered_exit: { bg: COLORES.primarioClaro, color: COLORES.primarioOscuro, label: "Salida no registrada" },
+  open_day: { bg: COLORES.fondoGris2, color: COLORES.textoSecundario, label: "Jornada abierta" },
 };
 
 export const TRAMO_STYLES = {
-  manana: { bg: COLORES.fondoGris2, color: COLORES.textoTerciario, label: "Mañana" },
-  tarde: { bg: COLORES.fondoGris2, color: COLORES.textoTerciario, label: "Tarde" },
-  completo: { bg: COLORES.successClaro, color: COLORES.verdeTexto, label: "Completo" },
+  morning: { bg: COLORES.fondoGris2, color: COLORES.textoTerciario, label: "Mañana" },
+  afternoon: { bg: COLORES.fondoGris2, color: COLORES.textoTerciario, label: "Tarde" },
+  full: { bg: COLORES.successClaro, color: COLORES.verdeTexto, label: "Completo" },
 };
 
 export const INCIDENCIA_ESTADO_STYLES = {
-  pendiente: { bg: COLORES.warningFondo, color: COLORES.warningOscuro, label: "Pendiente" },
-  en_revision: { bg: COLORES.primarioClaro, color: COLORES.primarioOscuro, label: "En revisión" },
-  aprobado: { bg: COLORES.successFondo, color: COLORES.verdeTexto, label: "Aprobada" },
-  rechazado: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro, label: "Rechazada" },
+  pending: { bg: COLORES.warningFondo, color: COLORES.warningOscuro, label: "Pendiente" },
+  under_review: { bg: COLORES.primarioClaro, color: COLORES.primarioOscuro, label: "En revisión" },
+  approved: { bg: COLORES.successFondo, color: COLORES.verdeTexto, label: "Aprobada" },
+  rejected: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro, label: "Rechazada" },
 };
 
 function Badge({ style, value }) {

@@ -6,10 +6,10 @@ import { COLORES } from "../../../shared/constants/colores.js";
 
 const ESTADOS = [
   { value: "", label: "Todos" },
-  { value: "puntual", label: "Puntual" },
-  { value: "tardanza", label: "Tardanza" },
-  { value: "ausente", label: "Ausente" },
-  { value: "justificado", label: "Justificado" },
+  { value: "on_time", label: "Puntual" },
+  { value: "late", label: "Tardanza" },
+  { value: "absent", label: "Ausente" },
+  { value: "justified", label: "Justificado" },
 ];
 
 export default function FiltrosAsistencia({

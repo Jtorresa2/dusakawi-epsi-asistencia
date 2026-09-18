@@ -17,25 +17,25 @@ import { COLORES } from "../../../shared/constants/colores.js";
 import { PALETA } from "../../../shared/constants/paleta.js";
 
 const tipoNovedadConfig = {
-  permiso: { label: "Permiso" },
-  vacaciones: { label: "Vacaciones" },
-  incapacidad: { label: "Incapacidad" },
-  comision: { label: "Comisión" },
-  licencia: { label: "Licencia" },
+  permission: { label: "Permiso" },
+  vacation: { label: "Vacaciones" },
+  sick_leave: { label: "Incapacidad" },
+  commission: { label: "Comisión" },
+  license: { label: "Licencia" },
   suspension: { label: "Suspensión" },
 };
 
 const modalidadConfig = {
-  dia_completo: { label: "Día completo", icon: <CalendarDays size={15} /> },
-  manana: { label: "Solo mañana", icon: <Sun size={15} /> },
-  tarde: { label: "Solo tarde", icon: <Moon size={15} /> },
-  horas: { label: "Por horas", icon: <Timer size={15} /> },
+  full_day: { label: "Día completo", icon: <CalendarDays size={15} /> },
+  morning: { label: "Solo mañana", icon: <Sun size={15} /> },
+  afternoon: { label: "Solo tarde", icon: <Moon size={15} /> },
+  hours: { label: "Por horas", icon: <Timer size={15} /> },
 };
 
 const estadoWorkflowMap = {
-  aprobado: { label: "Aprobado", color: PALETA.verdeOscuro, bg: PALETA.verdeClaro, icon: <CheckCircle size={13} /> },
-  pendiente: { label: "Pendiente", color: PALETA.amber, bg: PALETA.amberBg, icon: <Hourglass size={13} /> },
-  rechazado: { label: "Rechazado", color: PALETA.rojo, bg: COLORES.dangerFondo, icon: <XCircle size={13} /> },
+  approved: { label: "Aprobado", color: PALETA.verdeOscuro, bg: PALETA.verdeClaro, icon: <CheckCircle size={13} /> },
+  pending: { label: "Pendiente", color: PALETA.amber, bg: PALETA.amberBg, icon: <Hourglass size={13} /> },
+  rejected: { label: "Rechazado", color: PALETA.rojo, bg: COLORES.dangerFondo, icon: <XCircle size={13} /> },
 };
 
 function obtenerEstado(novedad) {
@@ -62,7 +62,7 @@ function calcularDiasTotales(desde, hasta) {
 }
 
 function obtenerDuracion(novedad) {
-  if (novedad.tipo === "horas" && novedad.hora_desde && novedad.hora_hasta) {
+  if (novedad.tipo === "hours" && novedad.hora_desde && novedad.hora_hasta) {
     const [hi, mi] = (novedad.hora_desde || "").split(":").map(Number);
     const [hf, mf] = (novedad.hora_hasta || "").split(":").map(Number);
     if (!isNaN(hi) && !isNaN(hf)) {
@@ -75,7 +75,7 @@ function obtenerDuracion(novedad) {
 }
 
 function obtenerJornada(novedad) {
-  if (novedad.tipo === "horas" && novedad.hora_desde && novedad.hora_hasta) {
+  if (novedad.tipo === "hours" && novedad.hora_desde && novedad.hora_hasta) {
     return `${(novedad.hora_desde || "").substring(0, 5)} – ${(novedad.hora_hasta || "").substring(0, 5)}`;
   }
   const map = {
@@ -119,12 +119,12 @@ const InfoCard = ({ icon, label, valor }) => (
 export default function NovedadDetailModal({ open, onClose, novedad }) {
   if (!novedad) return null;
 
-  const tipoCfg = tipoNovedadConfig[novedad.tipo_novedad || "permiso"] || tipoNovedadConfig.permiso;
-  const durCfg = modalidadConfig[novedad.tipo || "dia_completo"] || modalidadConfig.dia_completo;
+  const tipoCfg = tipoNovedadConfig[novedad.tipo_novedad || "permission"] || tipoNovedadConfig.permission;
+  const durCfg = modalidadConfig[novedad.tipo || "full_day"] || modalidadConfig.full_day;
   const nombreEmpleado = `${novedad.empleado_nombre || ""} ${novedad.empleado_apellido || ""}`.trim() || "—";
   const diasHabiles = calcularDiasHabiles(novedad.fecha_desde, novedad.fecha_hasta);
   const estado = obtenerEstado(novedad);
-  const estadoWF = estadoWorkflowMap[novedad.estado || "aprobado"] || estadoWorkflowMap.aprobado;
+  const estadoWF = estadoWorkflowMap[novedad.estado || "approved"] || estadoWorkflowMap.approved;
   const nombreSolicitante = novedad.solicitante_nombre
     ? `${novedad.solicitante_nombre} ${novedad.solicitante_apellido || ""}`.trim()
     : null;

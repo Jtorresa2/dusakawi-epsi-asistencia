@@ -32,28 +32,8 @@ export const eliminarPersonal = (id) =>
 
 // ─── Usuarios (acceso al sistema) ─────────────────────────────────────────────
 
-export const obtenerUsuarios = () =>
-  apiFetch("/usuarios");
-
 export const obtenerRoles = () =>
   apiFetch("/usuarios/roles");
-
-export const crearUsuario = (data) =>
-  apiFetch("/usuarios", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-
-export const actualizarUsuario = (id, data) =>
-  apiFetch(`/usuarios/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
-
-export const eliminarUsuario = (id) =>
-  apiFetch(`/usuarios/${id}`, {
-    method: "DELETE",
-  });
 
 export const generarUsuariosMasivos = () =>
   apiFetch("/usuarios/generar-masivos", {

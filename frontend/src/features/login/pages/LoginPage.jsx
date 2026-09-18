@@ -1,6 +1,7 @@
 ﻿import { useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { COLORES } from "../../../shared/constants/colores.js";
+import { refreshPermissions } from "../../../shared/permissions";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ export default function LoginPage() {
     const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
     const user = { ...data.user, rol: rolesMap[data.user.rol] || data.user.rol };
     localStorage.setItem("usuario", JSON.stringify(user));
+    await refreshPermissions(true);
     navigate("/dashboard");
 
   } catch (error) {

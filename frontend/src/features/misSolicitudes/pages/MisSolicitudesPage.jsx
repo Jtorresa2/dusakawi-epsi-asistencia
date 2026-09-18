@@ -2,13 +2,21 @@ import { useState, useEffect } from "react";
 import { Box, Paper, Typography, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from "@mui/material";
 import { Calendar, CheckCircle, XCircle, Clock, Eye, Image, FileText, X } from "lucide-react";
 import { COLORES } from "../../../shared/constants/colores.js";
+import { TIPOS_INCIDENCIA } from "../../../shared/incidenciaTipos";
 
 const API = "/api";
-const TIPOS = { falla_biometrica: "Falla biométrica", tardanza_justificada: "Tardanza justificada", otro: "Otro" };
+
+const TIPOS = TIPOS_INCIDENCIA;
 const ESTADO_COLORS = {
-  pendiente: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
-  aprobado: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
-  rechazado: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
+  pending: { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
+  approved: { bg: COLORES.successFondo, color: COLORES.verdeTexto },
+  rejected: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro },
+};
+const ESTADO_LABELS = {
+  pending: "Pendiente",
+  under_review: "En revisión",
+  approved: "Aprobado",
+  rejected: "Rechazado",
 };
 
 export default function MisSolicitudesPage() {
@@ -29,9 +37,9 @@ export default function MisSolicitudesPage() {
     })();
   }, []);
 
-  const pendientes = incidencias.filter(i => i.estado === "pendiente").length;
-  const aprobadas = incidencias.filter(i => i.estado === "aprobado").length;
-  const rechazadas = incidencias.filter(i => i.estado === "rechazado").length;
+  const pendientes = incidencias.filter(i => i.estado === "pending").length;
+  const aprobadas = incidencias.filter(i => i.estado === "approved").length;
+  const rechazadas = incidencias.filter(i => i.estado === "rejected").length;
 
   const isImage = (url) => /\.(jpg|jpeg|png|webp|gif)$/i.test(url);
 
@@ -85,7 +93,7 @@ export default function MisSolicitudesPage() {
                   <TableCell sx={{ fontSize: 13, color: COLORES.textoTerciario, maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inc.descripcion}</TableCell>
                   <TableCell sx={{ fontSize: 13, color: COLORES.textoTerciario }}>{new Date(inc.fecha).toLocaleDateString("es-CO")}</TableCell>
                   <TableCell>
-                    <Chip label={inc.estado} size="small" sx={{ borderRadius: "8px", fontSize: 11, fontWeight: 600, bgcolor: ec.bg, color: ec.color }} />
+                    <Chip label={ESTADO_LABELS[inc.estado] || inc.estado} size="small" sx={{ borderRadius: "8px", fontSize: 11, fontWeight: 600, bgcolor: ec.bg, color: ec.color }} />
                   </TableCell>
                   <TableCell>
                     <Box onClick={() => { setSelected(inc); setOpenDetalle(true); }}
@@ -114,7 +122,7 @@ export default function MisSolicitudesPage() {
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
                 <Box><Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 600, textTransform: "uppercase" }}>Tipo</Typography><Chip label={TIPOS[selected.tipo] || selected.tipo} size="small" sx={{ borderRadius: "8px", fontSize: 12, bgcolor: COLORES.fondoGris2 }} /></Box>
                 <Box><Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 600, textTransform: "uppercase" }}>Fecha</Typography><Typography sx={{ fontSize: 14 }}>{new Date(selected.fecha).toLocaleDateString("es-CO")}</Typography></Box>
-                <Box><Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 600, textTransform: "uppercase" }}>Estado</Typography><Chip label={selected.estado} size="small" sx={{ borderRadius: "8px", fontSize: 12, bgcolor: ESTADO_COLORS[selected.estado]?.bg, color: ESTADO_COLORS[selected.estado]?.color, fontWeight: 600 }} /></Box>
+                <Box><Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 600, textTransform: "uppercase" }}>Estado</Typography><Chip label={ESTADO_LABELS[selected.estado] || selected.estado} size="small" sx={{ borderRadius: "8px", fontSize: 12, bgcolor: ESTADO_COLORS[selected.estado]?.bg, color: ESTADO_COLORS[selected.estado]?.color, fontWeight: 600 }} /></Box>
                 <Box><Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 600, textTransform: "uppercase" }}>Revisado por</Typography><Typography sx={{ fontSize: 14 }}>{selected.revisado_por ? `#${selected.revisado_por}` : "—"}</Typography></Box>
                 <Box sx={{ gridColumn: "1/-1" }}><Typography sx={{ fontSize: 11, color: COLORES.textoSuave, fontWeight: 600, textTransform: "uppercase" }}>Descripción</Typography><Typography sx={{ fontSize: 14 }}>{selected.descripcion || "—"}</Typography></Box>
                 {selected.motivo_rechazo && (

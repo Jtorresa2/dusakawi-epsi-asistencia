@@ -8,6 +8,7 @@ import { obtenerPersonalPorId, actualizarPersonal } from "../../personal/persona
 import { obtenerCargos } from "../../cargos/cargo.api";
 import { obtenerAreas } from "../../areas/area.api";
 import MisNovedades from "../components/MisNovedades";
+import { onlyDigits } from "../../../shared/validators";
 import { COLORES } from "../../../shared/constants/colores.js";
 
 const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
@@ -52,8 +53,8 @@ export default function MiPerfilPage() {
   const initials = (usuario.nombre || "U").split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 
   const personalFields = [
-    { key: "nombre", label: "Nombre completo", icon: <User size={16} /> },
-    { key: "apellido", label: "Apellido", icon: <User size={16} /> },
+    { key: "nombre", label: "Nombre(s) ", icon: <User size={16} /> },
+    { key: "apellido", label: "Apellidos", icon: <User size={16} /> },
     { key: "correo", label: "Correo electrónico", icon: <Mail size={16} /> },
     { key: "telefono", label: "Teléfono", icon: <Phone size={16} /> },
     { key: "cedula", label: "Cédula", icon: <FileText size={16} /> },
@@ -159,7 +160,7 @@ export default function MiPerfilPage() {
                 fullWidth
                 size="small"
                 value={form[field.key] ?? ""}
-                onChange={(e) => setForm({ ...form, [field.key]: e.target.value === "" ? null : Number(e.target.value) })}
+                onChange={(e) => setForm({ ...form, [field.key]: e.target.value === "" ? null : e.target.value })}
                 sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: 13 } }}
               >
                 <MenuItem value="">
@@ -177,7 +178,8 @@ export default function MiPerfilPage() {
                 size="small"
                 type={field.type || "text"}
                 value={form[field.key] || ""}
-                onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
+                onChange={(e) => setForm({ ...form, [field.key]: ["cedula", "telefono"].includes(field.key) ? onlyDigits(e.target.value) : e.target.value })}
+                slotProps={{ htmlInput: ["cedula", "telefono"].includes(field.key) ? { inputMode: "numeric", maxLength: 15 } : undefined }}
                 sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: 13 } }}
               />
             )

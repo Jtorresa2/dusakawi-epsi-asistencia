@@ -12,16 +12,17 @@ import {
 import { aprobarConFirma } from "../incidencia.api";
 import PDFPreviewModal from "../../../shared/components/PDFPreviewModal";
 import { COLORES } from "../../../shared/constants/colores.js";
+import { TIPOS_INCIDENCIA } from "../../../shared/incidenciaTipos";
 
 const API = "/api";
-const TIPOS = { falla_biometrica: "Falla biométrica", tardanza_justificada: "Tardanza justificada", otro: "Otro" };
+const TIPOS = TIPOS_INCIDENCIA;
 const ESTADO_STYLES = {
-  pendiente: { bg: COLORES.warningFondo, color: COLORES.warningOscuro, label: "Pendiente" },
-  aprobado: { bg: COLORES.successFondo, color: COLORES.verdeTexto, label: "Aprobada" },
-  rechazado: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro, label: "Rechazada" },
+  pending: { bg: COLORES.warningFondo, color: COLORES.warningOscuro, label: "Pendiente" },
+  approved: { bg: COLORES.successFondo, color: COLORES.verdeTexto, label: "Aprobada" },
+  rejected: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro, label: "Rechazada" },
 };
 
-const PRIORIDADES = { baja: { label: "Baja", color: COLORES.textoTerciario, bg: COLORES.fondoGris2 }, media: { label: "Media", color: COLORES.warningOscuro, bg: COLORES.warningFondo }, alta: { label: "Alta", color: COLORES.dangerOscuro, bg: COLORES.dangerFondo } };
+const PRIORIDADES = { low: { label: "Baja", color: COLORES.textoTerciario, bg: COLORES.fondoGris2 }, medium: { label: "Media", color: COLORES.warningOscuro, bg: COLORES.warningFondo }, high: { label: "Alta", color: COLORES.dangerOscuro, bg: COLORES.dangerFondo } };
 
 function formatDate(d) {
   if (!d) return "—";
@@ -118,7 +119,7 @@ export default function IncidenciaExpedientePage() {
   const [usuario, setUsuario] = useState({ rol: "" });
   const [observacion, setObservacion] = useState("");
 
-  const [prioridad, setPrioridad] = useState("media");
+  const [prioridad, setPrioridad] = useState("medium");
   const [accionando, setAccionando] = useState(false);
   const [actionError, setActionError] = useState("");
   const [firmaFile, setFirmaFile] = useState(null);
@@ -132,7 +133,7 @@ export default function IncidenciaExpedientePage() {
   const esAdmin = rol === "admin";
   const esTTHH = rol === "talento_humano";
   const esEmpleado = rol === "empleado";
-  const puedeGestionar = (esAdmin || esTTHH) && (incidencia?.estado === "pendiente" || incidencia?.estado === "en_revision");
+  const puedeGestionar = (esAdmin || esTTHH) && (incidencia?.estado === "pending" || incidencia?.estado === "under_review");
 
   const headers = { Authorization: `Bearer ${localStorage.getItem("token")}` };
 
@@ -151,7 +152,7 @@ export default function IncidenciaExpedientePage() {
         if (!res.ok) throw new Error("No encontrada");
         const data = await res.json();
         setIncidencia(data);
-        setPrioridad(data.prioridad || "media");
+        setPrioridad(data.prioridad || "medium");
       })
       .catch(() => setPageError("No se pudo cargar la incidencia"))
       .finally(() => setCargando(false));
@@ -256,8 +257,8 @@ export default function IncidenciaExpedientePage() {
   const anio = new Date().getFullYear();
   const isImageFile = (url) => /\.(jpg|jpeg|png|webp|gif)$/i.test(url);
   const fechaCreacion = incidencia.created_at || incidencia.fecha;
-  const estadoAjuste = incidencia.estado === "pendiente" ? { label: "Pendiente", bg: COLORES.warningFondo, color: COLORES.warningOscuro }
-    : incidencia.estado === "aprobado" ? { label: "Aplicado", bg: COLORES.successFondo, color: COLORES.verdeTexto }
+  const estadoAjuste = incidencia.estado === "pending" ? { label: "Pendiente", bg: COLORES.warningFondo, color: COLORES.warningOscuro }
+    : incidencia.estado === "approved" ? { label: "Aplicado", bg: COLORES.successFondo, color: COLORES.verdeTexto }
     : { label: "No aplicado", bg: COLORES.dangerFondo, color: COLORES.danger };
 
   return (
@@ -445,13 +446,13 @@ export default function IncidenciaExpedientePage() {
             <TimelineItem icon={<FileText size={13} />} activo label="Incidencia creada"
               fecha={formatDate(fechaCreacion)} responsable={incidencia.empleado_nombre} />
             <TimelineItem icon={<User size={13} />}
-              activo={incidencia.revisado_por || incidencia.estado !== "pendiente" || puedeGestionar}
+              activo={incidencia.revisado_por || incidencia.estado !== "pending" || puedeGestionar}
               label="En revisión (Talento Humano)" />
             {(() => {
-              const esAprobado = incidencia.estado === "aprobado";
-              const esRechazado = incidencia.estado === "rechazado";
-              const esCorreccion = incidencia.observacion && incidencia.estado === "pendiente";
-              const esPendiente = incidencia.estado === "pendiente" && !incidencia.observacion;
+              const esAprobado = incidencia.estado === "approved";
+              const esRechazado = incidencia.estado === "rejected";
+              const esCorreccion = incidencia.observacion && incidencia.estado === "pending";
+              const esPendiente = incidencia.estado === "pending" && !incidencia.observacion;
               return (
                 <TimelineItem
                   icon={esAprobado ? <CheckCircle size={13} /> : esRechazado ? <XCircle size={13} /> : esCorreccion ? <AlertTriangle size={13} /> : <Clock size={13} />}
@@ -468,11 +469,11 @@ export default function IncidenciaExpedientePage() {
           {/* Impacto en la asistencia */}
           <SectionCard title="Impacto en la asistencia"
             action={<Clock size={16} color={COLORES.textoSuave} />}>
-            {incidencia.tipo === "otro" ? (
+            {incidencia.tipo === "other" ? (
               <Typography sx={{ fontSize: 13, color: COLORES.textoSuave }}>
                 Esta incidencia no genera modificaciones en el registro de asistencia del empleado.
               </Typography>
-            ) : incidencia.tipo === "tardanza_justificada" ? (
+            ) : incidencia.tipo === "justified_lateness" ? (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
                   <Clock size={16} color={COLORES.textoSuave} />
@@ -500,10 +501,10 @@ export default function IncidenciaExpedientePage() {
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
                   <CircleDollarSign size={16} color={COLORES.textoSuave} />
                   <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, flex: 1 }}>Descuento aplicado</Typography>
-                  <Chip label={incidencia.estado === "aprobado" && (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? "Sí" : "No"} size="small"
+                  <Chip label={incidencia.estado === "approved" && (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? "Sí" : "No"} size="small"
                     sx={{ borderRadius: "6px", fontSize: 11, fontWeight: 600, height: 24,
-                      bgcolor: incidencia.estado === "aprobado" && (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? COLORES.successFondo : COLORES.fondoGris2,
-                      color: incidencia.estado === "aprobado" && (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? COLORES.verdeTexto : COLORES.textoTerciario }} />
+                      bgcolor: incidencia.estado === "approved" && (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? COLORES.successFondo : COLORES.fondoGris2,
+                      color: incidencia.estado === "approved" && (incidencia.asistencia?.minutos_tardanza || 0) > 0 ? COLORES.verdeTexto : COLORES.textoTerciario }} />
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <RefreshCw size={16} color={COLORES.textoSuave} />
@@ -531,7 +532,7 @@ export default function IncidenciaExpedientePage() {
                   <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>
                     {incidencia.asistencia?.estado_marcacion
                       ? incidencia.asistencia.estado_marcacion.charAt(0).toUpperCase() + incidencia.asistencia.estado_marcacion.slice(1)
-                      : incidencia.estado === "aprobado" ? "Corregida" : "No marcada"}
+                      : incidencia.estado === "approved" ? "Corregida" : "No marcada"}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1, borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
@@ -592,9 +593,9 @@ export default function IncidenciaExpedientePage() {
                   <Typography sx={{ fontSize: 11, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5, textTransform: "uppercase" }}>Prioridad</Typography>
                   <Select value={prioridad} onChange={e => setPrioridad(e.target.value)} size="small" fullWidth
                     sx={{ borderRadius: "8px", fontSize: 13, bgcolor: COLORES.fondoBlanco }}>
-                    <MenuItem value="baja">Baja</MenuItem>
-                    <MenuItem value="media">Media</MenuItem>
-                    <MenuItem value="alta">Alta</MenuItem>
+                    <MenuItem value="low">Baja</MenuItem>
+                    <MenuItem value="medium">Media</MenuItem>
+                    <MenuItem value="high">Alta</MenuItem>
                   </Select>
                 </Box>
                 <TextField multiline rows={2} value={observacion} onChange={e => setObservacion(e.target.value)}

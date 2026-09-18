@@ -15,21 +15,24 @@ import { obtenerAreas } from "../../areas/area.api";
 import Loading from "../../../shared/components/Loading";
 import PDFPreviewModal from "../../../shared/components/PDFPreviewModal";
 import { COLORES } from "../../../shared/constants/colores.js";
+import { TIPOS_INCIDENCIA } from "../../../shared/incidenciaTipos";
 
-const TIPOS = { falla_biometrica: "Falla biométrica", tardanza_justificada: "Tardanza justificada", otro: "Otro" };
+const TIPOS = TIPOS_INCIDENCIA;
 const ESTADO_STYLES = {
-  pendiente: { bg: COLORES.warningFondo, color: COLORES.warningOscuro, label: "Pendiente" },
-  en_revision: { bg: COLORES.primarioClaro, color: COLORES.primarioOscuro, label: "En revisión" },
-  aprobado: { bg: COLORES.successFondo, color: COLORES.verdeTexto, label: "Aprobada" },
-  rechazado: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro, label: "Rechazada" },
+  pending: { bg: COLORES.warningFondo, color: COLORES.warningOscuro, label: "Pendiente" },
+  under_review: { bg: COLORES.primarioClaro, color: COLORES.primarioOscuro, label: "En revisión" },
+  approved: { bg: COLORES.successFondo, color: COLORES.verdeTexto, label: "Aprobada" },
+  rejected: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro, label: "Rechazada" },
 };
 const PRIORIDAD_STYLES = {
-  alta: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro, label: "Alta" },
-  media: { bg: COLORES.warningFondo, color: COLORES.warningOscuro, label: "Media" },
-  baja: { bg: COLORES.fondoGris2, color: COLORES.textoTerciario, label: "Baja" },
+  high: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro, label: "Alta" },
+  medium: { bg: COLORES.warningFondo, color: COLORES.warningOscuro, label: "Media" },
+  low: { bg: COLORES.fondoGris2, color: COLORES.textoTerciario, label: "Baja" },
 };
-const TIPO_OPTIONS = Object.entries(TIPOS);
-const TAB_MAP = ["", "aprobado", "rechazado"];
+// The incident type FILTER only offers the reportable types.
+const TIPOS_FILTRO = ["biometric_failure", "other"];
+const TIPO_OPTIONS = TIPOS_FILTRO.map((k) => [k, TIPOS[k] || k]);
+const TAB_MAP = ["", "approved", "rejected"];
 
 const STAT_CARDS = [
   { key: "pendientes", label: "Incidencias pendientes", icon: <Clock size={22} />, color: COLORES.warningOscuro, bg: COLORES.warningFondo },
@@ -153,9 +156,9 @@ export default function IncidenciasPage() {
 
   const total = Number(stats.pendientes) + Number(stats.aprobadas) + Number(stats.rechazadas);
   const filtrosActivos = contarActivos();
-  const alertasAltas = incidencias.filter((i) => i.prioridad === "alta" && i.estado !== "aprobado" && i.estado !== "rechazado");
-  const solicitudesPendientes = incidencias.filter((i) => i.estado === "pendiente" || i.estado === "en_revision");
-  const incidenciasBandeja = incidencias.filter((i) => i.estado === "aprobado" || i.estado === "rechazado");
+  const alertasAltas = incidencias.filter((i) => i.prioridad === "high" && i.estado !== "approved" && i.estado !== "rejected");
+  const solicitudesPendientes = incidencias.filter((i) => i.estado === "pending" || i.estado === "under_review");
+  const incidenciasBandeja = incidencias.filter((i) => i.estado === "approved" || i.estado === "rejected");
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2.5 }}>
@@ -362,8 +365,8 @@ export default function IncidenciasPage() {
                         <TableCell><Chip label={ec.label} size="small" sx={{ borderRadius: "8px", fontSize: 11, fontWeight: 600, bgcolor: ec.bg, color: ec.color }} /></TableCell>
                         <TableCell>
                           <Button size="small" endIcon={<ChevronRight size={13} />}
-                            sx={{ borderRadius: "8px", textTransform: "none", fontSize: 12, fontWeight: 600, color: inc.estado === "aprobado" || inc.estado === "rechazado" ? COLORES.textoTerciario : COLORES.primarioOscuro, p: 0, minWidth: "auto", "&:hover": { bgcolor: "transparent", textDecoration: "underline" } }}>
-                            {inc.estado === "aprobado" || inc.estado === "rechazado" ? "Ver detalle" : "Revisar"}
+                            sx={{ borderRadius: "8px", textTransform: "none", fontSize: 12, fontWeight: 600, color: inc.estado === "approved" || inc.estado === "rejected" ? COLORES.textoTerciario : COLORES.primarioOscuro, p: 0, minWidth: "auto", "&:hover": { bgcolor: "transparent", textDecoration: "underline" } }}>
+                            {inc.estado === "approved" || inc.estado === "rejected" ? "Ver detalle" : "Revisar"}
                           </Button>
                         </TableCell>
                       </TableRow>

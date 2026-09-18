@@ -18,20 +18,20 @@ import SeguimientoDetalleModal from "../components/SeguimientoDetalleModal";
 
 const SITUACION_OPTIONS = [
   { value: "", label: "Todas las situaciones" },
-  { value: "ausencia", label: "Ausencia" },
-  { value: "falta_manana", label: "Falta mañana" },
-  { value: "falta_tarde", label: "Falta tarde" },
-  { value: "salida_no_registrada", label: "Salida no registrada" },
-  { value: "jornada_abierta", label: "Jornada abierta" },
+  { value: "absence", label: "Ausencia" },
+  { value: "missing_morning", label: "Falta mañana" },
+  { value: "missing_afternoon", label: "Falta tarde" },
+  { value: "unregistered_exit", label: "Salida no registrada" },
+  { value: "open_day", label: "Jornada abierta" },
 ];
 
 const STAT_CARDS = [
   { key: "total", label: "Total situaciones", icon: <Users size={20} />, color: COLORES.primarioOscuro, bg: COLORES.primarioClaro },
-  { key: "ausencia", label: "Ausencias", icon: <CalendarX2 size={20} />, color: COLORES.dangerOscuro, bg: COLORES.dangerFondo },
-  { key: "falta_manana", label: "Falta mañana", icon: <Sunrise size={20} />, color: COLORES.warningOscuro, bg: COLORES.warningFondo },
-  { key: "falta_tarde", label: "Falta tarde", icon: <Sunset size={20} />, color: COLORES.warningOscuro2, bg: "#FEF3C7" },
-  { key: "salida_no_registrada", label: "Salida no reg.", icon: <LogOut size={20} />, color: COLORES.textoMuted, bg: COLORES.fondoGris2 },
-  { key: "jornada_abierta", label: "Jornada abierta", icon: <Clock3 size={20} />, color: COLORES.verdeTexto, bg: COLORES.successFondo },
+  { key: "absence", label: "Ausencias", icon: <CalendarX2 size={20} />, color: COLORES.dangerOscuro, bg: COLORES.dangerFondo },
+  { key: "missing_morning", label: "Falta mañana", icon: <Sunrise size={20} />, color: COLORES.warningOscuro, bg: COLORES.warningFondo },
+  { key: "missing_afternoon", label: "Falta tarde", icon: <Sunset size={20} />, color: COLORES.warningOscuro2, bg: "#FEF3C7" },
+  { key: "unregistered_exit", label: "Salida no reg.", icon: <LogOut size={20} />, color: COLORES.textoMuted, bg: COLORES.fondoGris2 },
+  { key: "open_day", label: "Jornada abierta", icon: <Clock3 size={20} />, color: COLORES.verdeTexto, bg: COLORES.successFondo },
 ];
 
 const KPIS_DEFAULT = {

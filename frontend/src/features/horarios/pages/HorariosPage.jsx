@@ -235,7 +235,7 @@ function HorarioCard({
   onEliminar,
   onPorDefecto,
 }) {
-  const esPorHoras = h.tipo_jornada === "por_horas";
+  const esPorHoras = h.tipo_jornada === "by_hours";
   const conteo = Array.isArray(asignados) ? asignados.length : 0;
   const chipModalidad =
     h.modalidad === "flexible"
@@ -393,8 +393,8 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
     setForm({
       nombre: horario.nombre || "",
       descripcion: horario.descripcion || "",
-      tipo_jornada: horario.tipo_jornada || "fija",
-      modalidad: horario.modalidad || "estricto",
+      tipo_jornada: horario.tipo_jornada || "fixed",
+      modalidad: horario.modalidad || "strict",
       horas_esperadas: horario.horas_esperadas != null ? String(horario.horas_esperadas) : "",
       tolerancia_minutos: horario.tolerancia_minutos ?? 0,
       tolerancia_salida_minutos: horario.tolerancia_salida_minutos ?? 0,
@@ -426,7 +426,7 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
     );
   }
 
-  const esFija = form.tipo_jornada === "fija";
+  const esFija = form.tipo_jornada === "fixed";
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
   const setCampo = (campo, valor) => set({ [campo]: valor });
   const setDia = (idx, campo, valor) =>
@@ -517,9 +517,9 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
   };
 
   const itemsVista = [];
-  if (form.tipo_jornada === "por_horas") {
+  if (form.tipo_jornada === "by_hours") {
     itemsVista.push("No controlará tardanzas", "Evaluará horas trabajadas", "Comparará contra las horas esperadas configuradas");
-  } else if (form.modalidad === "estricto") {
+  } else if (form.modalidad === "strict") {
     itemsVista.push("Controlará tardanzas", "Generará ausencias", "Utilizará horarios definidos");
   } else {
     itemsVista.push("No controlará tardanzas", "Registrará asistencia normalmente", "No generará sanciones por hora de ingreso");
@@ -570,12 +570,12 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5 }}>
             <SelectorCard titulo="Horario fijo"
               descripcion="El empleado debe cumplir horarios definidos de entrada y salida."
-              seleccionado={form.tipo_jornada === "fija"} disabled={readonly}
-              onClick={() => setCampo("tipo_jornada", "fija")} />
+              seleccionado={form.tipo_jornada === "fixed"} disabled={readonly}
+              onClick={() => setCampo("tipo_jornada", "fixed")} />
             <SelectorCard titulo="Jornada por horas"
               descripcion="El sistema evaluará únicamente las horas trabajadas."
-              seleccionado={form.tipo_jornada === "por_horas"} disabled={readonly}
-              onClick={() => setCampo("tipo_jornada", "por_horas")} />
+              seleccionado={form.tipo_jornada === "by_hours"} disabled={readonly}
+              onClick={() => setCampo("tipo_jornada", "by_hours")} />
           </Box>
         </Box>
 
@@ -587,8 +587,8 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5 }}>
             <SelectorCard titulo="Controlar tardanzas"
               descripcion="El sistema comparará la hora de entrada con el horario configurado."
-              seleccionado={form.modalidad === "estricto"} disabled={readonly}
-              onClick={() => setCampo("modalidad", "estricto")} />
+              seleccionado={form.modalidad === "strict"} disabled={readonly}
+              onClick={() => setCampo("modalidad", "strict")} />
             <SelectorCard titulo="No controlar tardanzas"
               descripcion="El sistema registrará la asistencia normalmente pero nunca generará tardanzas."
               seleccionado={form.modalidad === "flexible"} disabled={readonly}
@@ -839,7 +839,7 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
     try {
       const res = await asignarHorario({
         usuario_id: asignarA.id,
-        horario_id: Number(asigForm.horario_id),
+        horario_id: asigForm.horario_id,
         vigencia_desde: asigForm.vigencia_desde || hoyLocal(),
         motivo: asigForm.motivo.trim() || null,
       });
@@ -899,7 +899,7 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
     setAsignandoMasivo(true);
     try {
       const res = await asignarMasivo({
-        horario_id: Number(masivoForm.horario_id),
+        horario_id: masivoForm.horario_id,
         usuario_ids: [...seleccionados],
         vigencia_desde: masivoForm.vigencia_desde || hoyLocal(),
         motivo: masivoForm.motivo.trim() || null,
@@ -921,7 +921,7 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
       <MenuItem value="" disabled>Selecciona un horario</MenuItem>
       {horarios.map((h) => (
         <MenuItem key={h.id} value={String(h.id)}>
-          {h.nombre} — {h.tipo_jornada === "por_horas" ? "Por horas" : "Fija"} ({h.modalidad === "flexible" ? "Flexible" : "Estricto"})
+          {h.nombre} — {h.tipo_jornada === "by_hours" ? "Por horas" : "Fija"} ({h.modalidad === "flexible" ? "Flexible" : "Estricto"})
         </MenuItem>
       ))}
     </Select>

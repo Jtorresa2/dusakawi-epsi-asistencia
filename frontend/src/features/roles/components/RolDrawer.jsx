@@ -41,7 +41,7 @@ export default function RolDrawer({ open, rol, permisosIniciales, onClose, onSuc
     setCargando(true);
     try {
       const data = await obtenerPermisosRol(id);
-      setPermisos(new Set(data.permisos || []));
+      setPermisos(new Set(data.permissions || []));
     } catch (err) {
       onError?.(err.message || "Error al cargar los permisos");
     } finally {
