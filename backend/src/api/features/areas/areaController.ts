@@ -1,6 +1,7 @@
-import pool from "../config/db";
+import pool from "../../../config/db";
 import { Request, Response } from "express";
 import { DatabaseError } from "pg";
+import { esIdValido } from "../../shared/utils/validators";
 
 export const obtenerTodos = async (req: Request, res: Response) => {
   try {
@@ -19,6 +20,9 @@ export const obtenerTodos = async (req: Request, res: Response) => {
 
 export const obtenerPorId = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const { rows } = await pool.query(`
       SELECT a.id, a.name AS nombre, a.description AS descripcion, a.floor_id, NULLIF(regexp_replace(f.name, '\\D', '', 'g'), '')::int AS piso
       FROM areas a
@@ -53,6 +57,9 @@ export const crear = async (req: Request, res: Response) => {
 
 export const actualizar = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const { nombre, piso, descripcion } = req.body;
     await pool.query(
       `UPDATE areas
@@ -71,6 +78,9 @@ export const actualizar = async (req: Request, res: Response) => {
 
 export const eliminar = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     await pool.query("DELETE FROM areas WHERE id = $1", [req.params.id]);
     res.json({ mensaje: "Área eliminada correctamente" });
   } catch (error) {
@@ -81,6 +91,9 @@ export const eliminar = async (req: Request, res: Response) => {
 
 export const obtenerEmpleadosPorArea = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const { rows } = await pool.query(
       `SELECT u.id, dd.document_number AS cedula, u.first_name AS nombre, u.first_surname AS apellido, u.email AS correo, u.email AS email, u.phone AS telefono,
               u.date_of_birth AS fecha_nacimiento, u.position_id AS cargo_id, u.area_id, u.schedule_id AS horario_id,

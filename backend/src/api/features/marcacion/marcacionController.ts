@@ -1,6 +1,6 @@
-import { procesarMarca } from '../services/marcacionService';
+import { procesarMarca } from './marcacionService';
 import { Request, Response } from 'express';
-import { getErrorMessage } from '../utils/errors';
+import { getErrorMessage } from '../../shared/utils/errors';
 
 export const registrarMarcacion = async (req: Request, res: Response) => {
   try {

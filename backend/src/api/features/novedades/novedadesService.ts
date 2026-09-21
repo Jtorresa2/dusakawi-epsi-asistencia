@@ -1,5 +1,5 @@
-import pool from '../config/db';
-import { TipoNovedad, ModalidadNovedad } from '../types';
+import pool from '../../../config/db';
+import { TipoNovedad, ModalidadNovedad } from '../../shared/types';
 
 const TIPOS_NOVEDAD: TipoNovedad[] = [
   'permission', 'vacation', 'sick_leave', 'commission', 'license', 'suspension',

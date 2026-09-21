@@ -1,9 +1,10 @@
-import pool from '../config/db';
+import pool from '../../../config/db';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { enviarResetPassword } from '../services/emailService';
-import * as personalService from '../services/personalService';
+import { enviarResetPassword } from '../../shared/services/emailService';
+import * as personalService from '../empleados/personalService';
 import { Request, Response } from 'express';
+import { esIdValido } from '../../shared/utils/validators';
 
 export const getUsuarios = async (req: Request, res: Response) => {
   try {
@@ -32,83 +33,6 @@ export const getUsuarios = async (req: Request, res: Response) => {
   }
 };
 
-export const generarMasivos = async (req: Request, res: Response) => {
-  try {
-    const { rows: incompletos } = await pool.query(`
-      SELECT u.id, u.first_name, u.first_surname, u.email, dd.document_number
-      FROM users u
-      LEFT JOIN document_details dd ON dd.user_id = u.id
-      WHERE dd.document_number IS NULL OR u.email IS NULL
-    `);
-
-    if (!incompletos.length) {
-      return res.json({ mensaje: 'No hay usuarios pendientes — todos los datos están completos', creados: 0 });
-    }
-
-    let creados = 0;
-    let emailsOk = 0;
-    let emailsFail = 0;
-    const link = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const resultados: any[] = [];
-
-    for (const user of incompletos) {
-      let finalUser = personalService.generarUsername(user.first_name, user.first_surname, user.document_number);
-      let counter = 1;
-      while (true) {
-        const { rows: dup } = await pool.query('SELECT id FROM users WHERE username = $1', [finalUser]);
-        if (!dup.length) break;
-        finalUser = `${finalUser}${counter++}`;
-      }
-
-      const pass = crypto.randomBytes(32).toString("hex");
-      const hash = await bcrypt.hash(pass, 10);
-      await pool.query(
-        `UPDATE users SET username = $1, password_hash = $2, password_reset_required = 1 WHERE id = $3`,
-        [finalUser, hash, user.id]
-      );
-      creados++;
-
-      let r = null;
-      if (user.email) {
-        const resetToken = crypto.randomBytes(32).toString("hex");
-        const tokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
-        
-        await pool.query(
-          `INSERT INTO password_reset_tokens (user_id, token_hash, expires_at)
-           VALUES ($1, $2, now() + interval '7 days')`,
-          [user.id, tokenHash]
-        );
-
-        r = await enviarResetPassword({
-          email: user.email,
-          nombre: `${user.first_name} ${user.first_surname}`,
-          username: finalUser,
-          link: `${link}/restablecer-contrasena?token=${resetToken}`,
-          primerIngreso: true
-        });
-        if (r && r.enviado) emailsOk++; else emailsFail++;
-      }
-
-      resultados.push({
-        employee: `${user.first_name} ${user.first_surname}`,
-        username: finalUser,
-        email: user.email || 'SIN CORREO',
-        email_sent: !!(user.email && r?.enviado),
-      });
-    }
-
-    res.json({
-      mensaje: `${creados} usuarios actualizados`,
-      creados,
-      emails_enviados: emailsOk,
-      emails_fallados: emailsFail,
-      resultados,
-    });
-  } catch (err: any) {
-    res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
-  }
-};
-
 export const getRoles = async (req: Request, res: Response) => {
   try {
     const { rows } = await pool.query(`
@@ -128,6 +52,9 @@ export const getRoles = async (req: Request, res: Response) => {
 export const getPermisosRol = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    if (!esIdValido(String(id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const { rows: rol } = await pool.query('SELECT id FROM roles WHERE id = $1', [id]);
     if (!rol.length) return res.status(404).json({ mensaje: 'Rol no encontrado' });
 
@@ -146,6 +73,9 @@ export const getPermisosRol = async (req: Request, res: Response) => {
 
 export const updateRol = async (req: Request, res: Response) => {
   const { id } = req.params;
+  if (!esIdValido(String(id))) {
+    return res.status(400).json({ mensaje: 'Id inválido' });
+  }
   const { descripcion, permisos } = req.body;
 
   const acciones = Array.isArray(permisos) ? permisos : [];

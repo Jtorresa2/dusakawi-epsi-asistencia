@@ -1,6 +1,6 @@
-import pool from '../config/db';
+import pool from '../../../config/db';
 import { Request, Response } from 'express';
-import { getErrorMessage } from '../utils/errors';
+import { getErrorMessage } from '../../shared/utils/errors';
 
 interface IndicadoresRow {
   presentes_hoy: string | number | null;

@@ -1,4 +1,4 @@
-import pool from '../config/db';
+import pool from '../../../config/db';
 
 /**
  * Day-of-week map for schedule_details.day_of_week (display values in Spanish).

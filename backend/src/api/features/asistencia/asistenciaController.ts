@@ -1,7 +1,7 @@
-import pool from '../config/db';
+import pool from '../../../config/db';
 import { Request, Response } from 'express';
-import { SqlParam } from '../types';
-import { getErrorMessage } from '../utils/errors';
+import { SqlParam } from '../../shared/types';
+import { getErrorMessage } from '../../shared/utils/errors';
 
 interface MiAsistenciaRow {
   fecha: string | Date;

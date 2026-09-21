@@ -1,8 +1,9 @@
-import * as personalService from "../services/personalService";
+import * as personalService from "./personalService";
 import { Request, Response } from "express";
 import { DatabaseError } from "pg";
-import { PersonalFiltros } from "../types";
-import { getErrorMessage } from "../utils/errors";
+import { PersonalFiltros } from "../../shared/types";
+import { getErrorMessage } from "../../shared/utils/errors";
+import { esIdValido } from "../../shared/utils/validators";
 
 function getErrorCode(err: unknown): string | null {
   if (err instanceof DatabaseError && err.code) return err.code;
@@ -27,6 +28,9 @@ export const obtenerTodos = async (req: Request, res: Response) => {
 
 export const obtenerPorId = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const empleado = await personalService.obtenerPorId(String(req.params.id));
     if (!empleado) return res.status(404).json({ mensaje: "Empleado no encontrado" });
     res.json(empleado);
@@ -71,6 +75,9 @@ export const crear = async (req: Request, res: Response) => {
 
 export const actualizar = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     if (String(req.params.id) !== String(req.user?.id) && !["admin", "talento_humano"].includes(req.user?.rol)) {
       return res.status(403).json({ mensaje: "No autorizado" });
     }
@@ -96,6 +103,9 @@ export const actualizar = async (req: Request, res: Response) => {
 
 export const eliminar = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     await personalService.eliminar(String(req.params.id));
     res.json({ mensaje: "Empleado eliminado correctamente" });
   } catch (error: unknown) {

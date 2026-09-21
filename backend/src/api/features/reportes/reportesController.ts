@@ -1,4 +1,4 @@
-import pool from '../config/db';
+import pool from '../../../config/db';
 import { Request, Response } from 'express';
 
 const PISO_EXPR = "NULLIF(regexp_replace(fl.name, '\\D', '', 'g'), '')::int";

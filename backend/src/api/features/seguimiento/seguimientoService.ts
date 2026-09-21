@@ -1,5 +1,5 @@
-import pool from "../config/db";
-import { timeToMinutes } from "./marcacionService";
+import pool from "../../../config/db";
+import { timeToMinutes } from "../marcacion/marcacionService";
 
 /**
  * Seguimiento de Asistencia — módulo de SOLO CONSULTA (REQ-01..15).

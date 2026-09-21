@@ -1,8 +1,8 @@
-import pool from '../config/db';
+import pool from '../../../config/db';
 import fs from 'fs';
 import path from 'path';
-import { diaSemanaDeFecha } from './calculoHorarioService';
-import { EstadoIncidencia, IncidenciaDetalle, AsistenciaRelacionada, SqlParam } from '../types';
+import { diaSemanaDeFecha } from '../../shared/services/calculoHorarioService';
+import { EstadoIncidencia, IncidenciaDetalle, AsistenciaRelacionada, SqlParam } from '../../shared/types';
 
 const UPLOADS_DIR = path.join(__dirname, '../../uploads');
 

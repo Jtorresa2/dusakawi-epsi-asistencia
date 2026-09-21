@@ -34,8 +34,3 @@ export const eliminarPersonal = (id) =>
 
 export const obtenerRoles = () =>
   apiFetch("/usuarios/roles");
-
-export const generarUsuariosMasivos = () =>
-  apiFetch("/usuarios/generar-masivos", {
-    method: "POST",
-  });

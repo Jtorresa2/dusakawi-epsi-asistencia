@@ -1,4 +1,4 @@
-import pool from '../config/db';
+import pool from '../../../config/db';
 
 const EXCLUDED_TABLES: string[] = [];
 

@@ -1,6 +1,6 @@
 // @ts-ignore - no @types/node-cron installed
 import cron from "node-cron";
-import { marcarAusentes } from "../services/ausenteService";
+import { marcarAusentes } from "../api/shared/services/ausenteService";
 
 function fechaAyer() {
   const d = new Date(Date.now() - 86400000);

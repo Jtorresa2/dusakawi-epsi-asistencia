@@ -1,6 +1,7 @@
-import * as novedadesService from "../services/novedadesService";
+import * as novedadesService from "./novedadesService";
 import { Request, Response } from "express";
-import { getErrorMessage } from "../utils/errors";
+import { getErrorMessage } from "../../shared/utils/errors";
+import { esIdValido } from "../../shared/utils/validators";
 
 export const obtenerTodos = async (req: Request, res: Response) => {
   try {
@@ -34,6 +35,9 @@ export const crear = async (req: Request, res: Response) => {
 export const actualizar = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    if (!esIdValido(String(id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     await novedadesService.actualizar(String(id), req.body, req.user?.id);
     res.json({ mensaje: "Novedad actualizada correctamente" });
   } catch (error) {
@@ -49,6 +53,9 @@ export const actualizar = async (req: Request, res: Response) => {
 export const eliminar = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    if (!esIdValido(String(id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     await novedadesService.eliminar(String(id));
     res.json({ mensaje: "Novedad eliminada correctamente" });
   } catch (error) {

@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import pool from "../config/db";
-import { enviarResetPassword } from "../services/emailService";
+import pool from "../../../config/db";
+import { enviarResetPassword } from "../../shared/services/emailService";
 import { Request, Response } from "express";
-import { getErrorMessage } from "../utils/errors";
+import { getErrorMessage } from "../../shared/utils/errors";
 
 // Rol name -> short code stored in the JWT. Must stay in sync with the roles
 // seed data ("Administrador" | "Talento Humano" | "Empleado").

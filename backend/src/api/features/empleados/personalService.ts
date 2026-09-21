@@ -1,7 +1,7 @@
-import db from '../config/db';
+import db from '../../../config/db';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { Usuario, PersonalFiltros, CrearPersonalData, CrearUsuarioResult } from '../types';
+import { Usuario, PersonalFiltros, CrearPersonalData, CrearUsuarioResult } from '../../shared/types';
 
 // Style: initial of first name + FIRST surname + last 3 digits of the cédula
 // (e.g. "Juliana" + "Torres Aarón" + "1234567" -> "jtorres567").

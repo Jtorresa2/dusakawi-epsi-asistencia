@@ -1,15 +1,19 @@
 import { Router, type RequestHandler } from "express";
-import pool from "../config/db";
-import { generarMembrete, generarPlantillaIncidencia } from "../services/pdfTemplate";
-import * as calculoHorario from "../services/calculoHorarioService";
-import auth from "../middlewares/authMiddleware";
-import rol from "../middlewares/rol";
-import * as seguimientoService from "../services/seguimientoService";
+import pool from "../../../config/db";
+import { generarMembrete, generarPlantillaIncidencia } from "./pdfTemplate";
+import * as calculoHorario from "../../shared/services/calculoHorarioService";
+import auth from "../../shared/middlewares/authMiddleware";
+import rol from "../../shared/middlewares/rol";
+import * as seguimientoService from "../seguimiento/seguimientoService";
+import { esIdValido } from "../../shared/utils/validators";
 
 const router: Router = Router();
 
 // Plantilla individual de incidencia
 router.get("/incidencias/:id/plantilla", async (req, res) => {
+  if (!esIdValido(String(req.params.id))) {
+    return res.status(400).json({ mensaje: 'Id inválido' });
+  }
   try {
     const { rows } = await pool.query(
       `SELECT i.id, i.user_id AS usuario_id, i.type AS tipo, i.description AS descripcion,

@@ -1,7 +1,8 @@
-import * as incidenciaService from "../services/incidenciaService";
-import { IncidenciaFiltros } from "../services/incidenciaService";
-import pool from "../config/db";
+import * as incidenciaService from "./incidenciaService";
+import { IncidenciaFiltros } from "./incidenciaService";
+import pool from "../../../config/db";
 import { Request, Response } from "express";
+import { esIdValido } from "../../shared/utils/validators";
 
 export const crear = async (req: Request, res: Response) => {
   try {
@@ -38,6 +39,9 @@ export const obtenerTodas = async (req: Request, res: Response) => {
 
 export const obtenerPorId = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const incidencia = await incidenciaService.obtenerPorId(String(req.params.id));
     if (!incidencia) return res.status(404).json({ mensaje: "Incidencia no encontrada" });
     if (req.user.rol === "empleado" && incidencia.usuario_id !== req.user.id) {
@@ -52,6 +56,9 @@ export const obtenerPorId = async (req: Request, res: Response) => {
 
 export const aprobar = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const { prioridad } = req.body;
     const ok = await incidenciaService.aprobar(String(req.params.id), prioridad, req.user.id);
     if (!ok) return res.status(400).json({ mensaje: "No se pudo aprobar. Puede que ya no esté pendiente." });
@@ -64,6 +71,9 @@ export const aprobar = async (req: Request, res: Response) => {
 
 export const rechazar = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const { motivo } = req.body;
     if (!motivo) return res.status(400).json({ mensaje: "Debes indicar el motivo del rechazo" });
     const ok = await incidenciaService.rechazar(String(req.params.id), motivo, req.user.id);
@@ -77,6 +87,9 @@ export const rechazar = async (req: Request, res: Response) => {
 
 export const aprobarConFirma = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const archivo_firmado = req.file ? `/uploads/incidencias/firmas/${req.file.filename}` : null;
     if (!archivo_firmado) return res.status(400).json({ mensaje: "Debes adjuntar el PDF firmado" });
     const { prioridad } = req.body;
@@ -91,6 +104,9 @@ export const aprobarConFirma = async (req: Request, res: Response) => {
 
 export const solicitarCorreccion = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const { observacion } = req.body;
     if (!observacion) return res.status(400).json({ mensaje: "Debes indicar una observación" });
     const ok = await incidenciaService.solicitarCorreccion(String(req.params.id), observacion, req.user.id);
@@ -104,6 +120,9 @@ export const solicitarCorreccion = async (req: Request, res: Response) => {
 
 export const eliminar = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     await incidenciaService.eliminar(String(req.params.id));
     res.json({ mensaje: "Incidencia eliminada" });
   } catch (error) {

@@ -1,8 +1,9 @@
-import pool from '../config/db';
+import pool from '../../../config/db';
 import { Request, Response } from 'express';
 import { PoolClient } from 'pg';
-import { HorarioRow, HorarioAgrupado, SqlParam } from '../types';
-import { getErrorMessage } from '../utils/errors';
+import { HorarioRow, HorarioAgrupado, SqlParam } from '../../shared/types';
+import { getErrorMessage } from '../../shared/utils/errors';
+import { esIdValido } from '../../shared/utils/validators';
 
 function hoyLocal(): string {
   const d = new Date();
@@ -80,6 +81,9 @@ export const obtenerTodos = async (req: Request, res: Response) => {
 export const obtenerPorId = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    if (!esIdValido(String(id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const { rows: horarios } = await pool.query<HorarioRow>(`${SELECT_SCHEDULE_ALIASED} WHERE h.id = $1 ORDER BY ${ORDER_BY_DAY}`, [id]);
     if (horarios.length === 0) return res.status(404).json({ mensaje: 'Horario no encontrado' });
     const horario: HorarioAgrupado = {
@@ -154,6 +158,9 @@ export const crear = async (req: Request, res: Response) => {
 
 export const actualizar = async (req: Request, res: Response) => {
   const { id } = req.params;
+  if (!esIdValido(String(id))) {
+    return res.status(400).json({ mensaje: 'Id inválido' });
+  }
   const { detalles } = req.body;
 
   const client = await pool.connect();
@@ -219,6 +226,9 @@ export const actualizar = async (req: Request, res: Response) => {
 
 export const eliminar = async (req: Request, res: Response) => {
   const { id } = req.params;
+  if (!esIdValido(String(id))) {
+    return res.status(400).json({ mensaje: 'Id inválido' });
+  }
   try {
     const { rows: horario } = await pool.query('SELECT id FROM schedules WHERE id = $1', [id]);
     if (!horario.length) return res.status(404).json({ mensaje: 'Horario no encontrado' });
@@ -384,6 +394,9 @@ export const desasignar = async (req: Request, res: Response) => {
 
 export const porDefecto = async (req: Request, res: Response) => {
   const { id } = req.params;
+  if (!esIdValido(String(id))) {
+    return res.status(400).json({ mensaje: 'Id inválido' });
+  }
   const es_por_defecto = req.body.es_por_defecto === true;
 
   try {
@@ -414,6 +427,9 @@ export const porDefecto = async (req: Request, res: Response) => {
 
 export const asignados = async (req: Request, res: Response) => {
   const { id } = req.params;
+  if (!esIdValido(String(id))) {
+    return res.status(400).json({ mensaje: 'Id inválido' });
+  }
   try {
     const { rows: horario } = await pool.query('SELECT id FROM schedules WHERE id = $1', [id]);
     if (!horario.length) return res.status(404).json({ mensaje: 'Horario no encontrado' });
@@ -479,6 +495,9 @@ export const miHorario = async (req: Request, res: Response) => {
 
 export const historial = async (req: Request, res: Response) => {
   const { usuarioId } = req.params;
+  if (!esIdValido(String(usuarioId))) {
+    return res.status(400).json({ mensaje: 'Id inválido' });
+  }
   try {
     const { rows: asignaciones } = await pool.query(`
       SELECT a.id, a.user_id AS usuario_id, a.schedule_id AS horario_id,

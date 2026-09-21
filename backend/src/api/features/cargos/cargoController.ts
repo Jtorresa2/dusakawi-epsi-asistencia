@@ -1,6 +1,7 @@
-import * as positionService from "../services/cargoService";
+import * as positionService from "./cargoService";
 import { Request, Response } from "express";
 import { DatabaseError } from "pg";
+import { esIdValido } from "../../shared/utils/validators";
 
 export const obtenerTodos = async (req: Request, res: Response) => {
   try {
@@ -16,6 +17,9 @@ export const obtenerTodos = async (req: Request, res: Response) => {
 
 export const obtenerPorId = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const position = await positionService.obtenerPorId(String(req.params.id));
 
     if (!position) {
@@ -51,6 +55,9 @@ export const crear = async (req: Request, res: Response) => {
 
 export const actualizar = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     await positionService.actualizar(String(req.params.id), req.body);
 
     res.json({
@@ -66,6 +73,9 @@ export const actualizar = async (req: Request, res: Response) => {
 
 export const eliminar = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     await positionService.eliminar(String(req.params.id));
 
     res.json({

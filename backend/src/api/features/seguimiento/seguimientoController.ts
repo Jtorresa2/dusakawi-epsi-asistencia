@@ -1,4 +1,4 @@
-import * as seguimientoService from "../services/seguimientoService";
+import * as seguimientoService from "./seguimientoService";
 import { Request, Response } from "express";
 
 export const obtener = async (req: Request, res: Response) => {

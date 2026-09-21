@@ -1,5 +1,5 @@
-import pool from '../config/db';
-import { getHorarioDelDia, obtenerNovedadQueCubreTarde } from './marcacionService';
+import pool from '../../../config/db';
+import { getHorarioDelDia, obtenerNovedadQueCubreTarde } from '../../features/marcacion/marcacionService';
 import { AusentesResult } from '../types';
 
 interface AttendanceRow {

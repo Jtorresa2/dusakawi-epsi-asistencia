@@ -1,5 +1,5 @@
-import pool from '../config/db';
-import { Cargo } from '../types';
+import pool from '../../../config/db';
+import { Cargo } from '../../shared/types';
 
 export async function obtenerTodos(): Promise<Cargo[]> {
   const { rows } = await pool.query(`

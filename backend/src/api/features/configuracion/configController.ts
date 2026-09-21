@@ -1,5 +1,5 @@
-import pool from "../config/db";
-import { getAllTableNames, getTableData } from "../services/backupService";
+import pool from "../../../config/db";
+import { getAllTableNames, getTableData } from "./backupService";
 import { Request, Response } from "express";
 
 type ConfigValue = string | number | boolean;

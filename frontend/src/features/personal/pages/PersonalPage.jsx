@@ -9,7 +9,7 @@ import {
 import { Plus, Edit3, Trash2, Eye, Search, X, Users, UserCheck, UserX, Building2, User, Briefcase, KeyRound, UserPlus, Layers, ShieldCheck, Clock, CalendarDays } from "lucide-react";
 import {
   obtenerPersonal, crearPersonal, actualizarPersonal, eliminarPersonal,
-  obtenerRoles, generarUsuariosMasivos,
+  obtenerRoles,
 } from "../personal.api";
 import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
@@ -20,7 +20,7 @@ import { COLORES } from "../../../shared/constants/colores.js";
 
 const initialForm = {
   cedula: "", nombre: "", apellido: "", correo: "", telefono: "", fecha_nacimiento: "",
-  area_id: "", cargo_id: "", piso: "", rol_id: "", horario_id: "", username: "", password: "", activo: true,
+  area_id: "", cargo_id: "", piso: "", rol_id: "", horario_id: "", username: "", activo: true,
 };
 
 const ESTADOS_FILTRO = ["Todos", "Activo", "Inactivo"];
@@ -103,14 +103,10 @@ export default function PersonalPage() {
   const [editando, setEditando] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [confirmEliminar, setConfirmEliminar] = useState(null);
-  const [modalGenerar, setModalGenerar] = useState(false);
-  const [generando, setGenerando] = useState(false);
-  const [resultadoGen, setResultadoGen] = useState(null);
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
 
   const [form, setForm] = useState({ ...initialForm });
-  const [confirmPassword, setConfirmPassword] = useState("");
 
   const isActive = (e) => e.activo === 1 || e.activo === true;
   const getName = (e) => `${e.nombre} ${e.apellido}`;
@@ -179,13 +175,10 @@ export default function PersonalPage() {
     filtrados = filtrados.filter((e) => e.rol === filtroRol);
   }
 
-  const pendientes = personal.filter((p) => !p.username).length;
-
   // ─── Crear / Editar ───────────────────────────────────────────────────────
   const abrirCrear = () => {
     setEditando(null);
     setForm({ ...initialForm, touchedCorreo: false });
-    setConfirmPassword("");
     setModalAbierto(true);
   };
 
@@ -204,11 +197,9 @@ export default function PersonalPage() {
       rol_id: e.rol_id ? String(e.rol_id) : "",
       horario_id: e.horario_id ? String(e.horario_id) : "",
       username: e.username || "",
-      password: "",
       activo: isActive(e),
       touchedCorreo: false,
     });
-    setConfirmPassword("");
     setModalAbierto(true);
   };
 
@@ -227,9 +218,6 @@ export default function PersonalPage() {
   const handleGuardar = async () => {
     if (!form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim() || !form.correo.trim()) {
       return mostrarToast("Completa los campos obligatorios", "err");
-    }
-    if (!editando && form.password && form.password !== confirmPassword) {
-      return mostrarToast("Las contraseñas no coinciden", "err");
     }
     setGuardando(true);
     try {
@@ -294,47 +282,12 @@ export default function PersonalPage() {
     }
   };
 
-  // ─── Generar masivos ──────────────────────────────────────────────────────
-  const handleGenerarMasivos = async () => {
-    setGenerando(true);
-    try {
-      const data = await generarUsuariosMasivos();
-      setResultadoGen(data);
-      await cargarDatos();
-    } catch (err) {
-      mostrarToast("Error al generar usuarios", "err");
-    } finally {
-      setGenerando(false);
-    }
-  };
-
-  const descargarReporte = () => {
-    if (!resultadoGen?.resultados?.length) return;
-    const filas = resultadoGen.resultados
-      .map((r) => `${r.empleado}\t${r.username}\t${r.password}\t${r.correo}\t${r.email_enviado ? "SI" : "NO"}`)
-      .join("\n");
-    const tsv = `EMPLEADO\tUSUARIO\tCONTRASENA\tCORREO\tEMAIL_ENVIADO\n${filas}`;
-    const blob = new Blob([tsv], { type: "text/tab-separated-values;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "usuarios_generados.tsv";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <Box sx={{ p: 3 }}>
       {/* ENCABEZADO */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, gap: 2, flexWrap: "wrap" }}>
         <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>Inicio / Gestión del personal / Personal</Typography>
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
-          {pendientes > 0 && (
-            <Button onClick={() => setModalGenerar(true)}
-              sx={{ bgcolor: COLORES.primarioOscuro, color: COLORES.fondoBlanco, borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, "&:hover": { bgcolor: COLORES.primario } }}>
-              Generar faltantes ({pendientes})
-            </Button>
-          )}
           <Button startIcon={<Plus size={18} />} onClick={abrirCrear}
             sx={{ bgcolor: COLORES.primarioOscuro, color: COLORES.fondoBlanco, borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, "&:hover": { bgcolor: COLORES.primario } }}>
             Nuevo empleado
@@ -595,19 +548,19 @@ export default function PersonalPage() {
               </Box>
             </Box>
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 1.5 }}>
-              <TextField required label="Nombre *" value={form.nombre}
+              <TextField required label="Nombre" value={form.nombre}
                 onChange={(e) => setForm({ ...form, nombre: e.target.value })}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
-              <TextField required label="Apellido *" value={form.apellido}
+              <TextField required label="Apellido" value={form.apellido}
                 onChange={(e) => setForm({ ...form, apellido: e.target.value })}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
-              <TextField required label="Cédula *" value={form.cedula}
+              <TextField required label="Cédula" value={form.cedula}
                 onChange={(e) => setForm({ ...form, cedula: onlyDigits(e.target.value) })}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, htmlInput: { inputMode: "numeric", maxLength: 15 } }} sx={modalFieldSx} />
-              <TextField label="Teléfono" value={form.telefono}
+              <TextField label="Teléfono*" value={form.telefono}
                 onChange={(e) => setForm({ ...form, telefono: onlyDigits(e.target.value) })}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, htmlInput: { inputMode: "numeric", maxLength: 15 } }} sx={modalFieldSx} />
-              <TextField required label="Correo electrónico *" value={form.correo}
+              <TextField required label="Correo electrónico" value={form.correo}
                 onChange={(e) => setForm({ ...form, correo: e.target.value })}
                 error={form.correo.trim() === "" && form.touchedCorreo}
                 helperText={form.correo.trim() === "" && form.touchedCorreo ? "El correo es obligatorio" : ""}
@@ -678,9 +631,7 @@ export default function PersonalPage() {
                     <MenuItem key={h.id} value={String(h.id)}>{h.nombre}</MenuItem>
                   ))}
                 </Select>
-                <Typography sx={{ fontSize: 10.5, color: COLORES.textoSuave, mt: 0.5 }}>
-                  {editando ? "Podés asignar o quitar el horario desde acá." : "Lo podés elegir ahora o modificarlo después."}
-                </Typography>
+                
               </FormControl>
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <FormControlLabel
@@ -710,26 +661,6 @@ export default function PersonalPage() {
                 autoComplete="off"
                 helperText={editando ? "El nombre de usuario no se puede cambiar al editar" : "Se completa al guardar"}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } } }} sx={modalFieldSx} />
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                <TextField label="Contraseña temporal" type="password" value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  autoComplete="new-password"
-                  helperText={editando ? "Dejar vacío para no cambiar" : "Vacío = se envía al correo un link para crearla"}
-                  slotProps={{
-                    inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } },
-                    input: {
-                      startAdornment: <InputAdornment position="start"><KeyRound size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment>,
-                    },
-                  }} sx={modalFieldSx} />
-                {!editando && form.password !== "" && (
-                  <TextField label="Confirmar contraseña" type="password" value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    autoComplete="new-password"
-                    error={confirmPassword !== "" && form.password !== "" && confirmPassword !== form.password}
-                    helperText={confirmPassword !== "" && form.password !== "" && confirmPassword !== form.password ? "Las contraseñas no coinciden" : ""}
-                    slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } } }} sx={modalFieldSx} />
-                )}
-              </Box>
             </Box>
             {!editando && (
               <Button startIcon={<UserPlus size={14} />} onClick={handleGenerarUsuario}
@@ -772,84 +703,6 @@ export default function PersonalPage() {
             sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, bgcolor: COLORES.danger, "&:hover": { bgcolor: COLORES.dangerOscuro2 } }}>
             Eliminar
           </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* CONFIRMAR GENERAR MASIVOS */}
-      <Dialog open={modalGenerar && !resultadoGen} onClose={() => setModalGenerar(false)} maxWidth="xs" fullWidth
-        slotProps={{ paper: { sx: { borderRadius: "16px" } } }}>
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario }}>Generar usuarios faltantes?</DialogTitle>
-        <DialogContent>
-          <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario }}>
-            Se crearán usuarios para <strong>{pendientes} empleados</strong> que aún no tienen acceso al sistema.
-            El username se genera automáticamente y, si no se define, se genera una contraseña segura al crear.
-          </Typography>
-          {pendientes > 0 && (
-            <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario, mt: 1 }}>
-              Se enviará un correo a cada empleado si SMTP está configurado.
-            </Typography>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button onClick={() => setModalGenerar(false)}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: COLORES.textoTerciario }}>Cancelar</Button>
-          <Button variant="contained" onClick={handleGenerarMasivos} disabled={generando}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, ...verdeBoton }}>
-            {generando ? "Generando..." : "Generar"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* MODAL RESULTADO GENERACION */}
-      <Dialog open={!!resultadoGen} onClose={() => { setModalGenerar(false); setResultadoGen(null); }} maxWidth="sm" fullWidth
-        slotProps={{ paper: { sx: { borderRadius: "16px" } } }}>
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario, textAlign: "center" }}>Resultado</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
-            <Paper elevation={0} sx={{ textAlign: "center", bgcolor: COLORES.successClaro, borderRadius: "10px", p: 1.5, px: 3 }}>
-              <Typography sx={{ fontSize: 24, fontWeight: 700, color: COLORES.primarioOscuro }}>{resultadoGen?.creados || 0}</Typography>
-              <Typography sx={{ fontSize: 11, color: COLORES.textoTerciario }}>Creados</Typography>
-            </Paper>
-            <Paper elevation={0} sx={{ textAlign: "center", bgcolor: COLORES.primarioClaro, borderRadius: "10px", p: 1.5, px: 3 }}>
-              <Typography sx={{ fontSize: 24, fontWeight: 700, color: COLORES.verdeTexto }}>{resultadoGen?.emails_enviados || 0}</Typography>
-              <Typography sx={{ fontSize: 11, color: COLORES.textoTerciario }}>Emails enviados</Typography>
-            </Paper>
-            <Paper elevation={0} sx={{ textAlign: "center", bgcolor: COLORES.dangerFondo2, borderRadius: "10px", p: 1.5, px: 3 }}>
-              <Typography sx={{ fontSize: 24, fontWeight: 700, color: COLORES.danger }}>{resultadoGen?.emails_fallados || 0}</Typography>
-              <Typography sx={{ fontSize: 11, color: COLORES.textoTerciario }}>Fallos</Typography>
-            </Paper>
-          </Box>
-          {resultadoGen?.resultados?.length > 0 && (
-            <TableContainer sx={{ maxHeight: 220, border: `1px solid ${COLORES.borde}`, borderRadius: "8px" }}>
-              <Table size="small" stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    {["Empleado", "Usuario", "Contrasena", "Email"].map((h) => (
-                      <TableCell key={h} sx={{ fontSize: 11, fontWeight: 600, color: COLORES.textoTerciario, bgcolor: COLORES.fondoGris, py: 1 }}>{h}</TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {resultadoGen.resultados.map((r, i) => (
-                    <TableRow key={i} sx={{ "&:hover": { bgcolor: COLORES.fondoGris } }}>
-                      <TableCell sx={{ fontSize: 11, py: 1 }}>{r.empleado}</TableCell>
-                      <TableCell sx={{ fontSize: 11, py: 1, fontFamily: "monospace" }}>{r.username}</TableCell>
-                      <TableCell sx={{ fontSize: 11, py: 1, fontFamily: "monospace" }}>{r.password}</TableCell>
-                      <TableCell sx={{ fontSize: 11, py: 1 }}>{r.email_enviado ? "OK" : r.correo || "SIN CORREO"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button variant="contained" onClick={descargarReporte} disabled={!resultadoGen?.resultados?.length}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, ...verdeBoton }}>
-            Descargar reporte TSV
-          </Button>
-          <Button onClick={() => { setModalGenerar(false); setResultadoGen(null); }}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: COLORES.textoTerciario }}>Cerrar</Button>
         </DialogActions>
       </Dialog>
 

@@ -5,23 +5,24 @@ import path from "path";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
 
-import authRoutes from "./routes/authRoutes";
-import areaRoutes from "./routes/areaRoutes";
-import asistenciaRoutes from "./routes/asistenciaRoutes";
-import usuariosRoutes from "./routes/usuariosRoutes";
-import dashboardRoutes from "./routes/dashboardRoutes";
-import cargoRoutes from "./routes/cargoRoutes";
-import empleadoRoutes from "./routes/empleadoRoutes";
-import incidenciaRoutes from "./routes/incidenciaRoutes";
-import horarioRoutes from "./routes/horarioRoutes";
-import reportesRoutes from "./routes/reportesRoutes";
-import pdfRoutes from "./routes/pdfRoutes";
-import configRoutes from "./routes/configRoutes";
-import novedadesRoutes from "./routes/novedadesRoutes";
-import festivosRoutes from "./routes/festivosRoutes";
-import marcacionRoutes from "./routes/marcacionRoutes";
-import seguimientoRoutes from "./routes/seguimientoRoutes";
+import authRoutes from "./api/features/auth/authRoutes";
+import areaRoutes from "./api/features/areas/areaRoutes";
+import asistenciaRoutes from "./api/features/asistencia/asistenciaRoutes";
+import usuariosRoutes from "./api/features/usuarios/usuariosRoutes";
+import dashboardRoutes from "./api/features/dashboard/dashboardRoutes";
+import cargoRoutes from "./api/features/cargos/cargoRoutes";
+import empleadoRoutes from "./api/features/empleados/empleadoRoutes";
+import incidenciaRoutes from "./api/features/incidencias/incidenciaRoutes";
+import horarioRoutes from "./api/features/horarios/horarioRoutes";
+import reportesRoutes from "./api/features/reportes/reportesRoutes";
+import pdfRoutes from "./api/features/pdf/pdfRoutes";
+import configRoutes from "./api/features/configuracion/configRoutes";
+import novedadesRoutes from "./api/features/novedades/novedadesRoutes";
+import festivosRoutes from "./api/features/festivos/festivosRoutes";
+import marcacionRoutes from "./api/features/marcacion/marcacionRoutes";
+import seguimientoRoutes from "./api/features/seguimiento/seguimientoRoutes";
 import { iniciarAusentesJob } from "./jobs/ausentesJob";
+import { configurarSwagger } from "./api/shared/docs/swagger";
 
 const app = express();
 
@@ -53,6 +54,9 @@ app.use("/api/marcacion", marcacionRoutes);
 app.use("/api/seguimiento", seguimientoRoutes);
 
 // =======================
+
+// Swagger UI
+configurarSwagger(app);
 
 app.get("/", (req, res) => {
   res.json({

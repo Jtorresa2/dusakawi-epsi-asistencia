@@ -1,7 +1,8 @@
-import * as festivoService from "../services/festivoService";
+import * as festivoService from "./festivoService";
 import { Request, Response } from "express";
 import { DatabaseError } from "pg";
-import { getErrorMessage } from "../utils/errors";
+import { getErrorMessage } from "../../shared/utils/errors";
+import { esIdValido } from "../../shared/utils/validators";
 
 export const obtenerTodos = async (req: Request, res: Response) => {
   try {
@@ -36,6 +37,9 @@ export const crear = async (req: Request, res: Response) => {
 export const actualizar = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    if (!esIdValido(String(id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     const resultado = await festivoService.actualizar(String(id), req.body);
     res.json({ mensaje: "Festivo actualizado", festivo: resultado });
   } catch (err: unknown) {
@@ -45,6 +49,9 @@ export const actualizar = async (req: Request, res: Response) => {
 
 export const eliminar = async (req: Request, res: Response) => {
   try {
+    if (!esIdValido(String(req.params.id))) {
+      return res.status(400).json({ mensaje: 'Id inválido' });
+    }
     await festivoService.eliminar(String(req.params.id));
     res.json({ mensaje: "Festivo eliminado" });
   } catch (err: unknown) {
