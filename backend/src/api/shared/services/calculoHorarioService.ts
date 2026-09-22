@@ -44,7 +44,6 @@ export function calcularTardanza({
   entrada1,
   salida1,
   entrada2,
-  salida2,
   tolerancia_minutos,
   tolerancia_salida_minutos,
 }: CalcTardanzaParams): { minutos_tardanza: number; salida_temprana_minutos: number } {

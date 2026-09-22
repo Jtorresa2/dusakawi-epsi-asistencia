@@ -26,11 +26,6 @@ const HEADER = {
   text3: { x: 145, y: 42 },
   text4: { x: 145, y: 58 },
   textWidth: 220,
-  metadataX: 470,
-  metadataY: 24,
-  metadataLineGap: 10,
-  metadataWidth: 100,
-  pageNumY: 66,
   separatorLineY: 98,
 };
 
@@ -107,8 +102,8 @@ function _rombo(doc: any, x: number, y: number, size: number, color: string) {
 function drawGreek(doc: any, x: number) {
   const isLeft = x === GREEK_LEFT_X;
   const file = isLeft
-    ? path.join(__dirname, "../../assets/greca_derecha.png")
-    : path.join(__dirname, "../../assets/greca_izquierda.png");
+    ? path.join(__dirname, "../../../../assets/greca_derecha.png")
+    : path.join(__dirname, "../../../../assets/greca_izquierda.png");
 
   if (fs.existsSync(file)) {
     doc.image(file, x, 0, { height: PAGE_H });
@@ -116,21 +111,7 @@ function drawGreek(doc: any, x: number) {
 }
 
 // ─── drawHeader ───────────────────────────────────
-function drawHeader(doc: any, metadata?: MembreteMeta) {
-  // Metadata
-  doc.font("Helvetica").fontSize(7).fillColor(COLORS.grisTexto);
-  const lines = [
-    `Código: ${metadata?.codigo ?? "_______________"}`,
-    `Versión: ${metadata?.version ?? "_______________"}`,
-    `Emisión: ${metadata?.emision ?? "___/___/______"}`,
-    `Vigencia: ${metadata?.vigencia ?? "___/___/______"}`,
-  ];
-  let my = HEADER.metadataY;
-  for (const linea of lines) {
-    doc.text(linea, HEADER.metadataX, my, { align: "right", width: HEADER.metadataWidth });
-    my += HEADER.metadataLineGap;
-  }
-
+function drawHeader(doc: any, _metadata?: MembreteMeta) {
   // Separador
   doc.moveTo(BODY_X, HEADER.separatorLineY)
      .lineTo(PAGE_W - BODY_X, HEADER.separatorLineY)
@@ -165,14 +146,6 @@ function drawFooter(doc: any) {
   // Redes
   doc.fontSize(6.5);
   doc.text("Facebook  |  Instagram  |  YouTube  |  LinkedIn  |  X (@DusakawiEPSI)", 0, FOOTER.socialY, { align: "center", width: PAGE_W });
-}
-
-// ─── drawPageNumber ───────────────────────────────
-function drawPageNumber(doc: any, page: number, total: number) {
-  doc.font("Helvetica").fontSize(7).fillColor(COLORS.grisTexto);
-  doc.text(`Página ${page} de ${total}`, HEADER.metadataX, HEADER.pageNumY, {
-    align: "right", width: HEADER.metadataWidth,
-  });
 }
 
 // ─── drawContent ──────────────────────────────────
@@ -213,16 +186,14 @@ export function generarMembrete(res: Response, metadata?: MembreteMeta, callback
 
   // 2. RECORRER TODAS LAS PÁGINAS Y DIBUJAR MEMBRETE COMPLETO
   const range = doc.bufferedPageRange();
-  const total = range.count;
 
-  for (let i = 0; i < total; i++) {
+  for (let i = 0; i < range.count; i++) {
     doc.switchToPage(i);
 
     drawGreek(doc, GREEK_LEFT_X);
     drawGreek(doc, GREEK_RIGHT_X);
     drawHeader(doc, metadata);
     drawFooter(doc);
-    drawPageNumber(doc, i + 1, total);
   }
 
   doc.end();

@@ -42,8 +42,8 @@ export default function RestablecerContrasenaPage() {
   const handleSubmit = async () => {
     setError("");
     if (!form.nueva || !form.confirmar) return setError("Completa todos los campos");
-    if (form.nueva.length < 8) return setError("La contrasena debe tener al menos 8 caracteres");
-    if (form.nueva !== form.confirmar) return setError("Las contrasenas no coinciden");
+    if (form.nueva.length < 8) return setError("La contraseña debe tener al menos 8 caracteres");
+    if (form.nueva !== form.confirmar) return setError("Las contraseñas no coinciden");
     if (!token) return setError("Enlace invalido o ya utilizado");
 
     setCargando(true);
@@ -109,7 +109,7 @@ export default function RestablecerContrasenaPage() {
           Dusakawi EPSI
         </h1>
         <p style={{ fontSize: "15px", color: COLORES.textoMuted, marginBottom: "2rem" }}>
-          Restablece tu contrasena
+          Restablece tu contraseña
         </p>
 
         {/* Formulario */}
@@ -124,7 +124,7 @@ export default function RestablecerContrasenaPage() {
                 background: COLORES.successClaro, color: COLORES.primarioOscuro, padding: "10px 14px",
                 borderRadius: "8px", fontSize: "13px", marginBottom: "1rem", textAlign: "center"
               }}>
-                Contrasena restablecida exitosamente. Ya puedes iniciar sesion con tu nueva contrasena.
+                Contraseña restablecida exitosamente. Ya puedes iniciar sesion con tu nueva contraseña.
               </div>
               <button
                 onClick={() => navigate("/login")}
@@ -172,7 +172,7 @@ export default function RestablecerContrasenaPage() {
               )}
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ fontSize: "14px", fontWeight: 600, color: COLORES.grisOscuro, display: "block", marginBottom: "6px" }}>
-                  Nueva contrasena
+                  Nueva contraseña
                 </label>
                 <input
                   type="password"
@@ -186,11 +186,11 @@ export default function RestablecerContrasenaPage() {
               </div>
               <div style={{ marginBottom: "1.5rem" }}>
                 <label style={{ fontSize: "14px", fontWeight: 600, color: COLORES.grisOscuro, display: "block", marginBottom: "6px" }}>
-                  Confirmar contrasena
+                  Confirmar contraseña
                 </label>
                 <input
                   type="password"
-                  placeholder="Repite la nueva contrasena"
+                  placeholder="Repite la nueva contraseña"
                   value={form.confirmar}
                   onChange={e => setForm({ ...form, confirmar: e.target.value })}
                   onKeyDown={handleKeyDown}
@@ -210,7 +210,7 @@ export default function RestablecerContrasenaPage() {
                 onMouseEnter={e => { if (!cargando) e.target.style.background = COLORES.primarioOscuro }}
                 onMouseLeave={e => { if (!cargando) e.target.style.background = COLORES.primario }}
               >
-                {cargando ? "Guardando..." : "Restablecer contrasena"}
+                {cargando ? "Guardando..." : "Restablecer contraseña"}
               </button>
               <div style={{ textAlign: "center", marginTop: "1rem" }}>
                 <Link

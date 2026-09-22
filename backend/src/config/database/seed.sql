@@ -235,7 +235,7 @@ WHERE NOT EXISTS (
 -- ---------------------------------------------------------------------
 -- users
 -- Passwords are bcrypt hashes. Seed credentials (test only):
---   Jtorresa22 / 123456       (Administrador)
+--   Administrador / 123456       (Administrador)
 --   talento    / talento123   (Talento Humano)
 --   carlos     / 12345678     (Empleado)
 -- ---------------------------------------------------------------------
@@ -250,7 +250,7 @@ INSERT INTO users (
         '1995-04-12', 'Astrea', 'Calle 10 # 5-23', NULL,
         (SELECT id FROM positions WHERE name = 'Técnico de Sistemas'),
         (SELECT a.id FROM areas a JOIN floors f ON a.floor_id = f.id WHERE a.name = 'Sistemas' AND f.name = 'Piso 3'),
-        'Jtorresa22', '$2a$12$w5cCwla/RnLBWFTrLn0snOODkQlsZ2Lw96igxODh4KrdWy3ScyS8K', 'jtorresa@email.com',
+        'Administrador', '$2a$12$w5cCwla/RnLBWFTrLn0snOODkQlsZ2Lw96igxODh4KrdWy3ScyS8K', 'jtorresa@email.com',
         TRUE, FALSE, NULL, 'FP001', NULL, '2021-06-01'
     ),
     (
@@ -280,7 +280,7 @@ INSERT INTO document_details (
 VALUES
     (
         (SELECT id FROM document_types WHERE name = 'Cédula de Ciudadanía'),
-        (SELECT id FROM users WHERE username = 'Jtorresa22'),
+        (SELECT id FROM users WHERE username = 'Administrador'),
         '1065432187', '2012-03-15', 'Valledupar'
     ),
     (
@@ -302,7 +302,7 @@ INSERT INTO user_roles (user_id, role_id)
 VALUES
     ((SELECT id FROM users WHERE username = 'carlos'), (SELECT id FROM roles WHERE name = 'Empleado')),
     ((SELECT id FROM users WHERE username = 'talento'), (SELECT id FROM roles WHERE name = 'Talento Humano')),
-    ((SELECT id FROM users WHERE username = 'Jtorresa22'), (SELECT id FROM roles WHERE name = 'Administrador'))
+    ((SELECT id FROM users WHERE username = 'Administrador'), (SELECT id FROM roles WHERE name = 'Administrador'))
 ON CONFLICT (user_id, role_id) DO NOTHING;
 
 -- ---------------------------------------------------------------------
@@ -340,7 +340,7 @@ INSERT INTO attendances (
         8.75, 0.00, 15, 'huella', 'late', 'Llegada 15 minutos después de la tolerancia', 'RFID-002'
     ),
     (
-        (SELECT id FROM users WHERE username = 'Jtorresa22'),
+        (SELECT id FROM users WHERE username = 'Administrador'),
         DATE '2026-09-10',
         TIMESTAMPTZ '2026-09-10 07:00:00-05', TIMESTAMPTZ '2026-09-10 12:00:00-05',
         TIMESTAMPTZ '2026-09-10 13:00:00-05', TIMESTAMPTZ '2026-09-10 16:00:00-05',
@@ -362,7 +362,7 @@ INSERT INTO incidents (
         'firma_luis.pdf', (SELECT id FROM users WHERE username = 'carlos')
     ),
     (
-        (SELECT id FROM users WHERE username = 'Jtorresa22'),
+        (SELECT id FROM users WHERE username = 'Administrador'),
         'other', 'Ausencia sin previo aviso', DATE '2026-09-10', 'rejected', 'high',
         NULL, 'No se presentó soporte médico', 'Falta de justificación válida',
         'firma_ana.pdf', (SELECT id FROM users WHERE username = 'talento')

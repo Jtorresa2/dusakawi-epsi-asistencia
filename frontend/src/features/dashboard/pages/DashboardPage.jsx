@@ -77,7 +77,7 @@ function EmployeeDashboard({ usuario }) {
 
   const quickActions = [
     { label: "Reportar incidencia", icon: <AlertTriangle size={28} />, path: "/reportar-incidencia", color: COLORES.danger },
-    { label: "Mi perfil", icon: <User size={28} />, path: "/perfil", color: COLORES.primarioOscuro },
+    ...(usuario?.rol === "empleado" ? [{ label: "Mi perfil", icon: <User size={28} />, path: "/perfil", color: COLORES.primarioOscuro }] : []),
     { label: "Mis solicitudes", icon: <ClipboardList size={28} />, path: "/mis-solicitudes", color: COLORES.primario },
   ];
 

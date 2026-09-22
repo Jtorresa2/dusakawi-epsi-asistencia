@@ -1,5 +1,6 @@
 import pool from '../../../config/db';
 import { Request, Response } from 'express';
+import { excluirRolesPorNombre, excluirRolesPorUserId, joinRoles } from '../../shared/utils/rolesFiltro';
 
 const PISO_EXPR = "NULLIF(regexp_replace(fl.name, '\\D', '', 'g'), '')::int";
 
@@ -17,14 +18,14 @@ export const getReporteDiario = async (req: Request, res: Response) => {
         a.worked_hours AS horas_trabajadas, a.late_minutes AS minutos_tardanza, a.mark_type AS tipo_marcacion, a.status AS estado, a.observation AS observacion
       FROM attendances a JOIN users u ON a.user_id = u.id JOIN areas ar ON u.area_id = ar.id
       LEFT JOIN floors fl ON ar.floor_id = fl.id LEFT JOIN document_details dd ON dd.user_id = u.id
-      WHERE a.date = $1 ORDER BY ${PISO_EXPR}, ar.name, u.first_surname
+      WHERE a.date = $1${excluirRolesPorUserId('a.user_id')} ORDER BY ${PISO_EXPR}, ar.name, u.first_surname
     `, [fechaConsulta]);
     const { rows: resumen } = await pool.query(`
       SELECT COUNT(*) AS total, SUM((status = 'on_time')::int) AS puntuales, SUM((status = 'late')::int) AS tardanzas,
         SUM((status = 'absent')::int) AS ausentes, SUM((status = 'justified')::int) AS justificados,
         ROUND(SUM((status != 'absent')::int) / COUNT(*) * 100, 1) AS porcentaje_asistencia,
         AVG(late_minutes) AS promedio_tardanza
-      FROM attendances WHERE date = $1
+      FROM attendances WHERE date = $1${excluirRolesPorUserId('user_id')}
     `, [fechaConsulta]);
     res.json({ fecha: fechaConsulta, resumen: resumen[0], registros });
   } catch (err: any) { res.status(500).json({ mensaje: "Error del servidor", error: err.message }); }
@@ -55,7 +56,7 @@ export const getReporteMensual = async (req: Request, res: Response) => {
       SELECT date AS fecha, COUNT(*) AS total, SUM((status = 'on_time')::int) AS puntuales,
         SUM((status = 'late')::int) AS tardanzas, SUM((status = 'absent')::int) AS ausentes,
         ROUND(SUM((status != 'absent')::int) / COUNT(*) * 100, 1) AS porcentaje_asistencia
-      FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2 GROUP BY date ORDER BY date
+      FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2${excluirRolesPorUserId('user_id')} GROUP BY date ORDER BY date
     `, [mesConsulta, anioConsulta]);
 
     const porDiaConFestivos = porDia.map((d: any) => {
@@ -72,7 +73,7 @@ export const getReporteMensual = async (req: Request, res: Response) => {
         ROUND(SUM((a.status != 'absent')::int) / COUNT(*) * 100, 1) AS porcentaje_asistencia
       FROM attendances a JOIN users u ON a.user_id = u.id JOIN areas ar ON u.area_id = ar.id
       LEFT JOIN floors fl ON ar.floor_id = fl.id
-      WHERE EXTRACT(MONTH FROM a.date) = $1 AND EXTRACT(YEAR FROM a.date) = $2 GROUP BY ar.id, ar.name, fl.name ORDER BY ${PISO_EXPR}, ar.name
+      WHERE EXTRACT(MONTH FROM a.date) = $1 AND EXTRACT(YEAR FROM a.date) = $2${excluirRolesPorUserId('a.user_id')} GROUP BY ar.id, ar.name, fl.name ORDER BY ${PISO_EXPR}, ar.name
     `, [mesConsulta, anioConsulta]);
 
     const { rows: resumen } = await pool.query(`
@@ -80,7 +81,7 @@ export const getReporteMensual = async (req: Request, res: Response) => {
         SUM((status = 'late')::int) AS tardanzas, SUM((status = 'absent')::int) AS ausentes,
         ROUND(SUM((status != 'absent')::int) / COUNT(*) * 100, 1) AS porcentaje_asistencia,
         ROUND(SUM((status = 'on_time')::int) / COUNT(*) * 100, 1) AS porcentaje_puntualidad
-      FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2
+      FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2${excluirRolesPorUserId('user_id')}
     `, [mesConsulta, anioConsulta]);
 
     res.json({
@@ -102,38 +103,38 @@ export const getIndicadores = async (req: Request, res: Response) => {
     const mesAnterior = mesActual === 1 ? 12 : mesActual - 1;
     const anioAnterior = mesActual === 1 ? anioActual - 1 : anioActual;
 
-    const { rows: [{ activos }] } = await pool.query(`SELECT COUNT(*) AS activos FROM users WHERE active = TRUE`);
+    const { rows: [{ activos }] } = await pool.query(`SELECT COUNT(*) AS activos FROM users WHERE active = TRUE${excluirRolesPorUserId('id')}`);
     const { rows: [{ activosAnt }] } = await pool.query(
-      `SELECT COUNT(*) AS activos FROM users WHERE active = TRUE AND EXTRACT(YEAR FROM created_at) = $1 AND EXTRACT(MONTH FROM created_at) = $2`,
+      `SELECT COUNT(*) AS activos FROM users WHERE active = TRUE AND EXTRACT(YEAR FROM created_at) = $1 AND EXTRACT(MONTH FROM created_at) = $2${excluirRolesPorUserId('id')}`,
       [anioAnterior, mesAnterior]
     );
 
     const { rows: [{ asis }] } = await pool.query(`
       SELECT ROUND(SUM((status != 'absent')::int) / NULLIF(COUNT(*), 0) * 100, 1) AS asis
-      FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2
+      FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2${excluirRolesPorUserId('user_id')}
     `, [mesActual, anioActual]);
     const { rows: [{ asisAnt }] } = await pool.query(`
       SELECT ROUND(SUM((status != 'absent')::int) / NULLIF(COUNT(*), 0) * 100, 1) AS asis
-      FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2
+      FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2${excluirRolesPorUserId('user_id')}
     `, [mesAnterior, anioAnterior]);
 
     const { rows: [{ tard }] } = await pool.query(`
-      SELECT COUNT(*) AS tard FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2 AND status = 'late'
+      SELECT COUNT(*) AS tard FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2 AND status = 'late'${excluirRolesPorUserId('user_id')}
     `, [mesActual, anioActual]);
     const { rows: [{ tardAnt }] } = await pool.query(`
-      SELECT COUNT(*) AS tard FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2 AND status = 'late'
+      SELECT COUNT(*) AS tard FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2 AND status = 'late'${excluirRolesPorUserId('user_id')}
     `, [mesAnterior, anioAnterior]);
 
-    const { rows: [{ inc }] } = await pool.query(`SELECT COUNT(*) AS inc FROM incidents WHERE status = 'pending'`);
+    const { rows: [{ inc }] } = await pool.query(`SELECT COUNT(*) AS inc FROM incidents WHERE status = 'pending'${excluirRolesPorUserId('user_id')}`);
     const { rows: [{ incAnt }] } = await pool.query(`
-      SELECT COUNT(*) AS inc FROM incidents WHERE status = 'pending' AND EXTRACT(MONTH FROM created_at) = $1 AND EXTRACT(YEAR FROM created_at) = $2
+      SELECT COUNT(*) AS inc FROM incidents WHERE status = 'pending' AND EXTRACT(MONTH FROM created_at) = $1 AND EXTRACT(YEAR FROM created_at) = $2${excluirRolesPorUserId('user_id')}
     `, [mesAnterior, anioAnterior]);
 
     const { rows: [{ aus }] } = await pool.query(`
-      SELECT COUNT(*) AS aus FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2 AND status = 'absent'
+      SELECT COUNT(*) AS aus FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2 AND status = 'absent'${excluirRolesPorUserId('user_id')}
     `, [mesActual, anioActual]);
     const { rows: [{ ausAnt }] } = await pool.query(`
-      SELECT COUNT(*) AS aus FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2 AND status = 'absent'
+      SELECT COUNT(*) AS aus FROM attendances WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2 AND status = 'absent'${excluirRolesPorUserId('user_id')}
     `, [mesAnterior, anioAnterior]);
 
     const { rows: [{ reps }] } = await pool.query(`
@@ -161,7 +162,7 @@ export const getTendencia = async (req: Request, res: Response) => {
         ROUND(SUM((status != 'absent')::int) / NULLIF(COUNT(*), 0) * 100, 1) AS porcentaje
       FROM attendances
       WHERE date >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '6 months')::date
-        AND date <= (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month - 1 day')::date
+        AND date <= (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month - 1 day')::date${excluirRolesPorUserId('user_id')}
       GROUP BY EXTRACT(YEAR FROM date), EXTRACT(MONTH FROM date) ORDER BY anio, mes
       LIMIT 6
     `);
@@ -182,7 +183,7 @@ export const getReporteAsistencia = async (req: Request, res: Response) => {
         TO_CHAR(a.departure_timestamp, 'HH24:MI') AS salida2,
         a.worked_hours AS horas_trabajadas, a.late_minutes AS minutos_tardanza, a.mark_type AS tipo_marcacion, a.status AS estado, a.observation AS observacion
       FROM attendances a JOIN users u ON a.user_id = u.id JOIN areas ar ON u.area_id = ar.id
-      LEFT JOIN floors fl ON ar.floor_id = fl.id LEFT JOIN document_details dd ON dd.user_id = u.id WHERE 1=1
+      LEFT JOIN floors fl ON ar.floor_id = fl.id LEFT JOIN document_details dd ON dd.user_id = u.id${joinRoles('u.id')} WHERE 1=1${excluirRolesPorNombre('r')}
     `;
     const params: any[] = [];
     if (fecha_desde) { query += ` AND a.date >= $${params.length + 1}`; params.push(fecha_desde); }
@@ -205,7 +206,7 @@ export const getReporteIncidencias = async (req: Request, res: Response) => {
         TO_CHAR(i.created_at, 'YYYY-MM-DD') AS fecha,
         CONCAT(u.first_name, ' ', u.first_surname) AS empleado, dd.document_number AS cedula, ar.name AS area, i.rejection_reason AS motivo_rechazo
       FROM incidents i JOIN users u ON i.user_id = u.id JOIN areas ar ON u.area_id = ar.id
-      LEFT JOIN document_details dd ON dd.user_id = u.id WHERE 1=1
+      LEFT JOIN document_details dd ON dd.user_id = u.id WHERE 1=1${excluirRolesPorUserId('i.user_id')}
     `;
     const params: any[] = [];
     if (fecha_desde) { query += ` AND i.created_at >= $${params.length + 1}`; params.push(fecha_desde); }
@@ -232,7 +233,7 @@ export const getReporteTardanzas = async (req: Request, res: Response) => {
         a.late_minutes AS minutos_tardanza, a.mark_type AS tipo_marcacion, a.observation AS observacion
       FROM attendances a JOIN users u ON a.user_id = u.id JOIN areas ar ON u.area_id = ar.id
       LEFT JOIN floors fl ON ar.floor_id = fl.id LEFT JOIN document_details dd ON dd.user_id = u.id
-      WHERE a.status = 'late'
+      WHERE a.status = 'late'${excluirRolesPorUserId('a.user_id')}
     `;
     const params: any[] = [];
     if (fecha_desde) { query += ` AND a.date >= $${params.length + 1}`; params.push(fecha_desde); }
@@ -258,7 +259,7 @@ export const getReporteAusencias = async (req: Request, res: Response) => {
         AND NOT EXISTS (
           SELECT 1 FROM news p
           WHERE p.user_id = a.user_id AND a.date BETWEEN p.date_from AND p.date_to
-        )
+        )${excluirRolesPorUserId('a.user_id')}
     `;
     const params: any[] = [];
     if (fecha_desde) { query += ` AND a.date >= $${params.length + 1}`; params.push(fecha_desde); }
@@ -286,7 +287,7 @@ export const getReportePorEmpleado = async (req: Request, res: Response) => {
         TO_CHAR(u.hire_date, 'YYYY-MM-DD') AS fecha_ingreso
       FROM users u LEFT JOIN areas ar ON u.area_id = ar.id LEFT JOIN positions ca ON u.position_id = ca.id
       LEFT JOIN document_details dd ON dd.user_id = u.id
-      WHERE u.id = $1
+      WHERE u.id = $1${excluirRolesPorUserId('u.id')}
     `, [targetId]);
 
     if (!empleado) return res.status(404).json({ mensaje: "Empleado no encontrado" });
@@ -317,7 +318,7 @@ export const getReportePorEmpleado = async (req: Request, res: Response) => {
         COALESCE(SUM(worked_hours), 0) AS horas_trabajadas,
         COALESCE(SUM(late_minutes), 0) AS total_minutos_tardanza
       FROM attendances
-      WHERE user_id = $1 AND EXTRACT(MONTH FROM date) = $2 AND EXTRACT(YEAR FROM date) = $3
+      WHERE user_id = $1 AND EXTRACT(MONTH FROM date) = $2 AND EXTRACT(YEAR FROM date) = $3${excluirRolesPorUserId('user_id')}
     `, [targetId, mesConsulta, anioConsulta]);
 
     const resumen = asis || { total_registros: 0, puntuales: 0, tardanzas: 0, ausentes: 0, justificados: 0, horas_trabajadas: 0, total_minutos_tardanza: 0 };
@@ -331,13 +332,13 @@ export const getReportePorEmpleado = async (req: Request, res: Response) => {
           )
         ELSE 1 END), 0) AS dias_permiso
       FROM news
-      WHERE user_id = $1 AND EXTRACT(MONTH FROM date_from) = $2 AND EXTRACT(YEAR FROM date_from) = $3
+      WHERE user_id = $1 AND EXTRACT(MONTH FROM date_from) = $2 AND EXTRACT(YEAR FROM date_from) = $3${excluirRolesPorUserId('user_id')}
     `, [targetId, mesConsulta, anioConsulta]);
 
     const { rows: [incidencias] } = await pool.query(`
       SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE status = 'pending') AS pendientes
       FROM incidents
-      WHERE user_id = $1 AND EXTRACT(MONTH FROM date) = $2 AND EXTRACT(YEAR FROM date) = $3
+      WHERE user_id = $1 AND EXTRACT(MONTH FROM date) = $2 AND EXTRACT(YEAR FROM date) = $3${excluirRolesPorUserId('user_id')}
     `, [targetId, mesConsulta, anioConsulta]);
 
     const { rows: detalle } = await pool.query(`
@@ -348,7 +349,7 @@ export const getReportePorEmpleado = async (req: Request, res: Response) => {
         TO_CHAR(a.departure_timestamp, 'HH24:MI') AS salida2,
         a.worked_hours AS horas_trabajadas, a.late_minutes AS minutos_tardanza, a.observation AS observacion
       FROM attendances a
-      WHERE a.user_id = $1 AND EXTRACT(MONTH FROM a.date) = $2 AND EXTRACT(YEAR FROM a.date) = $3
+      WHERE a.user_id = $1 AND EXTRACT(MONTH FROM a.date) = $2 AND EXTRACT(YEAR FROM a.date) = $3${excluirRolesPorUserId('a.user_id')}
       ORDER BY a.date DESC
     `, [targetId, mesConsulta, anioConsulta]);
 
@@ -394,19 +395,40 @@ export const getReportePorEmpleado = async (req: Request, res: Response) => {
   } catch (err: any) { res.status(500).json({ mensaje: "Error del servidor", error: err.message }); }
 };
 
-export const getReporteEmpleados = async (req: Request, res: Response) => {
+export const getReportePorAreas = async (req: Request, res: Response) => {
   try {
-    const { area_id, cargo_id, activo } = req.query;
+    const { area_id, empleado_id, usuario_id, mes, anio, estado } = req.query;
+    const targetId = usuario_id || empleado_id;
     let query = `
-      SELECT u.id, dd.document_number AS cedula, u.first_name AS nombre, u.first_surname AS apellido, u.email AS correo, u.phone AS telefono,
-        ar.name AS area, ca.name AS cargo, u.active AS activo
-      FROM users u LEFT JOIN areas ar ON u.area_id = ar.id LEFT JOIN positions ca ON u.position_id = ca.id
-      LEFT JOIN document_details dd ON dd.user_id = u.id WHERE 1=1
+      SELECT u.id, CONCAT(u.first_name, ' ', u.first_surname) AS empleado, dd.document_number AS cedula, ar.name AS area,
+        (COUNT(DISTINCT a.date) FILTER (WHERE a.status IN ('on_time','late')))::int AS dias_laborados,
+        (COUNT(*) FILTER (WHERE a.status = 'on_time'))::int AS puntuales,
+        (COUNT(*) FILTER (WHERE a.status = 'late'))::int AS tardanzas,
+        (COUNT(*) FILTER (WHERE a.status = 'absent'))::int AS ausencias,
+        COALESCE(SUM(a.worked_hours), 0)::float AS horas_trabajadas
+      FROM users u
+      LEFT JOIN areas ar ON u.area_id = ar.id
+      LEFT JOIN document_details dd ON dd.user_id = u.id
+      LEFT JOIN attendances a ON a.user_id = u.id
     `;
     const params: any[] = [];
+    // mes/anio van en el ON del LEFT JOIN para que los empleados sin marcas sigan apareciendo (ceros)
+    const joinConds: string[] = [];
+    if (mes) { joinConds.push(`EXTRACT(MONTH FROM a.date) = $${params.length + 1}`); params.push(mes); }
+    if (anio) { joinConds.push(`EXTRACT(YEAR FROM a.date) = $${params.length + 1}`); params.push(anio); }
+    if (joinConds.length) { query += ` AND ${joinConds.join(" AND ")}`; }
+    query += joinRoles('u.id');
+    query += ` WHERE u.active = true${excluirRolesPorNombre('r')}`;
     if (area_id) { query += ` AND u.area_id = $${params.length + 1}`; params.push(area_id); }
-    if (cargo_id) { query += ` AND u.position_id = $${params.length + 1}`; params.push(cargo_id); }
-    if (activo !== undefined) { query += ` AND u.active = $${params.length + 1}`; params.push(activo); }
+    if (targetId) { query += ` AND u.id = $${params.length + 1}`; params.push(targetId); }
+    query += ` GROUP BY u.id, u.first_name, u.first_surname, dd.document_number, ar.name`;
+    const ESTADO_HAVING: Record<string, string> = {
+      on_time: "COUNT(*) FILTER (WHERE a.status = 'late') = 0 AND COUNT(*) FILTER (WHERE a.status = 'on_time') > 0",
+      late: "COUNT(*) FILTER (WHERE a.status = 'late') > 0",
+      absent: "COUNT(*) FILTER (WHERE a.status = 'absent') > 0",
+      justified: "COUNT(*) FILTER (WHERE a.status = 'justified') > 0",
+    };
+    if (estado && ESTADO_HAVING[String(estado)]) { query += ` HAVING ${ESTADO_HAVING[String(estado)]}`; }
     query += ` ORDER BY u.first_surname, u.first_name`;
     const { rows } = await pool.query(query, params);
     res.json({ registros: rows, total: rows.length });
@@ -426,7 +448,7 @@ export const getReporteMarcaciones = async (req: Request, res: Response) => {
         TO_CHAR(a.departure_timestamp, 'HH24:MI') AS salida2,
         a.worked_hours AS horas_trabajadas, a.late_minutes AS minutos_tardanza, a.mark_type AS tipo_marcacion, a.status AS estado
       FROM attendances a JOIN users u ON a.user_id = u.id JOIN areas ar ON u.area_id = ar.id
-      LEFT JOIN document_details dd ON dd.user_id = u.id WHERE 1=1
+      LEFT JOIN document_details dd ON dd.user_id = u.id WHERE 1=1${excluirRolesPorUserId('a.user_id')}
     `;
     const params: any[] = [];
     if (fecha_desde) { query += ` AND a.date >= $${params.length + 1}`; params.push(fecha_desde); }

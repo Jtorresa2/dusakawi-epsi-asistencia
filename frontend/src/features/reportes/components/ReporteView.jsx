@@ -9,20 +9,19 @@ import { COLORES } from "../../../shared/constants/colores.js";
 
 const ETIQUETAS = {
   porEmpleado: "Reporte por Empleado", asistencia: "Reporte de Asistencia", incidencias: "Reporte de Incidencias", tardanzas: "Reporte de Tardanzas",
-  ausencias: "Reporte de Ausencias", empleados: "Reporte de Empleados", marcaciones: "Reporte de Marcaciones",
+  ausencias: "Reporte de Ausencias", porAreas: "Reporte por Áreas", marcaciones: "Reporte de Marcaciones",
 };
-const ICONOS = { porEmpleado: "👤", asistencia: "📊", incidencias: "📄", tardanzas: "⏰", ausencias: "🚫", empleados: "👥", marcaciones: "📍" };
+const ICONOS = { porEmpleado: "👤", asistencia: "📊", incidencias: "📄", tardanzas: "⏰", ausencias: "🚫", porAreas: "🏢", marcaciones: "📍" };
 
 const API_MAP = {
   porEmpleado: "obtenerReportePorEmpleado", asistencia: "obtenerReporteAsistencia", incidencias: "obtenerReporteIncidencias", tardanzas: "obtenerReporteTardanzas",
-  ausencias: "obtenerReporteAusencias", empleados: "obtenerReporteEmpleados", marcaciones: "obtenerReporteMarcaciones",
+  ausencias: "obtenerReporteAusencias", porAreas: "obtenerReportePorAreas", marcaciones: "obtenerReporteMarcaciones",
 };
 
 const TIPOS_INC = [
   {value:"biometric_failure",label:"Falla biométrica"},
   {value:"other",label:"Otro"},
 ];
-const EST_ASIS = ["on_time","late","absent","justified"];
 const EST_INC = ["pending","approved","rejected"];
 const EST_EMP = [{value:"1",label:"Activo"},{value:"0",label:"Inactivo"}];
 
@@ -37,7 +36,7 @@ const FILTROS = {
   incidencias: ["fecha_desde","usuario_id","area_id","estado_incidencia","tipo_incidencia"],
   tardanzas: ["fecha_desde","usuario_id","area_id"],
   ausencias: ["fecha_desde","usuario_id","area_id"],
-  empleados: ["area_id","cargo_id","estado_empleado"],
+  porAreas: ["area_id","mes","anio","usuario_id","estado"],
   marcaciones: ["fecha_desde","usuario_id","area_id"],
 };
 
@@ -72,10 +71,13 @@ const COLS = {
     {field:"fecha",headerName:"Fecha",width:110,valueFormatter:v=>v?new Date(v).toLocaleDateString("es-CO"):"—"},
     {field:"estado",headerName:"Estado",width:110},{field:"observacion",headerName:"Observación",width:250},
   ],
-  empleados: [
-    {field:"nombre",headerName:"Nombre",width:130},{field:"apellido",headerName:"Apellido",width:130},{field:"cedula",headerName:"Cédula",width:100},
-    {field:"area",headerName:"Área",width:130},{field:"cargo",headerName:"Cargo",width:130},{field:"correo",headerName:"Correo",width:200},
-    {field:"telefono",headerName:"Teléfono",width:120},{field:"activo",headerName:"Estado",width:100,valueFormatter:v=>v?"Activo":"Inactivo"},
+  porAreas: [
+    {field:"empleado",headerName:"Empleado",width:180},
+    {field:"dias_laborados",headerName:"Días laborados",width:110},
+    {field:"puntuales",headerName:"Puntuales",width:90},
+    {field:"tardanzas",headerName:"Tardanzas",width:90},
+    {field:"ausencias",headerName:"Ausencias",width:90},
+    {field:"horas_trabajadas",headerName:"Horas trabajadas",width:120,valueFormatter:v=>v?`${Number(v).toFixed(2)}h`:"0h"},
   ],
   marcaciones: [
     {field:"empleado",headerName:"Empleado",width:160},{field:"cedula",headerName:"Cédula",width:90},{field:"area",headerName:"Área",width:110},
@@ -165,7 +167,7 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
               <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Estado</InputLabel>
               <TextField select size="small" value={f.estado||""} onChange={e => set("estado",e.target.value)} sx={{minWidth:130,...SX}}>
                 <MenuItem value="">Todos</MenuItem>
-                {EST_ASIS.map(e => <MenuItem key={e} value={e}>{e}</MenuItem>)}
+                {["on_time","late","absent","justified"].map(k => <MenuItem key={k} value={k}>{({on_time:"Puntual",late:"Tardanza",absent:"Ausente",justified:"Justificado"})[k]}</MenuItem>)}
               </TextField>
             </Box>
           );
@@ -201,7 +203,7 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
       </Box>
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
         <Button variant="contained" startIcon={<Search size={16}/>} onClick={() => onGenerar(f)} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,fontWeight:600,px:2.5,background:COLORES.primarioOscuro,"&:hover":{background:COLORES.primario}}}>Generar</Button>
-        <Button variant="outlined" startIcon={<FileText size={16}/>} onClick={tipoReporte==="porEmpleado"?undefined:onExportarPDF} disabled={tipoReporte==="porEmpleado"} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:COLORES.borde,color:COLORES.textoSecundario,"&:hover":{borderColor:COLORES.primarioOscuro,color:COLORES.primarioOscuro},"&.Mui-disabled":{color:COLORES.borde2,borderColor:COLORES.borde}}}>PDF</Button>
+        <Button variant="outlined" startIcon={<FileText size={16}/>} onClick={onExportarPDF} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:COLORES.borde,color:COLORES.textoSecundario,"&:hover":{borderColor:COLORES.primarioOscuro,color:COLORES.primarioOscuro},"&.Mui-disabled":{color:COLORES.borde2,borderColor:COLORES.borde}}}>PDF</Button>
         <Button variant="outlined" startIcon={<FileSpreadsheet size={16}/>} onClick={onExportarExcel} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:COLORES.borde,color:COLORES.textoSecundario,"&:hover":{borderColor:COLORES.primarioOscuro,color:COLORES.primarioOscuro}}}>Excel</Button>
         <Button variant="text" startIcon={<RotateCcw size={16}/>} onClick={()=>{setF({}); if(onLimpiar)onLimpiar();}} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,color:COLORES.textoTerciario,"&:hover":{color:COLORES.danger}}}>Limpiar</Button>
       </Box>
@@ -219,9 +221,9 @@ function ResultadosTable({ tipoReporte, registros, total }) {
     <Box>
       <Box sx={{display:"flex",justifyContent:"space-between",alignItems:"center",mb:1}}>
         <Typography sx={{fontSize:14,fontWeight:600,color:COLORES.textoSecundario}}>Resultados</Typography>
-        <Typography sx={{fontSize:12,color:COLORES.textoSuave}}>{total||registros.length} {tipoReporte==="empleados"?"empleados":"registros"}</Typography>
+        <Typography sx={{fontSize:12,color:COLORES.textoSuave}}>{total||registros.length} {tipoReporte==="porAreas"?"empleados":"registros"}</Typography>
       </Box>
-      <DataTable rows={registros} columns={COLS[tipoReporte]||[]} entityLabel={tipoReporte==="empleados"?"empleados":"registros"} getRowId={r=>r.id||r.cedula||Math.random()} pageSize={10} />
+      <DataTable rows={registros} columns={COLS[tipoReporte]||[]} entityLabel={tipoReporte==="porAreas"?"empleados":"registros"} getRowId={r=>r.id||r.cedula||Math.random()} pageSize={10} />
     </Box>
   );
 }

@@ -2,6 +2,7 @@ import pool from '../../../config/db';
 import { Request, Response } from 'express';
 import { SqlParam } from '../../shared/types';
 import { getErrorMessage } from '../../shared/utils/errors';
+import { excluirRolesPorUserId } from '../../shared/utils/rolesFiltro';
 
 interface MiAsistenciaRow {
   fecha: string | Date;
@@ -56,7 +57,7 @@ export const getRegistros = async (req: Request, res: Response) => {
           WHEN 5 THEN 'Viernes'
           WHEN 6 THEN 'Sábado'
         END
-      WHERE 1=1
+      WHERE 1=1${excluirRolesPorUserId('a.user_id')}
     `;
 
     const params: SqlParam[] = [];

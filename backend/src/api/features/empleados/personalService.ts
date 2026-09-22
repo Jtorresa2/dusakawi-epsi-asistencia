@@ -2,6 +2,7 @@ import db from '../../../config/db';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { Usuario, PersonalFiltros, CrearPersonalData, CrearUsuarioResult } from '../../shared/types';
+import { excluirRolesPorNombre } from '../../shared/utils/rolesFiltro';
 
 // Style: initial of first name + FIRST surname + last 3 digits of the cédula
 // (e.g. "Juliana" + "Torres Aarón" + "1234567" -> "jtorres567").
@@ -48,9 +49,9 @@ export async function obtenerTodos(filtros: PersonalFiltros = {}): Promise<Usuar
         COUNT(*) FILTER (WHERE asis.status = 'late') AS late_arrivals
       FROM attendances asis
       WHERE asis.user_id = u.id
-    ) stats ON true
-    WHERE 1=1
-  `;
+) stats ON true
+      WHERE 1=1${excluirRolesPorNombre('r')}
+    `;
   const params: unknown[] = [];
 
   if (filtros.area) {
@@ -92,7 +93,7 @@ export async function obtenerPorId(id: string): Promise<Usuario | undefined> {
        FROM attendances asis
        WHERE asis.user_id = u.id
      ) stats ON true
-     WHERE u.id = $1`,
+     WHERE u.id = $1${excluirRolesPorNombre('r')}`,
     [id]
   );
   return rows[0];

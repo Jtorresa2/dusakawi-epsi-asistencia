@@ -116,7 +116,7 @@ export async function actualizar(
     hora_desde?: string | null;
     hora_hasta?: string | null;
   },
-  usuarioId: string | null
+  _usuarioId: string | null
 ): Promise<{ id: string }> {
   const { usuario_id, empleado_id, fecha_desde, fecha_hasta, motivo, tipo_novedad, modalidad, hora_desde, hora_hasta } = data;
   const targetId = usuario_id ?? empleado_id;

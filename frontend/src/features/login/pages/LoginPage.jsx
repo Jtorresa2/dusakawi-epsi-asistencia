@@ -144,11 +144,11 @@ export default function LoginPage() {
 
               <div style={{ marginBottom: "1.5rem" }}>
                 <label style={{ fontSize: "14px", fontWeight: 600, color: COLORES.grisOscuro, display: "block", marginBottom: "6px" }}>
-                  Contrasena
+                  Contraseña
                 </label>
                 <input
                   type="password"
-                  placeholder="Ingresa tu contrasena"
+                  placeholder="Ingresa tu contraseña"
                   value={form.password}
                   onChange={e => setForm({ ...form, password: e.target.value })}
                   onKeyDown={handleKeyDown}
@@ -184,7 +184,7 @@ export default function LoginPage() {
                     padding: "4px"
                   }}
                 >
-                  ¿Olvidaste tu contrasena?
+                  ¿Has olvidado tu contraseña?
                 </Link>
               </div>
             </>

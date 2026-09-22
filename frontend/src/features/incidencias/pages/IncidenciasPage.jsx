@@ -9,7 +9,7 @@ import {
   AlertTriangle, CheckCircle, XCircle, Clock, Search, Download, FileText,
   Eye, ChevronRight, Filter, X, AlertOctagon, Zap, ArrowRight,
 } from "lucide-react";
-import * as XLSX from "xlsx";
+import { exportarExcel } from "../../../shared/utils/exportarExcel";
 import { obtenerIncidencias, obtenerStatsIncidencias, obtenerActividadIncidencias } from "../incidencia.api";
 import { obtenerAreas } from "../../areas/area.api";
 import Loading from "../../../shared/components/Loading";
@@ -145,10 +145,7 @@ export default function IncidenciasPage() {
       Estado: r.estado || "",
       Prioridad: r.prioridad || "—",
     }));
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(wb, ws, "Incidencias");
-    XLSX.writeFile(wb, `Incidencias_${new Date().toISOString().split("T")[0]}.xlsx`);
+    exportarExcel(data, `Incidencias_${new Date().toISOString().split("T")[0]}`);
   }
 
   function exportarPDF() { setExportAnchor(null); window.open("/api/pdf/incidencias", "_blank"); }

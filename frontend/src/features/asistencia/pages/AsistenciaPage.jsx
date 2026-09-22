@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Box, Paper, Typography,
 } from "@mui/material";
-import * as XLSX from "xlsx";
+import { exportarExcel } from "../../../shared/utils/exportarExcel";
 import DataTable from "../../../shared/components/DataTable";
 import Loading from "../../../shared/components/Loading";
 import EmptyState from "../../../shared/components/EmptyState";
@@ -127,20 +127,8 @@ export default function AsistenciaPage() {
       Estado: r.estado || "",
     }));
 
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(data);
-
-    const colWidths = [
-      { wch: 4 }, { wch: 28 }, { wch: 12 }, { wch: 18 }, { wch: 6 },
-      { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
-      { wch: 16 }, { wch: 12 }, { wch: 12 }, { wch: 14 },
-    ];
-    ws["!cols"] = colWidths;
-
-    XLSX.utils.book_append_sheet(wb, ws, "Asistencia");
-
     const label = vista === "dia" ? fecha : vista === "semana" ? `sem${fechaDesde}` : vista === "mes" ? `${anio}_${mes}` : `${fechaDesde}_${fechaHasta}`;
-    XLSX.writeFile(wb, `Asistencia_${label}.xlsx`);
+    exportarExcel(data, `Asistencia_${label}`);
   }
 
   function exportarPDF() {

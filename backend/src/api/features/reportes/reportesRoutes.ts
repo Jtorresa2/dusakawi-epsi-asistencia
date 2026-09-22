@@ -11,7 +11,7 @@ import {
   getReporteTardanzas,
   getReporteAusencias,
   getReportePorEmpleado,
-  getReporteEmpleados,
+  getReportePorAreas,
   getReporteMarcaciones,
   getHistorial,
   guardarHistorial,
@@ -158,15 +158,36 @@ router.get('/por-empleado', auth, getReportePorEmpleado);
 
 /**
  * @swagger
- * /api/reportes/empleados:
+ * /api/reportes/por-areas:
  *   get:
- *     summary: Reporte consolidado de todos los empleados
+ *     summary: Reporte por áreas
  *     tags: [Reportes]
+ *     parameters:
+ *       - in: query
+ *         name: area_id
+ *         schema: { type: integer }
+ *         description: Área del empleado
+ *       - in: query
+ *         name: mes
+ *         schema: { type: integer }
+ *         description: Mes (1-12)
+ *       - in: query
+ *         name: anio
+ *         schema: { type: integer }
+ *         description: Año del período
+ *       - in: query
+ *         name: usuario_id
+ *         schema: { type: integer }
+ *         description: Empleado específico
+ *       - in: query
+ *         name: estado
+ *         schema: { type: string }
+ *         description: Filtra empleados según su estado de asistencia (on_time, late, absent, justified)
  *     responses:
  *       200:
- *         description: Reporte consolidado
+ *         description: Reporte consolidado por áreas
  */
-router.get('/empleados', auth, getReporteEmpleados);
+router.get('/por-areas', auth, getReportePorAreas);
 
 /**
  * @swagger

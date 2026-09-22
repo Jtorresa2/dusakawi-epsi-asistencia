@@ -1,5 +1,4 @@
 import nodemailer, { Transporter } from 'nodemailer';
-import path from 'path';
 import { EnviarResetPasswordParams, EmailResult } from '../types';
 
 let transporter: Transporter | null = null;
@@ -18,17 +17,6 @@ function getTransporter(): Transporter | null {
   });
   return transporter;
 }
-
-// Ruta del logo institucional (attachment CID para que Gmail/Outlook lo muestren
-// sin descargar imágenes remotas). Busca en backend/assets y src/assets según runtime.
-import fs from 'fs';
-const CANDIDATAS_LOGO = [
-  path.resolve(__dirname, '../../assets/logo.png'),
-  path.resolve(__dirname, '../assets/logo.png'),
-  path.resolve(process.cwd(), 'assets/logo.png'),
-];
-const LOGO_PATH = CANDIDATAS_LOGO.find((p) => fs.existsSync(p)) ?? CANDIDATAS_LOGO[0];
-const LOGO_CID = 'dusakawi-logo';
 
 // ─── Paleta institucional ─────────────────────────────────────────────────────
 const VERDE_OSCURO = '#1B5E20';
@@ -78,8 +66,7 @@ function plantilla({
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${VERDE_CLARO};border-radius:14px 14px 0 0;">
               <tr>
                 <td align="center" style="padding:28px 24px 22px 24px;">
-                  <img src="cid:${LOGO_CID}" alt="Dusakawi EPSI" width="72" height="72" style="display:block;width:72px;height:72px;border-radius:12px;" />
-                  <p style="margin:14px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:700;color:${VERDE_OSCURO};letter-spacing:0.4px;">DUSAKAWI EPSI</p>
+                  <p style="margin:0 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:700;color:${VERDE_OSCURO};letter-spacing:0.4px;">DUSAKAWI EPSI</p>
                   <p style="margin:3px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:600;color:${VERDE};letter-spacing:1.6px;text-transform:uppercase;">Sistema de Control de Asistencia</p>
                 </td>
               </tr>
@@ -228,13 +215,13 @@ export async function enviarResetPassword({
         botonLink: link,
         avisoCaducidad: 'Este enlace es de un solo uso y estara disponible durante 7 dias.',
         textoPosterior:
-          'Una vez establecida tu contrasena, podras ingresar al sistema utilizando tu usuario y la contrasena que hayas configurado.',
+          'Una vez establecida tu contrasena, podras ingresar al sistema utilizando tu usuario y la contraseña que hayas configurado.',
         bloqueSeguridad: {
           encabezado: '¿No solicitaste esta cuenta?',
           texto:
             'No realices ninguna accion. Puedes ignorar este correo. ',
         },
-        avisoImportante: 'nunca compartas este enlace ni tu contrasena con otras personas.',
+        avisoImportante: 'nunca compartas este enlace ni tu contraseña ',
       })
     : plantilla({
         titulo: 'Restablece tu contrasena',
@@ -262,14 +249,6 @@ export async function enviarResetPassword({
       to: email,
       subject,
       html,
-      attachments: [
-        {
-          filename: 'logo.png',
-          path: LOGO_PATH,
-          cid: LOGO_CID,
-          contentDisposition: 'inline',
-        },
-      ],
     });
     console.log('[EMAIL] Enviado a', email);
     return { enviado: true };

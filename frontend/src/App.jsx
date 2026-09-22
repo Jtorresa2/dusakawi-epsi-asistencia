@@ -109,7 +109,7 @@ export default function App() {
         <Route path="/mi-asistencia" element={<ErrorBoundary><R roles={["empleado"]}><MiAsistenciaPage /></R></ErrorBoundary>} />
         <Route path="/mi-horario" element={<R roles={["admin", "talento_humano", "empleado"]}><MiHorarioPage /></R>} />
         <Route path="/reportar-incidencia" element={<ErrorBoundary><R roles={["empleado"]}><ReportarIncidenciaPage /></R></ErrorBoundary>} />
-        <Route path="/perfil" element={<ErrorBoundary><R roles={["admin", "talento_humano", "empleado"]}><MiPerfilPage /></R></ErrorBoundary>} />
+        <Route path="/perfil" element={<ErrorBoundary><R roles={["empleado"]}><MiPerfilPage /></R></ErrorBoundary>} />
 
         {/* Otras */}
         <Route path="/mis-solicitudes" element={<R roles={["admin", "talento_humano", "empleado"]}><MisSolicitudesPage /></R>} />

@@ -6,6 +6,7 @@ import auth from "../../shared/middlewares/authMiddleware";
 import rol from "../../shared/middlewares/rol";
 import * as seguimientoService from "../seguimiento/seguimientoService";
 import { esIdValido } from "../../shared/utils/validators";
+import { excluirRolesPorNombre, excluirRolesPorUserId, joinRoles } from "../../shared/utils/rolesFiltro";
 
 const router: Router = Router();
 
@@ -24,8 +25,8 @@ router.get("/incidencias/:id/plantilla", async (req, res) => {
        FROM incidents i
        LEFT JOIN users u ON i.user_id = u.id
        LEFT JOIN areas ar ON u.area_id = ar.id
-       LEFT JOIN document_details dd ON dd.user_id = u.id
-       WHERE i.id = $1`,
+       LEFT JOIN document_details dd ON dd.user_id = u.id${joinRoles('i.user_id')}
+       WHERE i.id = $1${excluirRolesPorNombre('r')}`,
       [req.params.id]
     );
     if (!rows[0]) return res.status(404).json({ mensaje: "Incidencia no encontrada" });
@@ -67,7 +68,7 @@ async function fetchAsistencia(fecha: any, fecha_desde: any, fecha_hasta: any, a
     LEFT JOIN floors fl ON ar.floor_id = fl.id
     LEFT JOIN document_details dd ON dd.user_id = u.id
     LEFT JOIN schedules h ON u.schedule_id = h.id
-    WHERE 1=1
+    WHERE 1=1${excluirRolesPorUserId('a.user_id')}
   `;
   const params: any[] = [];
   if (fecha) { query += " AND a.date = $1"; params.push(fecha); }
@@ -266,7 +267,7 @@ router.get("/incidencias", async (req, res) => {
       JOIN users u ON i.user_id = u.id
       JOIN areas ar ON u.area_id = ar.id
       LEFT JOIN document_details dd ON dd.user_id = u.id
-      WHERE 1=1
+      WHERE 1=1${excluirRolesPorUserId('i.user_id')}
     `;
     const params: any[] = [];
     if (estado) { query += " AND i.status = $1"; params.push(estado); }
@@ -330,11 +331,11 @@ router.get("/dashboard", async (req, res) => {
   try {
     const { rows: indicadores } = await pool.query(`
       SELECT
-        (SELECT ROUND(SUM((status = 'on_time')::int) / NULLIF(COUNT(*), 0) * 100, 1) FROM attendances WHERE date = CURRENT_DATE) AS puntualidad,
-        (SELECT COUNT(DISTINCT user_id) FROM attendances WHERE date = CURRENT_DATE AND status IN ('on_time','late')) AS presentes_hoy,
-        (SELECT COUNT(DISTINCT user_id) FROM attendances WHERE date = CURRENT_DATE AND status = 'absent') AS ausentes_hoy,
-        (SELECT COUNT(DISTINCT user_id) FROM attendances WHERE date = CURRENT_DATE AND status = 'late') AS tardanzas_hoy,
-        (SELECT COUNT(*) FROM incidents WHERE status = 'approved' AND date = CURRENT_DATE) AS permisos_hoy
+        (SELECT ROUND(SUM((status = 'on_time')::int) / NULLIF(COUNT(*), 0) * 100, 1) FROM attendances WHERE date = CURRENT_DATE${excluirRolesPorUserId('user_id')}) AS puntualidad,
+        (SELECT COUNT(DISTINCT user_id) FROM attendances WHERE date = CURRENT_DATE AND status IN ('on_time','late')${excluirRolesPorUserId('user_id')}) AS presentes_hoy,
+        (SELECT COUNT(DISTINCT user_id) FROM attendances WHERE date = CURRENT_DATE AND status = 'absent'${excluirRolesPorUserId('user_id')}) AS ausentes_hoy,
+        (SELECT COUNT(DISTINCT user_id) FROM attendances WHERE date = CURRENT_DATE AND status = 'late'${excluirRolesPorUserId('user_id')}) AS tardanzas_hoy,
+        (SELECT COUNT(*) FROM incidents WHERE status = 'approved' AND date = CURRENT_DATE${excluirRolesPorUserId('user_id')}) AS permisos_hoy
     `);
     let asistenciaHoy: any[] = [];
     try {
@@ -345,7 +346,7 @@ router.get("/dashboard", async (req, res) => {
           a.status AS estado
         FROM attendances a
         JOIN users u ON a.user_id = u.id
-        WHERE a.date = CURRENT_DATE
+        WHERE a.date = CURRENT_DATE${excluirRolesPorUserId('a.user_id')}
         ORDER BY a.entry_timestamp LIMIT 10
       `);
       asistenciaHoy = rowsAsistenciaHoy;
@@ -419,7 +420,7 @@ router.get("/tardanzas", async (req, res) => {
     let q = `SELECT dd.document_number AS cedula, CONCAT(u.first_name,' ',u.first_surname) AS colaborador, ar.name AS area,
       a.date AS fecha, TO_CHAR(a.entry_timestamp,'HH24:MI') AS entrada, a.late_minutes AS minutos_tardanza, a.observation AS observacion
       FROM attendances a JOIN users u ON a.user_id=u.id JOIN areas ar ON u.area_id=ar.id
-      LEFT JOIN document_details dd ON dd.user_id=u.id WHERE a.status='late'`;
+      LEFT JOIN document_details dd ON dd.user_id=u.id WHERE a.status='late'${excluirRolesPorUserId('a.user_id')}`;
     const p: any[] = [];
     if (fecha_desde) { q += ` AND a.date>=$${p.length + 1}`; p.push(fecha_desde); }
     if (fecha_hasta) { q += ` AND a.date<=$${p.length + 1}`; p.push(fecha_hasta); }
@@ -465,7 +466,7 @@ router.get("/ausencias", async (req, res) => {
         AND NOT EXISTS (
           SELECT 1 FROM news p
           WHERE p.user_id = a.user_id AND a.date BETWEEN p.date_from AND p.date_to
-        )`;
+        )${excluirRolesPorUserId('a.user_id')}`;
     const p: any[] = [];
     if (fecha_desde) { q += ` AND a.date>=$${p.length + 1}`; p.push(fecha_desde); }
     if (fecha_hasta) { q += ` AND a.date<=$${p.length + 1}`; p.push(fecha_hasta); }
@@ -498,32 +499,55 @@ router.get("/ausencias", async (req, res) => {
   } catch(e: any) { console.error(e); res.status(500).json({mensaje:"Error PDF",error:e.message}); }
 });
 
-// GET /api/pdf/empleados
-router.get("/empleados", async (req, res) => {
+// GET /api/pdf/por-areas
+router.get("/por-areas", async (req, res) => {
   try {
-    const { area_id, cargo_id } = req.query;
-    let q = `SELECT dd.document_number AS cedula, u.first_name AS nombre, u.first_surname AS apellido, u.phone AS telefono, u.email AS correo, ar.name AS area, ca.name AS cargo, u.active AS activo
-      FROM users u LEFT JOIN areas ar ON u.area_id=ar.id LEFT JOIN positions ca ON u.position_id=ca.id
-      LEFT JOIN document_details dd ON dd.user_id=u.id WHERE 1=1`;
+    const { area_id, empleado_id, usuario_id, mes, anio, estado } = req.query;
+    const targetId = usuario_id || empleado_id;
+    let q = `SELECT u.id, CONCAT(u.first_name, ' ', u.first_surname) AS empleado, dd.document_number AS cedula, ar.name AS area,
+        (COUNT(DISTINCT a.date) FILTER (WHERE a.status IN ('on_time','late')))::int AS dias_laborados,
+        (COUNT(*) FILTER (WHERE a.status = 'on_time'))::int AS puntuales,
+        (COUNT(*) FILTER (WHERE a.status = 'late'))::int AS tardanzas,
+        (COUNT(*) FILTER (WHERE a.status = 'absent'))::int AS ausencias,
+        COALESCE(SUM(a.worked_hours), 0)::float AS horas_trabajadas
+      FROM users u
+      LEFT JOIN areas ar ON u.area_id=ar.id
+      LEFT JOIN document_details dd ON dd.user_id=u.id
+      LEFT JOIN attendances a ON a.user_id=u.id`;
     const p: any[] = [];
+    // mes/anio van en el ON del LEFT JOIN para que los empleados sin marcas sigan apareciendo (ceros)
+    const joinConds: string[] = [];
+    if (mes) { joinConds.push(`EXTRACT(MONTH FROM a.date)=$${p.length + 1}`); p.push(mes); }
+    if (anio) { joinConds.push(`EXTRACT(YEAR FROM a.date)=$${p.length + 1}`); p.push(anio); }
+    if (joinConds.length) { q += ` AND ${joinConds.join(" AND ")}`; }
+    q += joinRoles('u.id');
+    q += ` WHERE u.active = true${excluirRolesPorNombre('r')}`;
     if (area_id) { q += ` AND u.area_id=$${p.length + 1}`; p.push(area_id); }
-    if (cargo_id) { q += ` AND u.position_id=$${p.length + 1}`; p.push(cargo_id); }
-    q += " ORDER BY u.first_surname";
+    if (targetId) { q += ` AND u.id=$${p.length + 1}`; p.push(targetId); }
+    q += ` GROUP BY u.id, u.first_name, u.first_surname, dd.document_number, ar.name`;
+    const ESTADO_HAVING: Record<string, string> = {
+      on_time: "COUNT(*) FILTER (WHERE a.status = 'late') = 0 AND COUNT(*) FILTER (WHERE a.status = 'on_time') > 0",
+      late: "COUNT(*) FILTER (WHERE a.status = 'late') > 0",
+      absent: "COUNT(*) FILTER (WHERE a.status = 'absent') > 0",
+      justified: "COUNT(*) FILTER (WHERE a.status = 'justified') > 0",
+    };
+    if (estado && ESTADO_HAVING[String(estado)]) { q += ` HAVING ${ESTADO_HAVING[String(estado)]}`; }
+    q += " ORDER BY u.first_surname, u.first_name";
     const { rows } = await pool.query(q, p);
     res.setHeader("Content-Type","application/pdf");
-    res.setHeader("Content-Disposition","inline; filename=empleados.pdf");
+    res.setHeader("Content-Disposition","inline; filename=por-areas.pdf");
     const meta = { codigo: "GA-F-001", version: "01", emision: "01/01/2024", vigencia: "01/01/2026" };
     generarMembrete(res, meta, (doc) => {
-      doc.font("Helvetica-Bold").fontSize(12).fillColor("#1B5E20").text("REPORTE DE EMPLEADOS",{align:"center"});
+      doc.font("Helvetica-Bold").fontSize(12).fillColor("#1B5E20").text("REPORTE POR ÁREAS",{align:"center"});
       doc.moveDown(1);
       if (!rows.length) return doc.fontSize(10).fillColor("#6B7280").text("Sin registros.",{align:"center"});
       doc.font("Helvetica").fontSize(7).fillColor("#6B7280").text(`Total: ${rows.length}`,PDF_BODY_X,doc.y,{align:"right",width:465}).moveDown(0.3);
       const pw=595.28, contentW=pw-PDF_BODY_X*2-10;
-      const cw=[Math.round(contentW*0.20),Math.round(contentW*0.11),Math.round(contentW*0.13),Math.round(contentW*0.15),Math.round(contentW*0.14),Math.round(contentW*0.17),Math.round(contentW*0.10)];
+      const cw=[Math.round(contentW*0.18),Math.round(contentW*0.11),Math.round(contentW*0.12),Math.round(contentW*0.14),Math.round(contentW*0.12),Math.round(contentW*0.11),Math.round(contentW*0.11),Math.round(contentW*0.11)];
       let rh=18, hh=20; let y=doc.y;
       doc.font("Helvetica-Bold").fontSize(7).fillColor("#FFF");
       doc.roundedRect(PDF_BODY_X,y,contentW,hh,3).fill("#1B5E20");
-      const headers=["Nombre","Cédula","Teléfono","Área","Cargo","Contacto","Estado"];
+      const headers=["Empleado","Cédula","Área","Días laborados","Puntuales","Tardanzas","Ausencias","Horas"];
       let hx=PDF_BODY_X+3;
       headers.forEach((h,i)=>{doc.fillColor("#FFF").text(h,hx+3,y+6,{width:cw[i]-3}); hx+=cw[i];});
       y+=hh; doc.fillColor("#111827").font("Helvetica").fontSize(6.5);
@@ -531,12 +555,194 @@ router.get("/empleados", async (req, res) => {
         if(y+rh>700){doc.addPage(); y=PDF_BODY_Y;}
         if(i%2===0)doc.rect(PDF_BODY_X,y,contentW,rh).fill("#F9FAFB");
         hx=PDF_BODY_X+3;
-        const c=[`${r.nombre||""} ${r.apellido||""}`,r.cedula||"",r.telefono||"—",r.area||"—",r.cargo||"—",r.correo||"",r.activo?"Activo":"Inactivo"];
-        c.forEach((v,i)=>{doc.fillColor("#111827").text(v,hx+3,y+5,{width:cw[i]-3}); hx+=cw[i];});
+        const c=[r.empleado||"",r.cedula||"",r.area||"",r.dias_laborados||0,r.puntuales||0,r.tardanzas||0,r.ausencias||0,r.horas_trabajadas?Number(r.horas_trabajadas).toFixed(2):"0"];
+        c.forEach((v,i)=>{doc.fillColor("#111827").text(`${v}`,hx+3,y+5,{width:cw[i]-3}); hx+=cw[i];});
         y+=rh;
       });
     });
   } catch(e: any) { console.error(e); res.status(500).json({mensaje:"Error PDF",error:e.message}); }
+});
+
+// GET /api/pdf/por-empleado?usuario_id=&empleado_id=&mes=&anio=
+router.get("/por-empleado", async (req, res) => {
+  try {
+    const { empleado_id, usuario_id, mes, anio } = req.query;
+    const targetId = usuario_id || empleado_id;
+    if (!targetId) return res.status(400).json({ mensaje: "usuario_id es requerido" });
+
+    const mesConsulta  = mes  || new Date().getMonth() + 1;
+    const anioConsulta = anio || new Date().getFullYear();
+
+    const { rows: [empleado] } = await pool.query(`
+      SELECT u.id, dd.document_number AS cedula, u.first_name AS nombre, u.first_surname AS apellido,
+        ar.name AS area, ca.name AS cargo,
+        TO_CHAR(u.hire_date, 'YYYY-MM-DD') AS fecha_ingreso
+      FROM users u LEFT JOIN areas ar ON u.area_id = ar.id LEFT JOIN positions ca ON u.position_id = ca.id
+      LEFT JOIN document_details dd ON dd.user_id = u.id
+      WHERE u.id = $1${excluirRolesPorUserId('u.id')}
+    `, [targetId]);
+    if (!empleado) return res.status(404).json({ mensaje: "Empleado no encontrado" });
+
+    const diasDelMes = new Date(anioConsulta as number, mesConsulta as number, 0).getDate();
+    let diasHabiles = 0;
+    for (let d = 1; d <= diasDelMes; d++) {
+      const dia = new Date(anioConsulta as number, (mesConsulta as number) - 1, d);
+      if (dia.getDay() !== 0 && dia.getDay() !== 6) diasHabiles++;
+    }
+
+    const { rows: festivos } = await pool.query(
+      `SELECT COUNT(*) AS total FROM holidays
+       WHERE active = TRUE AND EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2
+       AND EXTRACT(DOW FROM date) != 0 AND EXTRACT(DOW FROM date) != 6`,
+      [mesConsulta, anioConsulta]
+    );
+    const totalFestivos = Number(festivos[0]?.total || 0);
+    const diasEsperados = diasHabiles - totalFestivos;
+
+    const { rows: [asis] } = await pool.query(`
+      SELECT
+        COUNT(*) AS total_registros,
+        SUM((status = 'on_time')::int) AS puntuales,
+        SUM((status = 'late')::int) AS tardanzas,
+        SUM((status = 'absent')::int) AS ausentes,
+        SUM((status = 'justified')::int) AS justificados,
+        COALESCE(SUM(worked_hours), 0) AS horas_trabajadas,
+        COALESCE(SUM(late_minutes), 0) AS total_minutos_tardanza
+      FROM attendances
+      WHERE user_id = $1 AND EXTRACT(MONTH FROM date) = $2 AND EXTRACT(YEAR FROM date) = $3${excluirRolesPorUserId('user_id')}
+    `, [targetId, mesConsulta, anioConsulta]);
+    const resumen = asis || { total_registros: 0, puntuales: 0, tardanzas: 0, ausentes: 0, justificados: 0, horas_trabajadas: 0, total_minutos_tardanza: 0 };
+
+    const { rows: permisos } = await pool.query(`
+      SELECT COUNT(*) AS total,
+        COALESCE(SUM(CASE WHEN mark_type IN ('full_day', 'commission') THEN
+          (date_to - date_from + 1) - (
+            SELECT COUNT(*) FROM generate_series(date_from::date, date_to::date, '1 day') AS d
+            WHERE EXTRACT(DOW FROM d) IN (0, 6)
+          )
+        ELSE 1 END), 0) AS dias_permiso
+      FROM news
+      WHERE user_id = $1 AND EXTRACT(MONTH FROM date_from) = $2 AND EXTRACT(YEAR FROM date_from) = $3${excluirRolesPorUserId('user_id')}
+    `, [targetId, mesConsulta, anioConsulta]);
+
+    const { rows: [incidencias] } = await pool.query(`
+      SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE status = 'pending') AS pendientes
+      FROM incidents
+      WHERE user_id = $1 AND EXTRACT(MONTH FROM date) = $2 AND EXTRACT(YEAR FROM date) = $3${excluirRolesPorUserId('user_id')}
+    `, [targetId, mesConsulta, anioConsulta]);
+
+    const { rows: detalle } = await pool.query(`
+      SELECT a.date AS fecha, a.status AS estado,
+        TO_CHAR(a.entry_timestamp, 'HH24:MI') AS entrada1,
+        TO_CHAR(a.morning_departure_timestamp, 'HH24:MI') AS salida1,
+        TO_CHAR(a.afternoon_entry_timestamp, 'HH24:MI') AS entrada2,
+        TO_CHAR(a.departure_timestamp, 'HH24:MI') AS salida2,
+        a.worked_hours AS horas_trabajadas, a.late_minutes AS minutos_tardanza, a.observation AS observacion
+      FROM attendances a
+      WHERE a.user_id = $1 AND EXTRACT(MONTH FROM a.date) = $2 AND EXTRACT(YEAR FROM a.date) = $3${excluirRolesPorUserId('a.user_id')}
+      ORDER BY a.date DESC
+    `, [targetId, mesConsulta, anioConsulta]);
+
+    const { rows: festivosDetalle } = await pool.query(
+      `SELECT date AS fecha, name AS nombre FROM holidays WHERE active = TRUE
+       AND EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2`,
+      [mesConsulta, anioConsulta]
+    );
+    const festivosMapDetalle = Object.fromEntries(festivosDetalle.map((f: any) => {
+      const d = new Date(f.fecha);
+      return [`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`, f.nombre];
+    }));
+    const detalleConFestivos = detalle.map((d: any) => {
+      const fechaStr = d.fecha instanceof Date
+        ? `${d.fecha.getFullYear()}-${String(d.fecha.getMonth()+1).padStart(2,'0')}-${String(d.fecha.getDate()).padStart(2,'0')}`
+        : d.fecha.substring(0, 10);
+      return { ...d, esFestivo: !!festivosMapDetalle[fechaStr], festivo: festivosMapDetalle[fechaStr] || null };
+    });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline; filename=reporte-por-empleado.pdf");
+    const meta = { codigo: "GA-F-001", version: "01", emision: "01/01/2024", vigencia: "01/01/2026" };
+    const NOMBRES_MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+    const ETIQUETA_ESTADO: Record<string, string> = { on_time: "Puntual", late: "Tardanza", absent: "Ausente", justified: "Justificado" };
+
+    generarMembrete(res, meta, (doc) => {
+      doc.font("Helvetica-Bold").fontSize(12).fillColor("#1B5E20").text("REPORTE POR EMPLEADO", { align: "center" });
+      doc.moveDown(0.6);
+
+      doc.font("Helvetica-Bold").fontSize(9.5).fillColor("#111827").text(`Empleado: ${empleado.nombre || ""} ${empleado.apellido || ""}`);
+      doc.font("Helvetica").fontSize(8).fillColor("#4B5563");
+      doc.text(`Cédula: ${empleado.cedula || "—"}   Área: ${empleado.area || "—"}   Cargo: ${empleado.cargo || "—"}   Fecha de ingreso: ${empleado.fecha_ingreso || "—"}`);
+      doc.moveDown(0.4);
+      doc.font("Helvetica-Bold").fontSize(9).fillColor("#1B5E20").text(`Período: ${NOMBRES_MESES[Number(mesConsulta) - 1]} ${anioConsulta}`, { align: "center" });
+      doc.moveDown(0.4);
+
+      const [punt, tard, aus, jus] = [Number(resumen.puntuales), Number(resumen.tardanzas), Number(resumen.ausentes), Number(resumen.justificados)];
+      const pAsistencia = Math.round((punt + tard + jus) / Math.max(diasEsperados, 1) * 100);
+      const metas = [
+        { label: "Días hábiles", value: `${diasHabiles}` },
+        { label: "Festivos", value: `${totalFestivos}` },
+        { label: "Asistencia %", value: `${pAsistencia}%` },
+        { label: "Puntuales", value: `${punt}` },
+        { label: "Tardanzas", value: `${tard}` },
+        { label: "Ausentes", value: `${aus}` },
+        { label: "Horas trabajadas", value: `${Number(resumen.horas_trabajadas)} h` },
+        { label: "Permisos", value: `${Number(permisos[0]?.total || 0)}` },
+        { label: "Incidencias", value: `${Number(incidencias?.total || 0)}` },
+      ];
+      const pw = 595.28, contentW = pw - PDF_BODY_X * 2 - 10;
+      const colW = contentW / 3, gridH = 30;
+      let y = doc.y;
+      metas.forEach((m, i) => {
+        const col = i % 3, rowIdx = Math.floor(i / 3);
+        const cx = PDF_BODY_X + col * colW;
+        const cy = y + rowIdx * gridH;
+        doc.rect(cx, cy, colW - 4, gridH - 4).fill(i % 2 === 0 ? "#F9FAFB" : "#FFFFFF");
+        doc.font("Helvetica").fontSize(6.5).fillColor("#6B7280").text(m.label, cx + 6, cy + 5, { width: colW - 16 });
+        doc.font("Helvetica-Bold").fontSize(10).fillColor("#111827").text(m.value, cx + 6, cy + 14, { width: colW - 16 });
+      });
+      y += 3 * gridH;
+      doc.y = y;
+      doc.moveDown(0.6);
+
+      if (!detalleConFestivos.length) {
+        doc.font("Helvetica").fontSize(10).fillColor("#6B7280").text("Sin registros de asistencia en el período.", { align: "center" });
+        return;
+      }
+      doc.moveDown(0.2);
+      const cw = [Math.round(contentW*0.14), Math.round(contentW*0.115), Math.round(contentW*0.115), Math.round(contentW*0.115), Math.round(contentW*0.115), Math.round(contentW*0.09), Math.round(contentW*0.16), Math.round(contentW*0.105)];
+      const headers = ["Fecha","Ent. Mañana","Sal. Mañana","Ent. Tarde","Sal. Tarde","Horas","Estado","Festivo"];
+      let rh = 18, hh = 20;
+      function drawHeaderDetalle() {
+        doc.font("Helvetica-Bold").fontSize(7).fillColor("#FFFFFF");
+        doc.roundedRect(PDF_BODY_X, y, contentW, hh, 3).fill("#1B5E20");
+        let hx = PDF_BODY_X + 3;
+        headers.forEach((h, i) => { doc.fillColor("#FFFFFF").text(h, hx + 3, y + 6, { width: cw[i] - 3 }); hx += cw[i]; });
+        y += hh;
+      }
+      drawHeaderDetalle();
+      doc.fillColor("#111827").font("Helvetica").fontSize(6.5);
+      detalleConFestivos.forEach((r: any, i: number) => {
+        if (y + rh > 700) { doc.addPage(); y = PDF_BODY_Y; drawHeaderDetalle(); doc.fillColor("#111827").font("Helvetica").fontSize(6.5); }
+        if (i % 2 === 0) doc.rect(PDF_BODY_X, y, contentW, rh).fill("#F9FAFB");
+        let hx = PDF_BODY_X + 3;
+        const fechaStr = r.fecha instanceof Date
+          ? `${String(r.fecha.getDate()).padStart(2, '0')}/${String(r.fecha.getMonth() + 1).padStart(2, '0')}/${r.fecha.getFullYear()}`
+          : (() => { const s = String(r.fecha).substring(0, 10).split("-"); return `${s[2]}/${s[1]}/${s[0]}`; })();
+        const cells = [
+          fechaStr,
+          r.entrada1 || "—",
+          r.salida1 || "—",
+          r.entrada2 || "—",
+          r.salida2 || "—",
+          r.horas_trabajadas != null ? `${r.horas_trabajadas} h` : "—",
+          ETIQUETA_ESTADO[r.estado] || r.estado || "—",
+          r.esFestivo ? "Sí" : "No",
+        ];
+        cells.forEach((v, j) => { doc.fillColor("#111827").text(String(v), hx + 3, y + 5, { width: cw[j] - 3 }); hx += cw[j]; });
+        y += rh;
+      });
+    });
+  } catch(e: any) { console.error(e); res.status(500).json({ mensaje: "Error PDF", error: e.message }); }
 });
 
 // GET /api/pdf/marcaciones
@@ -548,7 +754,7 @@ router.get("/marcaciones", async (req, res) => {
       a.date AS fecha,       TO_CHAR(a.entry_timestamp,'HH24:MI') AS entrada,
       TO_CHAR(a.departure_timestamp,'HH24:MI') AS salida, a.mark_type AS tipo_marcacion, a.status AS estado
       FROM attendances a JOIN users u ON a.user_id=u.id JOIN areas ar ON u.area_id=ar.id
-      LEFT JOIN document_details dd ON dd.user_id=u.id WHERE 1=1`;
+      LEFT JOIN document_details dd ON dd.user_id=u.id WHERE 1=1${excluirRolesPorUserId('a.user_id')}`;
     const p: any[] = [];
     if (fecha_desde) { q += ` AND a.date>=$${p.length + 1}`; p.push(fecha_desde); }
     if (fecha_hasta) { q += ` AND a.date<=$${p.length + 1}`; p.push(fecha_hasta); }

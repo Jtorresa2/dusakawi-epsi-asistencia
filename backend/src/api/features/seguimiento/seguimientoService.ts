@@ -23,16 +23,6 @@ export const SITUACION = Object.freeze({
   JORNADA_ABIERTA: "open_day",
 });
 
-// Incidencias formales que el módulo puede vincular a una fila (REQ-04/05/10).
-// 'late' y 'biometric_failure' no generan situación propia pero sí habilitan
-// "Ver en Incidencias" cuando existen para ese (usuario, fecha).
-const TIPOS_INCIDENCIA_VINCULABLES = [
-  "unregistered_exit",
-  "afternoon_absence",
-  "late",
-  "biometric_failure",
-];
-
 // Tipo de incidencia formal que corresponde a cada situación (para elegir el
 // vínculo más relevante cuando hay varias el mismo día).
 const INCIDENCIA_POR_SITUACION: Record<string, string> = {

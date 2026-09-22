@@ -5,7 +5,7 @@ import { ChevronRight, FileText, Eye, Download, X } from "lucide-react";
 import Loading from "../../../shared/components/Loading";
 import DataTable from "../../../shared/components/DataTable";
 import ReporteView from "../components/ReporteView";
-import { obtenerIndicadores, obtenerTendencia, obtenerReporteAsistencia, obtenerReporteIncidencias, obtenerReporteTardanzas, obtenerReporteAusencias, obtenerReporteEmpleados, obtenerReporteMarcaciones, obtenerReportePorEmpleado, obtenerHistorial } from "../reportes.api";
+import { obtenerIndicadores, obtenerTendencia, obtenerReporteAsistencia, obtenerReporteIncidencias, obtenerReporteTardanzas, obtenerReporteAusencias, obtenerReportePorAreas, obtenerReporteMarcaciones, obtenerReportePorEmpleado, obtenerHistorial } from "../reportes.api";
 import { exportarPDF, handleExcel, NOMBRES } from "../reportes.export";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { COLORES } from "../../../shared/constants/colores.js";
@@ -16,7 +16,7 @@ const CARD_DATA = [
   { id: "incidencias", icon: "📄", titulo: "Reporte de Incidencias", desc: "Incidencias registradas y su estado actual.", color: COLORES.danger },
   { id: "tardanzas", icon: "⏰", titulo: "Reporte de Tardanzas", desc: "Tardanzas registradas por los empleados.", color: COLORES.warning },
   { id: "ausencias", icon: "🚫", titulo: "Reporte de Ausencias", desc: "Ausencias y novedades registradas.", color: COLORES.verdeTexto },
-  { id: "empleados", icon: "👥", titulo: "Reporte de Empleados", desc: "Información general de empleados.", color: COLORES.primarioOscuro },
+  { id: "porAreas", icon: "🏢", titulo: "Reporte por Áreas", desc: "Resumen por empleado: días laborados, puntualidad, tardanzas, ausencias y horas del mes.", color: COLORES.primarioOscuro },
   { id: "marcaciones", icon: "📍", titulo: "Reporte de Marcaciones", desc: "Marcaciones de entrada y salida con detalle.", color: COLORES.primario },
 ];
 
@@ -29,7 +29,7 @@ const IND_META = [
   { key: "reportes_mes", icon: "📄", label: "Reportes este mes", color: COLORES.primario, bg: COLORES.primarioClaro },
 ];
 
-const API_FNS = { obtenerReporteAsistencia, obtenerReporteIncidencias, obtenerReporteTardanzas, obtenerReporteAusencias, obtenerReporteEmpleados, obtenerReporteMarcaciones, obtenerReportePorEmpleado };
+const API_FNS = { obtenerReporteAsistencia, obtenerReporteIncidencias, obtenerReporteTardanzas, obtenerReporteAusencias, obtenerReportePorAreas, obtenerReporteMarcaciones, obtenerReportePorEmpleado };
 const NOMBRES_REV = Object.fromEntries(Object.entries(NOMBRES).map(([k, v]) => [v, k]));
 
 export default function ReportesPage() {

@@ -24,14 +24,3 @@ export const passwordResetLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req) => ipKeyGenerator(req.ip ?? ''),
 });
-
-// Rate limiter general para auth: 20 requests por IP en 15 minutos
-export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  message: {
-    error: 'Demasiadas peticiones. Intentá de nuevo en unos minutos.',
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});

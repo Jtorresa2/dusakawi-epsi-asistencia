@@ -92,7 +92,7 @@ export default function OlvideContrasenaPage() {
                 background: COLORES.successClaro, color: COLORES.primarioOscuro, padding: "10px 14px",
                 borderRadius: "8px", fontSize: "13px", marginBottom: "1rem", textAlign: "center"
               }}>
-                Si el correo esta registrado, recibiras un enlace para restablecer tu contrasena
+                Si el correo esta registrado, recibiras un enlace para restablecer tu contraseña
               </div>
               <Link
                 to="/login"
