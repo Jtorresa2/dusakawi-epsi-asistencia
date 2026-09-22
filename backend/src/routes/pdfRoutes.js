@@ -7,9 +7,18 @@ const { generarMembrete, generarPlantillaIncidencia } = require("../services/pdf
 router.get("/incidencias/:id/plantilla", async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT i.*, e.nombre AS empleado_nombre, e.cedula, ar.nombre AS area
-       FROM incidencias i
-       LEFT JOIN empleado e ON i.empleado_id = e.id
+      `SELECT i.*,
+              i.type AS tipo,
+              i.description AS descripcion,
+              i.status AS estado,
+              i.rejection_reason AS motivo_rechazo,
+              i.created_at AS fecha,
+              CONCAT(e.first_name, ' ', e.first_surname) AS empleado_nombre,
+              COALESCE(dd.document_number, '') AS cedula,
+              ar.name AS area
+       FROM incidents i
+       LEFT JOIN users e ON i.user_id = e.id
+       LEFT JOIN document_details dd ON dd.user_id = e.id
        LEFT JOIN areas ar ON e.area_id = ar.id
        WHERE i.id = ?`,
       [req.params.id]
@@ -48,32 +57,34 @@ function determinarEstado(e1, e2, justificado) {
 
 async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, estado, empleado_id, area_id) {
   let query = `
-    SELECT a.id, e.cedula,
-      CONCAT(e.nombre, ' ', e.apellido) AS colaborador,
-      ar.nombre AS area, ar.piso, a.fecha,
-      TO_CHAR(a.fecha_hora_entrada, 'HH24:MI') AS entrada1,
-      TO_CHAR(a.fecha_hora_salida_manana, 'HH24:MI') AS salida1,
-      TO_CHAR(a.fecha_hora_entrada_tarde, 'HH24:MI') AS entrada2,
-      TO_CHAR(a.fecha_hora_salida, 'HH24:MI') AS salida2,
+    SELECT a.id, COALESCE(dd.document_number, '') AS cedula,
+      CONCAT(e.first_name, ' ', e.first_surname) AS colaborador,
+      ar.name AS area, fl.name AS piso, DATE(a.created_at) AS fecha,
+      TO_CHAR(a.first_entry_time, 'HH24:MI') AS entrada1,
+      TO_CHAR(a.first_departure_time, 'HH24:MI') AS salida1,
+      TO_CHAR(a.last_entry_time, 'HH24:MI') AS entrada2,
+      TO_CHAR(a.last_departure_time, 'HH24:MI') AS salida2,
       a.horas_trabajadas, a.horas_extra,
       a.minutos_tardanza, a.tipo_marcacion,
       a.estado, a.observacion
-    FROM asistencia a
-    JOIN empleado e ON a.empleado_id = e.id
-    JOIN areas ar ON e.area_id = ar.id
+    FROM attendances a
+    JOIN users e ON a.user_id = e.id
+    LEFT JOIN document_details dd ON dd.user_id = e.id
+    LEFT JOIN areas ar ON e.area_id = ar.id
+    LEFT JOIN floors fl ON ar.floor_id = fl.id
     WHERE 1=1
   `;
   const params = [];
-  if (fecha) { query += " AND a.fecha = ?"; params.push(fecha); }
-  else if (fecha_desde && fecha_hasta) { query += " AND a.fecha >= ? AND a.fecha <= ?"; params.push(fecha_desde, fecha_hasta); }
-  else if (fecha_desde) { query += " AND a.fecha >= ?"; params.push(fecha_desde); }
-  else if (fecha_hasta) { query += " AND a.fecha <= ?"; params.push(fecha_hasta); }
+  if (fecha) { query += " AND DATE(a.created_at) = ?"; params.push(fecha); }
+  else if (fecha_desde && fecha_hasta) { query += " AND DATE(a.created_at) >= ? AND DATE(a.created_at) <= ?"; params.push(fecha_desde, fecha_hasta); }
+  else if (fecha_desde) { query += " AND DATE(a.created_at) >= ?"; params.push(fecha_desde); }
+  else if (fecha_hasta) { query += " AND DATE(a.created_at) <= ?"; params.push(fecha_hasta); }
   if (area_id) { query += " AND e.area_id = ?"; params.push(area_id); }
-  else if (area) { query += " AND ar.nombre LIKE ?"; params.push(`%${area}%`); }
-  if (piso) { query += " AND ar.piso = ?"; params.push(piso); }
+  else if (area) { query += " AND ar.name LIKE ?"; params.push(`%${area}%`); }
+  if (piso) { query += " AND fl.name ILIKE ?"; params.push(`%${piso}%`); }
   if (estado) { query += " AND a.estado = ?"; params.push(estado); }
-  if (empleado_id) { query += " AND a.empleado_id = ?"; params.push(empleado_id); }
-  query += " ORDER BY ar.nombre, e.nombre";
+  if (empleado_id) { query += " AND a.user_id = ?"; params.push(empleado_id); }
+  query += " ORDER BY ar.name, e.first_name";
   const [rows] = await pool.query(query, params);
   return rows.map((r) => ({
     ...r,
@@ -84,6 +95,7 @@ async function fetchAsistencia(fecha, fecha_desde, fecha_hasta, area, piso, esta
 }
 
 const PDF_BODY_X = 65;
+const PDF_BODY_Y = 130;
 
 function drawTable(doc, rows, startY) {
   let y = startY;
@@ -190,19 +202,20 @@ router.get("/incidencias", async (req, res) => {
     const { estado, tipo } = req.query;
     let query = `
       SELECT i.id,
-        CONCAT(e.nombre, ' ', e.apellido) AS empleado,
-        e.cedula, ar.nombre AS area,
-        i.tipo, i.descripcion, i.evidencia_url,
+        CONCAT(e.first_name, ' ', e.first_surname) AS empleado,
+        COALESCE(dd.document_number, '') AS cedula, ar.name AS area,
+        i.type AS tipo, i.description AS descripcion, i.evidence AS evidencia_url,
         TO_CHAR(i.created_at, 'DD/MM/YYYY') AS fecha,
-        i.estado, i.motivo_rechazo
-      FROM incidencias i
-      JOIN empleado e ON i.empleado_id = e.id
+        i.status AS estado, i.rejection_reason AS motivo_rechazo
+      FROM incidents i
+      JOIN users e ON i.user_id = e.id
+      LEFT JOIN document_details dd ON dd.user_id = e.id
       JOIN areas ar ON e.area_id = ar.id
       WHERE 1=1
     `;
     const params = [];
-    if (estado) { query += " AND i.estado = ?"; params.push(estado); }
-    if (tipo) { query += " AND i.tipo = ?"; params.push(tipo); }
+    if (estado) { query += " AND i.status = ?"; params.push(estado); }
+    if (tipo) { query += " AND i.type = ?"; params.push(tipo); }
     query += " ORDER BY i.created_at DESC";
     const [rows] = await pool.query(query, params);
 
@@ -264,14 +277,14 @@ router.get("/dashboard", async (req, res) => {
     let asistenciaHoy = [];
     try {
       [asistenciaHoy] = await pool.query(`
-        SELECT CONCAT(e.nombre, ' ', e.apellido) AS empleado,
-          TO_CHAR(a.fecha_hora_entrada, 'HH24:MI') AS entrada,
-          TO_CHAR(a.fecha_hora_salida, 'HH24:MI') AS salida,
+        SELECT CONCAT(e.first_name, ' ', e.first_surname) AS empleado,
+          TO_CHAR(a.first_entry_time, 'HH24:MI') AS entrada,
+          TO_CHAR(COALESCE(a.last_departure_time, a.first_departure_time), 'HH24:MI') AS salida,
           a.estado
-        FROM asistencia a
-        JOIN empleado e ON a.empleado_id = e.id
-        WHERE a.fecha = CURRENT_DATE
-        ORDER BY a.fecha_hora_entrada LIMIT 10
+        FROM attendances a
+        JOIN users e ON a.user_id = e.id
+        WHERE DATE(a.created_at) = CURRENT_DATE
+        ORDER BY a.first_entry_time LIMIT 10
       `);
     } catch { asistenciaHoy = []; }
     const ind = indicadores[0] || {};
@@ -340,15 +353,19 @@ router.get("/dashboard", async (req, res) => {
 router.get("/tardanzas", async (req, res) => {
   try {
     const { fecha_desde, fecha_hasta, area_id, empleado_id } = req.query;
-    let q = `SELECT e.cedula, CONCAT(e.nombre,' ',e.apellido) AS colaborador, ar.nombre AS area,
-      a.fecha, TO_CHAR(a.fecha_hora_entrada,'HH24:MI') AS entrada, a.minutos_tardanza, a.observacion
-      FROM asistencia a JOIN empleado e ON a.empleado_id=e.id JOIN areas ar ON e.area_id=ar.id WHERE a.estado='tardanza'`;
+    let q = `SELECT COALESCE(dd.document_number, '') AS cedula, CONCAT(e.first_name,' ',e.first_surname) AS colaborador, ar.name AS area,
+      DATE(a.created_at) AS fecha, TO_CHAR(a.first_entry_time,'HH24:MI') AS entrada, a.minutos_tardanza, a.observacion
+      FROM attendances a
+      JOIN users e ON a.user_id=e.id
+      LEFT JOIN document_details dd ON dd.user_id = e.id
+      JOIN areas ar ON e.area_id=ar.id
+      WHERE a.estado='tardanza'`;
     const p = [];
-    if (fecha_desde) { q += " AND a.fecha>=?"; p.push(fecha_desde); }
-    if (fecha_hasta) { q += " AND a.fecha<=?"; p.push(fecha_hasta); }
+    if (fecha_desde) { q += " AND DATE(a.created_at)>=?"; p.push(fecha_desde); }
+    if (fecha_hasta) { q += " AND DATE(a.created_at)<=?"; p.push(fecha_hasta); }
     if (area_id) { q += " AND e.area_id=?"; p.push(area_id); }
-    if (empleado_id) { q += " AND a.empleado_id=?"; p.push(empleado_id); }
-    q += " ORDER BY a.fecha DESC LIMIT 50";
+    if (empleado_id) { q += " AND a.user_id=?"; p.push(empleado_id); }
+    q += " ORDER BY a.created_at DESC LIMIT 50";
     const [rows] = await pool.query(q, p);
     res.setHeader("Content-Type","application/pdf");
     res.setHeader("Content-Disposition","inline; filename=tardanzas.pdf");
@@ -379,20 +396,23 @@ router.get("/tardanzas", async (req, res) => {
 router.get("/ausencias", async (req, res) => {
   try {
     const { fecha_desde, fecha_hasta, area_id, empleado_id } = req.query;
-    let q = `SELECT e.cedula, CONCAT(e.nombre,' ',e.apellido) AS colaborador, ar.nombre AS area,
-      a.fecha, a.estado, a.observacion FROM asistencia a JOIN empleado e ON a.empleado_id=e.id
+    let q = `SELECT COALESCE(dd.document_number, '') AS cedula, CONCAT(e.first_name,' ',e.first_surname) AS colaborador, ar.name AS area,
+      DATE(a.created_at) AS fecha, a.estado, a.observacion
+      FROM attendances a
+      JOIN users e ON a.user_id=e.id
+      LEFT JOIN document_details dd ON dd.user_id = e.id
       JOIN areas ar ON e.area_id=ar.id
       WHERE a.estado IN('ausente','justificado')
         AND NOT EXISTS (
           SELECT 1 FROM permisos p
-          WHERE p.empleado_id = a.empleado_id AND a.fecha BETWEEN p.fecha_desde AND p.fecha_hasta
+          WHERE p.empleado_id = a.user_id AND DATE(a.created_at) BETWEEN p.fecha_desde AND p.fecha_hasta
         )`;
     const p = [];
-    if (fecha_desde) { q += " AND a.fecha>=?"; p.push(fecha_desde); }
-    if (fecha_hasta) { q += " AND a.fecha<=?"; p.push(fecha_hasta); }
+    if (fecha_desde) { q += " AND DATE(a.created_at)>=?"; p.push(fecha_desde); }
+    if (fecha_hasta) { q += " AND DATE(a.created_at)<=?"; p.push(fecha_hasta); }
     if (area_id) { q += " AND e.area_id=?"; p.push(area_id); }
-    if (empleado_id) { q += " AND a.empleado_id=?"; p.push(empleado_id); }
-    q += " ORDER BY a.fecha DESC LIMIT 50";
+    if (empleado_id) { q += " AND a.user_id=?"; p.push(empleado_id); }
+    q += " ORDER BY a.created_at DESC LIMIT 50";
     const [rows] = await pool.query(q, p);
     res.setHeader("Content-Type","application/pdf");
     res.setHeader("Content-Disposition","inline; filename=ausencias.pdf");
@@ -423,12 +443,17 @@ router.get("/ausencias", async (req, res) => {
 router.get("/empleados", async (req, res) => {
   try {
     const { area_id, cargo_id } = req.query;
-    let q = `SELECT e.cedula, e.nombre, e.apellido, e.telefono, e.correo, ar.nombre AS area, ca.nombre AS cargo, e.activo
-      FROM empleado e LEFT JOIN areas ar ON e.area_id=ar.id LEFT JOIN cargos ca ON e.cargo_id=ca.id WHERE 1=1`;
+    let q = `SELECT COALESCE(dd.document_number, '') AS cedula, e.first_name AS nombre, e.first_surname AS apellido,
+      COALESCE(e.cell, e.phone, '') AS telefono, e.email AS correo, ar.name AS area, ca.name AS cargo, 1 AS activo
+      FROM users e
+      LEFT JOIN document_details dd ON dd.user_id = e.id
+      LEFT JOIN areas ar ON e.area_id=ar.id
+      LEFT JOIN positions ca ON e.position_id=ca.id
+      WHERE 1=1`;
     const p = [];
     if (area_id) { q += " AND e.area_id=?"; p.push(area_id); }
-    if (cargo_id) { q += " AND e.cargo_id=?"; p.push(cargo_id); }
-    q += " ORDER BY e.apellido";
+    if (cargo_id) { q += " AND e.position_id=?"; p.push(cargo_id); }
+    q += " ORDER BY e.first_surname";
     const [rows] = await pool.query(q, p);
     res.setHeader("Content-Type","application/pdf");
     res.setHeader("Content-Disposition","inline; filename=empleados.pdf");
@@ -438,9 +463,7 @@ router.get("/empleados", async (req, res) => {
       doc.moveDown(1);
       if (!rows.length) return doc.fontSize(10).fillColor("#6B7280").text("Sin registros.",{align:"center"});
       doc.font("Helvetica").fontSize(7).fillColor("#6B7280").text(`Total: ${rows.length}`,PDF_BODY_X,doc.y,{align:"right",width:465}).moveDown(0.3);
-      const pw=595.28, contentW=pw-PDF_BODY_X*2-10;
-      const cw=[Math.round(contentW*0.20),Math.round(contentW*0.11),Math.round(contentW*0.13),Math.round(contentW*0.15),Math.round(contentW*0.14),Math.round(contentW*0.17),Math.round(contentW*0.10)];
-      let rh=18, hh=20; let y=doc.y;
+      const pw=595.28, contentW=pw-PDF_BODY_X*2-10, cw=[Math.round(contentW*0.20),Math.round(contentW*0.11),Math.round(contentW*0.13),Math.round(contentW*0.15),Math.round(contentW*0.14),Math.round(contentW*0.17),Math.round(contentW*0.10)], rh=18, hh=20; let y=doc.y;
       doc.font("Helvetica-Bold").fontSize(7).fillColor("#FFF");
       doc.roundedRect(PDF_BODY_X,y,contentW,hh,3).fill("#1B5E20");
       const headers=["Nombre","Cédula","Teléfono","Área","Cargo","Contacto","Estado"];
@@ -463,16 +486,22 @@ router.get("/empleados", async (req, res) => {
 router.get("/marcaciones", async (req, res) => {
   try {
     const { fecha_desde, fecha_hasta, empleado_id, area_id } = req.query;
-    let q = `SELECT e.cedula, CONCAT(e.nombre,' ',e.apellido) AS colaborador, ar.nombre AS area,
-      a.fecha,       TO_CHAR(a.fecha_hora_entrada,'HH24:MI') AS entrada,
-      TO_CHAR(a.fecha_hora_salida,'HH24:MI') AS salida, a.tipo_marcacion, a.estado
-      FROM asistencia a JOIN empleado e ON a.empleado_id=e.id JOIN areas ar ON e.area_id=ar.id WHERE 1=1`;
+    let q = `SELECT COALESCE(dd.document_number, '') AS cedula, CONCAT(e.first_name,' ',e.first_surname) AS colaborador, ar.name AS area,
+      DATE(a.created_at) AS fecha,
+      TO_CHAR(a.first_entry_time,'HH24:MI') AS entrada,
+      TO_CHAR(COALESCE(a.last_departure_time, a.first_departure_time),'HH24:MI') AS salida,
+      a.tipo_marcacion, a.estado
+      FROM attendances a
+      JOIN users e ON a.user_id=e.id
+      LEFT JOIN document_details dd ON dd.user_id = e.id
+      JOIN areas ar ON e.area_id=ar.id
+      WHERE 1=1`;
     const p = [];
-    if (fecha_desde) { q += " AND a.fecha>=?"; p.push(fecha_desde); }
-    if (fecha_hasta) { q += " AND a.fecha<=?"; p.push(fecha_hasta); }
-    if (empleado_id) { q += " AND a.empleado_id=?"; p.push(empleado_id); }
+    if (fecha_desde) { q += " AND DATE(a.created_at)>=?"; p.push(fecha_desde); }
+    if (fecha_hasta) { q += " AND DATE(a.created_at)<=?"; p.push(fecha_hasta); }
+    if (empleado_id) { q += " AND a.user_id=?"; p.push(empleado_id); }
     if (area_id) { q += " AND e.area_id=?"; p.push(area_id); }
-    q += " ORDER BY a.fecha DESC LIMIT 50";
+    q += " ORDER BY a.created_at DESC LIMIT 50";
     const [rows] = await pool.query(q, p);
     res.setHeader("Content-Type","application/pdf");
     res.setHeader("Content-Disposition","inline; filename=marcaciones.pdf");

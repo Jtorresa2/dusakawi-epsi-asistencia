@@ -1,7 +1,7 @@
-import { Prisma } from '@config/database/prisma/generated/client.js';
-import { Floor } from '../../../domain/entities/floor.js';
-import { DataString } from '@shared/value-objects/data-string.js';
-import type { Uuid } from '@shared/types/uuid.js';
+import { Prisma } from '@config/database/prisma/generated/client';
+import type { Uuid } from '@shared/types/uuid';
+import { DataString } from '@shared/value-objects/data-string';
+import { Floor } from '@modules/areas/domain/entities/floor';
 
 type PrismaFloor = Prisma.floorsGetPayload<{}>;
 

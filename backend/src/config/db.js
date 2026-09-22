@@ -31,9 +31,9 @@ pool.query = (text, params) => {
 
   return originalQuery(sql, params).then((result) => {
     // Emular [rows, fields] de mysql2/promise
-    let insertId = 0;
+    let insertId = null;
     if (result.rows && result.rows.length > 0 && result.rows[0].id != null) {
-      insertId = Number(result.rows[0].id);
+      insertId = result.rows[0].id;
     }
 
     const fakeResult = {

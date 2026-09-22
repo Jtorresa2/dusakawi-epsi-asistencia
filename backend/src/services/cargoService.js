@@ -2,12 +2,18 @@ const db = require("../config/db");
 
 exports.obtenerTodos = async () => {
   const [rows] = await db.query(`
-    SELECT c.*, a.nombre AS areas, COUNT(e.id)::int AS empleados_count
-    FROM cargos c
-    LEFT JOIN areas a ON a.id = c.area_id
-    LEFT JOIN empleado e ON e.cargo_id = c.id
-    GROUP BY c.id, c.nombre, c.descripcion, c.estado, c.creado_en, c.area_id, a.nombre
-    ORDER BY c.nombre ASC
+    SELECT
+      p.id,
+      p.name AS nombre,
+      p.name,
+      p.description AS descripcion,
+      p.description,
+      'activo' AS estado,
+      COUNT(u.id)::int AS empleados_count
+    FROM positions p
+    LEFT JOIN users u ON u.position_id = p.id
+    GROUP BY p.id, p.name, p.description
+    ORDER BY p.name ASC
   `);
 
   return rows;
@@ -16,9 +22,15 @@ exports.obtenerTodos = async () => {
 exports.obtenerPorId = async (id) => {
   const [rows] = await db.query(
     `
-    SELECT *
-    FROM cargos
-    WHERE id = ?
+    SELECT
+      p.id,
+      p.name AS nombre,
+      p.name,
+      p.description AS descripcion,
+      p.description,
+      'activo' AS estado
+    FROM positions p
+    WHERE p.id = ?
     `,
     [id]
   );
@@ -27,41 +39,42 @@ exports.obtenerPorId = async (id) => {
 };
 
 exports.crear = async (cargo) => {
-  const { nombre, descripcion, estado, area_id } = cargo;
+  const { nombre, name, descripcion, description } = cargo;
+  const cargoNombre = nombre || name;
+  const cargoDesc = descripcion || description || '';
 
   const [rows, result] = await db.query(
     `
-    INSERT INTO cargos
-    (nombre, descripcion, estado, area_id)
-    VALUES (?, ?, ?, ?) RETURNING id
+    INSERT INTO positions (name, description)
+    VALUES (?, ?) RETURNING id
     `,
-    [nombre, descripcion, estado || "activo", area_id || null]
+    [cargoNombre, cargoDesc]
   );
 
   return rows[0]?.id || result.insertId;
 };
 
 exports.actualizar = async (id, cargo) => {
-  const { nombre, descripcion, estado, area_id } = cargo;
+  const { nombre, name, descripcion, description } = cargo;
+  const cargoNombre = nombre || name;
+  const cargoDesc = descripcion || description;
 
   await db.query(
     `
-    UPDATE cargos
+    UPDATE positions
     SET
-      nombre = ?,
-      descripcion = ?,
-      estado = ?,
-      area_id = ?
+      name = COALESCE(?, name),
+      description = COALESCE(?, description)
     WHERE id = ?
     `,
-    [nombre, descripcion, estado || "activo", area_id || null, id]
+    [cargoNombre, cargoDesc, id]
   );
 };
 
 exports.eliminar = async (id) => {
   await db.query(
     `
-    DELETE FROM cargos
+    DELETE FROM positions
     WHERE id = ?
     `,
     [id]

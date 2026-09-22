@@ -1,8 +1,8 @@
-import { DataString } from '@shared/value-objects/data-string.js';
-import { Area } from '../../../domain/entities/area.js';
-import { Prisma } from '@config/database/prisma/generated/client.js';
-import { PrismaFloorMapper } from './prisma-floor.mapper.js';
-import type { Uuid } from '@shared/types/uuid.js';
+import { Prisma } from '@config/database/prisma/generated/client';
+import type { Uuid } from '@shared/types/uuid';
+import { DataString } from '@shared/value-objects/data-string';
+import { Area } from '@modules/areas/domain/entities/area';
+import { PrismaFloorMapper } from './prisma-floor.mapper';
 
 type PrismaArea = Prisma.areasGetPayload<{ include: { floors: true } }>;
 

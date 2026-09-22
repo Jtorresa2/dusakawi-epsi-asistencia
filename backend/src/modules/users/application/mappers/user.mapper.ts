@@ -1,5 +1,5 @@
-import type { User } from '../../domain/entities/user.js';
-import type { UserDetailsDto } from '../common/dtos/user-details.dto.js';
+import { User } from '@modules/users/domain/entities/user';
+import type { UserDetailsDto } from '../common/dtos/user-details.dto';
 
 export class UserMapper {
   static toUserResponseDto(user: User): UserDetailsDto {
@@ -32,8 +32,8 @@ export class UserMapper {
         name: user.area.name.value,
       },
       position: {
-        id: user.area.metadata.id,
-        name: user.area.name.value,
+        id: user.position.metadata.id,
+        name: user.position.name.value,
       },
       roles: roles,
       createdAt: user.metadata.createdAt,

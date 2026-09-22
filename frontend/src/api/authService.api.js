@@ -6,5 +6,11 @@ export const login = (credenciales) =>
     body: JSON.stringify(credenciales),
   });
 
+export const cambiarPassword = (data) =>
+  apiFetch("/auth/cambiar-password", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
 export const obtenerPerfil = () =>
   apiFetch("/auth/perfil");

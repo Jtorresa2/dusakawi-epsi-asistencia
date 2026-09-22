@@ -1,32 +1,31 @@
-import { prisma } from '@config/database/prisma/prisma.js';
-import type { Uuid } from '@shared/types/uuid.js';
-import type { FloorRepository } from '../../../../domain/repositories/floor-repository.js';
-import type { Floor } from '../../../../domain/entities/floor.js';
-import { PrismaFloorMapper } from '../../../mappers/prisma/prisma-floor.mapper.js';
+import { asCrudDelegate } from '@config/database/prisma/delegate';
+import type { Prisma } from '@config/database/prisma/generated/client';
+import { prisma } from '@config/database/prisma/prisma';
+import type { Floor } from '@modules/areas/domain/entities/floor';
+import type { FloorRepository } from '@modules/areas/domain/repositories/floor-repository';
+import { PrismaFloorMapper } from '@modules/areas/infrastructure/mappers/prisma/prisma-floor.mapper';
+import { PrismaGenericRepository } from '@shared/repositories/prisma/prisma-generic-repository';
 
-export class PrismaFloorRepository implements FloorRepository {
-  async create(entity: Floor): Promise<void> {
-    await prisma.floors.create({ data: PrismaFloorMapper.toCreate(entity) });
+export class PrismaFloorRepository
+  extends PrismaGenericRepository<
+    Floor,
+    Prisma.floorsGetPayload<{}>,
+    Prisma.floorsWhereInput,
+    Prisma.floorsWhereUniqueInput,
+    Prisma.floorsCreateInput,
+    Prisma.floorsUpdateInput
+  >
+  implements FloorRepository
+{
+  constructor() {
+    super(asCrudDelegate(prisma.floors), PrismaFloorMapper);
   }
 
-  async update(id: Uuid, entity: Floor): Promise<void> {
-    await prisma.floors.update({
-      where: { id },
-      data: PrismaFloorMapper.toUpdate(entity),
-    });
+  async floorExists(name: string): Promise<boolean> {
+    return (await prisma.floors.count({ where: { name } })) > 0;
   }
 
-  async delete(id: Uuid): Promise<void> {
-    await prisma.floors.delete({ where: { id } });
-  }
-
-  async findById(id: Uuid): Promise<Floor | null> {
-    const floor = await prisma.floors.findUnique({ where: { id } });
-    return floor ? PrismaFloorMapper.toDomain(floor) : null;
-  }
-
-  async findAll(): Promise<Floor[]> {
-    const floors = await prisma.floors.findMany();
-    return floors.map((floor) => PrismaFloorMapper.toDomain(floor));
+  protected buildSearchWhere(query: string): Prisma.floorsWhereInput {
+    return query ? { name: { contains: query, mode: 'insensitive' } } : {};
   }
 }

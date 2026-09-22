@@ -1,4 +1,4 @@
-﻿import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 export default function LoginPage() {
@@ -20,13 +20,20 @@ export default function LoginPage() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.mensaje || "Error en login");
+      alert(data.mensaje || data.detail || "Error en login");
       return;
     }
 
     localStorage.setItem("token", data.token);
     const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
-    const user = { ...data.user, rol: rolesMap[data.user.rol] || data.user.rol };
+    const rawUser = data.user || {};
+    const user = {
+      ...rawUser,
+      id: rawUser.id,
+      empleado_id: rawUser.id || rawUser.empleado_id,
+      nombre: rawUser.nombre || form.usuario,
+      rol: rolesMap[rawUser.rol] || rawUser.rol || "admin"
+    };
     localStorage.setItem("usuario", JSON.stringify(user));
 
     // Si debe cambiar contrasena, redirigir

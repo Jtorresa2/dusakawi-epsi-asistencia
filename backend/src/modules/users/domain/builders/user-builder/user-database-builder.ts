@@ -1,14 +1,14 @@
-import { Area } from '../../../../areas/domain/entities/area.js';
-import { DataString } from '@shared/value-objects/data-string.js';
-import { DocumentDetails } from '../../value-objects/document-details.js';
-import { Email } from '../../value-objects/email.js';
-import { HashedPassword } from '../../value-objects/hashed-password.js';
-import { Name } from '../../value-objects/name.js';
-import { Position } from '../../entities/position.js';
-import { Role } from '../../entities/role.js';
-import { User } from '../../entities/user.js';
-import type { UserBuilder } from '../../interfaces/user-builder.js';
-import type { Metadata } from '@shared/types/metadata.js';
+import { Area } from '@modules/areas/domain/entities/area';
+import { DataString } from '@shared/value-objects/data-string';
+import { DocumentDetails } from '../../value-objects/document-details';
+import { Email } from '../../value-objects/email';
+import { HashedPassword } from '../../value-objects/hashed-password';
+import { Name } from '../../value-objects/name';
+import { Position } from '@modules/positions/domain/entities/position';
+import { Role } from '../../entities/role';
+import { User } from '../../entities/user';
+import type { UserBuilder } from '../../interfaces/user-builder';
+import type { Metadata } from '@shared/types/metadata';
 
 export class UserDatabaseBuilder implements UserBuilder {
   private _documentDetails?: DocumentDetails;

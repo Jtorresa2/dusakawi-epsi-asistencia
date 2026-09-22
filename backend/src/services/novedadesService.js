@@ -4,12 +4,12 @@ exports.obtenerTodos = async () => {
   const [rows] = await db.query(`
     SELECT
       p.*,
-      e.nombre AS empleado_nombre,
-      e.apellido AS empleado_apellido,
-      u.username AS registrado_por_nombre
+      TRIM(CONCAT(u.first_name, ' ', COALESCE(u.middle_name, ''))) AS empleado_nombre,
+      TRIM(CONCAT(u.first_surname, ' ', COALESCE(u.second_surname, ''))) AS empleado_apellido,
+      reg.username AS registrado_por_nombre
     FROM permisos p
-    LEFT JOIN empleado e ON e.id = p.empleado_id
-    LEFT JOIN usuarios u ON u.id = p.registrado_por
+    LEFT JOIN users u ON u.id = p.empleado_id
+    LEFT JOIN users reg ON reg.id = p.registrado_por
     ORDER BY p.creado_en DESC
   `);
   return rows;
@@ -64,14 +64,14 @@ exports.crear = async (data, usuarioId) => {
 
     for (const fecha of dias) {
       const [existentes] = await db.query(
-        `SELECT id FROM asistencia WHERE empleado_id = ? AND fecha = ?`,
+        `SELECT id FROM attendances WHERE user_id = ? AND DATE(created_at) = ?::date`,
         [empleado_id, fecha]
       );
       if (existentes.length === 0) {
         await db.query(
-          `INSERT INTO asistencia (empleado_id, fecha, estado, observacion, horas_trabajadas, minutos_tardanza)
-           VALUES (?, ?, ?, ?, 0, 0)`,
-          [empleado_id, fecha, estado, observacion]
+          `INSERT INTO attendances (user_id, created_at, estado, observacion, horas_trabajadas, minutos_tardanza)
+           VALUES (?, ?::timestamptz, ?, ?, 0, 0)`,
+          [empleado_id, `${fecha} 08:00:00+00`, estado, observacion]
         );
       }
     }
@@ -113,10 +113,10 @@ exports.obtenerPorEmpleado = async (empleadoId) => {
   const [rows] = await db.query(`
     SELECT
       p.*,
-      e.nombre AS empleado_nombre,
-      e.apellido AS empleado_apellido
+      TRIM(CONCAT(u.first_name, ' ', COALESCE(u.middle_name, ''))) AS empleado_nombre,
+      TRIM(CONCAT(u.first_surname, ' ', COALESCE(u.second_surname, ''))) AS empleado_apellido
     FROM permisos p
-    LEFT JOIN empleado e ON e.id = p.empleado_id
+    LEFT JOIN users u ON u.id = p.empleado_id
     WHERE p.empleado_id = ?
     ORDER BY p.creado_en DESC
   `, [empleadoId]);

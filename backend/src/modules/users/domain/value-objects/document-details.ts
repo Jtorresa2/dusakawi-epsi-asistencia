@@ -1,6 +1,6 @@
-import { DataString } from '@shared/value-objects/data-string.js';
-import { DocumentNumber } from './document-number.js';
-import { DocumentType } from '../entities/document-type.js';
+import { DataString } from '@shared/value-objects/data-string';
+import { DocumentNumber } from './document-number';
+import { DocumentType } from '@modules/document-types/domain/entities/document-type';
 
 export class DocumentDetails {
   private constructor(

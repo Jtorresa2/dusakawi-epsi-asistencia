@@ -1,5 +1,5 @@
-import { ValidationError } from '@shared/errors/errors.js';
-import { DataString } from '@shared/value-objects/data-string.js';
+import { ValidationError } from '@shared/errors/errors';
+import { DataString } from '@shared/value-objects/data-string';
 
 export class Name {
   private static readonly FIRST_LETTER_UPPERCASE_PATTERN = /^[A-ZÀ-Ý]/;

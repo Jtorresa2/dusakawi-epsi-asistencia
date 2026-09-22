@@ -1,80 +1,74 @@
-import type { Uuid } from '@shared/types/uuid.js';
-import type { User } from '../../../../domain/entities/user.js';
-import type { UserRepository } from '../../../../domain/repositories/user-repository.js';
-import { prisma } from '@config/database/prisma/prisma.js';
-import { PrismaUserMapper } from '../../../mappers/prisma/prisma-user.mapper.js';
-import type { Prisma } from '@config/database/prisma/generated/client.js';
+import { prisma } from '@config/database/prisma/prisma';
+import type { Prisma } from '@config/database/prisma/generated/client';
+import { asCrudDelegate } from '@config/database/prisma/delegate';
+import { PrismaGenericRepository } from '@shared/repositories/prisma/prisma-generic-repository';
+import { User } from '@modules/users/domain/entities/user';
+import type { UserRepository } from '@modules/users/domain/repositories/user-repository';
+import { PrismaUserMapper } from '@modules/users/infrastructure/mappers/prisma/prisma-user.mapper';
 
-export class PrismaUserRepository implements UserRepository {
-  private readonly includeEntities = {
-    positions: true,
-    area: { include: { floors: true } },
-    document_details: { include: { document_types: true } },
-    user_roles: { include: { roles: true } },
-  };
+const includeEntities = {
+  positions: true,
+  area: { include: { floors: true } },
+  document_details: { include: { document_types: true } },
+  user_roles: { include: { roles: true } },
+} as const;
 
-  private async findUserByUniqueInput(
-    where: Prisma.usersWhereUniqueInput,
-  ): Promise<User | null> {
-    const userFound = await prisma.users.findUnique({
-      where,
-      include: this.includeEntities,
-    });
+export class PrismaUserRepository
+  extends PrismaGenericRepository<
+    User,
+    Prisma.usersGetPayload<{ include: typeof includeEntities }>,
+    Prisma.usersWhereInput,
+    Prisma.usersWhereUniqueInput,
+    Prisma.usersCreateInput,
+    Prisma.usersUpdateInput,
+    typeof includeEntities
+  >
+  implements UserRepository
+{
+  private readonly queryFields = [
+    'first_name',
+    'middle_name',
+    'first_surname',
+    'second_surname',
+    'username',
+    'email',
+  ];
 
-    return userFound ? PrismaUserMapper.toDomain(userFound) : null;
+  constructor() {
+    super(asCrudDelegate(prisma.users), PrismaUserMapper, includeEntities);
   }
 
-  private async getIfUserExists(
-    where: Prisma.usersWhereInput,
-  ): Promise<boolean> {
-    const userExist = await prisma.users.count({ where });
-    return userExist !== 0;
-  }
-
-  async create(entity: User): Promise<void> {
-    await prisma.users.create({
-      data: PrismaUserMapper.toCreate(entity),
-    });
-  }
-
-  async update(id: Uuid, entity: User): Promise<void> {
-    await prisma.users.update({
-      where: { id },
-      data: PrismaUserMapper.toUpdate(entity),
-    });
-  }
-
-  async delete(id: Uuid): Promise<void> {
-    await prisma.users.delete({ where: { id } });
-  }
-
-  async findById(id: Uuid): Promise<User | null> {
-    return await this.findUserByUniqueInput({ id });
-  }
-
-  async findAll(): Promise<User[]> {
-    const users = await prisma.users.findMany({
-      include: this.includeEntities,
-    });
-
-    return users.map((user) => PrismaUserMapper.toDomain(user));
+  protected buildSearchWhere(query: string): Prisma.usersWhereInput {
+    const where: Prisma.usersWhereInput = {
+      OR: this.queryFields.map((field) => ({
+        [field]: { contains: query, mode: 'insensitive' },
+      })),
+    };
+    return where;
   }
 
   async getUserByUsername(username: string): Promise<User | null> {
-    return await this.findUserByUniqueInput({ username });
+    const found = await prisma.users.findUnique({
+      where: { username },
+      include: includeEntities,
+    });
+
+    return found ? this.mapper.toDomain(found) : null;
   }
 
   async getUserExists(username: string): Promise<boolean> {
-    return await this.getIfUserExists({ username });
+    return (await prisma.users.count({ where: { username } })) !== 0;
   }
 
   async getUserExistsByDocument(documentNumber: string): Promise<boolean> {
-    return await this.getIfUserExists({
-      document_details: { document_number: documentNumber },
-    });
+    return (
+      (await prisma.users.count({
+        where: { document_details: { document_number: documentNumber } },
+      })) !== 0
+    );
   }
 
   async getUserExistsByEmail(email: string): Promise<boolean> {
-    return await this.getIfUserExists({ email });
+    return (await prisma.users.count({ where: { email } })) !== 0;
   }
 }

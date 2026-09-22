@@ -1,12 +1,12 @@
-import { Prisma } from '@config/database/prisma/generated/client.js';
-import { User } from '../../../domain/entities/user.js';
-import type { Uuid } from '@shared/types/uuid.js';
-import { PrismaDocumentDetailsMapper } from './prisma-document-details.mapper.js';
-import { PrismaPositionMapper } from './prisma-position.mapper.js';
-import { HashedPassword } from '../../../domain/value-objects/hashed-password.js';
-import { PrismaAreaMapper } from '../../../../areas/infrastructure/mappers/prisma/prisma-area-mapper.js';
-import { PrismaRoleMapper } from './prisma-role.mapper.js';
-import { UserDatabaseBuilder } from '../../../domain/builders/user-builder/user-database-builder.js';
+import { Prisma } from '@config/database/prisma/generated/client';
+import type { Uuid } from '@shared/types/uuid';
+import { PrismaDocumentDetailsMapper } from './prisma-document-details.mapper';
+import { PrismaPositionMapper } from '@modules/positions/infrastructure/mappers/prisma/prisma-position.mapper';
+import { PrismaAreaMapper } from '@modules/areas/infrastructure/mappers/prisma/prisma-area-mapper';
+import { PrismaRoleMapper } from './prisma-role.mapper';
+import { UserDatabaseBuilder } from '@modules/users/domain/builders/user-builder/user-database-builder';
+import { User } from '@modules/users/domain/entities/user';
+import { HashedPassword } from '@modules/users/domain/value-objects/hashed-password';
 
 type PrismaUser = Prisma.usersGetPayload<{
   include: {
@@ -76,7 +76,7 @@ export class PrismaUserMapper {
     return {
       ...PrismaUserMapper.basicData(entity),
       email: entity.email.value,
-      password_hash: entity.password.value,
+      password_hash: entity.passwordHash.value,
       username: entity.username.value,
       id: entity.metadata.id,
       created_at: entity.metadata.createdAt,
@@ -87,11 +87,9 @@ export class PrismaUserMapper {
         create: PrismaDocumentDetailsMapper.toCreate(entity.documentDetails),
       },
       user_roles: {
-        create: entity.roles.map((role) => {
-          return {
-            roles: { connect: { id: role.metadata.id } },
-          };
-        }),
+        create: entity.roles.map((role) => ({
+          roles: { connect: { id: role.metadata.id } },
+        })),
       },
     };
   }
@@ -104,6 +102,12 @@ export class PrismaUserMapper {
       area: { connect: { id: entity.area.metadata.id } },
       document_details: {
         update: PrismaDocumentDetailsMapper.toUpdate(entity.documentDetails),
+      },
+      user_roles: {
+        deleteMany: {},
+        create: entity.roles.map((role) => ({
+          roles: { connect: { id: role.metadata.id } },
+        })),
       },
     };
   }

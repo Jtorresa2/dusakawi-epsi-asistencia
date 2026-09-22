@@ -1,26 +1,23 @@
 const pool = require("../config/db");
 
 exports.obtenerTodos = async (activo = null) => {
-  let sql = "SELECT * FROM festivos WHERE 1=1";
+  let sql = "SELECT id, name AS nombre, name, type AS tipo, type, TO_CHAR(date, 'YYYY-MM-DD') AS fecha, active AS activo, active FROM holidays WHERE 1=1";
   const params = [];
-  if (activo !== null) { sql += " AND activo = ?"; params.push(activo); }
-  sql += " ORDER BY fecha DESC";
+  if (activo !== null) { sql += " AND active = ?"; params.push(activo); }
+  sql += " ORDER BY date DESC";
   const [rows] = await pool.query(sql, params);
   return rows;
 };
 
 exports.obtenerPorId = async (id) => {
-  const [rows] = await pool.query("SELECT * FROM festivos WHERE id = ?", [id]);
+  const [rows] = await pool.query("SELECT id, name AS nombre, name, type AS tipo, type, TO_CHAR(date, 'YYYY-MM-DD') AS fecha, active AS activo, active FROM holidays WHERE id = ?", [id]);
   return rows[0] || null;
 };
 
 exports.crear = async ({ fecha, nombre, tipo }) => {
   const tipoValido = tipo || "nacional";
-  if (!["nacional", "regional", "institucional"].includes(tipoValido)) {
-    throw new Error("tipo debe ser: nacional, regional o institucional");
-  }
   const [result] = await pool.query(
-    `INSERT INTO festivos (fecha, nombre, tipo) VALUES (?, ?, ?) RETURNING id`,
+    `INSERT INTO holidays (date, name, type, active) VALUES (?::date, ?, ?, true) RETURNING id`,
     [fecha, nombre, tipoValido]
   );
   return { id: result[0]?.id || result.insertId, fecha, nombre, tipo: tipoValido };
@@ -29,24 +26,24 @@ exports.crear = async ({ fecha, nombre, tipo }) => {
 exports.actualizar = async (id, { fecha, nombre, tipo, activo }) => {
   const campos = [];
   const params = [];
-  if (fecha !== undefined) { campos.push("fecha = ?"); params.push(fecha); }
-  if (nombre !== undefined) { campos.push("nombre = ?"); params.push(nombre); }
-  if (tipo !== undefined) { campos.push("tipo = ?"); params.push(tipo); }
-  if (activo !== undefined) { campos.push("activo = ?"); params.push(activo); }
+  if (fecha !== undefined) { campos.push("date = ?::date"); params.push(fecha); }
+  if (nombre !== undefined) { campos.push("name = ?"); params.push(nombre); }
+  if (tipo !== undefined) { campos.push("type = ?"); params.push(tipo); }
+  if (activo !== undefined) { campos.push("active = ?"); params.push(activo); }
   if (campos.length === 0) return { id };
   params.push(id);
-  await pool.query(`UPDATE festivos SET ${campos.join(", ")} WHERE id = ?`, params);
+  await pool.query(`UPDATE holidays SET ${campos.join(", ")} WHERE id = ?`, params);
   return { id };
 };
 
 exports.eliminar = async (id) => {
-  await pool.query("DELETE FROM festivos WHERE id = ?", [id]);
+  await pool.query("DELETE FROM holidays WHERE id = ?", [id]);
   return { id };
 };
 
 exports.verificarFestivo = async (fecha) => {
   const [rows] = await pool.query(
-    "SELECT id, nombre, tipo FROM festivos WHERE fecha = ? AND activo = TRUE",
+    "SELECT id, name AS nombre, type AS tipo FROM holidays WHERE date = ?::date AND active = TRUE",
     [fecha]
   );
   return rows[0] || null;
@@ -138,12 +135,12 @@ exports.generarNacionales = async (year) => {
 
   for (const festivo of lista) {
     const [rows] = await pool.query(
-      "SELECT id FROM festivos WHERE fecha = ? AND tipo = 'nacional'",
+      "SELECT id FROM holidays WHERE date = ?::date AND type = 'nacional'",
       [festivo.fecha]
     );
     if (rows.length === 0) {
       await pool.query(
-        "INSERT INTO festivos (fecha, nombre, tipo) VALUES (?, ?, 'nacional') RETURNING id",
+        "INSERT INTO holidays (date, name, type, active) VALUES (?::date, ?, 'nacional', true) RETURNING id",
         [festivo.fecha, festivo.nombre]
       );
       insertados++;

@@ -1,0 +1,38 @@
+import { Prisma } from '@config/database/prisma/generated/client';
+import type { Uuid } from '@shared/types/uuid';
+import { DataString } from '@shared/value-objects/data-string';
+import { Position } from '@modules/positions/domain/entities/position';
+
+type PrismaPosition = Prisma.positionsGetPayload<{}>;
+
+export class PrismaPositionMapper {
+  static toDomain(position: PrismaPosition): Position {
+    return new Position(
+      DataString.create(position.name),
+      DataString.create(position.description),
+      {
+        id: position.id as Uuid,
+        createdAt: position.created_at,
+        updatedAt: position.updated_at,
+      },
+    );
+  }
+
+  static toCreate(position: Position): Prisma.positionsCreateInput {
+    return {
+      name: position.name.value,
+      description: position.description?.value,
+      id: position.metadata.id,
+      created_at: position.metadata.createdAt,
+      updated_at: position.metadata.updatedAt,
+    };
+  }
+
+  static toUpdate(position: Position): Prisma.positionsUpdateInput {
+    return {
+      name: position.name.value,
+      description: position.description?.value,
+      updated_at: position.metadata.updatedAt,
+    };
+  }
+}

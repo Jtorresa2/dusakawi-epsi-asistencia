@@ -49,7 +49,8 @@ exports.obtenerPorId = async (req, res) => {
 
 exports.aprobar = async (req, res) => {
   try {
-    const ok = await incidenciaService.aprobar(req.params.id, req.user.id);
+    const { observacion } = req.body || {};
+    const ok = await incidenciaService.aprobar(req.params.id, req.user.id, observacion);
     if (!ok) return res.status(400).json({ mensaje: "No se pudo aprobar. Puede que ya no esté pendiente." });
     res.json({ mensaje: "Incidencia aprobada" });
   } catch (error) {
@@ -113,10 +114,10 @@ exports.obtenerStats = async (req, res) => {
     const pool = require("../config/db");
     const [rows] = await pool.query(`
       SELECT 
-        SUM((estado = 'pendiente')::int) AS pendientes,
-        SUM((estado = 'aprobado')::int) AS aprobadas,
-        SUM((estado = 'rechazado')::int) AS rechazadas
-      FROM incidencias
+        COALESCE(SUM((LOWER(status) = 'pendiente')::int), 0) AS pendientes,
+        COALESCE(SUM((LOWER(status) IN ('aprobado', 'aprobada'))::int), 0) AS aprobadas,
+        COALESCE(SUM((LOWER(status) IN ('rechazado', 'rechazada'))::int), 0) AS rechazadas
+      FROM incidents
     `);
     res.json(rows[0] || { pendientes: 0, aprobadas: 0, rechazadas: 0 });
   } catch (error) {
@@ -130,11 +131,18 @@ exports.obtenerActividad = async (req, res) => {
   try {
     const pool = require("../config/db");
     const [rows] = await pool.query(`
-      SELECT i.id, i.estado, i.tipo, i.created_at, i.updated_at, i.fecha,
-        e.nombre AS empleado_nombre, e.apellido AS empleado_apellido
-      FROM incidencias i
-      JOIN empleado e ON i.empleado_id = e.id
-      ORDER BY i.updated_at DESC
+      SELECT
+        i.id,
+        i.status AS estado,
+        i.type AS tipo,
+        i.created_at,
+        COALESCE(i.updated_at, i.created_at) AS updated_at,
+        TO_CHAR(i.created_at, 'YYYY-MM-DD') AS fecha,
+        u.first_name AS empleado_nombre,
+        u.first_surname AS empleado_apellido
+      FROM incidents i
+      JOIN users u ON i.user_id = u.id
+      ORDER BY COALESCE(i.updated_at, i.created_at) DESC
       LIMIT 10
     `);
     res.json(rows);

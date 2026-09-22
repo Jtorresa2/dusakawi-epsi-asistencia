@@ -1,4 +1,6 @@
 import { GenericEntity } from '@shared/entities/generic-entity.js';
+import type { FindAllOptions } from '@shared/types/find-all-options';
+import type { PagedListResponse } from '@shared/types/paged-list-response.js';
 import type { Uuid } from '@shared/types/uuid.js';
 
 export interface GenericRepository<T extends GenericEntity> {
@@ -6,5 +8,5 @@ export interface GenericRepository<T extends GenericEntity> {
   update(id: Uuid, entity: T): Promise<void>;
   delete(id: Uuid): Promise<void>;
   findById(id: Uuid): Promise<T | null>;
-  findAll(): Promise<T[]>;
+  findAll(options?: FindAllOptions): Promise<PagedListResponse<T>>;
 }

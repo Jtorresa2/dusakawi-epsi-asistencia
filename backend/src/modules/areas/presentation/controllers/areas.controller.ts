@@ -1,0 +1,65 @@
+import type { Request, Response } from 'express';
+import type { Uuid } from '@shared/types/uuid';
+import type { GetAreaQueryHandler } from '@modules/areas/application/use-cases/get-area/get-area-query.handler';
+import type { GetAreasQueryHandler } from '@modules/areas/application/use-cases/get-areas/get-areas-query.handler';
+import type { GetAreasQueryDto } from '@modules/areas/application/use-cases/get-areas/get-areas-query.dto';
+import type { CreateAreaCommandHandler } from '@modules/areas/application/use-cases/create-area/create-area-command.handler';
+import type { DeleteAreaCommandHandler } from '@modules/areas/application/use-cases/delete-area/delete-area-command.handler';
+import type { UpdateAreaCommandHandler } from '@modules/areas/application/use-cases/update-area/update-area-command.handler';
+
+const getArea = async (req: Request<{ id: Uuid }>, res: Response) => {
+  const handler = req.container.resolve<GetAreaQueryHandler>(
+    'getAreaQueryHandler',
+  );
+
+  const { id } = req.params;
+  const result = await handler.handle({ id });
+
+  res.json(result);
+};
+
+const getAreas = async (req: Request<GetAreasQueryDto>, res: Response) => {
+  const handler = req.container.resolve<GetAreasQueryHandler>(
+    'getAreasQueryHandler',
+  );
+
+  const result = await handler.handle({
+    limit: Number(req.query.limit ?? 10),
+    page: Number(req.query.page ?? 1),
+    query: typeof req.query.query === 'string' ? req.query.query : undefined,
+  });
+
+  res.json(result);
+};
+
+const createArea = async (req: Request, res: Response) => {
+  const handler = req.container.resolve<CreateAreaCommandHandler>(
+    'createAreaCommandHandler',
+  );
+
+  const result = await handler.handle(req.body);
+  return res.status(201).json(result);
+};
+
+const deleteArea = async (req: Request<{ id: Uuid }>, res: Response) => {
+  const handler = req.container.resolve<DeleteAreaCommandHandler>(
+    'deleteAreaCommandHandler',
+  );
+
+  const { id } = req.params;
+  await handler.handle({ id });
+
+  return res.sendStatus(204);
+};
+
+const updateArea = async (req: Request<{ id: Uuid }>, res: Response) => {
+  const handler = req.container.resolve<UpdateAreaCommandHandler>(
+    'updateAreaCommandHandler',
+  );
+
+  const { id } = req.params;
+  await handler.handle({ id, ...req.body });
+  res.sendStatus(204);
+};
+
+export default { getArea, getAreas, createArea, deleteArea, updateArea };

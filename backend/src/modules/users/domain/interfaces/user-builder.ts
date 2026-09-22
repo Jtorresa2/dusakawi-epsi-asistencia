@@ -1,11 +1,11 @@
-import type { Metadata } from '@shared/types/metadata.js';
-import { Area } from '../../../areas/domain/entities/area.js';
-import { Position } from '../entities/position.js';
-import { Role } from '../entities/role.js';
-import { User } from '../entities/user.js';
-import { DocumentDetails } from '../value-objects/document-details.js';
-import { HashedPassword } from '../value-objects/hashed-password.js';
-import type { Builder } from './builder.js';
+import type { Metadata } from '@shared/types/metadata';
+import { Area } from '@modules/areas/domain/entities/area';
+import { Position } from '@modules/positions/domain/entities/position';
+import { Role } from '../entities/role';
+import { User } from '../entities/user';
+import { DocumentDetails } from '../value-objects/document-details';
+import { HashedPassword } from '../value-objects/hashed-password';
+import type { Builder } from './builder';
 
 export interface UserBuilder extends Builder<User> {
   documentDetails(documentDetails: DocumentDetails): this;

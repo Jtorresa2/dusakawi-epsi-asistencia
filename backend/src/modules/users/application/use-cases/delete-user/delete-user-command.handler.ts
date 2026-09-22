@@ -1,6 +1,6 @@
-import { NotFoundError } from '@shared/errors/errors.js';
-import type { UserRepository } from '../../../domain/repositories/user-repository.js';
-import type { DeleteUserCommandDto } from './delete-user-command.dto.js';
+import { NotFoundError } from '@shared/errors/errors';
+import type { UserRepository } from '@modules/users/domain/repositories/user-repository';
+import type { DeleteUserCommandDto } from './delete-user-command.dto';
 
 export class DeleteUserCommandHandler {
   constructor(private readonly userRepository: UserRepository) {}

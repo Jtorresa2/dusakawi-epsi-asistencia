@@ -1,25 +1,35 @@
-﻿const pool = require('../config/db');
+const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
-const { enviarCredenciales } = require('../services/emailService');
 
 exports.getUsuarios = async (req, res) => {
   try {
     const [rows] = await pool.query(`
       SELECT 
-        u.id, u.username, u.activo, u.password_reset_required, u.ultimo_acceso, u.creado_en,
-        r.nombre AS rol,
-        CONCAT(e.nombre, ' ', e.apellido) AS empleado,
-        e.cedula, e.correo,
-        a.nombre AS area,
-        a.piso
-      FROM usuarios u
-      JOIN roles r ON u.rol_id = r.id
-      JOIN empleado e ON u.empleado_id = e.id
-      JOIN areas a ON e.area_id = a.id
-      ORDER BY u.creado_en DESC
+        u.id,
+        u.id AS empleado_id,
+        u.username,
+        1 AS activo,
+        0 AS password_reset_required,
+        u.created_at AS creado_en,
+        u.created_at AS ultimo_acceso,
+        COALESCE(r.name, 'Empleado') AS rol,
+        COALESCE(r.id, '86b7792a-7786-4a15-91e3-ebdeec841992') AS rol_id,
+        TRIM(CONCAT(u.first_name, ' ', u.first_surname)) AS empleado,
+        COALESCE(dd.document_number, '') AS cedula,
+        u.email AS correo,
+        COALESCE(a.name, '') AS area,
+        COALESCE(fl.name, '') AS piso
+      FROM users u
+      LEFT JOIN user_roles ur ON ur.user_id = u.id
+      LEFT JOIN roles r ON ur.role_id = r.id
+      LEFT JOIN document_details dd ON dd.user_id = u.id
+      LEFT JOIN areas a ON u.area_id = a.id
+      LEFT JOIN floors fl ON a.floor_id = fl.id
+      ORDER BY u.created_at DESC
     `);
     res.json({ usuarios: rows });
   } catch (err) {
+    console.error('getUsuarios error:', err);
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
   }
 };
@@ -28,38 +38,32 @@ exports.crearUsuario = async (req, res) => {
   try {
     const { empleado_id, rol_id, username, password } = req.body;
 
-    // Si no enviaron password, usar la cedula del empleado
-    let passFinal = password;
-    let cedula = null;
-    if (!passFinal) {
-      const [emp] = await pool.query('SELECT cedula, correo, nombre, apellido FROM empleado WHERE id = ?', [empleado_id]);
-      if (!emp.length) return res.status(400).json({ mensaje: 'Empleado no encontrado' });
-      cedula = emp[0].cedula;
-      passFinal = cedula;
-    }
+    const [emp] = await pool.query(`
+      SELECT u.id, u.email, u.first_name, u.first_surname, dd.document_number AS cedula
+      FROM users u
+      LEFT JOIN document_details dd ON dd.user_id = u.id
+      WHERE u.id = ?
+    `, [empleado_id]);
 
+    if (!emp.length) return res.status(400).json({ mensaje: 'Empleado no encontrado' });
+
+    let passFinal = password || emp[0].cedula || '123456';
     const hash = await bcrypt.hash(passFinal, 10);
-    const [result] = await pool.query(
-      `INSERT INTO usuarios (empleado_id, rol_id, username, password_hash, password_reset_required) VALUES (?, ?, ?, ?, 1)`,
-      [empleado_id, rol_id, username, hash]
+
+    await pool.query(
+      `UPDATE users SET username = ?, password_hash = ? WHERE id = ?`,
+      [username, hash, empleado_id]
     );
 
-    // Obtener datos del empleado para el email
-    const [emp] = await pool.query('SELECT e.correo, e.nombre, e.apellido, e.cedula FROM empleado e WHERE e.id = ?', [empleado_id]);
-    if (emp.length && emp[0].correo) {
-      const link = process.env.FRONTEND_URL || 'http://localhost:3000';
-      await enviarCredenciales({
-        email: emp[0].correo,
-        nombre: `${emp[0].nombre} ${emp[0].apellido}`,
-        username,
-        password: passFinal,
-        link: `${link}/cambiar-password`,
-      });
+    if (rol_id) {
+      await pool.query(`DELETE FROM user_roles WHERE user_id = ?`, [empleado_id]);
+      await pool.query(`INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)`, [empleado_id, rol_id]);
     }
 
-    res.json({ mensaje: 'Usuario creado correctamente', password: passFinal, password_reset_required: 1 });
+    res.json({ mensaje: 'Usuario creado correctamente', password: passFinal, password_reset_required: 0 });
   } catch (err) {
-    if (err.code === '23505') return res.status(400).json({ mensaje: 'El usuario ya existe' });
+    console.error('crearUsuario error:', err);
+    if (err.code === '23505') return res.status(400).json({ mensaje: 'El nombre de usuario ya existe' });
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
   }
 };
@@ -67,15 +71,27 @@ exports.crearUsuario = async (req, res) => {
 exports.actualizarUsuario = async (req, res) => {
   try {
     const { id } = req.params;
-    const { rol_id, username, password, activo, password_reset_required } = req.body;
-    if (password) {
+    const { rol_id, username, password } = req.body;
+
+    if (password && password.trim() !== '') {
       const hash = await bcrypt.hash(password, 10);
-      await pool.query(`UPDATE usuarios SET rol_id=?, username=?, password_hash=?, activo=?, password_reset_required=? WHERE id=?`, [rol_id, username, hash, activo, password_reset_required ?? 0, id]);
-    } else {
-      await pool.query(`UPDATE usuarios SET rol_id=?, username=?, activo=?, password_reset_required=? WHERE id=?`, [rol_id, username, activo, password_reset_required ?? 0, id]);
+      if (username) {
+        await pool.query(`UPDATE users SET username = ?, password_hash = ? WHERE id = ?`, [username, hash, id]);
+      } else {
+        await pool.query(`UPDATE users SET password_hash = ? WHERE id = ?`, [hash, id]);
+      }
+    } else if (username) {
+      await pool.query(`UPDATE users SET username = ? WHERE id = ?`, [username, id]);
     }
+
+    if (rol_id) {
+      await pool.query(`DELETE FROM user_roles WHERE user_id = ?`, [id]);
+      await pool.query(`INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)`, [id, rol_id]);
+    }
+
     res.json({ mensaje: 'Usuario actualizado correctamente' });
   } catch (err) {
+    console.error('actualizarUsuario error:', err);
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
   }
 };
@@ -83,84 +99,57 @@ exports.actualizarUsuario = async (req, res) => {
 exports.eliminarUsuario = async (req, res) => {
   try {
     const { id } = req.params;
-    await pool.query(`DELETE FROM usuarios WHERE id = ?`, [id]);
+    await pool.query(`DELETE FROM user_roles WHERE user_id = ?`, [id]);
     res.json({ mensaje: 'Usuario eliminado correctamente' });
   } catch (err) {
+    console.error('eliminarUsuario error:', err);
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
   }
 };
 
 exports.generarMasivos = async (req, res) => {
   try {
-    // Empleados sin usuario
-    const [sinUsuario] = await pool.query(`
-      SELECT e.id, e.nombre, e.apellido, e.cedula, e.correo
-      FROM empleado e
-      LEFT JOIN usuarios u ON e.id = u.empleado_id
-      WHERE u.id IS NULL
+    const [pendientes] = await pool.query(`
+      SELECT u.id, u.first_name, u.first_surname, COALESCE(dd.document_number, '123456') AS cedula, u.email
+      FROM users u
+      LEFT JOIN document_details dd ON dd.user_id = u.id
+      LEFT JOIN user_roles ur ON ur.user_id = u.id
+      WHERE ur.role_id IS NULL
     `);
 
-    if (!sinUsuario.length) return res.json({ mensaje: 'No hay empleados pendientes', creados: 0 });
+    const [roleEmp] = await pool.query(`SELECT id FROM roles WHERE name ILIKE '%empleado%' LIMIT 1`);
+    const defaultRoleId = roleEmp[0]?.id || '86b7792a-7786-4a15-91e3-ebdeec841992';
 
     let creados = 0;
-    let emailsOk = 0;
-    let emailsFail = 0;
-    const link = process.env.FRONTEND_URL || 'http://localhost:3000';
     const resultados = [];
-
-    for (const emp of sinUsuario) {
-      // Generar username: nombre.apellido normalizado
-      const username = emp.nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.') + '.' +
-                       emp.apellido.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.');
-      // Evitar duplicados: agregar sufijo si existe
-      let finalUser = username;
-      let counter = 1;
-      while (true) {
-        const [dup] = await pool.query('SELECT id FROM usuarios WHERE username = ?', [finalUser]);
-        if (!dup.length) break;
-        finalUser = username + counter;
-        counter++;
-      }
-
+    for (const emp of pendientes) {
+      const baseUser = `${emp.first_name}.${emp.first_surname}`.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.');
       const hash = await bcrypt.hash(emp.cedula, 10);
-      // Asignar rol por defecto: Empleado (id=3)
-      await pool.query(
-        `INSERT INTO usuarios (empleado_id, rol_id, username, password_hash, password_reset_required) VALUES (?, 3, ?, ?, 1)`,
-        [emp.id, finalUser, hash]
-      );
+      await pool.query(`UPDATE users SET username = ?, password_hash = ? WHERE id = ?`, [baseUser, hash, emp.id]);
+      await pool.query(`INSERT INTO user_roles (user_id, role_id) VALUES (?, ?) ON CONFLICT DO NOTHING`, [emp.id, defaultRoleId]);
       creados++;
-
-      if (emp.correo) {
-        const r = await enviarCredenciales({
-          email: emp.correo,
-          nombre: `${emp.nombre} ${emp.apellido}`,
-          username: finalUser,
-          password: emp.cedula,
-          link: `${link}/cambiar-password`,
-        });
-        if (r.enviado) emailsOk++; else emailsFail++;
-      }
-
-      resultados.push({ empleado: `${emp.nombre} ${emp.apellido}`, username: finalUser, password: emp.cedula, correo: emp.correo || 'SIN CORREO', email_enviado: !!(emp.correo && r?.enviado) });
+      resultados.push({ empleado: `${emp.first_name} ${emp.first_surname}`, username: baseUser, password: emp.cedula, correo: emp.email });
     }
 
     res.json({
-      mensaje: `${creados} usuarios creados`,
+      mensaje: `${creados} usuarios generados`,
       creados,
-      emails_enviados: emailsOk,
-      emails_fallados: emailsFail,
+      emails_enviados: 0,
+      emails_fallados: 0,
       resultados,
     });
   } catch (err) {
+    console.error('generarMasivos error:', err);
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
   }
 };
 
 exports.getRoles = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT id, nombre, descripcion FROM roles');
+    const [rows] = await pool.query('SELECT id, name AS nombre, description AS descripcion FROM roles ORDER BY name');
     res.json({ roles: rows });
   } catch (err) {
+    console.error('getRoles error:', err);
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
   }
 };

@@ -1,6 +1,6 @@
-import { GenericEntity } from '@shared/entities/generic-entity.js';
-import type { Metadata } from '@shared/types/metadata.js';
-import { DataString } from '@shared/value-objects/data-string.js';
+import { GenericEntity } from '@shared/entities/generic-entity';
+import type { Metadata } from '@shared/types/metadata';
+import { DataString } from '@shared/value-objects/data-string';
 
 export class Role extends GenericEntity {
   constructor(

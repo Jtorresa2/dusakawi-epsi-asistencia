@@ -5,6 +5,7 @@ import PageHeader from "../../../shared/components/PageHeader";
 import PageContainer from "../../../shared/components/PageContainer";
 import DataTable from "../../../shared/components/DataTable";
 import { obtenerEmpleado } from "../../empleados/empleado.api";
+import { obtenerMiAsistencia } from "../../asistencia/asistencia.api";
 
 const ESTADO_COLORS = {
   Puntual: { bg: "#D1FAE5", color: "#065F46" },
@@ -24,9 +25,6 @@ export default function MiAsistenciaPage() {
   const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
   const initials = (usuario.nombre || "E").split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 
-  const headers = { Authorization: `Bearer ${localStorage.getItem("token")}` };
-  const API = "/api";
-
   useEffect(() => {
     if (usuario.empleado_id) {
       obtenerEmpleado(usuario.empleado_id).then(setEmpleado).catch(() => {});
@@ -37,8 +35,7 @@ export default function MiAsistenciaPage() {
     (async () => {
       setCargando(true);
       try {
-        const res = await fetch(`${API}/asistencia/mi-asistencia?mes=${mes}&anio=${anio}`, { headers });
-        const data = await res.json();
+        const data = await obtenerMiAsistencia(mes, anio);
         setRegistros(data.registros || []);
       } catch {} finally { setCargando(false); }
     })();

@@ -18,6 +18,20 @@ export const registrarManual = (data) =>
     body: JSON.stringify(data),
   });
 
+export const marcarAsistencia = (data = {}) =>
+  apiFetch("/asistencia/marcar", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+export const obtenerMiAsistencia = (mes, anio) => {
+  const query = new URLSearchParams();
+  if (mes) query.append("mes", mes);
+  if (anio) query.append("anio", anio);
+  const qs = query.toString();
+  return apiFetch(`/asistencia/mi-asistencia${qs ? `?${qs}` : ""}`);
+};
+
 export const justificarAusencia = (id, data) =>
   apiFetch(`/asistencia/${id}/justificar`, {
     method: "PUT",

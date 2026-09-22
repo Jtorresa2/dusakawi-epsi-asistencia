@@ -2,8 +2,8 @@
   "compilerOptions": {
     "verbatimModuleSyntax": true,
     "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
@@ -15,6 +15,7 @@
     "sourceMap": true,
     "paths": {
       "@config/*": ["./src/config/*"],
+      "@modules/*": ["./src/modules/*"],
       "@shared/*": ["./src/shared/*"]
     }
   },
