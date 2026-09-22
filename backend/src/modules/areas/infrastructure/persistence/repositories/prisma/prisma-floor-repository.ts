@@ -21,6 +21,10 @@ export class PrismaFloorRepository
     super(asCrudDelegate(prisma.floors), PrismaFloorMapper);
   }
 
+  async floorExists(name: string): Promise<boolean> {
+    return (await prisma.floors.count({ where: { name } })) > 0;
+  }
+
   protected buildSearchWhere(query: string): Prisma.floorsWhereInput {
     return query ? { name: { contains: query, mode: 'insensitive' } } : {};
   }
