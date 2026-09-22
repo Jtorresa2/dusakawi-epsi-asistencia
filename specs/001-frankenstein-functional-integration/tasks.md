@@ -15,9 +15,9 @@
 
 **Propósito**: Preparación de esquemas de base de datos y configuración del entorno
 
-- [ ] T001 Crear script de tablas complementarias `backend/src/config/database/complementary_tables.sql` con las tablas `horarios`, `horario_detalle` y `configuracion` con datos semilla iniciales
-- [ ] T002 Ejecutar script de tablas complementarias en el contenedor PostgreSQL de Docker `dusakawi-postgres`
-- [ ] T003 [P] Configurar variables de entorno en `backend/.env` para conectar al PostgreSQL local y definir `JWT_SECRET` institucional
+- [X] T001 Crear script de tablas complementarias `backend/src/config/database/complementary_tables.sql` con las tablas `horarios`, `horario_detalle` y `configuracion` con datos semilla iniciales
+- [X] T002 Ejecutar script de tablas complementarias en el contenedor PostgreSQL de Docker `dusakawi-postgres`
+- [X] T003 [P] Configurar variables de entorno en `backend/.env` para conectar al PostgreSQL local y definir `JWT_SECRET` institucional
 
 ---
 
@@ -25,10 +25,10 @@
 
 **Propósito**: Infraestructura central que DEBE estar completa antes de montar las historias de usuario
 
-- [ ] T004 Ajustar el wrapper de conexión en `backend/src/config/db.js` para asegurar compatibilidad de consultas SQL con el pool de PostgreSQL
-- [ ] T005 [P] Unificar el middleware de autenticación `backend/src/middlewares/authMiddleware.js` para validar el JWT refactorizado y poblar `req.user`
-- [ ] T006 [P] Configurar el cargador híbrido en `backend/src/main.ts` utilizando `createRequire` para importar y registrar routers CommonJS
-- [ ] T007 [P] Configurar el cliente API base en `frontend/src/shared/api/api.js` y `frontend/src/api/api.js` para unificar la URL base `/api`
+- [X] T004 Ajustar el wrapper de conexión en `backend/src/config/db.js` para asegurar compatibilidad de consultas SQL con el pool de PostgreSQL
+- [X] T005 [P] Unificar el middleware de autenticación `backend/src/middlewares/authMiddleware.js` para validar el JWT refactorizado y poblar `req.user`
+- [X] T006 [P] Configurar el cargador híbrido en `backend/src/main.ts` utilizando `createRequire` para importar y registrar routers CommonJS
+- [X] T007 [P] Configurar el cliente API base en `frontend/src/shared/api/api.js` y `frontend/src/api/api.js` para unificar la URL base `/api`
 
 **Checkpoint**: Base de datos lista y servidor híbrido preparado para recibir controladores y vistas.
 
@@ -39,11 +39,11 @@
 **Meta**: Permitir inicio de sesión con retorno de token y contexto de usuario, cambio de contraseña y navegación según rol.
 **Prueba Independiente**: Iniciar sesión desde `LoginPage.jsx` con credenciales de usuario registrado y verificar redirección al dashboard y almacenamiento de sesión en `localStorage`.
 
-- [ ] T008 [US1] Enriquecer el DTO de respuesta y handler en `backend/src/modules/auth/application/use-cases/login/login-query.handler.ts` para devolver `{ token, user }`
-- [ ] T009 [P] [US1] Implementar endpoint para cambio de contraseña en `backend/src/controllers/authController.js` y registrar en `backend/src/routes/authRoutes.js`
-- [ ] T010 [US1] Montar las rutas completas de autenticación en `backend/src/main.ts` bajo `/api/auth`
-- [ ] T011 [US1] Ajustar la llamada de inicio de sesión y guardado de sesión en `frontend/src/features/login/pages/LoginPage.jsx`
-- [ ] T012 [P] [US1] Actualizar el servicio de autenticación y cambio de clave en `frontend/src/api/authService.api.js` y `frontend/src/features/cambiarPassword/pages/CambiarPasswordPage.jsx`
+- [X] T008 [US1] Enriquecer el DTO de respuesta y handler en `backend/src/modules/auth/application/use-cases/login/login-query.handler.ts` para devolver `{ token, user }`
+- [X] T009 [P] [US1] Implementar endpoint para cambio de contraseña en `backend/src/controllers/authController.js` y registrar en `backend/src/routes/authRoutes.js`
+- [X] T010 [US1] Montar las rutas completas de autenticación en `backend/src/main.ts` bajo `/api/auth`
+- [X] T011 [US1] Ajustar la llamada de inicio de sesión y guardado de sesión en `frontend/src/features/login/pages/LoginPage.jsx`
+- [X] T012 [P] [US1] Actualizar el servicio de autenticación y cambio de clave en `frontend/src/api/authService.api.js` y `frontend/src/features/cambiarPassword/pages/CambiarPasswordPage.jsx`
 
 **Checkpoint**: MVP de autenticación y control de acceso 100% operativo.
 
@@ -54,10 +54,10 @@
 **Meta**: Registro de marcaciones de entrada y salida laboral matutina y vespertina, historial en "Mi Asistencia" y marcaciones manuales.
 **Prueba Independiente**: Realizar una marcación desde "Mi Asistencia", verificar inserción en `attendances` y visualización inmediata en tabla mensual.
 
-- [ ] T013 [US2] Adaptar consultas SQL en `backend/src/controllers/asistenciaController.js` para operar sobre la tabla `attendances` con deducción de casillas (`first_entry_time`, `first_departure_time`, `last_entry_time`, `last_departure_time`)
-- [ ] T014 [P] [US2] Ajustar el router `backend/src/routes/asistenciaRoutes.js` y montarlo en `backend/src/main.ts` bajo `/api/asistencia`
-- [ ] T015 [US2] Actualizar el cliente API de asistencia en `frontend/src/features/asistencia/asistencia.api.js`
-- [ ] T016 [P] [US2] Sincronizar el consumo del historial en `frontend/src/features/miAsistencia/pages/MiAsistenciaPage.jsx`
+- [X] T013 [US2] Adaptar consultas SQL en `backend/src/controllers/asistenciaController.js` para operar sobre la tabla `attendances` con deducción de casillas (`first_entry_time`, `first_departure_time`, `last_entry_time`, `last_departure_time`)
+- [X] T014 [P] [US2] Ajustar el router `backend/src/routes/asistenciaRoutes.js` y montarlo en `backend/src/main.ts` bajo `/api/asistencia`
+- [X] T015 [US2] Actualizar el cliente API de asistencia en `frontend/src/features/asistencia/asistencia.api.js`
+- [X] T016 [P] [US2] Sincronizar el consumo del historial en `frontend/src/features/miAsistencia/pages/MiAsistenciaPage.jsx`
 
 **Checkpoint**: Flujo de marcaciones e historial personal plenamente funcional.
 
@@ -68,11 +68,11 @@
 **Meta**: Radicación de incidencias con archivo adjunto, bandeja de revisión para supervisores y aprobación o rechazo.
 **Prueba Independiente**: Radicar una incidencia con adjunto desde cuenta de empleado y aprobarla desde cuenta de administrador.
 
-- [ ] T017 [US3] Adaptar consultas SQL en `backend/src/services/incidenciaService.js` para consultar y persistir sobre la tabla `incidents` en PostgreSQL
-- [ ] T018 [US3] Ajustar el controlador de incidencias en `backend/src/controllers/incidenciaController.js` para gestión de estados (Pendiente, Aprobada, Rechazada) y evidencias
-- [ ] T019 [P] [US3] Adaptar el controlador de novedades en `backend/src/controllers/novedadesController.js` y router `backend/src/routes/novedadesRoutes.js`
-- [ ] T020 [US3] Montar `incidenciaRoutes.js` y `novedadesRoutes.js` en `backend/src/main.ts` bajo `/api/incidencias` y `/api/novedades`
-- [ ] T021 [P] [US3] Actualizar el cliente API en `frontend/src/features/incidencias/incidencias.api.js` y `frontend/src/features/reportarIncidencia/reportarIncidencia.api.js`
+- [X] T017 [US3] Adaptar consultas SQL en `backend/src/services/incidenciaService.js` para consultar y persistir sobre la tabla `incidents` en PostgreSQL
+- [X] T018 [US3] Ajustar el controlador de incidencias en `backend/src/controllers/incidenciaController.js` para gestión de estados (Pendiente, Aprobada, Rechazada) y evidencias
+- [X] T019 [P] [US3] Adaptar el controlador de novedades en `backend/src/controllers/novedadesController.js` y router `backend/src/routes/novedadesRoutes.js`
+- [X] T020 [US3] Montar `incidenciaRoutes.js` y `novedadesRoutes.js` en `backend/src/main.ts` bajo `/api/incidencias` y `/api/novedades`
+- [X] T021 [P] [US3] Actualizar el cliente API en `frontend/src/features/incidencias/incidencias.api.js` y `frontend/src/features/reportarIncidencia/reportarIncidencia.api.js`
 
 **Checkpoint**: Ciclo completo de radicación y revisión de novedades e incidencias operativo.
 
@@ -83,13 +83,13 @@
 **Meta**: Administración integral de funcionarios bajo `users`, cargos en `positions`, festivos en `holidays`, horarios por día y configuración general.
 **Prueba Independiente**: Crear o editar un cargo, asignarlo a un empleado y ajustar la tolerancia en la pantalla de horarios verificando la persistencia en base de datos.
 
-- [ ] T022 [US4] Adaptar `backend/src/services/empleadoService.js` y `backend/src/controllers/empleadoController.js` para operar como vista/adaptador sobre la tabla `users` y `document_details`
-- [ ] T023 [P] [US4] Adaptar `backend/src/services/cargoService.js` y `backend/src/controllers/cargoController.js` para consultar y persistir en la tabla `positions`
-- [ ] T024 [P] [US4] Adaptar `backend/src/controllers/festivosController.js` para operar sobre la tabla `holidays`
-- [ ] T025 [P] [US4] Adaptar `backend/src/controllers/horarioController.js` para operar contra las tablas `horarios` y `horario_detalle`
-- [ ] T026 [P] [US4] Adaptar `backend/src/controllers/configController.js` para operar sobre la tabla `configuracion`
-- [ ] T027 [US4] Montar rutas en `backend/src/main.ts` (`/api/empleados`, `/api/cargos`, `/api/festivos`, `/api/horarios`, `/api/config`)
-- [ ] T028 [P] [US4] Sincronizar clientes API del frontend en `frontend/src/api/empleado.api.js`, `frontend/src/features/cargos/cargo.api.js`, `frontend/src/features/festivos/festivo.api.js` y `frontend/src/features/horarios/horario.api.js`
+- [X] T022 [US4] Adaptar `backend/src/services/empleadoService.js` y `backend/src/controllers/empleadoController.js` para operar como vista/adaptador sobre la tabla `users` y `document_details`
+- [X] T023 [P] [US4] Adaptar `backend/src/services/cargoService.js` y `backend/src/controllers/cargoController.js` para consultar y persistir en la tabla `positions`
+- [X] T024 [P] [US4] Adaptar `backend/src/controllers/festivosController.js` para operar sobre la tabla `holidays`
+- [X] T025 [P] [US4] Adaptar `backend/src/controllers/horarioController.js` para operar contra las tablas `horarios` y `horario_detalle`
+- [X] T026 [P] [US4] Adaptar `backend/src/controllers/configController.js` para operar sobre la tabla `configuracion`
+- [X] T027 [US4] Montar rutas en `backend/src/main.ts` (`/api/empleados`, `/api/cargos`, `/api/festivos`, `/api/horarios`, `/api/config`)
+- [X] T028 [P] [US4] Sincronizar clientes API del frontend en `frontend/src/api/empleado.api.js`, `frontend/src/features/cargos/cargo.api.js`, `frontend/src/features/festivos/festivo.api.js` y `frontend/src/features/horarios/horario.api.js`
 
 **Checkpoint**: Catálogos maestros, estructura institucional, personal y horarios 100% operativos.
 
@@ -100,11 +100,11 @@
 **Meta**: Dashboard con tarjetas cuantitativas de asistencia diaria, tablas dinámicas de reportes y descarga oficial de PDFs con membrete.
 **Prueba Independiente**: Cargar el dashboard principal verificando conteos reales del día y descargar un reporte PDF de asistencia por área.
 
-- [ ] T029 [US5] Adaptar consultas SQL en `backend/src/controllers/dashboardController.js` para computar presentes, ausentes, retardos e incidencias sobre `attendances`, `users` e `incidents`
-- [ ] T030 [US5] Adaptar consultas tabulares en `backend/src/controllers/reportesController.js` para generar consolidados por período y área sobre `attendances` y `users`
-- [ ] T031 [P] [US5] Adaptar el generador de reportes PDF con membrete en `backend/src/routes/pdfRoutes.js` para emitir documentos con PDFKit desde `attendances` y `users`
-- [ ] T032 [US5] Montar las rutas en `backend/src/main.ts` bajo `/api/dashboard`, `/api/reportes` y `/api/pdf`
-- [ ] T033 [P] [US5] Actualizar clientes API en `frontend/src/features/dashboard/dashboard.api.js` y `frontend/src/features/reportes/reportes.api.js`
+- [X] T029 [US5] Adaptar consultas SQL en `backend/src/controllers/dashboardController.js` para computar presentes, ausentes, retardos e incidencias sobre `attendances`, `users` e `incidents`
+- [X] T030 [US5] Adaptar consultas tabulares en `backend/src/controllers/reportesController.js` para generar consolidados por período y área sobre `attendances` y `users`
+- [X] T031 [P] [US5] Adaptar el generador de reportes PDF con membrete en `backend/src/routes/pdfRoutes.js` para emitir documentos con PDFKit desde `attendances` y `users`
+- [X] T032 [US5] Montar las rutas en `backend/src/main.ts` bajo `/api/dashboard`, `/api/reportes` y `/api/pdf`
+- [X] T033 [P] [US5] Actualizar clientes API en `frontend/src/features/dashboard/dashboard.api.js` y `frontend/src/features/reportes/reportes.api.js`
 
 **Checkpoint**: Dashboard y reportería documental PDF totalmente funcionales.
 
@@ -114,8 +114,8 @@
 
 **Propósito**: Ajustes de carpetas de almacenamiento y verificación funcional integral
 
-- [ ] T034 [P] Crear y asegurar permisos del directorio estático `backend/uploads/` y subdirectorios de evidencias
-- [ ] T035 Ejecutar la guía de validación funcional de extremo a extremo descrita en `specs/001-frankenstein-functional-integration/quickstart.md`
+- [X] T034 [P] Crear y asegurar permisos del directorio estático `backend/uploads/` y subdirectorios de evidencias
+- [X] T035 Ejecutar la guía de validación funcional de extremo a extremo descrita en `specs/001-frankenstein-functional-integration/quickstart.md`
 
 ---
 

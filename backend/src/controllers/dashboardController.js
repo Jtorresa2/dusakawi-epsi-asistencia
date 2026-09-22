@@ -39,63 +39,74 @@ exports.getIndicadores = async (req, res) => {
     // Indicadores filtrados por período
     const [indicadores] = await pool.query(`
       SELECT 
-        COUNT(DISTINCT CASE WHEN a.estado = 'puntual' OR a.estado = 'tardanza' THEN a.empleado_id END) AS presentes_hoy,
-        COUNT(DISTINCT CASE WHEN a.estado = 'ausente' THEN a.empleado_id END) AS ausentes_hoy,
-        COUNT(DISTINCT CASE WHEN a.estado = 'tardanza' THEN a.empleado_id END) AS tardanzas_hoy,
-        ROUND(SUM(CASE WHEN a.estado = 'puntual' THEN 1 ELSE 0 END) / COUNT(*) * 100, 1) AS puntualidad
-      FROM asistencia a
-      WHERE a.fecha BETWEEN '${r.start}' AND '${r.end}'
-    `);
+        COUNT(DISTINCT CASE WHEN LOWER(a.estado) = 'puntual' OR LOWER(a.estado) = 'tardanza' THEN a.user_id END) AS presentes_hoy,
+        COUNT(DISTINCT CASE WHEN LOWER(a.estado) = 'ausente' THEN a.user_id END) AS ausentes_hoy,
+        COUNT(DISTINCT CASE WHEN LOWER(a.estado) = 'tardanza' THEN a.user_id END) AS tardanzas_hoy,
+        CASE WHEN COUNT(*) > 0 THEN ROUND(SUM(CASE WHEN LOWER(a.estado) = 'puntual' THEN 1 ELSE 0 END)::numeric / COUNT(*) * 100, 1) ELSE 100 END AS puntualidad
+      FROM attendances a
+      WHERE DATE(a.created_at) BETWEEN ? AND ?
+    `, [r.start, r.end]);
 
-    // Horas extra en el período (usando columna calculada)
+    // Horas extra en el período
     const [extras] = await pool.query(`
       SELECT COALESCE(SUM(a.horas_extra), 0) AS horas_extras
-      FROM asistencia a
-      WHERE a.fecha BETWEEN '${r.start}' AND '${r.end}'
-    `);
+      FROM attendances a
+      WHERE DATE(a.created_at) BETWEEN ? AND ?
+    `, [r.start, r.end]);
 
     // Permisos/incidencias aprobadas en el período
     const [permisos] = await pool.query(`
-      SELECT COUNT(*) AS total FROM incidencias
-      WHERE estado = 'aprobado'
-        AND fecha BETWEEN '${r.start}' AND '${r.end}'
-    `);
+      SELECT COUNT(*) AS total FROM incidents
+      WHERE LOWER(status) IN ('aprobado', 'aprobada')
+        AND DATE(created_at) BETWEEN ? AND ?
+    `, [r.start, r.end]);
 
     const [asistenciaHoy] = await pool.query(`
-      SELECT a.id, e.nombre, e.apellido, a.fecha, a.estado,
-        a.fecha_hora_entrada, a.fecha_hora_salida_manana, a.fecha_hora_entrada_tarde, a.fecha_hora_salida,
-        a.horas_trabajadas, a.minutos_tardanza
-      FROM asistencia a
-      JOIN empleado e ON a.empleado_id = e.id
-      WHERE a.fecha = CURRENT_DATE
-      ORDER BY a.fecha_hora_entrada
+      SELECT
+        a.id,
+        u.first_name AS nombre,
+        u.first_surname AS apellido,
+        TO_CHAR(a.created_at, 'YYYY-MM-DD') AS fecha,
+        a.estado,
+        TO_CHAR(a.first_entry_time, 'HH24:MI') AS fecha_hora_entrada,
+        TO_CHAR(a.first_departure_time, 'HH24:MI') AS fecha_hora_salida_manana,
+        TO_CHAR(a.last_entry_time, 'HH24:MI') AS fecha_hora_entrada_tarde,
+        TO_CHAR(a.last_departure_time, 'HH24:MI') AS fecha_hora_salida,
+        a.horas_trabajadas,
+        a.minutos_tardanza
+      FROM attendances a
+      JOIN users u ON a.user_id = u.id
+      WHERE DATE(a.created_at) = CURRENT_DATE
+      ORDER BY a.first_entry_time ASC NULLS LAST
       LIMIT 10
     `);
+
     const [semanal] = await pool.query(`
       SELECT 
-        TRIM(TO_CHAR(fecha, 'Day')) AS dia,
-        SUM((estado != 'ausente')::int) AS presentes,
-        SUM((estado = 'ausente')::int) AS ausentes
-      FROM asistencia
-      WHERE fecha >= CURRENT_DATE - INTERVAL '7 days'
-      GROUP BY fecha, TRIM(TO_CHAR(fecha, 'Day'))
-      ORDER BY fecha
+        TRIM(TO_CHAR(created_at, 'Day')) AS dia,
+        SUM((LOWER(estado) != 'ausente')::int) AS presentes,
+        SUM((LOWER(estado) = 'ausente')::int) AS ausentes
+      FROM attendances
+      WHERE DATE(created_at) >= CURRENT_DATE - INTERVAL '7 days'
+      GROUP BY DATE(created_at), TRIM(TO_CHAR(created_at, 'Day'))
+      ORDER BY DATE(created_at)
     `);
+
     const [mensual] = await pool.query(`
       SELECT 
-        EXTRACT(MONTH FROM fecha) AS mes,
-        ROUND(SUM((estado = 'puntual')::int) / COUNT(*) * 100, 1) AS puntualidad,
-        ROUND(SUM((estado = 'ausente')::int) / COUNT(*) * 100, 1) AS ausentismo
-      FROM asistencia
-      WHERE EXTRACT(YEAR FROM fecha) = EXTRACT(YEAR FROM CURRENT_DATE)
-      GROUP BY EXTRACT(MONTH FROM fecha)
+        EXTRACT(MONTH FROM created_at) AS mes,
+        ROUND(SUM((LOWER(estado) = 'puntual')::int)::numeric / GREATEST(COUNT(*), 1) * 100, 1) AS puntualidad,
+        ROUND(SUM((LOWER(estado) = 'ausente')::int)::numeric / GREATEST(COUNT(*), 1) * 100, 1) AS ausentismo
+      FROM attendances
+      WHERE EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM CURRENT_DATE)
+      GROUP BY EXTRACT(MONTH FROM created_at)
       ORDER BY mes
     `);
 
     const ind = indicadores[0] || {};
     res.json({
       indicadores: {
-        puntualidad: ind.puntualidad || 0,
+        puntualidad: ind.puntualidad || 100,
         presentes_hoy: ind.presentes_hoy || 0,
         ausentes_hoy: ind.ausentes_hoy || 0,
         tardanzas_hoy: ind.tardanzas_hoy || 0,
@@ -117,17 +128,17 @@ exports.getResumenPorArea = async (req, res) => {
     const [rows] = await pool.query(`
       SELECT
         ar.id,
-        ar.nombre AS area,
+        ar.name AS area,
         COUNT(a.id) AS total,
-        SUM(CASE WHEN a.estado = 'puntual' THEN 1 ELSE 0 END) AS presentes,
-        SUM(CASE WHEN a.estado = 'ausente' THEN 1 ELSE 0 END) AS ausentes,
-        SUM(CASE WHEN a.estado = 'tardanza' THEN 1 ELSE 0 END) AS tardanzas
-      FROM asistencia a
-      JOIN empleado e ON a.empleado_id = e.id
-      JOIN areas ar ON e.area_id = ar.id
-      WHERE a.fecha = CURRENT_DATE
-      GROUP BY ar.id, ar.nombre
-      ORDER BY ar.nombre
+        SUM(CASE WHEN LOWER(a.estado) = 'puntual' THEN 1 ELSE 0 END) AS presentes,
+        SUM(CASE WHEN LOWER(a.estado) = 'ausente' THEN 1 ELSE 0 END) AS ausentes,
+        SUM(CASE WHEN LOWER(a.estado) = 'tardanza' THEN 1 ELSE 0 END) AS tardanzas
+      FROM attendances a
+      JOIN users u ON a.user_id = u.id
+      JOIN areas ar ON u.area_id = ar.id
+      WHERE DATE(a.created_at) = CURRENT_DATE
+      GROUP BY ar.id, ar.name
+      ORDER BY ar.name
     `);
 
     const data = rows.map((r) => ({

@@ -27,9 +27,21 @@ export class LoginQueryHandler {
     }
 
     const token = this.tokenHandler.createToken(user.metadata!.id, user.roles);
+    const primaryRole = user.roles[0]?.name?.value || 'Empleado';
+    const fullName = `${user.firstName.value} ${user.firstSurname.value}`.trim();
 
     return {
       token,
+      user: {
+        id: user.metadata!.id,
+        username: user.username.value,
+        nombre: fullName,
+        email: user.email.value,
+        rol: primaryRole,
+        area_id: user.area?.metadata?.id,
+        cargo_id: user.position?.metadata?.id,
+      },
+      password_reset_required: false,
     };
   }
 }

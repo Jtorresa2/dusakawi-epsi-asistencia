@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const API = "/api";
@@ -26,7 +26,7 @@ export default function CambiarPasswordPage() {
         body: JSON.stringify({ password_actual: form.actual, password_nuevo: form.nueva }),
       });
       const data = await res.json();
-      if (!res.ok) return setError(data.mensaje || "Error");
+      if (!res.ok) return setError(data.mensaje || data.detail || "Error");
       localStorage.setItem("token", data.token);
       setExito(true);
       setTimeout(() => navigate("/dashboard"), 1500);

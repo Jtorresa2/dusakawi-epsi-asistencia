@@ -55,7 +55,7 @@ exports.eliminar = async (req, res) => {
 
 exports.mios = async (req, res) => {
   try {
-    const empleadoId = req.user?.empleado_id;
+    const empleadoId = req.user?.empleado_id || req.user?.id;
     if (!empleadoId) return res.status(400).json({ mensaje: "empleado_id no encontrado" });
     const novedades = await novedadesService.obtenerPorEmpleado(empleadoId);
     res.json({ novedades });
