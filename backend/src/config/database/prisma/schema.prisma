@@ -5,6 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["asistencia"]
 }
 
 model actions {
@@ -14,19 +15,58 @@ model actions {
   created_at   DateTime       @default(now()) @db.Timestamptz(6)
   updated_at   DateTime?      @db.Timestamptz(6)
   role_actions role_actions[]
+
+  @@schema("asistencia")
+}
+
+model areas {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  floor_id    String    @db.Uuid
+  name        String    @db.VarChar(100)
+  description String?
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime? @db.Timestamptz(6)
+  floors      floors    @relation(fields: [floor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users       users[]
+
+  @@unique([name, floor_id], map: "uq_area_name_floor")
+  @@index([floor_id], map: "idx_area_floor_id")
+  @@schema("asistencia")
 }
 
 model attendances {
-  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id              String    @db.Uuid
-  first_entry_time     DateTime? @db.Time(6)
-  last_entry_time      DateTime? @db.Time(6)
-  first_departure_time DateTime? @db.Time(6)
-  last_departure_time  DateTime? @db.Time(6)
-  created_at           DateTime  @default(now()) @db.Timestamptz(6)
-  users                users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                     String    @db.Uuid
+  date                        DateTime  @db.Date
+  entry_timestamp             DateTime? @db.Timestamptz(6)
+  morning_departure_timestamp DateTime? @db.Timestamptz(6)
+  afternoon_entry_timestamp   DateTime? @db.Timestamptz(6)
+  departure_timestamp         DateTime? @db.Timestamptz(6)
+  worked_hours                Decimal?  @db.Decimal(5, 2)
+  extra_hours                 Decimal?  @db.Decimal(5, 2)
+  late_minutes                Int?
+  mark_type                   String?   @db.VarChar(50)
+  status                      String    @default("on_time") @db.VarChar(20)
+  mark_state                  String    @default("open") @db.VarChar(20)
+  observation                 String?
+  device_id                   String?   @db.VarChar(100)
+  created_at                  DateTime  @default(now()) @db.Timestamptz(6)
+  users                       users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@unique([user_id, date])
   @@index([user_id], map: "idx_attendances_user_id")
+  @@schema("asistencia")
+}
+
+model config {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key        String    @unique(map: "uq_config_key") @db.VarChar(100)
+  value      String
+  type       String    @db.VarChar(20)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+
+  @@schema("asistencia")
 }
 
 model document_details {
@@ -42,6 +82,7 @@ model document_details {
   users            users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([document_type_id], map: "idx_document_details_document_type_id")
+  @@schema("asistencia")
 }
 
 model document_types {
@@ -50,6 +91,8 @@ model document_types {
   created_at       DateTime           @default(now()) @db.Timestamptz(6)
   updated_at       DateTime?          @db.Timestamptz(6)
   document_details document_details[]
+
+  @@schema("asistencia")
 }
 
 model floors {
@@ -58,6 +101,8 @@ model floors {
   created_at DateTime  @default(now()) @db.Timestamptz(6)
   updated_at DateTime? @db.Timestamptz(6)
   areas      areas[]
+
+  @@schema("asistencia")
 }
 
 model holidays {
@@ -68,6 +113,8 @@ model holidays {
   active     Boolean   @default(true)
   created_at DateTime  @default(now()) @db.Timestamptz(6)
   updated_at DateTime? @db.Timestamptz(6)
+
+  @@schema("asistencia")
 }
 
 model incidents {
@@ -75,29 +122,88 @@ model incidents {
   user_id                            String    @db.Uuid
   type                               String    @db.VarChar(50)
   description                        String
+  date                               DateTime  @db.Date
   status                             String    @db.VarChar(50)
   priority                           String    @db.VarChar(20)
   evidence                           String?
   observation                        String?
   rejection_reason                   String?
   signed_file                        String?   @db.VarChar(255)
-  reviewed_by                        String    @db.Uuid
+  reviewed_by                        String?   @db.Uuid
   created_at                         DateTime  @default(now()) @db.Timestamptz(6)
   updated_at                         DateTime? @db.Timestamptz(6)
-  users_incidents_reviewed_byTousers users     @relation("incidents_reviewed_byTousers", fields: [reviewed_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_incidents_reviewed_byTousers users?    @relation("incidents_reviewed_byTousers", fields: [reviewed_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_incidents_user_idTousers     users     @relation("incidents_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([reviewed_by], map: "idx_incidents_reviewed_by")
   @@index([user_id], map: "idx_incidents_user_id")
+  @@schema("asistencia")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model news {
+  id                                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                                String    @db.Uuid
+  date_from                              DateTime  @db.Date
+  date_to                                DateTime  @db.Date
+  reason                                 String
+  news_type                              String    @default("permission") @db.VarChar(30)
+  mark_type                              String    @default("full_day") @db.VarChar(20)
+  time_from                              DateTime? @db.Time(6)
+  time_to                                DateTime? @db.Time(6)
+  registered_by                          String?   @db.Uuid
+  status                                 String    @default("approved") @db.VarChar(20)
+  request_file                           String?   @db.VarChar(500)
+  signed_file                            String?   @db.VarChar(500)
+  requested_by_user_id                   String?   @db.Uuid
+  rejection_reason                       String?
+  created_at                             DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                             DateTime? @db.Timestamptz(6)
+  users_news_registered_byTousers        users?    @relation("news_registered_byTousers", fields: [registered_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_news_requested_by_user_idTousers users?    @relation("news_requested_by_user_idTousers", fields: [requested_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_news_user_idTousers              users     @relation("news_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_news_user_id")
+  @@schema("asistencia")
+}
+
+model password_reset_tokens {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String    @db.Uuid
+  token_hash String    @unique(map: "uq_password_reset_tokens_hash") @db.VarChar(64)
+  expires_at DateTime  @db.Timestamp(6)
+  used       Boolean   @default(false)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  used_at    DateTime? @db.Timestamptz(6)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_password_reset_tokens_user_id")
+  @@schema("asistencia")
 }
 
 model positions {
   id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String    @unique(map: "uq_positions_name") @db.VarChar(100)
   description String
+  active      Boolean   @default(true)
+  area_id     String?   @db.Uuid
   created_at  DateTime  @default(now()) @db.Timestamptz(6)
   updated_at  DateTime? @db.Timestamptz(6)
   users       users[]
+
+  @@schema("asistencia")
+}
+
+model report_history {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  report_type   String   @db.VarChar(100)
+  user_name     String   @db.VarChar(255)
+  format        String?  @db.VarChar(20)
+  filters       String?
+  total_records Int?     @default(0)
+  generated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@schema("asistencia")
 }
 
 model requests {
@@ -111,6 +217,7 @@ model requests {
   users      users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([user_id], map: "idx_requests_user_id")
+  @@schema("asistencia")
 }
 
 model role_actions {
@@ -121,6 +228,7 @@ model role_actions {
   roles      roles    @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([role_id, action_id])
+  @@schema("asistencia")
 }
 
 model roles {
@@ -131,6 +239,64 @@ model roles {
   updated_at   DateTime?      @db.Timestamptz(6)
   role_actions role_actions[]
   user_roles   user_roles[]
+
+  @@schema("asistencia")
+}
+
+model schedule_assignments {
+  id                                            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                                       String    @db.Uuid
+  schedule_id                                   String    @db.Uuid
+  valid_from                                    DateTime  @default(dbgenerated("CURRENT_DATE")) @db.Date
+  valid_until                                   DateTime? @db.Date
+  reason                                        String?   @db.VarChar(255)
+  assigned_by                                   String?   @db.Uuid
+  created_at                                    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                                    DateTime? @db.Timestamptz(6)
+  users_schedule_assignments_assigned_byTousers users?    @relation("schedule_assignments_assigned_byTousers", fields: [assigned_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  schedules                                     schedules @relation(fields: [schedule_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_schedule_assignments_user_idTousers     users     @relation("schedule_assignments_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([schedule_id], map: "idx_schedule_assignments_schedule_id")
+  @@index([user_id], map: "idx_schedule_assignments_user_id")
+  @@schema("asistencia")
+}
+
+model schedule_details {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  schedule_id     String    @db.Uuid
+  day_of_week     String    @db.VarChar(20)
+  morning_entry   DateTime? @db.Time(6)
+  morning_exit    DateTime? @db.Time(6)
+  afternoon_entry DateTime? @db.Time(6)
+  afternoon_exit  DateTime? @db.Time(6)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime? @db.Timestamptz(6)
+  schedules       schedules @relation(fields: [schedule_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([schedule_id, day_of_week], map: "uq_schedule_details_schedule_day")
+  @@index([schedule_id], map: "idx_schedule_details_schedule_id")
+  @@schema("asistencia")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model schedules {
+  id                          String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                        String                 @unique(map: "uq_schedules_name") @db.VarChar(100)
+  tolerance_minutes           Int                    @default(0)
+  tolerance_departure_minutes Int                    @default(0)
+  modality                    String                 @default("strict") @db.VarChar(20)
+  workday_type                String                 @default("fixed") @db.VarChar(20)
+  description                 String?
+  expected_hours              Decimal?               @db.Decimal(4, 2)
+  active                      Boolean                @default(true)
+  is_default                  Boolean                @default(false)
+  created_at                  DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at                  DateTime?              @db.Timestamptz(6)
+  schedule_assignments        schedule_assignments[]
+  schedule_details            schedule_details[]
+
+  @@schema("asistencia")
 }
 
 model user_roles {
@@ -141,50 +307,51 @@ model user_roles {
   users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([user_id, role_id])
+  @@schema("asistencia")
 }
 
-/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model users {
-  id                                     String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  first_name                             String            @db.VarChar(100)
-  middle_name                            String?           @db.VarChar(100)
-  first_surname                          String            @db.VarChar(100)
-  second_surname                         String?           @db.VarChar(100)
-  date_of_birth                          DateTime          @db.Date
-  place_of_birth                         String            @db.VarChar(150)
-  address                                String            @db.VarChar(255)
-  phone                                  String?           @db.VarChar(20)
-  cell                                   String            @db.VarChar(20)
-  position_id                            String            @db.Uuid
-  area_id                                String            @db.Uuid
-  username                               String            @unique(map: "uq_users_username") @db.VarChar(50)
-  password_hash                          String            @db.VarChar(255)
-  email                                  String            @unique(map: "uq_users_email") @db.VarChar(150)
-  created_at                             DateTime          @default(now()) @db.Timestamptz(6)
-  updated_at                             DateTime?         @db.Timestamptz(6)
-  attendances                            attendances[]
-  document_details                       document_details?
-  incidents_incidents_reviewed_byTousers incidents[]       @relation("incidents_reviewed_byTousers")
-  incidents_incidents_user_idTousers     incidents[]       @relation("incidents_user_idTousers")
-  requests                               requests[]
-  user_roles                             user_roles[]
-  area                                   areas             @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  positions                              positions         @relation(fields: [position_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                                                           String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name                                                   String                  @db.VarChar(100)
+  middle_name                                                  String?                 @db.VarChar(100)
+  first_surname                                                String                  @db.VarChar(100)
+  second_surname                                               String?                 @db.VarChar(100)
+  date_of_birth                                                DateTime                @db.Date
+  place_of_birth                                               String                  @db.VarChar(150)
+  address                                                      String                  @db.VarChar(255)
+  phone                                                        String?                 @db.VarChar(20)
+  position_id                                                  String                  @db.Uuid
+  area_id                                                      String                  @db.Uuid
+  schedule_id                                                  String?                 @db.Uuid
+  username                                                     String                  @unique(map: "uq_users_username") @db.VarChar(50)
+  password_hash                                                String                  @db.VarChar(255)
+  email                                                        String                  @unique(map: "uq_users_email") @db.VarChar(150)
+  active                                                       Boolean                 @default(true)
+  password_reset_required                                      Boolean                 @default(true)
+  last_access                                                  DateTime?               @db.Timestamptz(6)
+  fingerprint                                                  String?
+  photo                                                        String?
+  rfc_card                                                     String?                 @db.VarChar(50)
+  hire_date                                                    DateTime?               @db.Date
+  created_at                                                   DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at                                                   DateTime?               @db.Timestamptz(6)
+  attendances                                                  attendances[]
+  document_details                                             document_details?
+  incidents_incidents_reviewed_byTousers                       incidents[]             @relation("incidents_reviewed_byTousers")
+  incidents_incidents_user_idTousers                           incidents[]             @relation("incidents_user_idTousers")
+  news_news_registered_byTousers                               news[]                  @relation("news_registered_byTousers")
+  news_news_requested_by_user_idTousers                        news[]                  @relation("news_requested_by_user_idTousers")
+  news_news_user_idTousers                                     news[]                  @relation("news_user_idTousers")
+  password_reset_tokens                                        password_reset_tokens[]
+  requests                                                     requests[]
+  schedule_assignments_schedule_assignments_assigned_byTousers schedule_assignments[]  @relation("schedule_assignments_assigned_byTousers")
+  schedule_assignments_schedule_assignments_user_idTousers     schedule_assignments[]  @relation("schedule_assignments_user_idTousers")
+  user_roles                                                   user_roles[]
+  areas                                                        areas                   @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  positions                                                    positions               @relation(fields: [position_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([area_id], map: "idx_users_area_id")
   @@index([position_id], map: "idx_users_position_id")
-}
-
-model areas {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  floor_id    String    @db.Uuid
-  name        String    @db.VarChar(100)
-  description String?
-  created_at  DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime? @db.Timestamptz(6)
-  floors      floors    @relation(fields: [floor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users       users[]
-
-  @@unique([name, floor_id], map: "uq_area_name_floor")
-  @@index([floor_id], map: "idx_area_floor_id")
+  @@index([schedule_id], map: "idx_users_schedule_id")
+  @@schema("asistencia")
 }

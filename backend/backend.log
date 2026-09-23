@@ -1,0 +1,384 @@
+$ tsx watch src/main.ts
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Servidor corriendo en puerto 5000
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+error: relation "vista_indicadores" does not exist
+    at C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\pg-pool@3.14.0_pg@8.22.0\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\routes\pdfRoutes.js:279:27 {
+  length: 116,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '15',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+2:09:51 p. m. [tsx] change in ./src\routes\pdfRoutes.js Restarting...
+2:09:56 p. m. [tsx] change in ./src\routes\pdfRoutes.js Restarting...
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+2:35:32 p. m. [tsx] change in ./src\routes\pdfRoutes.js Rerunning...
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+Servidor corriendo en puerto 5000
+Conectado a PostgreSQL
+2:38:16 p. m. [tsx] change in ./src\modules\users\infrastructure\mappers\prisma\prisma-user.mapper.ts Restarting...
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+Servidor corriendo en puerto 5000
+2:39:52 p. m. [tsx] change in ./src\modules\users\infrastructure\mappers\prisma\prisma-user.mapper.ts Restarting...
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+Servidor corriendo en puerto 5000
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Error en PostgreSQL: Error: Connection terminated unexpectedly
+    at Connection.<anonymous> (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\pg@8.22.0\node_modules\pg\lib\client.js:199:73)
+    at Object.onceWrapper (node:events:630:28)
+    at Connection.emit (node:events:509:28)
+    at Socket.<anonymous> (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\pg@8.22.0\node_modules\pg\lib\connection.js:63:12)
+    at Socket.emit (node:events:509:28)
+    at TCP.<anonymous> (node:net:355:12) {
+  client: Client {
+    _events: [Object: null prototype] { error: [Function (anonymous)] },
+    _eventsCount: 1,
+    _maxListeners: undefined,
+    connectionParameters: ConnectionParameters {
+      user: 'postgres',
+      database: 'base_sie_dusakawi',
+      port: 5436,
+      host: '129.80.159.38',
+      binary: false,
+      options: '-c search_path=asistencia',
+      ssl: false,
+      sslnegotiation: undefined,
+      client_encoding: '',
+      replication: undefined,
+      isDomainSocket: false,
+      application_name: undefined,
+      fallback_application_name: undefined,
+      statement_timeout: false,
+      lock_timeout: false,
+      idle_in_transaction_session_timeout: false,
+      query_timeout: false,
+      connect_timeout: 5
+    },
+    user: 'postgres',
+    database: 'base_sie_dusakawi',
+    port: 5436,
+    host: '129.80.159.38',
+    replication: undefined,
+    _Promise: [Function: Promise],
+    _types: TypeOverrides { _types: [Object], text: {}, binary: {} },
+    _ending: true,
+    _ended: true,
+    _connecting: false,
+    _connected: true,
+    _connectionError: false,
+    _queryable: false,
+    _activeQuery: null,
+    _txStatus: 'I',
+    enableChannelBinding: false,
+    scramMaxIterations: 100000,
+    connection: Connection {
+      _events: [Object: null prototype],
+      _eventsCount: 22,
+      _maxListeners: undefined,
+      stream: [Socket],
+      _keepAlive: false,
+      _keepAliveInitialDelayMillis: 0,
+      parsedStatements: {},
+      ssl: false,
+      sslNegotiation: 'postgres',
+      _ending: true,
+      _emitMessage: false,
+      _connecting: true,
+      Symbol(shapeMode): false,
+      Symbol(kCapture): false
+    },
+    _queryQueue: [],
+    binary: false,
+    processID: 5189,
+    secretKey: 1782363630,
+    ssl: false,
+    sslNegotiation: 'postgres',
+    _connectionTimeoutMillis: 5000,
+    _connectionCallback: null,
+    connectionTimeoutHandle: Timeout {
+      _idleTimeout: -1,
+      _idlePrev: null,
+      _idleNext: null,
+      _idleStart: 601575,
+      _onTimeout: null,
+      _timerArgs: undefined,
+      _repeat: null,
+      _destroyed: true,
+      Symbol(refed): false,
+      Symbol(kHasPrimitive): false,
+      Symbol(asyncId): 4710,
+      Symbol(triggerId): 4683,
+      Symbol(kAsyncContextFrame): undefined
+    },
+    saslSession: null,
+    release: [Function (anonymous)],
+    readyForQuery: true,
+    hasExecuted: true,
+    _poolUseCount: 21,
+    Symbol(shapeMode): false,
+    Symbol(kCapture): false
+  }
+}
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+3:27:20 p. m. [tsx] change in ./src\services\empleadoService.js Restarting...
+3:27:24 p. m. [tsx] change in ./src\services\empleadoService.js Restarting...
+3:27:27 p. m. [tsx] change in ./src\services\empleadoService.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Servidor corriendo en puerto 5000
+Conectado a PostgreSQL
+3:27:34 p. m. [tsx] change in ./src\controllers\asistenciaController.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+Servidor corriendo en puerto 5000
+3:27:38 p. m. [tsx] change in ./src\controllers\asistenciaController.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Servidor corriendo en puerto 5000
+3:27:43 p. m. [tsx] change in ./src\controllers\reportesController.js Rerunning...
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+Servidor corriendo en puerto 5000
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+3:27:47 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:27:52 p. m. [tsx] change in ./src\controllers\reportesController.js Rerunning...
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:27:56 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:28:00 p. m. [tsx] change in ./src\controllers\reportesController.js Rerunning...
+◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+Servidor corriendo en puerto 5000
+3:28:05 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Servidor corriendo en puerto 5000
+3:28:10 p. m. [tsx] change in ./src\controllers\reportesController.js Rerunning...
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Servidor corriendo en puerto 5000
+3:28:13 p. m. [tsx] change in ./src\controllers\reportesController.js Rerunning...
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+Conectado a PostgreSQL
+3:28:28 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Servidor corriendo en puerto 5000
+Conectado a PostgreSQL
+3:28:47 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+Servidor corriendo en puerto 5000
+3:28:50 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Servidor corriendo en puerto 5000
+3:28:55 p. m. [tsx] change in ./src\controllers\reportesController.js Rerunning...
+◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+Servidor corriendo en puerto 5000
+3:29:02 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Servidor corriendo en puerto 5000
+3:29:12 p. m. [tsx] change in ./src\controllers\reportesController.js Rerunning...
+◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+Servidor corriendo en puerto 5000
+3:29:23 p. m. [tsx] change in ./src\controllers\reportesController.js Rerunning...
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Servidor corriendo en puerto 5000
+3:29:28 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+Servidor corriendo en puerto 5000
+3:29:33 p. m. [tsx] change in ./src\controllers\reportesController.js Rerunning...
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:29:37 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+Servidor corriendo en puerto 5000
+3:29:41 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Servidor corriendo en puerto 5000
+3:29:44 p. m. [tsx] change in ./src\controllers\reportesController.js Rerunning...
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Servidor corriendo en puerto 5000
+3:29:48 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+Servidor corriendo en puerto 5000
+3:29:55 p. m. [tsx] change in ./src\controllers\reportesController.js Rerunning...
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Servidor corriendo en puerto 5000
+3:30:06 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Servidor corriendo en puerto 5000
+3:30:13 p. m. [tsx] change in ./src\controllers\reportesController.js Restarting...
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:30:22 p. m. [tsx] change in ./src\routes\pdfRoutes.js Rerunning...
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Servidor corriendo en puerto 5000
+3:30:26 p. m. [tsx] change in ./src\routes\pdfRoutes.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+Servidor corriendo en puerto 5000
+3:30:29 p. m. [tsx] change in ./src\routes\pdfRoutes.js Rerunning...
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:30:39 p. m. [tsx] change in ./src\routes\pdfRoutes.js Restarting...
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:30:48 p. m. [tsx] change in ./src\routes\pdfRoutes.js Rerunning...
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:30:51 p. m. [tsx] change in ./src\routes\pdfRoutes.js Restarting...
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:30:55 p. m. [tsx] change in ./src\routes\pdfRoutes.js Rerunning...
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:31:00 p. m. [tsx] change in ./src\routes\pdfRoutes.js Rerunning...
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:31:05 p. m. [tsx] change in ./src\routes\pdfRoutes.js Restarting...
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:31:09 p. m. [tsx] change in ./src\routes\pdfRoutes.js Restarting...
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:31:12 p. m. [tsx] change in ./src\routes\pdfRoutes.js Rerunning...
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Servidor corriendo en puerto 5000
+3:31:18 p. m. [tsx] change in ./src\routes\pdfRoutes.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+Servidor corriendo en puerto 5000
+3:31:23 p. m. [tsx] change in ./src\routes\pdfRoutes.js Rerunning...
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+3:31:28 p. m. [tsx] change in ./src\routes\pdfRoutes.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+Servidor corriendo en puerto 5000
+3:31:33 p. m. [tsx] change in ./src\routes\pdfRoutes.js Rerunning...
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Servidor corriendo en puerto 5000
+3:31:36 p. m. [tsx] change in ./src\routes\pdfRoutes.js Restarting...
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Servidor corriendo en puerto 5000
+3:31:40 p. m. [tsx] change in ./src\routes\pdfRoutes.js Rerunning...
+◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+Servidor corriendo en puerto 5000
+3:31:43 p. m. [tsx] change in ./src\routes\pdfRoutes.js Restarting...
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+4:08:40 p. m. [tsx] change in ./src\config\injections.ts Rerunning...
+4:08:40 p. m. [tsx] change in ./src\config\injections.ts Restarting...
+4:08:41 p. m. [tsx] change in ./src\main.ts Restarting...
+◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+4:08:42 p. m. [tsx] change in ./src\main.ts Restarting...
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Servidor corriendo en puerto 5000
+Conectado a PostgreSQL
+4:09:00 p. m. [tsx] change in ./src\modules\cargos\application\use-cases\create-cargo\create-cargo-command.handler.ts Restarting...
+4:09:01 p. m. [tsx] change in ./src\modules\cargos\infrastructure\persistence\repositories\prisma\prisma-cargo-repository.ts Restarting...
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Servidor corriendo en puerto 5000
+4:14:58 p. m. [tsx] change in ./src\modules\cargos\presentation\cargos.presentation.ts Rerunning...
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\main.ts:38
+cargos.addRoutesV2(app);
+       ^
+
+TypeError: cargos.addRoutesV2 is not a function
+    at <anonymous> (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\main.ts:38:8)
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.19.0
+4:14:59 p. m. [tsx] change in ./src\main.ts Rerunning...
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+4:15:03 p. m. [tsx] change in ./src\main.ts Rerunning...
+4:15:03 p. m. [tsx] change in ./src\main.ts Restarting...
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+Servidor corriendo en puerto 5000
+4:15:13 p. m. [tsx] unlink in ./src\services\cargoService.js Restarting...
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Servidor corriendo en puerto 5000
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL

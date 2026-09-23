@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { puede } from "../novedades";
+import { puede as puedeEstatico } from "../novedades";
+import { usePermissions, puedeConjunto } from "../permissions";
 
 export default function useRol() {
   const [rol, setRol] = useState(null);
+  const perms = usePermissions();
 
   useEffect(() => {
     try {
@@ -14,8 +16,11 @@ export default function useRol() {
   }, []);
 
   function puedeAcceder(modulo, accion = "ver") {
+    // Prefer the real permissions once loaded; fall back to the static role
+    // map only while the permissions request is in flight.
+    if (perms) return puedeConjunto(perms, modulo, accion);
     if (!rol) return false;
-    return puede(rol, modulo, accion);
+    return puedeEstatico(rol, modulo, accion);
   }
 
   return { rol, puede: puedeAcceder };

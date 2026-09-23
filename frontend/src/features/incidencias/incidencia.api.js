@@ -35,32 +35,15 @@ export const eliminarIncidencia = (id) =>
     method: "DELETE",
   });
 
-export const aprobarIncidencia = (id, data = {}) =>
-  apiFetch(`/incidencias/${id}/aprobar`, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
-
-export const rechazarIncidencia = (id, data = {}) =>
-  apiFetch(`/incidencias/${id}/rechazar`, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
-
-export const solicitarCorreccion = (id, data = {}) =>
-  apiFetch(`/incidencias/${id}/solicitar-correccion`, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
-
 export const descargarPlantilla = (id) => {
   const token = localStorage.getItem("token");
   window.open(`/api/pdf/incidencias/${id}/plantilla?token=${token}`, "_blank");
 };
 
-export const aprobarConFirma = (id, file) => {
+export const aprobarConFirma = (id, file, prioridad) => {
   const formData = new FormData();
   formData.append("archivo_firmado", file);
+  if (prioridad) formData.append("prioridad", prioridad);
   return apiFetch(`/incidencias/${id}/aprobar-con-firma`, {
     method: "PUT",
     body: formData,

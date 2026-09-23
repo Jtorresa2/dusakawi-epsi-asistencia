@@ -1,0 +1,1 @@
+import{j as e}from"./index-DPg6K75Q.js";var t=()=>e(`/areas`),n=t=>e(`/areas`,{method:`POST`,body:JSON.stringify(t)}),r=(t,n)=>e(`/areas/${t}`,{method:`PUT`,body:JSON.stringify(n)}),i=t=>e(`/areas/${t}`,{method:`DELETE`}),a=t=>e(`/areas/${t}/empleados`);export{a,t as i,n,i as r,r as t};

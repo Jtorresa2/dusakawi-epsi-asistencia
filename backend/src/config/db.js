@@ -8,6 +8,7 @@ const pool = new Pool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  options: `-c search_path=${process.env.DB_SCHEMA || 'public'}`,
   max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,

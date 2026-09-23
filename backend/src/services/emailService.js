@@ -46,4 +46,90 @@ async function enviarCredenciales({ email, nombre, username, password, link }) {
   }
 }
 
-module.exports = { enviarCredenciales };
+async function enviarResetPassword({ email, nombre, username, link, primerIngreso = false }) {
+  const t = getTransporter();
+  if (!t) {
+    console.log('[EMAIL] SMTP no configurado. No se envio correo a', email);
+    return { enviado: false, motivo: 'SMTP no configurado' };
+  }
+  const esPrimerIngreso = primerIngreso;
+  const subject = esPrimerIngreso
+    ? 'Activa tu cuenta de acceso - Dusakawi EPSI'
+    : 'Restablece tu contrasena - Dusakawi EPSI';
+
+  const botonTexto = esPrimerIngreso ? 'Crear mi contrasena' : 'Restablecer contrasena';
+  const avisoCaducidad = esPrimerIngreso
+    ? 'Este enlace es de un solo uso y estara disponible durante 7 dias.'
+    : 'Este enlace es de un solo uso y estara disponible durante 30 minutos.';
+  const saludo = 'Hola, ' + nombre;
+
+  const bloqueUsuario = username
+    ? '<tr><td style="padding:22px 40px 4px 40px;">' +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#E8F5E9;border-radius:10px;">' +
+      '<tr><td style="padding:16px 20px;">' +
+      '<p style="margin:0 0 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:10.5px;font-weight:700;color:#2E7D32;letter-spacing:1.4px;text-transform:uppercase;">Usuario</p>' +
+      '<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:700;color:#1B5E20;">' + username + '</p>' +
+      '</td></tr></table></td></tr>'
+    : '';
+
+  const html =
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F3F4F6;">' +
+    '<tr><td align="center" style="padding:36px 16px;">' +
+    '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;background-color:#FFFFFF;border:1px solid #E5E7EB;border-radius:14px;">' +
+    '<tr><td style="padding:0;">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#E8F5E9;border-radius:14px 14px 0 0;">' +
+    '<tr><td align="center" style="padding:28px 24px 22px 24px;">' +
+    '<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:700;color:#1B5E20;">DUSAKAWI EPSI</p>' +
+    '<p style="margin:3px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:600;color:#2E7D32;letter-spacing:1.6px;text-transform:uppercase;">Sistema de Control de Asistencia</p>' +
+    '</td></tr></table>' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">' +
+    '<tr><td style="padding:32px 40px 8px 40px;">' +
+    '<p style="margin:0 0 6px 0;font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:700;color:#1B5E20;">' + (esPrimerIngreso ? 'Activa tu cuenta de acceso' : 'Restablece tu contrasena') + '</p>' +
+    '<p style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:600;color:#111827;">' + saludo + '</p>' +
+    '</td></tr>' +
+    '<tr><td style="padding:0 40px;">' +
+    '<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.65;color:#4B5563;">' +
+    (esPrimerIngreso
+      ? 'Tu cuenta de acceso al Sistema de Control de Asistencia de Dusakawi EPSI ha sido creada correctamente. Para comenzar a utilizar el sistema, establece una contrasena personal y segura.'
+      : 'Recibimos una solicitud para restablecer tu contrasena en el Sistema de Control de Asistencia de Dusakawi EPSI. Si fuiste tu quien la solicito, sigue el boton para crear una contrasena nueva y segura.') +
+    '</p></td></tr>' +
+    bloqueUsuario +
+    '<tr><td align="center" style="padding:26px 40px 8px 40px;">' +
+    '<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>' +
+    '<td align="center" style="border-radius:9px;background-color:#1B5E20;">' +
+    '<a href="' + link + '" target="_blank" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:#FFFFFF;text-decoration:none;background-color:#1B5E20;padding:14px 32px;border-radius:9px;line-height:22px;">' + botonTexto + '</a>' +
+    '</td></tr></table>' +
+    '<p style="margin:10px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#9CA3AF;">' + avisoCaducidad + '</p>' +
+    '</td></tr>' +
+    '<tr><td style="padding:22px 40px 0 40px;">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F3F4F6;border:1px solid #E5E7EB;border-radius:10px;">' +
+    '<tr><td style="padding:14px 18px;">' +
+    '<p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12.5px;font-weight:700;color:#111827;">' + (esPrimerIngreso ? 'No solicitaste esta cuenta?' : 'No solicitaste este cambio?') + '</p>' +
+    '<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12.5px;line-height:1.6;color:#4B5563;">No realices ninguna accion. Puedes ignorar este correo. Si consideras que se trata de un error, comunicate con el area de Talento Humano de Dusakawi EPSI.</p>' +
+    '</td></tr></table></td></tr>' +
+    '<tr><td style="padding:16px 40px 0 40px;">' +
+    '<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.55;color:#4B5563;"><span style="font-weight:700;color:#B3261E;">Importante:</span> nunca compartas este enlace ni tu contrasena con otras personas.</p>' +
+    '</td></tr></table>' +
+    '<tr><td align="center" style="padding:18px 20px 22px 20px;">' +
+    '<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11.5px;font-weight:700;color:#4B5563;">Dusakawi EPSI - Sistema de Control de Asistencia</p>' +
+    '<p style="margin:5px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#9CA3AF;">Este es un mensaje automatico. Por favor, no respondas a este correo.</p>' +
+    '</td></tr>' +
+    '</td></tr></table></td></tr></table>';
+
+  try {
+    await t.sendMail({
+      from: process.env.SMTP_FROM || 'noreply@dusakawiepsi.com',
+      to: email,
+      subject,
+      html,
+    });
+    console.log('[EMAIL] Enviado a', email);
+    return { enviado: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[EMAIL] Error al enviar a', email, msg);
+    return { enviado: false, motivo: msg };
+  }
+}
+
+module.exports = { enviarCredenciales, enviarResetPassword };

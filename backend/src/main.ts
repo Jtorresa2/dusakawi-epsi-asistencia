@@ -13,6 +13,7 @@ import { httpErrorRegistry } from '@shared/http/errors/http-error-registry.confi
 import auth from '@modules/auth/presentation/auth.presentation.js';
 import users from '@modules/users/presentation/user.presentation.js';
 import areas from '@modules/areas/presentation/areas.presentation';
+import cargos from '@modules/cargos/presentation/cargos.presentation';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,13 +34,13 @@ app.use(cors());
 auth.addRoutes(app);
 users.addRoutes(app);
 areas.addRoutes(app);
+cargos.addRoutes(app);
 
 // =======================================================
 // Rutas JavaScript Rescatadas (Coexistencia Híbrida CJS)
 // =======================================================
 const authLegacyRoutes = require('./routes/authRoutes.js');
 const asistenciaRoutes = require('./routes/asistenciaRoutes.js');
-const cargoRoutes = require('./routes/cargoRoutes.js');
 const configRoutes = require('./routes/configRoutes.js');
 const dashboardRoutes = require('./routes/dashboardRoutes.js');
 const empleadoRoutes = require('./routes/empleadoRoutes.js');
@@ -49,11 +50,11 @@ const incidenciaRoutes = require('./routes/incidenciaRoutes.js');
 const novedadesRoutes = require('./routes/novedadesRoutes.js');
 const pdfRoutes = require('./routes/pdfRoutes.js');
 const reportesRoutes = require('./routes/reportesRoutes.js');
+const seguimientoRoutes = require('./routes/seguimientoRoutes.js');
 const usuariosRoutes = require('./routes/usuariosRoutes.js');
 
 app.use('/api/auth', authLegacyRoutes);
 app.use('/api/asistencia', asistenciaRoutes);
-app.use('/api/cargos', cargoRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/empleados', empleadoRoutes);
@@ -63,6 +64,7 @@ app.use('/api/incidencias', incidenciaRoutes);
 app.use('/api/novedades', novedadesRoutes);
 app.use('/api/pdf', pdfRoutes);
 app.use('/api/reportes', reportesRoutes);
+app.use('/api/seguimiento', seguimientoRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 
 // =======================================================

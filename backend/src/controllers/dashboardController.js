@@ -31,6 +31,14 @@ function getDateRange(periodo) {
   }
 }
 
+function statusDisplay(status) {
+  if (status === 'on_time') return 'puntual';
+  if (status === 'late') return 'tardanza';
+  if (status === 'absent') return 'ausente';
+  if (status === 'justified') return 'justificado';
+  return status || 'puntual';
+}
+
 exports.getIndicadores = async (req, res) => {
   try {
     const periodo = req.query.periodo || 'Hoy';
@@ -39,25 +47,25 @@ exports.getIndicadores = async (req, res) => {
     // Indicadores filtrados por período
     const [indicadores] = await pool.query(`
       SELECT 
-        COUNT(DISTINCT CASE WHEN LOWER(a.estado) = 'puntual' OR LOWER(a.estado) = 'tardanza' THEN a.user_id END) AS presentes_hoy,
-        COUNT(DISTINCT CASE WHEN LOWER(a.estado) = 'ausente' THEN a.user_id END) AS ausentes_hoy,
-        COUNT(DISTINCT CASE WHEN LOWER(a.estado) = 'tardanza' THEN a.user_id END) AS tardanzas_hoy,
-        CASE WHEN COUNT(*) > 0 THEN ROUND(SUM(CASE WHEN LOWER(a.estado) = 'puntual' THEN 1 ELSE 0 END)::numeric / COUNT(*) * 100, 1) ELSE 100 END AS puntualidad
+        COUNT(DISTINCT CASE WHEN a.status IN ('on_time','late') THEN a.user_id END) AS presentes_hoy,
+        COUNT(DISTINCT CASE WHEN a.status = 'absent' THEN a.user_id END) AS ausentes_hoy,
+        COUNT(DISTINCT CASE WHEN a.status = 'late' THEN a.user_id END) AS tardanzas_hoy,
+        CASE WHEN COUNT(*) > 0 THEN ROUND(SUM(CASE WHEN a.status = 'on_time' THEN 1 ELSE 0 END)::numeric / COUNT(*) * 100, 1) ELSE 100 END AS puntualidad
       FROM attendances a
-      WHERE DATE(a.created_at) BETWEEN ? AND ?
+      WHERE a.date BETWEEN ?::date AND ?::date
     `, [r.start, r.end]);
 
     // Horas extra en el período
     const [extras] = await pool.query(`
-      SELECT COALESCE(SUM(a.horas_extra), 0) AS horas_extras
+      SELECT COALESCE(SUM(a.extra_hours), 0) AS horas_extras
       FROM attendances a
-      WHERE DATE(a.created_at) BETWEEN ? AND ?
+      WHERE a.date BETWEEN ?::date AND ?::date
     `, [r.start, r.end]);
 
     // Permisos/incidencias aprobadas en el período
     const [permisos] = await pool.query(`
       SELECT COUNT(*) AS total FROM incidents
-      WHERE LOWER(status) IN ('aprobado', 'aprobada')
+      WHERE LOWER(status) IN ('approved', 'aprobado', 'aprobada')
         AND DATE(created_at) BETWEEN ? AND ?
     `, [r.start, r.end]);
 
@@ -66,40 +74,42 @@ exports.getIndicadores = async (req, res) => {
         a.id,
         u.first_name AS nombre,
         u.first_surname AS apellido,
-        TO_CHAR(a.created_at, 'YYYY-MM-DD') AS fecha,
-        a.estado,
-        TO_CHAR(a.first_entry_time, 'HH24:MI') AS fecha_hora_entrada,
-        TO_CHAR(a.first_departure_time, 'HH24:MI') AS fecha_hora_salida_manana,
-        TO_CHAR(a.last_entry_time, 'HH24:MI') AS fecha_hora_entrada_tarde,
-        TO_CHAR(a.last_departure_time, 'HH24:MI') AS fecha_hora_salida,
-        a.horas_trabajadas,
-        a.minutos_tardanza
+        TO_CHAR(a.date, 'YYYY-MM-DD') AS fecha,
+        a.status AS estado,
+        TO_CHAR(a.entry_timestamp, 'HH24:MI') AS fecha_hora_entrada,
+        TO_CHAR(a.morning_departure_timestamp, 'HH24:MI') AS fecha_hora_salida_manana,
+        TO_CHAR(a.afternoon_entry_timestamp, 'HH24:MI') AS fecha_hora_entrada_tarde,
+        TO_CHAR(a.departure_timestamp, 'HH24:MI') AS fecha_hora_salida,
+        a.worked_hours AS horas_trabajadas,
+        a.late_minutes AS minutos_tardanza
       FROM attendances a
       JOIN users u ON a.user_id = u.id
-      WHERE DATE(a.created_at) = CURRENT_DATE
-      ORDER BY a.first_entry_time ASC NULLS LAST
+      WHERE a.date = CURRENT_DATE
+      ORDER BY a.entry_timestamp ASC NULLS LAST
       LIMIT 10
     `);
 
+    const registros = (asistenciaHoy || []).map((r) => ({ ...r, estado: statusDisplay(r.estado) }));
+
     const [semanal] = await pool.query(`
       SELECT 
-        TRIM(TO_CHAR(created_at, 'Day')) AS dia,
-        SUM((LOWER(estado) != 'ausente')::int) AS presentes,
-        SUM((LOWER(estado) = 'ausente')::int) AS ausentes
+        TRIM(TO_CHAR(date, 'Day')) AS dia,
+        SUM((status != 'absent')::int) AS presentes,
+        SUM((status = 'absent')::int) AS ausentes
       FROM attendances
-      WHERE DATE(created_at) >= CURRENT_DATE - INTERVAL '7 days'
-      GROUP BY DATE(created_at), TRIM(TO_CHAR(created_at, 'Day'))
-      ORDER BY DATE(created_at)
+      WHERE date >= CURRENT_DATE - INTERVAL '7 days'
+      GROUP BY date, TRIM(TO_CHAR(date, 'Day'))
+      ORDER BY date
     `);
 
     const [mensual] = await pool.query(`
       SELECT 
-        EXTRACT(MONTH FROM created_at) AS mes,
-        ROUND(SUM((LOWER(estado) = 'puntual')::int)::numeric / GREATEST(COUNT(*), 1) * 100, 1) AS puntualidad,
-        ROUND(SUM((LOWER(estado) = 'ausente')::int)::numeric / GREATEST(COUNT(*), 1) * 100, 1) AS ausentismo
+        EXTRACT(MONTH FROM date) AS mes,
+        ROUND(SUM((status = 'on_time')::int)::numeric / GREATEST(COUNT(*), 1) * 100, 1) AS puntualidad,
+        ROUND(SUM((status = 'absent')::int)::numeric / GREATEST(COUNT(*), 1) * 100, 1) AS ausentismo
       FROM attendances
-      WHERE EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM CURRENT_DATE)
-      GROUP BY EXTRACT(MONTH FROM created_at)
+      WHERE EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+      GROUP BY EXTRACT(MONTH FROM date)
       ORDER BY mes
     `);
 
@@ -113,7 +123,7 @@ exports.getIndicadores = async (req, res) => {
         horas_extras_hoy: extras[0]?.horas_extras || 0,
         permisos_hoy: permisos[0]?.total || 0,
       },
-      registros: asistenciaHoy,
+      registros,
       semanal,
       mensual
     });
@@ -130,13 +140,13 @@ exports.getResumenPorArea = async (req, res) => {
         ar.id,
         ar.name AS area,
         COUNT(a.id) AS total,
-        SUM(CASE WHEN LOWER(a.estado) = 'puntual' THEN 1 ELSE 0 END) AS presentes,
-        SUM(CASE WHEN LOWER(a.estado) = 'ausente' THEN 1 ELSE 0 END) AS ausentes,
-        SUM(CASE WHEN LOWER(a.estado) = 'tardanza' THEN 1 ELSE 0 END) AS tardanzas
+        SUM(CASE WHEN a.status = 'on_time' THEN 1 ELSE 0 END) AS presentes,
+        SUM(CASE WHEN a.status = 'absent' THEN 1 ELSE 0 END) AS ausentes,
+        SUM(CASE WHEN a.status = 'late' THEN 1 ELSE 0 END) AS tardanzas
       FROM attendances a
       JOIN users u ON a.user_id = u.id
       JOIN areas ar ON u.area_id = ar.id
-      WHERE DATE(a.created_at) = CURRENT_DATE
+      WHERE a.date = CURRENT_DATE
       GROUP BY ar.id, ar.name
       ORDER BY ar.name
     `);

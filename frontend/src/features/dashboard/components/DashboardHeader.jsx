@@ -1,5 +1,6 @@
 import { Paper, Typography, Box } from "@mui/material";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import { CalendarDays as CalendarTodayIcon } from "lucide-react";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 export default function DashboardHeader({ usuario }) {
   const fecha = new Date().toLocaleDateString("es-CO", {
@@ -15,8 +16,8 @@ export default function DashboardHeader({ usuario }) {
         py: 3,
         height: 140,
         borderRadius: "22px",
-        background: "linear-gradient(135deg, #1B5E20 0%, #388E3C 50%, #43A047 100%)",
-        color: "#fff",
+        background: `linear-gradient(135deg, ${COLORES.primarioOscuro} 0%, ${COLORES.primario} 50%, ${COLORES.acento} 100%)`,
+        color: COLORES.fondoBlanco,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -30,7 +31,7 @@ export default function DashboardHeader({ usuario }) {
           Bienvenido al sistema de control de asistencia
         </Typography>
       </Box>
-      <Box display="flex" alignItems="center" gap={1.5} sx={{ opacity: 0.8 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, opacity: 0.8 }}>
         <CalendarTodayIcon sx={{ fontSize: 18 }} />
         <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{fecha}</Typography>
       </Box>

@@ -16,7 +16,7 @@ type PrismaUser = Prisma.usersGetPayload<{
       };
     };
     positions: true;
-    area: { include: { floors: true } };
+    areas: { include: { floors: true } };
     user_roles: {
       include: {
         roles: true;
@@ -31,25 +31,25 @@ export class PrismaUserMapper {
       return PrismaRoleMapper.toDomain(roles);
     });
 
-    return new UserDatabaseBuilder()
+return new UserDatabaseBuilder()
       .documentDetails(
         PrismaDocumentDetailsMapper.toDomain(likeEntity.document_details!),
       )
-      .firstName(likeEntity.first_name)
-      .firstSurname(likeEntity.first_surname)
-      .secondSurname(likeEntity.second_surname ?? undefined)
+      .firstName(likeEntity.first_name?.trim() || 'Sin dato')
+      .firstSurname(likeEntity.first_surname?.trim() || 'Sin dato')
+      .secondSurname(likeEntity.second_surname?.trim() || undefined)
       .dateOfBirth(likeEntity.date_of_birth)
-      .placeOfBirth(likeEntity.place_of_birth)
-      .address(likeEntity.address)
-      .cell(likeEntity.cell)
-      .position(PrismaPositionMapper.toDomain(likeEntity.positions))
-      .area(PrismaAreaMapper.toDomain(likeEntity.area))
-      .username(likeEntity.username)
-      .passwordHash(HashedPassword.create(likeEntity.password_hash))
-      .email(likeEntity.email)
-      .roles(roles)
-      .middleName(likeEntity.middle_name ?? undefined)
+      .placeOfBirth(likeEntity.place_of_birth?.trim() || 'Sin dato')
+      .address(likeEntity.address?.trim() || 'Sin dato')
       .phone(likeEntity.phone ?? undefined)
+      .cell(likeEntity.phone ?? 'Sin dato')
+      .position(PrismaPositionMapper.toDomain(likeEntity.positions))
+      .area(PrismaAreaMapper.toDomain(likeEntity.areas))
+      .username(likeEntity.username?.trim() || 'Sin dato')
+      .passwordHash(HashedPassword.create(likeEntity.password_hash))
+      .email(likeEntity.email?.trim() || 'Sin dato')
+      .roles(roles)
+      .middleName(likeEntity.middle_name?.trim() || undefined)
       .metadata({
         id: likeEntity.id as Uuid,
         createdAt: likeEntity.created_at,
@@ -67,8 +67,7 @@ export class PrismaUserMapper {
       date_of_birth: user.dateOfBirth,
       place_of_birth: user.placeOfBirth.value,
       address: user.address.value,
-      cell: user.cell.value,
-      phone: user.phone?.value,
+      phone: user.phone?.value ?? user.cell.value,
     };
   }
 
@@ -82,7 +81,7 @@ export class PrismaUserMapper {
       created_at: entity.metadata.createdAt,
       updated_at: entity.metadata.updatedAt,
       positions: { connect: { id: entity.position.metadata.id } },
-      area: { connect: { id: entity.area.metadata.id } },
+      areas: { connect: { id: entity.area.metadata.id } },
       document_details: {
         create: PrismaDocumentDetailsMapper.toCreate(entity.documentDetails),
       },
@@ -99,7 +98,7 @@ export class PrismaUserMapper {
       ...PrismaUserMapper.basicData(entity),
       updated_at: entity.metadata.updatedAt,
       positions: { connect: { id: entity.position.metadata.id } },
-      area: { connect: { id: entity.area.metadata.id } },
+      areas: { connect: { id: entity.area.metadata.id } },
       document_details: {
         update: PrismaDocumentDetailsMapper.toUpdate(entity.documentDetails),
       },

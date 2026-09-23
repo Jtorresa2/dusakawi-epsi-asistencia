@@ -5,7 +5,10 @@ import { Environment } from '../../environment.js';
 
 const connectionString = `${Environment.DB_URL}`;
 
-const adapter = new PrismaPg({ connectionString });
+const adapter = new PrismaPg({
+  connectionString,
+  options: '-c search_path=asistencia',
+}, { schema: 'asistencia' });
 const prisma = new PrismaClient({ adapter });
 
 export { prisma };

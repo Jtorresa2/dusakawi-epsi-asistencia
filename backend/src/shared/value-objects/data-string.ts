@@ -1,7 +1,7 @@
 import { ValidationError } from '@shared/errors/errors.js';
 
 export class DataString {
-  private static readonly MIN_LENGTH = 2;
+  private static readonly MIN_LENGTH = 1;
   private static readonly MAX_LENGTH = 255;
 
   private readonly _value: string;

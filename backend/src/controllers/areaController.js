@@ -57,14 +57,26 @@ exports.eliminar = async (req, res) => {
 exports.obtenerEmpleadosPorArea = async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT e.*, c.nombre AS cargo FROM empleado e
-       LEFT JOIN cargos c ON e.cargo_id = c.id
-       WHERE e.area_id = ? ORDER BY e.nombre ASC`,
+      `SELECT u.id, dd.document_number AS cedula, u.first_name AS nombre, u.first_surname AS apellido,
+              u.email AS correo, u.email, u.phone AS telefono,
+              u.date_of_birth AS fecha_nacimiento, u.position_id AS cargo_id, u.area_id,
+              u.schedule_id AS horario_id,
+              NULLIF(regexp_replace(f.name, '\\D', '', 'g'), '')::int AS piso,
+              u.hire_date AS fecha_ingreso, u.active AS activo, u.username, u.created_at,
+              c.name AS cargo, r.name AS rol
+       FROM users u
+       LEFT JOIN positions c ON u.position_id = c.id
+       LEFT JOIN areas a ON u.area_id = a.id
+       LEFT JOIN floors f ON a.floor_id = f.id
+       LEFT JOIN document_details dd ON dd.user_id = u.id
+       LEFT JOIN user_roles ur ON ur.user_id = u.id
+       LEFT JOIN roles r ON r.id = ur.role_id
+       WHERE u.area_id = ? ORDER BY u.first_name ASC`,
       [req.params.id]
     );
     res.json(rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ mensaje: "Error al obtener empleados del área" });
+    res.status(500).json({ mensaje: "Error al obtener empleados del \u00e1rea" });
   }
 };

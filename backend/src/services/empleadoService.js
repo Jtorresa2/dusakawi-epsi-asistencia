@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const { excluirRolesPorNombre, excluirRolesPorUserId, joinRoles } = require("./rolesFiltro");
 
 exports.obtenerTodos = async (filtros = {}) => {
   let sql = `
@@ -10,8 +11,7 @@ exports.obtenerTodos = async (filtros = {}) => {
       TRIM(CONCAT(u.first_name, ' ', COALESCE(u.middle_name, ''), ' ', u.first_surname, ' ', COALESCE(u.second_surname, ''))) AS empleado,
       u.email AS correo,
       u.email,
-      COALESCE(u.cell, u.phone, '') AS telefono,
-      u.cell,
+      COALESCE(u.phone, '') AS telefono,
       u.phone,
       TO_CHAR(u.date_of_birth, 'YYYY-MM-DD') AS fecha_nacimiento,
       u.position_id AS cargo_id,
@@ -19,14 +19,15 @@ exports.obtenerTodos = async (filtros = {}) => {
       u.area_id,
       COALESCE(ar.name, '') AS area,
       COALESCE(fl.name, '') AS piso,
-      'activo' AS estado,
-      1 AS activo
+      COALESCE(u.photo, '') AS foto_url,
+      u.active::int AS activo,
+      CASE WHEN u.active THEN 'activo' ELSE 'inactivo' END AS estado
     FROM users u
     LEFT JOIN document_details dd ON dd.user_id = u.id
     LEFT JOIN positions pos ON u.position_id = pos.id
     LEFT JOIN areas ar ON u.area_id = ar.id
     LEFT JOIN floors fl ON ar.floor_id = fl.id
-    WHERE 1=1
+    WHERE 1=1${excluirRolesPorUserId('u.id')}
   `;
   const params = [];
 
@@ -54,8 +55,7 @@ exports.obtenerPorId = async (id) => {
       TRIM(CONCAT(u.first_name, ' ', COALESCE(u.middle_name, ''), ' ', u.first_surname, ' ', COALESCE(u.second_surname, ''))) AS empleado,
       u.email AS correo,
       u.email,
-      COALESCE(u.cell, u.phone, '') AS telefono,
-      u.cell,
+      COALESCE(u.phone, '') AS telefono,
       u.phone,
       TO_CHAR(u.date_of_birth, 'YYYY-MM-DD') AS fecha_nacimiento,
       u.position_id AS cargo_id,
@@ -63,14 +63,15 @@ exports.obtenerPorId = async (id) => {
       u.area_id,
       COALESCE(ar.name, '') AS area,
       COALESCE(fl.name, '') AS piso,
-      'activo' AS estado,
-      1 AS activo
+      COALESCE(u.photo, '') AS foto_url,
+      u.active::int AS activo,
+      CASE WHEN u.active THEN 'activo' ELSE 'inactivo' END AS estado
     FROM users u
     LEFT JOIN document_details dd ON dd.user_id = u.id
     LEFT JOIN positions pos ON u.position_id = pos.id
     LEFT JOIN areas ar ON u.area_id = ar.id
     LEFT JOIN floors fl ON ar.floor_id = fl.id
-    WHERE u.id = ?`,
+    WHERE u.id = ?${excluirRolesPorUserId('u.id')}`,
     [id]
   );
   return rows[0];
@@ -83,7 +84,7 @@ exports.crear = async (data) => {
   const passwordHash = "$2b$10$FnNwnu0sg.DOrspnoCm91.PVx/HHmKhXM7fUGh6i1mZQLN7JhIVR.";
 
   const [userRows, userResult] = await db.query(
-    `INSERT INTO users (first_name, first_surname, email, cell, date_of_birth, position_id, area_id, username, password_hash, address, place_of_birth)
+    `INSERT INTO users (first_name, first_surname, email, phone, date_of_birth, position_id, area_id, username, password_hash, address, place_of_birth)
      VALUES (?, ?, ?, ?, COALESCE(?::date, '1990-01-01'::date), ?, ?, ?, ?, 'Valledupar', 'Valledupar')
      RETURNING id`,
     [nombre, apellido || '', correo, telefono || '0000000000', fecha_nacimiento || null, cargo_id, area_id, username, passwordHash]
@@ -117,10 +118,11 @@ exports.actualizar = async (id, data) => {
   if (data.nombre !== undefined) { sets.push("first_name = ?"); params.push(data.nombre); }
   if (data.apellido !== undefined) { sets.push("first_surname = ?"); params.push(data.apellido); }
   if (data.correo !== undefined || data.email !== undefined) { sets.push("email = ?"); params.push(data.correo || data.email); }
-  if (data.telefono !== undefined || data.cell !== undefined) { sets.push("cell = ?"); params.push(data.telefono || data.cell); }
+  if (data.telefono !== undefined || data.phone !== undefined) { sets.push("phone = ?"); params.push(data.telefono || data.phone); }
   if (data.fecha_nacimiento !== undefined) { sets.push("date_of_birth = ?::date"); params.push(data.fecha_nacimiento); }
   if (data.cargo_id !== undefined) { sets.push("position_id = ?"); params.push(data.cargo_id); }
   if (data.area_id !== undefined) { sets.push("area_id = ?"); params.push(data.area_id); }
+  if (data.foto_url !== undefined) { sets.push("photo = ?"); params.push(data.foto_url); }
 
   if (sets.length > 0) {
     params.push(id);

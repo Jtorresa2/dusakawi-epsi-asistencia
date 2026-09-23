@@ -1,4 +1,5 @@
 import { Component } from "react";
+import { COLORES } from "../constants/colores.js";
 
 export default class ErrorBoundary extends Component {
   constructor(props) {
@@ -12,11 +13,11 @@ export default class ErrorBoundary extends Component {
     if (this.state.error) {
       return (
         <div style={{ padding: 40, textAlign: "center", fontFamily: "monospace" }}>
-          <h3 style={{ color: "#DC2626" }}>Error de renderizado</h3>
-          <pre style={{ color: "#374151", fontSize: 13, whiteSpace: "pre-wrap" }}>
+          <h3 style={{ color: COLORES.danger }}>Error de renderizado</h3>
+          <pre style={{ color: COLORES.textoSecundario, fontSize: 13, whiteSpace: "pre-wrap" }}>
             {this.state.error.message}
           </pre>
-          <pre style={{ color: "#6B7280", fontSize: 11, whiteSpace: "pre-wrap", marginTop: 16 }}>
+          <pre style={{ color: COLORES.textoTerciario, fontSize: 11, whiteSpace: "pre-wrap", marginTop: 16 }}>
             {this.state.error.stack}
           </pre>
         </div>

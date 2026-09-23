@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const db = require("../config/db");
+const { enviarResetPassword } = require("../services/emailService");
 
 exports.login = async (req, res) => {
   try {
@@ -145,5 +147,133 @@ exports.perfil = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error perfil" });
+  }
+};
+
+exports.solicitarResetPassword = async (req, res) => {
+  try {
+    const { correo } = req.body;
+
+    if (!correo) {
+      return res.status(400).json({ mensaje: "Faltan datos" });
+    }
+
+    const mensajeGenerico = "Si el correo esta registrado, recibiras un enlace para restablecer tu contrasena";
+
+    const [rows] = await db.query(
+      "SELECT id, username, first_name, first_surname, email FROM users WHERE email = ?",
+      [correo]
+    );
+
+    if (rows.length === 0) {
+      return res.json({ mensaje: mensajeGenerico });
+    }
+
+    const usuario = rows[0];
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    await db.query(
+      "UPDATE password_reset_tokens SET used = true WHERE user_id = ? AND used = false",
+      [usuario.id]
+    );
+    await db.query(
+      `INSERT INTO password_reset_tokens (user_id, token_hash, expires_at)
+       VALUES (?, ?, now() + interval '30 minutes')`,
+      [usuario.id, tokenHash]
+    );
+
+    const link = `${process.env.FRONTEND_URL || "http://localhost:3000"}/restablecer-contrasena?token=${token}`;
+    await enviarResetPassword({
+      email: usuario.email,
+      nombre: `${usuario.first_name} ${usuario.first_surname}`,
+      link,
+    });
+
+    res.json({ mensaje: mensajeGenerico });
+  } catch (error) {
+    console.error("SOLICITAR RESET ERROR:", error);
+    res.status(500).json({ mensaje: "Error al solicitar restablecimiento de contrasena" });
+  }
+};
+
+exports.restablecerPassword = async (req, res) => {
+  try {
+    const { token, password_nuevo } = req.body;
+
+    if (!token || !password_nuevo) {
+      return res.status(400).json({ mensaje: "Faltan datos" });
+    }
+
+    if (password_nuevo.length < 8) {
+      return res.status(400).json({ mensaje: "La contrasena debe tener al menos 8 caracteres" });
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    const [rows] = await db.query(
+      `SELECT t.id, t.user_id, t.expires_at, t.used
+       FROM password_reset_tokens t
+       WHERE t.token_hash = ?`,
+      [tokenHash]
+    );
+
+    if (rows.length === 0 || rows[0].used) {
+      return res.status(400).json({ mensaje: "Enlace invalido o ya utilizado" });
+    }
+
+    if (new Date(rows[0].expires_at) < new Date()) {
+      return res.status(400).json({ mensaje: "El enlace ha expirado" });
+    }
+
+    const hash = await bcrypt.hash(password_nuevo, 10);
+    await db.query(
+      "UPDATE users SET password_hash = ?, password_reset_required = false WHERE id = ?",
+      [hash, rows[0].user_id]
+    );
+    await db.query("UPDATE password_reset_tokens SET used = true, used_at = now() WHERE id = ?", [rows[0].id]);
+
+    res.json({ mensaje: "Contrasena restablecida exitosamente" });
+  } catch (error) {
+    console.error("RESTABLECER RESET ERROR:", error);
+    res.status(500).json({ mensaje: "Error al restablecer contrasena" });
+  }
+};
+
+exports.validarTokenReset = async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token) return res.json({ valido: false, motivo: "invalido" });
+    const tokenHash = crypto.createHash("sha256").update(String(token)).digest("hex");
+    const [rows] = await db.query(
+      `SELECT id, used, expires_at
+       FROM password_reset_tokens
+       WHERE token_hash = ?`,
+      [tokenHash]
+    );
+    if (rows.length === 0) return res.json({ valido: false, motivo: "invalido" });
+    if (rows[0].used) return res.json({ valido: false, motivo: "usado" });
+    if (new Date(rows[0].expires_at) < new Date()) return res.json({ valido: false, motivo: "expirado" });
+    res.json({ valido: true });
+  } catch (error) {
+    console.error("VALIDAR TOKEN RESET ERROR:", error);
+    res.status(500).json({ mensaje: "Error al validar el enlace" });
+  }
+};
+
+exports.misPermisos = async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT DISTINCT a.name
+      FROM user_roles ur
+      JOIN role_actions ra ON ra.role_id = ur.role_id
+      JOIN actions a ON a.id = ra.action_id
+      WHERE ur.user_id = ?
+      ORDER BY a.name
+    `, [req.user.id]);
+    res.json({ permissions: rows.map((r) => r.name) });
+  } catch (error) {
+    console.error("MIS PERMISOS ERROR:", error);
+    res.status(500).json({ mensaje: "Error al obtener permisos" });
   }
 };

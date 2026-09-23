@@ -1,5 +1,6 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { Box } from "@mui/material";
+import { COLORES } from "../constants/colores.js";
 
 export default function DataTable({
   rows = [],
@@ -24,40 +25,38 @@ export default function DataTable({
           fontFamily: "'Inter', 'Segoe UI', sans-serif",
         },
         "& .MuiDataGrid-columnHeaders": {
-          backgroundColor: "#F9FAFB",
-          borderBottom: "1px solid #ECECEC",
-          minHeight: "48px!important",
-          maxHeight: "48px!important",
-        },
-        "& .MuiDataGrid-columnHeader": {
-          minHeight: "48px!important",
-          maxHeight: "48px!important",
-          height: "48px!important",
+          backgroundColor: COLORES.fondoGris,
+          borderBottom: `1px solid ${COLORES.grisContorno}`,
         },
         "& .MuiDataGrid-columnHeaderTitle": {
           fontWeight: 600,
           fontSize: 12,
-          color: "#6B7280",
+          color: COLORES.textoTerciario,
           letterSpacing: "0.03em",
           textTransform: "uppercase",
         },
         "& .MuiDataGrid-cell": {
-          borderBottom: "1px solid #F3F4F6",
+          borderBottom: `1px solid ${COLORES.fondoGris2}`,
           py: 1.2,
           display: "flex",
           alignItems: "center",
-          overflow: "visible",
+        },
+        "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
+          outline: "none!important",
+        },
+        "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within": {
+          outline: "none!important",
         },
         "& .MuiDataGrid-row:hover": {
-          backgroundColor: "#F0FFF4",
+          backgroundColor: COLORES.successClaro || "rgba(16, 185, 129, 0.04)",
         },
         "& .MuiDataGrid-footerContainer": {
-          borderTop: "1px solid #ECECEC",
+          borderTop: `1px solid ${COLORES.grisContorno}`,
           minHeight: "56px",
         },
         "& .MuiTablePagination-root": {
           fontSize: 13,
-          color: "#6B7280",
+          color: COLORES.textoTerciario,
         },
         "& .MuiTablePagination-spacer": {
           display: "none",
@@ -68,19 +67,28 @@ export default function DataTable({
         },
         "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
           fontSize: 13,
-          color: "#6B7280",
+          color: COLORES.textoTerciario,
           fontWeight: 500,
           margin: 0,
         },
         "& .MuiDataGrid-virtualScroller": {
           minHeight: 200,
-          overflowX: "hidden",
         },
-        "& .MuiDataGrid-virtualScroller::-webkit-scrollbar": {
-          display: "none",
+        "& .MuiDataGrid-scrollbar": {
+          scrollbarWidth: "thin",
+          scrollbarColor: `${COLORES.acento || "#10B981"} ${COLORES.primarioClaro || "#E6F4EA"}`,
         },
-        "& .MuiDataGrid-main": {
-          overflow: "hidden",
+        "& .MuiDataGrid-scrollbar::-webkit-scrollbar": {
+          width: 8,
+          height: 8,
+        },
+        "& .MuiDataGrid-scrollbar::-webkit-scrollbar-track": {
+          background: COLORES.primarioClaro || "#E6F4EA",
+          borderRadius: 4,
+        },
+        "& .MuiDataGrid-scrollbar::-webkit-scrollbar-thumb": {
+          background: COLORES.acento || "#10B981",
+          borderRadius: 4,
         },
         ...sx,
       }}
@@ -90,18 +98,19 @@ export default function DataTable({
         columns={columns}
         loading={loading}
         autoHeight={autoHeight}
+        columnHeaderHeight={48}
         checkboxSelection={checkboxSelection}
         disableRowSelectionOnClick
-        pageSizeOptions={[5, 10, 20, 50]}
+        pageSizeOptions={[5, 10, 15, 20, 50]}
         onRowClick={onRowClick}
         getRowId={getRowId}
         getRowHeight={getRowHeight}
-        disableVirtualization
         localeText={{
+          noRowsLabel: "No hay registros para mostrar",
           footerRowSelected: () => "",
           MuiTablePagination: {
             labelDisplayedRows: ({ from, to, count }) =>
-              `Mostrando ${from}-${to} de ${count} ${entityLabel}`,
+              `Mostrando ${from}-${to} de ${count !== -1 ? count : `más de ${to}`} ${entityLabel}`,
           },
         }}
         initialState={{

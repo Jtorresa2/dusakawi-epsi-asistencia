@@ -1,0 +1,1 @@
+import{j as e}from"./index-DPg6K75Q.js";var t=()=>e(`/cargos`),n=t=>e(`/cargos`,{method:`POST`,body:JSON.stringify(t)}),r=(t,n)=>e(`/cargos/${t}`,{method:`PUT`,body:JSON.stringify(n)});export{n,t as r,r as t};

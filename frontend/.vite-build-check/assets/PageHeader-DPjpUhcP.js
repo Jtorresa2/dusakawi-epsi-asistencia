@@ -1,0 +1,1 @@
+import{n as e}from"./colores-CSHG17cT.js";e();

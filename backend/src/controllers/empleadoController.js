@@ -1,5 +1,20 @@
 const empleadoService = require("../services/empleadoService");
 
+exports.subirFoto = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!req.file) {
+      return res.status(400).json({ mensaje: "Debe adjuntar una imagen en el campo 'foto'" });
+    }
+    const foto_url = `/uploads/fotos/${req.file.filename}`;
+    await empleadoService.actualizar(id, { foto_url });
+    res.json({ foto_url });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al subir la foto" });
+  }
+};
+
 exports.obtenerTodos = async (req, res) => {
   try {
     const filtros = {};

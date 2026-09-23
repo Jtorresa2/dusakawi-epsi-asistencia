@@ -1,6 +1,9 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { menuPorRol } from "../menu";
+import { usePermissions, puedeConjunto, refreshPermissions } from "../permissions";
+import { COLORES } from "../constants/colores.js";
 
 const EXPANDIDO = 260;
 const COLAPSADO = 72;
@@ -15,10 +18,39 @@ const scrollStyle = `
 
 export default function Sidebar({ abierto, setAbierto, isMobile }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const menuRef = useRef(null);
   const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
-  const menu = menuPorRol[usuario.rol] || [];
+  const perms = usePermissions();
+  const menuBase = menuPorRol[usuario.rol] || [];
+
+  // Once the user's permissions are loaded, keep only items whose module the
+  // user can `ver`. Before loading, fall back to the role-based menu.
+  const menu = perms
+    ? menuBase
+        .map((grupo) => ({
+          ...grupo,
+          items: grupo.items.filter((item) => !item.modulo || puedeConjunto(perms, item.modulo, "ver")),
+        }))
+        .filter((grupo) => grupo.items.length > 0)
+    : menuBase;
+
+  const [seccionesAbiertas, setSeccionesAbiertas] = useState(() => {
+    const inicial = {};
+    menuBase.forEach((grupo) => {
+      inicial[grupo.section] = false;
+    });
+    const grupoActivo = menuBase.find((grupo) =>
+      grupo.items.some((item) => item.path === location.pathname)
+    );
+    if (grupoActivo) inicial[grupoActivo.section] = true;
+    return inicial;
+  });
+
+  const toggleSeccion = (section) => {
+    setSeccionesAbiertas((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -31,13 +63,14 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
+    refreshPermissions(true);
     navigate("/login");
   };
 
   const ancho = isMobile ? EXPANDIDO : (abierto ? EXPANDIDO : COLAPSADO);
 
   const baseStyle = {
-    background: "#1B5E20",
+    background: COLORES.primarioOscuro,
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
@@ -61,6 +94,89 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
     transition: "width .3s cubic-bezier(.4,0,.2,1)",
   };
 
+  const renderItem = (item) => (
+    <NavLink
+      key={item.path}
+      to={item.path}
+      title={!abierto ? item.label : undefined}
+      onClick={() => { if (isMobile) setAbierto(false); }}
+      style={({ isActive }) => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: abierto ? "flex-start" : "center",
+        gap: 12,
+        textDecoration: "none",
+        borderRadius: 10,
+        marginBottom: 3,
+        marginLeft: abierto ? 0 : 8,
+        marginRight: abierto ? 0 : 8,
+        padding: abierto ? "10px 14px" : "10px 0",
+        color: isActive ? COLORES.fondoBlanco : "rgba(255,255,255,.7)",
+        background: isActive ? "rgba(255,255,255,.13)" : "transparent",
+        transition: "all .2s",
+      })}
+    >
+      <div style={{ display: "flex", opacity: 0.9, flexShrink: 0 }}>{item.icon}</div>
+      {abierto && <span style={{ fontSize: 14, whiteSpace: "nowrap" }}>{item.label}</span>}
+    </NavLink>
+  );
+
+  const renderGrupo = (grupo) => {
+    if (grupo.items.length === 1 && !grupo.accordion) {
+      return (
+        <div key={grupo.section} style={{ marginBottom: 20 }}>
+          <div style={{
+            color: "rgba(255,255,255,.65)",
+            fontSize: 10, fontWeight: 700,
+            letterSpacing: "1.5px", marginBottom: 8,
+            paddingLeft: 12,
+          }}>
+            {grupo.section}
+          </div>
+          {renderItem(grupo.items[0])}
+        </div>
+      );
+    }
+
+    const abierta = !!seccionesAbiertas[grupo.section];
+
+    return (
+      <div key={grupo.section} style={{ marginBottom: 20 }}>
+        <button
+          onClick={() => toggleSeccion(grupo.section)}
+          style={{
+            width: "100%",
+            boxSizing: "border-box",
+            border: "none",
+            background: "transparent",
+            color: "rgba(255,255,255,.65)",
+            fontSize: 10, fontWeight: 700,
+            letterSpacing: "1.5px",
+            marginBottom: 8,
+            padding: "0 12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            cursor: "pointer",
+            fontFamily: "inherit",
+          }}
+        >
+          <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{grupo.section}</span>
+          {abierta ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        </button>
+        <div style={{
+          display: "grid",
+          gridTemplateRows: abierta ? "1fr" : "0fr",
+          transition: "grid-template-rows .3s ease",
+        }}>
+          <div style={{ overflow: "hidden", minHeight: 0 }}>
+            {grupo.items.map(renderItem)}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <aside style={{ ...baseStyle, ...(isMobile ? mobileStyle : desktopStyle) }}>
       <div style={{
@@ -78,19 +194,12 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
           <img src="/logo.png" alt="Dusakawi" style={{ width: 38, height: 38, objectFit: "contain", flexShrink: 0 }} />
           {abierto && (
             <div style={{ overflow: "hidden" }}>
-              <div style={{ color: "#fff", fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>Dusakawi EPSI</div>
+              <div style={{ color: COLORES.fondoBlanco, fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>Dusakawi EPSI</div>
               <div style={{ color: "rgba(255,255,255,.5)", fontSize: 11, whiteSpace: "nowrap" }}>Control de asistencia</div>
             </div>
           )}
         </div>
-        {abierto && !isMobile && (
-          <button onClick={() => setAbierto(false)} style={{
-            border: "none", background: "rgba(255,255,255,.1)",
-            color: "#fff", borderRadius: 8, width: 30, height: 30,
-            cursor: "pointer", fontSize: 16, display: "flex",
-            alignItems: "center", justifyContent: "center",
-          }}>✕</button>
-        )}
+
       </div>
 
       <style>{scrollStyle}</style>
@@ -98,54 +207,23 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
         flex: 1, overflowY: "auto", overflowX: "hidden",
         padding: abierto ? "20px 16px" : "20px 0",
       }}>
-        {menu.map((grupo) => (
-          <div key={grupo.section} style={{ marginBottom: 20 }}>
-            {abierto && (
-              <div style={{
-                color: "rgba(255,255,255,.35)",
-                fontSize: 10, fontWeight: 700,
-                letterSpacing: "1.5px", marginBottom: 8,
-                paddingLeft: 12,
-              }}>
-                {grupo.section}
+        {!abierto
+          ? menu.map((grupo) => (
+              <div key={grupo.section} style={{ marginBottom: 20 }}>
+                {grupo.items.map(renderItem)}
               </div>
-            )}
-            {grupo.items.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                onClick={() => { if (isMobile) setAbierto(false); }}
-                style={({ isActive }) => ({
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: abierto ? "flex-start" : "center",
-                  gap: 12,
-                  textDecoration: "none",
-                  borderRadius: 10,
-                  marginBottom: 3,
-                  marginLeft: abierto ? 0 : 8,
-                  marginRight: abierto ? 0 : 8,
-                  padding: abierto ? "10px 14px" : "10px 0",
-                  color: isActive ? "#fff" : "rgba(255,255,255,.7)",
-                  background: isActive ? "rgba(255,255,255,.13)" : "transparent",
-                  transition: "all .2s",
-                })}
-              >
-                <div style={{ display: "flex", opacity: 0.9, flexShrink: 0 }}>{item.icon}</div>
-                {abierto && <span style={{ fontSize: 14, whiteSpace: "nowrap" }}>{item.label}</span>}
-              </NavLink>
-            ))}
-          </div>
-        ))}
+            ))
+          : menu.map(renderGrupo)}
       </div>
 
       <div ref={menuRef} style={{
+        position: "relative",
         borderTop: "1px solid rgba(255,255,255,.08)",
         padding: abierto ? 16 : "16px 0",
       }}>
         <button onClick={() => setMenuAbierto(!menuAbierto)} style={{
           width: "100%", border: "none", background: "transparent",
-          color: "#fff", display: "flex", alignItems: "center",
+          color: COLORES.fondoBlanco, display: "flex", alignItems: "center",
           justifyContent: abierto ? "flex-start" : "center",
           gap: 12, cursor: "pointer",
         }}>
@@ -169,10 +247,20 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
           )}
         </button>
         {menuAbierto && abierto && (
-          <div style={{ marginTop: 10, borderRadius: 10, background: "#fff", overflow: "hidden" }}>
+          <div style={{
+            position: "absolute",
+            bottom: 68,
+            left: 16,
+            right: 16,
+            borderRadius: 10,
+            background: COLORES.fondoBlanco,
+            boxShadow: "0 10px 25px -5px rgba(0,0,0,0.3)",
+            overflow: "hidden",
+            zIndex: 10,
+          }}>
             <button onClick={handleLogout} style={{
               width: "100%", border: "none", background: "transparent",
-              padding: 11, cursor: "pointer", color: "#dc2626", fontSize: 13, fontWeight: 500,
+              padding: 11, cursor: "pointer", color: COLORES.danger, fontSize: 13, fontWeight: 600,
             }}>
               Cerrar sesión
             </button>

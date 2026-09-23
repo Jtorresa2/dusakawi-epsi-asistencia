@@ -1,0 +1,1 @@
+var e={biometric_failure:`Falla biométrica`,other:`Otro`,late:`Tardanza`,unregistered_exit:`Salida no registrada`,afternoon_absence:`Ausencia de la tarde`,absence:`Ausencia`,damaged_equipment:`Equipo dañado`,late_arrival:`Llegada tarde`};export{e as t};

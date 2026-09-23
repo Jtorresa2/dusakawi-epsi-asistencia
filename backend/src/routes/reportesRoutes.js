@@ -12,6 +12,7 @@ const {
   getReportePorEmpleado,
   getReporteEmpleados,
   getReporteMarcaciones,
+  getReportePorAreas,
   getHistorial,
   guardarHistorial,
 } = require('../controllers/reportesController');
@@ -27,6 +28,7 @@ router.get('/incidencias', auth, getReporteIncidencias);
 router.get('/tardanzas',   auth, getReporteTardanzas);
 router.get('/ausencias',   auth, getReporteAusencias);
 router.get('/por-empleado', auth, getReportePorEmpleado);
+router.get('/por-areas',    auth, getReportePorAreas);
 router.get('/empleados',   auth, getReporteEmpleados);
 router.get('/marcaciones', auth, getReporteMarcaciones);
 

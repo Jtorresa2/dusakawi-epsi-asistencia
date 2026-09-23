@@ -2,31 +2,48 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  Button,
   Typography,
   Box,
   Chip,
   Divider,
   Link,
+  IconButton,
 } from "@mui/material";
-import { CalendarDays, Clock, Sun, Moon, FileText, Calendar, Timer, UserCheck, CheckCircle, XCircle, Hourglass, Download, AlertCircle, ShieldAlert } from "lucide-react";
+import {
+  FileText, CalendarDays, Clock, Sun, Moon, Calendar, Timer, UserCheck,
+  CheckCircle, XCircle, Hourglass, Download, AlertCircle, ShieldAlert, X,
+} from "lucide-react";
+import { COLORES } from "../../../shared/constants/colores.js";
+import { PALETA } from "../../../shared/constants/paleta.js";
 
 const tipoNovedadConfig = {
-  permiso: { label: "Permiso", color: "#2563EB", bg: "#DBEAFE", icon: <FileText size={16} /> },
-  vacaciones: { label: "Vacaciones", color: "#7C3AED", bg: "#F3E8FF", icon: <CalendarDays size={16} /> },
-  incapacidad: { label: "Incapacidad", color: "#DC2626", bg: "#FEE2E2", icon: <AlertCircle size={16} /> },
-  comision: { label: "Comisión", color: "#C62828", bg: "#FFEBEE", icon: <UserCheck size={16} /> },
-  licencia: { label: "Licencia", color: "#0891B2", bg: "#ECFEFF", icon: <FileText size={16} /> },
-  suspension: { label: "Suspensión", color: "#6B7280", bg: "#F3F4F6", icon: <ShieldAlert size={16} /> },
+  permission: { label: "Permiso" },
+  vacation: { label: "Vacaciones" },
+  sick_leave: { label: "Incapacidad" },
+  commission: { label: "Comisión" },
+  license: { label: "Licencia" },
+  suspension: { label: "Suspensión" },
 };
 
 const modalidadConfig = {
-  dia_completo: { label: "Día completo", color: "#1B5E20", bg: "#E8F5E9", icon: <CalendarDays size={16} /> },
-  manana: { label: "Solo mañana", color: "#92400E", bg: "#FEF3C7", icon: <Sun size={16} /> },
-  tarde: { label: "Solo tarde", color: "#6B21A8", bg: "#F3E8FF", icon: <Moon size={16} /> },
-  horas: { label: "Por horas", color: "#2563EB", bg: "#DBEAFE", icon: <Timer size={16} /> },
+  full_day: { label: "Día completo", icon: <CalendarDays size={15} /> },
+  morning: { label: "Solo mañana", icon: <Sun size={15} /> },
+  afternoon: { label: "Solo tarde", icon: <Moon size={15} /> },
+  hours: { label: "Por horas", icon: <Timer size={15} /> },
 };
+
+const estadoWorkflowMap = {
+  approved: { label: "Aprobado", color: PALETA.verdeOscuro, bg: PALETA.verdeClaro, icon: <CheckCircle size={13} /> },
+  pending: { label: "Pendiente", color: PALETA.amber, bg: PALETA.amberBg, icon: <Hourglass size={13} /> },
+  rejected: { label: "Rechazado", color: PALETA.rojo, bg: COLORES.dangerFondo, icon: <XCircle size={13} /> },
+};
+
+function obtenerEstado(novedad) {
+  const hoy = new Date().toISOString().split("T")[0];
+  if (novedad.fecha_desde > hoy) return { label: "Programado", color: PALETA.amber, bg: PALETA.amberBg };
+  if (novedad.fecha_hasta < hoy) return { label: "Finalizado", color: PALETA.grisTexto, bg: PALETA.grisClaro };
+  return { label: "Activo", color: PALETA.verdeOscuro, bg: PALETA.verdeClaro };
+}
 
 function calcularDiasHabiles(desde, hasta) {
   if (!desde || !hasta) return 0;
@@ -39,207 +56,213 @@ function calcularDiasHabiles(desde, hasta) {
   return count;
 }
 
+function calcularDiasTotales(desde, hasta) {
+  if (!desde || !hasta) return 0;
+  return Math.max(0, Math.round((new Date(hasta) - new Date(desde)) / 86400000) + 1);
+}
+
+function obtenerDuracion(novedad) {
+  if (novedad.tipo === "hours" && novedad.hora_desde && novedad.hora_hasta) {
+    const [hi, mi] = (novedad.hora_desde || "").split(":").map(Number);
+    const [hf, mf] = (novedad.hora_hasta || "").split(":").map(Number);
+    if (!isNaN(hi) && !isNaN(hf)) {
+      const horas = (hf * 60 + mf - (hi * 60 + mi)) / 60;
+      if (horas > 0) return `${horas} h`;
+    }
+  }
+  const dias = calcularDiasTotales(novedad.fecha_desde, novedad.fecha_hasta);
+  return `${dias} ${dias === 1 ? "día" : "días"}`;
+}
+
+function obtenerJornada(novedad) {
+  if (novedad.tipo === "hours" && novedad.hora_desde && novedad.hora_hasta) {
+    return `${(novedad.hora_desde || "").substring(0, 5)} – ${(novedad.hora_hasta || "").substring(0, 5)}`;
+  }
+  const map = {
+    dia_completo: "Jornada completa",
+    manana: "Media jornada · mañana",
+    tarde: "Media jornada · tarde",
+    horas: "—",
+  };
+  return map[novedad.tipo] || "—";
+}
+
 function formatFecha(fecha) {
   if (!fecha) return "—";
   return new Date(fecha).toLocaleDateString("es-CO", {
-    year: "numeric", month: "long", day: "numeric",
+    year: "numeric", month: "short", day: "numeric",
   });
 }
 
-function formatearFechaCorta(fecha) {
-  if (!fecha) return "—";
-  return new Date(fecha).toLocaleDateString("es-CO", {
-    weekday: "short", day: "numeric", month: "short",
-  });
-}
-
-function obtenerEstado(novedad) {
-  const hoy = new Date().toISOString().split("T")[0];
-  if (novedad.fecha_desde > hoy) return { label: "Programado", color: "#92400E", bg: "#FEF3C7" };
-  if (novedad.fecha_hasta < hoy) return { label: "Finalizado", color: "#6B7280", bg: "#F3F4F6" };
-  return { label: "Activo", color: "#1B5E20", bg: "#E8F5E9" };
-}
-
-const estadoWorkflowMap = {
-  aprobado: { label: "Aprobado", color: "#1B5E20", bg: "#E8F5E9", icon: <CheckCircle size={14} /> },
-  pendiente: { label: "Pendiente", color: "#92400E", bg: "#FEF3C7", icon: <Hourglass size={14} /> },
-  rechazado: { label: "Rechazado", color: "#DC2626", bg: "#FEE2E2", icon: <XCircle size={14} /> },
+const infoCardSx = {
+  border: `1px solid ${PALETA.borde}`,
+  borderRadius: "14px",
+  bgcolor: COLORES.fondoBlanco,
+  p: 1.5,
+  transition: "all 0.2s ease",
+  "&:hover": { borderColor: PALETA.gris, boxShadow: "0 4px 14px rgba(0,0,0,0.06)" },
 };
 
-const FilaInfo = ({ icon, label, valor, color }) => (
-  <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5, py: 1.25 }}>
-    <Box sx={{ width: 28, flexShrink: 0, display: "flex", justifyContent: "center", pt: 0.3 }}>
-      <Box sx={{ color: color || "#9CA3AF", display: "flex" }}>{icon}</Box>
+const infoLabelSx = { fontSize: 10.5, color: PALETA.gris, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em" };
+const infoValueSx = { fontSize: 13.5, fontWeight: 700, color: PALETA.texto, mt: 0.4, wordBreak: "break-word" };
+
+const InfoCard = ({ icon, label, valor }) => (
+  <Box sx={infoCardSx}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.4 }}>
+      <Box sx={{ color: PALETA.gris, display: "flex" }}>{icon}</Box>
+      <Typography sx={infoLabelSx}>{label}</Typography>
     </Box>
-    <Box sx={{ flex: 1, minWidth: 0 }}>
-      <Typography sx={{ fontSize: 11, color: "#9CA3AF", fontWeight: 600, textTransform: "uppercase", mb: 0.2 }}>
-        {label}
-      </Typography>
-      {typeof valor === "string" || typeof valor === "number" ? (
-        <Typography sx={{ fontSize: 14, color: "#111827", fontWeight: 500, wordBreak: "break-word" }}>
-          {valor}
-        </Typography>
-      ) : (
-        valor
-      )}
-    </Box>
+    <Typography sx={infoValueSx}>{valor}</Typography>
   </Box>
 );
 
 export default function NovedadDetailModal({ open, onClose, novedad }) {
   if (!novedad) return null;
 
-  const tipoCfg = tipoNovedadConfig[novedad.tipo_novedad || "permiso"] || tipoNovedadConfig.permiso;
-  const durCfg = modalidadConfig[novedad.tipo || "dia_completo"] || modalidadConfig.dia_completo;
+  const tipoCfg = tipoNovedadConfig[novedad.tipo_novedad || "permission"] || tipoNovedadConfig.permission;
+  const durCfg = modalidadConfig[novedad.tipo || "full_day"] || modalidadConfig.full_day;
   const nombreEmpleado = `${novedad.empleado_nombre || ""} ${novedad.empleado_apellido || ""}`.trim() || "—";
   const diasHabiles = calcularDiasHabiles(novedad.fecha_desde, novedad.fecha_hasta);
   const estado = obtenerEstado(novedad);
-  const estadoWF = estadoWorkflowMap[novedad.estado || "aprobado"] || estadoWorkflowMap.aprobado;
+  const estadoWF = estadoWorkflowMap[novedad.estado || "approved"] || estadoWorkflowMap.approved;
   const nombreSolicitante = novedad.solicitante_nombre
     ? `${novedad.solicitante_nombre} ${novedad.solicitante_apellido || ""}`.trim()
     : null;
+  const tieneAdjuntos = Boolean(novedad.archivo_solicitud || novedad.archivo_firmado || novedad.motivo_rechazo);
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
       fullWidth
-      maxWidth="sm"
-      PaperProps={{ sx: { borderRadius: "16px", overflow: "hidden" } }}
+      maxWidth="md"
+      transitionDuration={200}
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: "18px",
+            position: "relative",
+            boxShadow: "0 24px 70px rgba(0,0,0,0.25)",
+            backgroundColor: COLORES.fondoBlanco,
+            overflow: "hidden",
+          },
+        },
+      }}
+      sx={{ "& .MuiBackdrop-root": { bgcolor: "rgba(17, 24, 39, 0.5)", backdropFilter: "blur(4px)" } }}
     >
-      {/* Barra de acento según tipo */}
-      <Box sx={{ height: 4, bgcolor: tipoCfg.color }} />
-
-      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", pt: 2.5, pb: 0 }}>
-        <Box>
-          <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>
-            Detalle de la novedad
-          </Typography>
-          <Typography sx={{ fontSize: 13, color: "#6B7280", mt: 0.3 }}>
-            {nombreEmpleado}
-          </Typography>
+      {/* HEADER */}
+      <DialogTitle sx={{ px: 3, py: 2, pr: 7, bgcolor: COLORES.fondoBlanco }}>
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
+          <Box sx={{ flex: "1 1 200px", minWidth: 0 }}>
+            <Typography sx={{ fontSize: 17, fontWeight: 700, color: PALETA.texto, lineHeight: 1.25 }}>
+              Detalle de la novedad
+            </Typography>
+            <Typography sx={{ fontSize: 12.5, color: PALETA.grisTexto, mt: 0.15 }}>
+              {nombreEmpleado}
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap", pr: 0.5 }}>
+            <Chip icon={estado.icon} label={estado.label} size="small"
+              sx={{ height: 24, fontWeight: 600, fontSize: 11.5, bgcolor: estado.bg, color: estado.color, borderRadius: "8px" }} />
+            <Chip icon={estadoWF.icon} label={estadoWF.label} size="small"
+              sx={{ height: 24, fontWeight: 600, fontSize: 11.5, bgcolor: estadoWF.bg, color: estadoWF.color, borderRadius: "8px" }} />
+          </Box>
         </Box>
-        <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", justifyContent: "flex-end" }}>
-          <Chip icon={estadoWF.icon} label={estadoWF.label} size="small"
-            sx={{ fontWeight: 600, fontSize: 11, bgcolor: estadoWF.bg, color: estadoWF.color, borderRadius: "8px" }} />
-          <Chip label={estado.label} size="small"
-            sx={{ fontWeight: 600, fontSize: 11, bgcolor: estado.bg, color: estado.color, borderRadius: "8px", px: 0.5 }} />
-        </Box>
+        <IconButtonCorner onClose={onClose} />
       </DialogTitle>
+      <Divider />
 
-      <DialogContent sx={{ pt: 2.5, pb: 1 }}>
-        {/* Info principal tipo fecha */}
-        <Box sx={{ bgcolor: "#F9FAFB", borderRadius: "12px", p: 2, mb: 2 }}>
-          <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-            <Box sx={{ flex: "1 1 140px", minWidth: 0 }}>
-              <FilaInfo icon={<FileText size={16} />} label="Tipo / Modalidad" valor={
-                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                  <Chip icon={tipoCfg.icon} label={tipoCfg.label} size="small"
-                    sx={{ height: 24, fontSize: 12, fontWeight: 600, bgcolor: tipoCfg.bg, color: tipoCfg.color, borderRadius: "8px" }} />
-                  <Chip icon={durCfg.icon} label={durCfg.label} size="small"
-                    sx={{ height: 24, fontSize: 12, fontWeight: 600, bgcolor: durCfg.bg, color: durCfg.color, borderRadius: "8px" }} />
-                </Box>
-              } />
-            </Box>
-            <Box sx={{ flex: "1 1 160px", minWidth: 0 }}>
-              <FilaInfo icon={<Calendar size={16} />} label="Días hábiles"
-                valor={<Chip label={`${diasHabiles} día${diasHabiles !== 1 ? "s" : ""}`} size="small"
-                  sx={{ height: 24, fontSize: 12, fontWeight: 600, bgcolor: "#E8F5E9", color: "#1B5E20", borderRadius: "8px" }} />} />
-            </Box>
-          </Box>
-
-          <Divider sx={{ my: 1 }} />
-
-          <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-            <Box sx={{ flex: "1 1 140px", minWidth: 0 }}>
-              <FilaInfo icon={<CalendarDays size={16} />} label="Desde"
-                valor={formatearFechaCorta(novedad.fecha_desde)} />
-            </Box>
-            <Box sx={{ flex: "1 1 140px", minWidth: 0 }}>
-              <FilaInfo icon={<CalendarDays size={16} />} label="Hasta"
-                valor={formatearFechaCorta(novedad.fecha_hasta)} />
-            </Box>
-          </Box>
-
-          {/* Horario (solo tipo horas) */}
-          {novedad.tipo === "horas" && novedad.hora_desde && (
-            <>
-              <Divider sx={{ my: 1 }} />
-              <FilaInfo icon={<Clock size={16} />} label="Horario"
-                valor={`${(novedad.hora_desde || "").substring(0, 5)} – ${(novedad.hora_hasta || "").substring(0, 5)}`} />
-            </>
-          )}
-        </Box>
-
-        {/* Motivo */}
-        <Box sx={{ bgcolor: "#F9FAFB", borderRadius: "12px", p: 2, mb: 2 }}>
-          <FilaInfo icon={<FileText size={16} />} label="Motivo"
-            valor={novedad.motivo || "—"} />
-        </Box>
-
-        {/* Archivos */}
-        {(novedad.archivo_solicitud || novedad.archivo_firmado) && (
-          <Box sx={{ bgcolor: "#F9FAFB", borderRadius: "12px", p: 2, mb: 2 }}>
-            {novedad.archivo_solicitud && (
-              <FilaInfo icon={<Download size={16} />} label="Solicitud"
-                valor={<Link href={novedad.archivo_solicitud} target="_blank" underline="hover"
-                  sx={{ fontSize: 14, fontWeight: 500, color: "#1565C0", cursor: "pointer" }}>
-                  Ver PDF
-                </Link>} />
-            )}
-            {novedad.archivo_firmado && (
-              <FilaInfo icon={<Download size={16} />} label="Respuesta firmada"
-                valor={<Link href={novedad.archivo_firmado} target="_blank" underline="hover"
-                  sx={{ fontSize: 14, fontWeight: 500, color: "#1565C0", cursor: "pointer" }}>
-                  Ver PDF
-                </Link>} />
-            )}
-            {novedad.motivo_rechazo && (
-              <FilaInfo icon={<XCircle size={16} />} label="Motivo de rechazo"
-                valor={<Typography sx={{ fontSize: 14, color: "#DC2626", fontWeight: 500 }}>{novedad.motivo_rechazo}</Typography>} />
-            )}
-          </Box>
-        )}
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Footer info */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}>
-          <Box>
-            <Typography sx={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", color: "#9CA3AF", mb: 0.2 }}>
-              Registrado por
-            </Typography>
-            <Typography sx={{ fontSize: 13, color: "#6B7280" }}>
-              {novedad.registrado_por_nombre || "—"}
-            </Typography>
-          </Box>
-          {nombreSolicitante && (
-            <Box>
-              <Typography sx={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", color: "#9CA3AF", mb: 0.2 }}>
-                Solicitado por
-              </Typography>
-              <Typography sx={{ fontSize: 13, color: "#6B7280" }}>
-                {nombreSolicitante}
-              </Typography>
-            </Box>
-          )}
-          <Box sx={{ textAlign: "right" }}>
-            <Typography sx={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", color: "#9CA3AF", mb: 0.2 }}>
-              Fecha registro
-            </Typography>
-            <Typography sx={{ fontSize: 13, color: "#6B7280" }}>
-              {formatFecha(novedad.creado_en)}
-            </Typography>
-          </Box>
+      {/* FILA 1 — Tipo / Modalidad / Días hábiles / Jornada */}
+      <DialogContent sx={{ px: 3, py: 1.5, bgcolor: COLORES.fondoBlanco }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "1fr 1fr 1fr 1fr" }, gap: 1.25 }}>
+          <InfoCard icon={<FileText size={14} />} label="Tipo" valor={tipoCfg.label} />
+          <InfoCard icon={durCfg.icon} label="Modalidad" valor={durCfg.label} />
+          <InfoCard icon={<CalendarDays size={14} />} label="Días hábiles" valor={`${diasHabiles} día${diasHabiles !== 1 ? "s" : ""}`} />
+          <InfoCard icon={<Clock size={14} />} label="Jornada" valor={obtenerJornada(novedad)} />
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2.5, pt: 1 }}>
-        <Button onClick={onClose}
-          sx={{ textTransform: "none", fontWeight: 600, fontSize: 13, color: "#6B7280", px: 3, borderRadius: "10px" }}>
-          Cerrar
-        </Button>
-      </DialogActions>
+      {/* FILA 2 — Fecha inicio / Fecha fin / Duración */}
+      <DialogContent sx={{ px: 3, py: 0.5, bgcolor: COLORES.fondoBlanco }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 1.25 }}>
+          <InfoCard icon={<Calendar size={14} />} label="Fecha inicio" valor={formatFecha(novedad.fecha_desde)} />
+          <InfoCard icon={<Calendar size={14} />} label="Fecha fin" valor={formatFecha(novedad.fecha_hasta)} />
+          <InfoCard icon={<Timer size={14} />} label="Duración" valor={obtenerDuracion(novedad)} />
+        </Box>
+      </DialogContent>
+
+      {/* FILA 3 — Motivo (ancho completo) */}
+      <DialogContent sx={{ px: 3, py: 0.5, bgcolor: COLORES.fondoBlanco }}>
+        <Box sx={infoCardSx}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.4 }}>
+            <FileText size={14} style={{ color: PALETA.gris }} />
+            <Typography sx={infoLabelSx}>Motivo</Typography>
+          </Box>
+          <Typography sx={infoValueSx}>{novedad.motivo || "—"}</Typography>
+        </Box>
+      </DialogContent>
+
+      {/* FILA 4 — Información del registro */}
+      <DialogContent sx={{ px: 3, py: 1, bgcolor: COLORES.fondoBlanco }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: nombreSolicitante ? "1fr 1fr 1fr" : "1fr 1fr" }, gap: 1.25 }}>
+          <InfoCard icon={<UserCheck size={14} />} label="Registrado por" valor={novedad.registrado_por_nombre || "—"} />
+          <InfoCard icon={<Clock size={14} />} label="Fecha de registro" valor={formatFecha(novedad.creado_en)} />
+          {nombreSolicitante && (
+            <InfoCard icon={<UserCheck size={14} />} label="Solicitado por" valor={nombreSolicitante} />
+          )}
+        </Box>
+      </DialogContent>
+
+      {/* ADJUNTOS (solo si existen) */}
+      {tieneAdjuntos && (
+        <DialogContent sx={{ px: 3, py: 1, pb: 2, bgcolor: COLORES.fondoBlanco }}>
+          <Box sx={infoCardSx}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.75 }}>
+              <Download size={14} style={{ color: PALETA.gris }} />
+              <Typography sx={infoLabelSx}>Adjuntos</Typography>
+            </Box>
+            <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+              {novedad.archivo_solicitud && (
+                <Link href={novedad.archivo_solicitud} target="_blank" underline="hover"
+                  sx={{ fontSize: 12.5, fontWeight: 600, color: COLORES.primarioOscuro, cursor: "pointer" }}>
+                  Ver solicitud
+                </Link>
+              )}
+              {novedad.archivo_firmado && (
+                <Link href={novedad.archivo_firmado} target="_blank" underline="hover"
+                  sx={{ fontSize: 12.5, fontWeight: 600, color: COLORES.primarioOscuro, cursor: "pointer" }}>
+                  Ver respuesta firmada
+                </Link>
+              )}
+              {novedad.motivo_rechazo && (
+                <Typography sx={{ fontSize: 12.5, fontWeight: 600, color: PALETA.rojo }}>
+                  Rechazo: {novedad.motivo_rechazo}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+        </DialogContent>
+      )}
     </Dialog>
+  );
+}
+
+function IconButtonCorner({ onClose }) {
+  return (
+    <IconButton
+      onClick={onClose}
+      size="small"
+      aria-label="Cerrar"
+      sx={{
+        position: "absolute",
+        top: 14,
+        right: 14,
+        color: PALETA.gris,
+        bgcolor: PALETA.grisClaro,
+        "&:hover": { color: PALETA.texto, bgcolor: PALETA.borde },
+      }}
+    >
+      <X size={17} />
+    </IconButton>
   );
 }

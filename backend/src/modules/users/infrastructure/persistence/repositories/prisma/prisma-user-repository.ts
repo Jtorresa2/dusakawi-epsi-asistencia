@@ -8,7 +8,7 @@ import { PrismaUserMapper } from '@modules/users/infrastructure/mappers/prisma/p
 
 const includeEntities = {
   positions: true,
-  area: { include: { floors: true } },
+  areas: { include: { floors: true } },
   document_details: { include: { document_types: true } },
   user_roles: { include: { roles: true } },
 } as const;

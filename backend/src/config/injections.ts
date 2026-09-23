@@ -10,6 +10,7 @@ import { registerAreasModule } from '@modules/areas/infrastructure/area.registry
 import { registerAuthModule } from '@modules/auth/infrastructure/auth.registry.js';
 import { registerPositionsModule } from '@modules/positions/infrastructure/position.registry.js';
 import { registerDocumentTypesModule } from '@modules/document-types/infrastructure/document-types.registry.js';
+import { registerCargosModule } from '@modules/cargos/infrastructure/cargo.registry.js';
 
 export function buildContainer(): AwilixContainer {
   const container = createContainer({
@@ -26,6 +27,7 @@ export function buildContainer(): AwilixContainer {
   registerAreasModule(container);
   registerPositionsModule(container);
   registerDocumentTypesModule(container);
+  registerCargosModule(container);
 
   return container;
 }

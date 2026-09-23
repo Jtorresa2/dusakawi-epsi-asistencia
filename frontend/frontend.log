@@ -1,0 +1,68 @@
+$ vite
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vite.config.js:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+
+  [32m[1mVITE[22m v8.3.0[39m  [2mready in [0m[1m182[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m3000[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[2m11:34:17 a. m.[22m [36m[1m[vite][22m[39m [32mvite.config.js changed, restarting server...[39m
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vite.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+[2m11:34:17 a. m.[22m [36m[1m[vite][22m[39m server restarted.
+[2m2:10:18 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/incidencias?estado=pending&prioridad=high[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1339:18)
+    at afterConnectMultiple (node:net:1942:7)
+[2m2:10:48 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/incidencias?estado=pending&prioridad=high[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1339:18)
+    at afterConnectMultiple (node:net:1942:7)
+[2m2:50:09 p. m.[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.vite-build-check/index.html[22m
+[2m3:09:01 p. m.[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/personal/pages/PersonalPage.jsx, /src/features/personal/components/PersonalPerfilModal.jsx, /src/features/asistencia/pages/AsistenciaPage.jsx, /src/features/seguimientoAsistencia/pages/SeguimientoAsistenciaPage.jsx, /src/features/horarios/pages/HorariosPage.jsx, /src/features/incidencias/pages/IncidenciasPage.jsx, /src/features/novedades/pages/NovedadesPage.jsx, /src/features/cargos/pages/CargosPage.jsx, /src/features/areas/pages/AreasPage.jsx and 1 more[22m
+[2m3:14:33 p. m.[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/personal/pages/PersonalPage.jsx, /src/features/personal/components/PersonalPerfilModal.jsx, /src/features/asistencia/pages/AsistenciaPage.jsx, /src/features/seguimientoAsistencia/pages/SeguimientoAsistenciaPage.jsx, /src/features/horarios/pages/HorariosPage.jsx, /src/features/incidencias/pages/IncidenciasPage.jsx, /src/features/novedades/pages/NovedadesPage.jsx, /src/features/cargos/pages/CargosPage.jsx, /src/features/areas/pages/AreasPage.jsx and 1 more[22m
+[2m3:27:35 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/empleados[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1339:18)
+    at afterConnectMultiple (node:net:1942:7)
+[2m3:27:35 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/usuarios/roles[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1339:18)
+    at afterConnectMultiple (node:net:1942:7)
+[2m3:27:35 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/areas?limit=1000[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1339:18)
+    at afterConnectMultiple (node:net:1942:7)
+[2m3:27:35 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/cargos[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1339:18)
+    at afterConnectMultiple (node:net:1942:7)
+[2m3:27:35 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/horarios[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1339:18)
+    at afterConnectMultiple (node:net:1942:7)
+[2m3:27:35 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/empleados[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1339:18)
+    at afterConnectMultiple (node:net:1942:7)
+[2m3:27:35 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/usuarios/roles[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1339:18)
+    at afterConnectMultiple (node:net:1942:7)
+[2m3:27:35 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/areas?limit=1000[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1339:18)
+    at afterConnectMultiple (node:net:1942:7)
+[2m3:27:35 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/cargos[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1339:18)
+    at afterConnectMultiple (node:net:1942:7)
+[2m3:27:35 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/horarios[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1339:18)
+    at afterConnectMultiple (node:net:1942:7)
+[2m3:29:44 p. m.[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/incidencias?estado=pending&prioridad=high[39m
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
