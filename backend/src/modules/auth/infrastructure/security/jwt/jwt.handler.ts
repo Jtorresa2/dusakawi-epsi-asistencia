@@ -6,9 +6,9 @@ import type { TokenHandler } from '@modules/auth/domain/interfaces/token.handler
 
 export class JwtHandler implements TokenHandler {
   createToken(id: Uuid, roles: Role[]): string {
-    const roleNames = roles.map((role) => role.name?.value || 'Empleado');
+    const roleNames = roles.map((role) => role.name?.value).filter(Boolean) as string[];
     const roleIds = roles.map((role) => role.metadata?.id ?? '');
-    const primaryRole = roleNames[0] || 'Empleado';
+    const primaryRole = roleNames[0] || '';
 
     return jwt.sign(
       {

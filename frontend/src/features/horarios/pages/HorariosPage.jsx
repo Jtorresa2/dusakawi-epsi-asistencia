@@ -274,12 +274,12 @@ function HorarioCard({
           <Box
             sx={{
               width: 8, height: 8, borderRadius: "50%",
-              bgcolor: h.activo ? PALETA.verde : COLORES.textoSuave,
-              boxShadow: `0 0 0 3px ${h.activo ? PALETA.verdeClaro : COLORES.grisContorno}`,
+              bgcolor: h.active ? PALETA.verde : COLORES.textoSuave,
+              boxShadow: `0 0 0 3px ${h.active ? PALETA.verdeClaro : COLORES.grisContorno}`,
             }}
           />
-          <Typography sx={{ fontSize: 12, fontWeight: 600, color: h.activo ? PALETA.verdeOscuro : PALETA.gris }}>
-            {h.activo ? "Activo" : "Inactivo"}
+          <Typography sx={{ fontSize: 12, fontWeight: 600, color: h.active ? PALETA.verdeOscuro : PALETA.gris }}>
+            {h.active ? "Activo" : "Inactivo"}
           </Typography>
         </Box>
       </Box>
@@ -393,7 +393,7 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
     setForm({
       nombre: horario.nombre || "",
       descripcion: horario.descripcion || "",
-      tipo_jornada: horario.tipo_jornada || "fixed",
+      tipo_jornada: horario.workday_type || horario.tipo_jornada || "fixed",
       modalidad: horario.modalidad || "strict",
       horas_esperadas: horario.horas_esperadas != null ? String(horario.horas_esperadas) : "",
       tolerancia_minutos: horario.tolerancia_minutos ?? 0,
@@ -1358,7 +1358,7 @@ export default function HorariosPage() {
         horas_esperadas: h.horas_esperadas || null,
         tolerancia_minutos: Number(h.tolerancia_minutos) || 0,
         tolerancia_salida_minutos: Number(h.tolerancia_salida_minutos) || 0,
-        activo: h.activo,
+        activo: h.active,
         detalles: (h.detalles || []).map((d) => ({ ...d })),
       });
       mostrarToast("Horario duplicado correctamente", "ok");

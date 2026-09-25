@@ -64,6 +64,11 @@ FROM (VALUES
 ) AS d(dia, em, sm, et, st)
 WHERE NOT EXISTS (SELECT 1 FROM horario_detalle WHERE horario_id = 1);
 
+-- 5. Migración: empleados sin credenciales de acceso
+-- username y password_hash pasan a NULLABLE (el empleado no tiene cuenta de acceso)
+ALTER TABLE users ALTER COLUMN username DROP NOT NULL;
+ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+
 -- Semilla de Configuración Institucional
 INSERT INTO configuracion (clave, valor, tipo)
 VALUES 

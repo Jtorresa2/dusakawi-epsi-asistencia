@@ -1,4 +1,4 @@
-﻿import { lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import {
   BrowserRouter as Router,
@@ -35,11 +35,7 @@ const ConfiguracionPage = lazy(() => import("./features/configuracion/pages/Conf
 const RolesPage = lazy(() => import("./features/roles/pages/RolesPage"));
 const CopiasSeguridadPage = lazy(() => import("./features/copiasSeguridad/pages/CopiasSeguridadPage"));
 const MiPerfilPage = lazy(() => import("./features/miperfil/pages/MiPerfilPage"));
-const MiHorarioPage = lazy(() => import("./features/miHorario/pages/MiHorarioPage"));
-const MisSolicitudesPage = lazy(() => import("./features/misSolicitudes/pages/MisSolicitudesPage"));
 const IntegracionesPage = lazy(() => import("./features/integraciones/pages/IntegracionesPage"));
-const ReportarIncidenciaPage = lazy(() => import("./features/reportarIncidencia/pages/ReportarIncidenciaPage"));
-const MiAsistenciaPage = lazy(() => import("./features/miAsistencia/pages/MiAsistenciaPage"));
 
 const routeFallback = (
   <div style={{ padding: 40, textAlign: "center", color: COLORES.textoSuave }}>Cargando...</div>
@@ -80,7 +76,7 @@ export default function App() {
         <Route path="/restablecer-contrasena" element={<Suspense fallback={routeFallback}><RestablecerContrasenaPage /></Suspense>} />
 
         {/* General */}
-        <Route path="/dashboard" element={<R roles={["admin", "talento_humano", "empleado"]}><DashboardPage /></R>} />
+        <Route path="/dashboard" element={<R roles={["admin", "talento_humano"]}><DashboardPage /></R>} />
 
         {/* Gestion */}
         <Route path="/personal" element={<R roles={["admin", "talento_humano"]}><PersonalPage /></R>} />
@@ -90,7 +86,7 @@ export default function App() {
         <Route path="/novedades" element={<R roles={["admin", "talento_humano"]}><NovedadesPage /></R>} />
         <Route path="/areas" element={<R roles={["admin", "talento_humano"]}><AreasPage /></R>} />
         <Route path="/incidencias" element={<R roles={["admin", "talento_humano"]}><IncidenciasPage /></R>} />
-<Route path="/incidencias/:id" element={<R roles={["admin", "talento_humano", "empleado"]}><IncidenciaExpedientePage /></R>} />
+        <Route path="/incidencias/:id" element={<R roles={["admin", "talento_humano"]}><IncidenciaExpedientePage /></R>} />
 
         {/* Operacion */}
         <Route path="/asistencia" element={<R roles={["admin", "talento_humano"]}><AsistenciaPage /></R>} />
@@ -105,14 +101,8 @@ export default function App() {
         <Route path="/festivos" element={<R roles={["admin", "talento_humano"]}><FestivosPage /></R>} />
         <Route path="/integraciones" element={<R roles={["admin"]}><IntegracionesPage /></R>} />
 
-        {/* Empleado */}
-        <Route path="/mi-asistencia" element={<ErrorBoundary><R roles={["empleado"]}><MiAsistenciaPage /></R></ErrorBoundary>} />
-        <Route path="/mi-horario" element={<R roles={["admin", "talento_humano", "empleado"]}><MiHorarioPage /></R>} />
-        <Route path="/reportar-incidencia" element={<ErrorBoundary><R roles={["empleado"]}><ReportarIncidenciaPage /></R></ErrorBoundary>} />
-        <Route path="/perfil" element={<ErrorBoundary><R roles={["empleado"]}><MiPerfilPage /></R></ErrorBoundary>} />
-
-        {/* Otras */}
-        <Route path="/mis-solicitudes" element={<R roles={["admin", "talento_humano", "empleado"]}><MisSolicitudesPage /></R>} />
+        {/* Cuenta */}
+        <Route path="/perfil" element={<ErrorBoundary><R roles={["admin", "talento_humano"]}><MiPerfilPage /></R></ErrorBoundary>} />
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/login" replace />} />

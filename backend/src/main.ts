@@ -12,8 +12,19 @@ import { createErrorHandler } from '@config/express/middlewares/error-handler.mi
 import { httpErrorRegistry } from '@shared/http/errors/http-error-registry.config.js';
 import auth from '@modules/auth/presentation/auth.presentation.js';
 import users from '@modules/users/presentation/user.presentation.js';
+import usuarios from '@modules/usuarios/presentation/usuarios.presentation';
 import areas from '@modules/areas/presentation/areas.presentation';
 import cargos from '@modules/cargos/presentation/cargos.presentation';
+import dashboard from '@modules/dashboard/presentation/dashboard.presentation';
+import config from '@modules/config/presentation/config.presentation';
+import empleados from '@modules/empleados/presentation/empleados.presentation';
+import festivos from '@modules/festivos/presentation/festivos.presentation';
+import novedades from '@modules/novedades/presentation/novedades.presentation';
+import incidencias from '@modules/incidencias/presentation/incidencias.presentation';
+import seguimiento from '@modules/seguimiento/presentation/seguimiento.presentation';
+import asistencia from '@modules/asistencia/presentation/asistencia.presentation';
+import schedules from '@modules/horarios/presentation/schedules.presentation';
+import reports from '@modules/reportes/presentation/reports.presentation';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,39 +44,30 @@ app.use(cors());
 // =======================================================
 auth.addRoutes(app);
 users.addRoutes(app);
+usuarios.addRoutes(app);
 areas.addRoutes(app);
 cargos.addRoutes(app);
+dashboard.addRoutes(app);
+config.addRoutes(app);
+empleados.addRoutes(app);
+festivos.addRoutes(app);
+novedades.addRoutes(app);
+incidencias.addRoutes(app);
+seguimiento.addRoutes(app);
+asistencia.addRoutes(app, '/api/asistencia');
+schedules.addRoutes(app);
+reports.addRoutes(app);
 
 // =======================================================
 // Rutas JavaScript Rescatadas (Coexistencia Híbrida CJS)
 // =======================================================
 const authLegacyRoutes = require('./routes/authRoutes.js');
-const asistenciaRoutes = require('./routes/asistenciaRoutes.js');
-const configRoutes = require('./routes/configRoutes.js');
-const dashboardRoutes = require('./routes/dashboardRoutes.js');
-const empleadoRoutes = require('./routes/empleadoRoutes.js');
-const festivosRoutes = require('./routes/festivosRoutes.js');
-const horarioRoutes = require('./routes/horarioRoutes.js');
-const incidenciaRoutes = require('./routes/incidenciaRoutes.js');
-const novedadesRoutes = require('./routes/novedadesRoutes.js');
 const pdfRoutes = require('./routes/pdfRoutes.js');
 const reportesRoutes = require('./routes/reportesRoutes.js');
-const seguimientoRoutes = require('./routes/seguimientoRoutes.js');
-const usuariosRoutes = require('./routes/usuariosRoutes.js');
 
 app.use('/api/auth', authLegacyRoutes);
-app.use('/api/asistencia', asistenciaRoutes);
-app.use('/api/config', configRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/empleados', empleadoRoutes);
-app.use('/api/festivos', festivosRoutes);
-app.use('/api/horarios', horarioRoutes);
-app.use('/api/incidencias', incidenciaRoutes);
-app.use('/api/novedades', novedadesRoutes);
 app.use('/api/pdf', pdfRoutes);
 app.use('/api/reportes', reportesRoutes);
-app.use('/api/seguimiento', seguimientoRoutes);
-app.use('/api/usuarios', usuariosRoutes);
 
 // =======================================================
 

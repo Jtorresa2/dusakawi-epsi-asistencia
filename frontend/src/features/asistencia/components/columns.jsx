@@ -76,7 +76,7 @@ export const asistenciaColumns = ({ getPiso, onDetalle }) => [
       const piso = getPiso ? getPiso(row.area) : row.piso;
       return (
         <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, textAlign: "center", width: "100%" }}>
-          {piso ? `P${piso}` : "—"}
+          {piso ? `${piso}` : "—"}
         </Typography>
       );
     },

@@ -11,7 +11,6 @@ import { COLORES } from "../../../shared/constants/colores.js";
 const ROL_ESTILO = {
   Administrador: { icon: <ShieldCheck size={26} />, bg: COLORES.warningFondo, color: COLORES.warningOscuro },
   "Talento Humano": { icon: <Badge size={26} />, bg: COLORES.primarioClaro, color: COLORES.primarioOscuro },
-  Empleado: { icon: <UserRound size={26} />, bg: COLORES.primarioClaro, color: COLORES.primarioOscuro },
 };
 
 const estiloFallback = { icon: <ShieldCheck size={26} />, bg: COLORES.fondoGris2, color: COLORES.textoSecundario };

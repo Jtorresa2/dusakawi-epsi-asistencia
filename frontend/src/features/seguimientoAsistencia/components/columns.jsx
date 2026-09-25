@@ -96,7 +96,7 @@ export const seguimientoColumns = ({ onDetalle, onVerIncidencia }) => [
     sortable: false,
     renderCell: ({ value }) => (
       <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, textAlign: "center", width: "100%" }}>
-        {value ? `P${value}` : "—"}
+        {value ? `${value}` : "—"}
       </Typography>
     ),
   },

@@ -1,7 +1,6 @@
 const R = {
   ADMIN: "admin",
   TH: "talento_humano",
-  EMP: "empleado",
 };
 
 const NOVEDADES = {
@@ -50,7 +49,7 @@ const NOVEDADES = {
     ver: [R.ADMIN],
   },
   dashboard: {
-    ver: [R.ADMIN, R.TH, R.EMP],
+    ver: [R.ADMIN, R.TH],
   },
   areas: {
     ver: [R.ADMIN, R.TH],
@@ -58,17 +57,8 @@ const NOVEDADES = {
     editar: [R.ADMIN],
     eliminar: [R.ADMIN],
   },
-  mi_asistencia: {
-    ver: [R.EMP],
-  },
-  mi_horario: {
-    ver: [R.EMP],
-  },
-  reportar_incidencia: {
-    ver: [R.EMP],
-  },
   perfil: {
-    ver: [R.ADMIN, R.TH, R.EMP],
+    ver: [R.ADMIN, R.TH],
   },
 };
 

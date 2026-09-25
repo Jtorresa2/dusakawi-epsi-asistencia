@@ -6,10 +6,9 @@ import {
   Avatar, Select, MenuItem, InputLabel, FormControl, Switch, FormControlLabel,
   Dialog, DialogTitle, DialogContent, DialogActions, Divider, InputAdornment,
 } from "@mui/material";
-import { Plus, Edit3, Trash2, Eye, Search, X, Users, UserCheck, UserX, Building2, User, Briefcase, KeyRound, UserPlus, Layers, ShieldCheck, Clock, CalendarDays } from "lucide-react";
+import { Plus, Edit3, Trash2, Eye, Search, X, Users, UserCheck, UserX, Building2, User, Briefcase, Layers, Clock } from "lucide-react";
 import {
   obtenerPersonal, crearPersonal, actualizarPersonal, eliminarPersonal,
-  obtenerRoles,
 } from "../personal.api";
 import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
@@ -20,16 +19,10 @@ import { COLORES } from "../../../shared/constants/colores.js";
 
 const initialForm = {
   cedula: "", nombre: "", apellido: "", correo: "", telefono: "", fecha_nacimiento: "",
-  area_id: "", cargo_id: "", piso: "", rol_id: "", horario_id: "", username: "", activo: true,
+  area_id: "", cargo_id: "", piso: "", horario_id: "", activo: true,
 };
 
 const ESTADOS_FILTRO = ["Todos", "Activo", "Inactivo"];
-
-const ROL_BADGE = {
-  "Administrador":  { bg: COLORES.warningFondo, color: COLORES.warningOscuro },
-  "Talento Humano": { bg: COLORES.primarioClaro, color: COLORES.primarioOscuro },
-  "Empleado":       { bg: COLORES.primarioClaro, color: COLORES.primarioOscuro },
-};
 
 const selectMenuSx = {
   slotProps: {
@@ -96,7 +89,6 @@ export default function PersonalPage() {
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("Todos");
   const [filtroArea, setFiltroArea] = useState("Todas");
-  const [filtroRol, setFiltroRol] = useState("Todos");
 
   // ─── Modales / acciones ───────────────────────────────────────────────────
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -126,12 +118,8 @@ export default function PersonalPage() {
       const params = {};
       if (cargoFiltro) params.cargo = cargoFiltro;
       if (areaFiltro) params.area = areaFiltro;
-      const [resPersonal, resRoles] = await Promise.all([
-        obtenerPersonal(params),
-        obtenerRoles(),
-      ]);
+      const resPersonal = await obtenerPersonal(params);
       setPersonal(resPersonal.empleados || []);
-      setRoles(resRoles.roles || []);
     } catch (err) {
       console.error("Error al cargar personal:", err);
     } finally {
@@ -160,7 +148,7 @@ export default function PersonalPage() {
 
   // ─── Filtrado ─────────────────────────────────────────────────────────────
   let filtrados = personal.filter((e) =>
-    `${e.nombre} ${e.apellido} ${e.cedula || ""} ${e.cargo || ""} ${e.area || ""} ${e.username || ""} ${e.rol || ""}`
+    `${e.nombre} ${e.apellido} ${e.cedula || ""} ${e.cargo || ""} ${e.area || ""}`
       .toLowerCase().includes(busqueda.toLowerCase())
   );
 
@@ -171,9 +159,6 @@ export default function PersonalPage() {
   if (filtroArea !== "Todas") {
     filtrados = filtrados.filter((e) => e.area === filtroArea);
   }
-  if (filtroRol !== "Todos") {
-    filtrados = filtrados.filter((e) => e.rol === filtroRol);
-  }
 
   // ─── Crear / Editar ───────────────────────────────────────────────────────
   const abrirCrear = () => {
@@ -182,7 +167,7 @@ export default function PersonalPage() {
     setModalAbierto(true);
   };
 
-  const abrirEditar = (e) => {
+const abrirEditar = (e) => {
     setEditando(e);
     setForm({
       cedula: e.cedula || "",
@@ -194,28 +179,14 @@ export default function PersonalPage() {
       area_id: e.area_id ? String(e.area_id) : "",
       cargo_id: e.cargo_id ? String(e.cargo_id) : "",
       piso: e.piso ?? "",
-      rol_id: e.rol_id ? String(e.rol_id) : "",
-      horario_id: e.horario_id ? String(e.horario_id) : "",
-      username: e.username || "",
+      horario_id: e.schedule_id ? String(e.schedule_id) : "",
       activo: isActive(e),
       touchedCorreo: false,
     });
     setModalAbierto(true);
   };
 
-  const handleGenerarUsuario = () => {
-    // Same formula as the backend: initial + first surname + last 3 digits of the cc.
-    const normalizar = (s) =>
-      s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
-    const primeraPalabra = (s) => (s || "").trim().split(/\s+/)[0] || "";
-    const inicial = (normalizar(primeraPalabra(form.nombre)) || "u").charAt(0);
-    const apellidoNorm = normalizar(primeraPalabra(form.apellido) || "usuario").slice(0, 12);
-    const digitos = String(form.cedula || "").replace(/\D/g, "").slice(-3);
-    const sufijo = digitos || String(Math.floor(Math.random() * 900) + 100);
-    setForm((f) => ({ ...f, username: `${inicial}${apellidoNorm}${sufijo}` }));
-  };
-
-  const handleGuardar = async () => {
+const handleGuardar = async () => {
     if (!form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim() || !form.correo.trim()) {
       return mostrarToast("Completa los campos obligatorios", "err");
     }
@@ -226,7 +197,6 @@ export default function PersonalPage() {
         ...rest,
         area_id: form.area_id || null,
         cargo_id: form.cargo_id || null,
-        rol_id: form.rol_id || null,
         piso: form.piso !== "" && form.piso !== null ? Number(form.piso) : null,
         activo: form.activo ? 1 : 0,
       };
@@ -245,12 +215,7 @@ export default function PersonalPage() {
         if (horarioSel) {
           await asignarHorario({ usuario_id: res.id, horario_id: horarioSel, motivo: "Asignación desde creación de colaborador" });
         }
-        const extra = res?.password
-          ? ` — Usuario: ${res.username}, Contraseña: ${res.password}`
-          : res?.email_enviado
-            ? ` — Usuario: ${res.username}. Le enviamos al correo el link para crear su contraseña`
-            : "";
-        mostrarToast(`${res?.mensaje || "Empleado creado correctamente"}${extra}`, "ok");
+        mostrarToast(res?.mensaje || "Empleado creado correctamente", "ok");
       }
       setModalAbierto(false);
       await cargarDatos();
@@ -335,11 +300,6 @@ export default function PersonalPage() {
             <MenuItem value="Todas">Área</MenuItem>
             {areas.map((a) => <MenuItem key={a.id} value={a.nombre}>{a.nombre}</MenuItem>)}
           </Select>
-          <Select value={filtroRol} onChange={(e) => setFiltroRol(e.target.value)} size="small"
-            sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
-            <MenuItem value="Todos">Rol</MenuItem>
-            {roles.map((r) => <MenuItem key={r.id} value={r.nombre}>{r.nombre}</MenuItem>)}
-          </Select>
         </Box>
         {(cargoFiltro || areaFiltro) && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1.5, flexWrap: "wrap" }}>
@@ -390,7 +350,7 @@ export default function PersonalPage() {
           <Table sx={{ minWidth: { xs: 780, md: 1250 } }}>
             <TableHead>
               <TableRow>
-                {["", "Empleado", "Documento", "Cargo", "Área", "Piso", "Rol", "Usuario", "Último acceso", "Inas.", "Tard.", "Estado", "Acciones"].map((h) => (
+                {["", "Empleado", "Documento", "Cargo", "Área", "Piso", "Horario", "Inas.", "Tard.", "Estado", "Acciones"].map((h) => (
                   <TableCell key={h} sx={{
                     fontWeight: 600, color: COLORES.textoTerciario, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.5, whiteSpace: "nowrap",
                     display: h === "Cargo" || h === "Área" || h === "Piso" ? { xs: "none", md: "table-cell" }
@@ -404,18 +364,17 @@ export default function PersonalPage() {
             <TableBody>
               {cargando ? (
                 <TableRow>
-                  <TableCell colSpan={13} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>Cargando...</TableCell>
+                  <TableCell colSpan={11} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>Cargando...</TableCell>
                 </TableRow>
               ) : filtrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={13} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>
+                  <TableCell colSpan={11} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>
                     {busqueda ? "No se encontraron empleados" : "No hay empleados registrados"}
                   </TableCell>
                 </TableRow>
               ) : (
-                filtrados.map((e) => {
-                  const badge = ROL_BADGE[e.rol] || { bg: COLORES.fondoGris2, color: COLORES.textoSecundario };
-                  return (
+filtrados.map((e) => {
+                    return (
                     <TableRow key={e.id} sx={{ "&:hover": { bgcolor: COLORES.fondoGris }, transition: "background .15s" }}>
                       <TableCell sx={{ py: 1.2 }}>
                         <Avatar sx={{ width: 34, height: 34, bgcolor: COLORES.primarioClaro, color: COLORES.primario, fontSize: 12, fontWeight: 700 }}>
@@ -440,18 +399,11 @@ export default function PersonalPage() {
                     {e.area || "—"}
                   </TableCell>
                   <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
-                    {e.piso ? `P${e.piso}` : "—"}
+                    {e.piso || "—"}
                   </TableCell>
-                      <TableCell sx={{ py: 1.2, display: { xs: "none", sm: "table-cell" } }}>
-                        <Chip label={e.rol || "Sin rol"} size="small"
-                          sx={{ height: 24, fontSize: 11, fontWeight: 600, bgcolor: badge.bg, color: badge.color }} />
-                      </TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 12, fontFamily: "monospace", color: COLORES.textoSecundario, whiteSpace: "nowrap" }}>
-                        {e.username || "—"}
-                      </TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 12, color: COLORES.textoSuave, whiteSpace: "nowrap" }}>
-                        {e.ultimo_acceso ? new Date(e.ultimo_acceso).toLocaleDateString("es-CO") : "Nunca"}
-                      </TableCell>
+                  <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
+                    {e.horario || "—"}
+                  </TableCell>
                       <TableCell sx={{ py: 1.2 }}>
                         <Chip label={e.inasistencias ?? 0} size="small"
                           sx={{ height: 24, fontSize: 11, fontWeight: 700, minWidth: 32,
@@ -610,17 +562,6 @@ export default function PersonalPage() {
                 onChange={(e) => setForm({ ...form, piso: e.target.value === "" ? "" : Number(e.target.value) })}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, htmlInput: { min: 1 }, input: { startAdornment: <InputAdornment position="start"><Layers size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment> } }} sx={modalFieldSx} />
               <FormControl fullWidth>
-                <InputLabel sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>Rol del sistema</InputLabel>
-                <Select value={form.rol_id} label="Rol del sistema" sx={{ ...modalSelectSx, ...selectIconAdornment }}
-                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><ShieldCheck size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment> }, menu: selectMenuSx }}
-                  onChange={(e) => setForm({ ...form, rol_id: e.target.value })}>
-                  <MenuItem value=""><em>Sin rol</em></MenuItem>
-                  {roles.map((r) => (
-                    <MenuItem key={r.id} value={String(r.id)}>{r.nombre}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
                 <InputLabel sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>Horario asignado</InputLabel>
                 <Select value={form.horario_id || ""} label="Horario asignado"
                   onChange={(e) => setForm({ ...form, horario_id: e.target.value })}
@@ -641,34 +582,6 @@ export default function PersonalPage() {
                 />
               </Box>
             </Box>
-          </Box>
-
-          {/* SECCIÓN 3 — INFORMACIÓN DE ACCESO */}
-          <Box sx={modalSeccionCard}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
-              <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <KeyRound size={14} />
-              </Box>
-              <Box>
-                <Typography sx={modalSeccionTitulo}>Información de acceso</Typography>
-                <Typography sx={modalSeccionSubtitulo}>Credenciales para ingresar al sistema</Typography>
-              </Box>
-            </Box>
-            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 1.5 }}>
-              <TextField label="Usuario" value={form.username}
-                onChange={(e) => setForm({ ...form, username: e.target.value })}
-                disabled={!!editando}
-                autoComplete="off"
-                helperText={editando ? "El nombre de usuario no se puede cambiar al editar" : "Se completa al guardar"}
-                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } } }} sx={modalFieldSx} />
-            </Box>
-            {!editando && (
-              <Button startIcon={<UserPlus size={14} />} onClick={handleGenerarUsuario}
-                disabled={!form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim()}
-                sx={{ mt: 1.5, borderRadius: "10px", textTransform: "none", fontSize: 12.5, fontWeight: 600, color: COLORES.primarioOscuro, bgcolor: COLORES.primarioClaro, px: 2.5, py: 0.75, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}>
-                Generar usuario
-              </Button>
-            )}
           </Box>
         </DialogContent>
 

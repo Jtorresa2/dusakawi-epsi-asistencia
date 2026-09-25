@@ -18,9 +18,6 @@ module.exports = (...rolesPermitidos) => {
       if (target.includes('talento')) {
         return userRoles.some((r) => r.includes('talento'));
       }
-      if (target.includes('empleado')) {
-        return userRoles.some((r) => r.includes('empleado'));
-      }
       return userRoles.includes(target);
     });
 

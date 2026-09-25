@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import {
   User, Mail, Phone, Calendar, FileText, Briefcase, MapPin,
-  CheckCircle, XCircle, Clock, Edit2, Save, X, Camera, Shield,
+  CheckCircle, XCircle, Clock, Edit2, Save, X,
 } from "lucide-react";
 import { obtenerPersonalPorId, actualizarPersonal } from "../personal.api";
 import { obtenerAreas } from "../../areas/area.api";
@@ -39,7 +39,6 @@ const workFields = [
 
 const infoFields = [
   { key: "piso", label: "Piso", icon: <MapPin size={16} />, render: (v) => (v ? `Piso ${v}` : "—") },
-  { key: "rol", label: "Rol del sistema", icon: <Shield size={16} /> },
 ];
 
 const selectSx = { borderRadius: "10px", fontSize: 14, background: COLORES.fondoBlanco, "& fieldset": { borderColor: COLORES.textoPrimario }, "&:hover fieldset": { borderColor: COLORES.textoPrimario }, "&.Mui-focused fieldset": { borderColor: COLORES.textoPrimario } };
@@ -100,24 +99,6 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
   const handleCancel = () => {
     setEditando(null);
     setForm({});
-  };
-
-  const handleFotoChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setSubiendoFoto(true);
-    try {
-      const formData = new FormData();
-      formData.append("foto", file);
-      await fetch(`/api/empleados/${id}/foto`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        body: formData,
-      });
-      const updated = await obtenerPersonalPorId(id);
-      setData(updated);
-    } catch {}
-    setSubiendoFoto(false);
   };
 
   const handleSave = async () => {
@@ -219,17 +200,10 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
           <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             {/* Header card */}
             <Paper elevation={0} sx={{ p: 3, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap", bgcolor: COLORES.fondoGris }}>
-              <Box sx={{ position: "relative", "&:hover .foto-overlay": { opacity: 1 } }}>
-                <Avatar src={data.foto_url || ""}
-                  sx={{ width: 72, height: 72, bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro, fontSize: 26, fontWeight: 700, cursor: "pointer" }}>
-                  {initials}
-                </Avatar>
-                <Box className="foto-overlay" onClick={() => document.getElementById("perfil-foto-input")?.click()}
-                  sx={{ position: "absolute", inset: 0, borderRadius: "50%", bgcolor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.fondoBlanco, opacity: 0, transition: "opacity 0.2s", cursor: "pointer" }}>
-                  {subiendoFoto ? <Typography sx={{ fontSize: 10, fontWeight: 600 }}>...</Typography> : <Camera size={20} />}
-                </Box>
-                <input id="perfil-foto-input" type="file" hidden accept="image/*" onChange={handleFotoChange} />
-              </Box>
+              <Avatar
+                sx={{ width: 72, height: 72, bgcolor: COLORES.primarioClaro, color: COLORES.primarioOscuro, fontSize: 26, fontWeight: 700 }}>
+                {initials}
+              </Avatar>
               <Box sx={{ flex: 1, minWidth: 200 }}>
                 <Typography sx={{ fontSize: 22, fontWeight: 700, color: COLORES.textoPrimario }}>{data.nombre} {data.apellido}</Typography>
                 <Typography sx={{ fontSize: 14, color: COLORES.textoTerciario, mt: 0.3 }}>{data.cargo || "—"} · {data.area || "—"}</Typography>

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Edit3, Trash2 } from "lucide-react";
 
 const API = "/api";
@@ -8,7 +8,6 @@ const getToken = () => localStorage.getItem("token");
 const ROL_BADGE = {
   "Administrador":  { bg: "#FFF3E0", color: "#E65100" },
   "Talento Humano": { bg: "#E8F5E9", color: "#1B5E20" },
-  "Empleado":     { bg: "#E3F2FD", color: "#0D47A1" },
 };
 
 const inputStyle = {

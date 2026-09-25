@@ -18,7 +18,6 @@ export const API_URL = "/api";
 export const ROLES = {
   ADMIN: "admin",
   TALENTO_HUMANO: "talento_humano",
-  EMPLEADO: "empleado",
 };
 
 // ===============================

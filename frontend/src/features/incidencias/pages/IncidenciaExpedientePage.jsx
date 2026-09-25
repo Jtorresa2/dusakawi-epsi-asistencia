@@ -132,7 +132,6 @@ export default function IncidenciaExpedientePage() {
   const rol = usuario.rol;
   const esAdmin = rol === "admin";
   const esTTHH = rol === "talento_humano";
-  const esEmpleado = rol === "empleado";
   const puedeGestionar = (esAdmin || esTTHH) && (incidencia?.estado === "pending" || incidencia?.estado === "under_review");
 
   const headers = { Authorization: `Bearer ${localStorage.getItem("token")}` };

@@ -1,0 +1,13 @@
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Servidor corriendo en puerto 5000
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Servidor corriendo en puerto 5000
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+Servidor corriendo en puerto 5000
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+Conectado a PostgreSQL
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+Servidor corriendo en puerto 5000

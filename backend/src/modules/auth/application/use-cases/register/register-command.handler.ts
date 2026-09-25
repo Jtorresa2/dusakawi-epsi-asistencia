@@ -7,8 +7,10 @@ import { UserBuilderDirector } from '@modules/users/domain/builders/user-builder
 import type { UserRepository } from '@modules/users/domain/repositories/user-repository';
 import { DocumentDetailsCreator } from '@modules/users/domain/services/document-details-creator';
 import type { GenericResponseDto } from '@shared/dtos/generic-response.dto';
-import { ConflictError, NotFoundError } from '@shared/errors/errors';
+import { ConflictError, NotFoundError, ForbiddenError } from '@shared/errors/errors';
 import { PlainPassword } from '@modules/users/domain/value-objects/plain-password';
+
+const ALLOWED_ROLES = ['Administrador', 'Talento Humano'];
 import type { PasswordHasher } from '@modules/auth/domain/interfaces/password-hasher';
 
 export class RegisterCommandHandler {
@@ -44,6 +46,11 @@ export class RegisterCommandHandler {
     const roles = await this.roleRepository.getRolesByName(request.roles);
     if (roles.length === 0) throw new ConflictError('roles');
 
+    const authorizedRoles = roles.filter((role) => ALLOWED_ROLES.includes(role.name?.value));
+    if (authorizedRoles.length === 0) {
+      throw new ForbiddenError('No se pueden crear usuarios con rol Empleado');
+    }
+
     const documentDetails = await this.documentDetailsCreator.create(
       request.documentDetails.documentTypeId,
       request.documentDetails.number,
@@ -67,7 +74,7 @@ export class RegisterCommandHandler {
         request.middleName,
         request.secondSurname,
       )
-      .workData(position, area, roles)
+      .workData(position, area, authorizedRoles)
       .authData(request.username, hashedPassword, request.email)
       .build();
 

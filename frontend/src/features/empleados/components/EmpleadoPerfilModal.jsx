@@ -5,7 +5,7 @@ import {
 } from "@mui/material";
 import {
   User, Mail, Phone, Calendar, FileText, Briefcase, MapPin,
-  CheckCircle, XCircle, Edit2, Save, X, Camera, Shield, Fingerprint,
+  CheckCircle, XCircle, Edit2, Save, X,
 } from "lucide-react";
 import { obtenerEmpleado, actualizarEmpleado } from "../empleado.api";
 import { obtenerAreas } from "../../areas/area.api";
@@ -41,7 +41,6 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
   const [editando, setEditando] = useState(null);
   const [form, setForm] = useState({});
   const [guardando, setGuardando] = useState(false);
-  const [subiendoFoto, setSubiendoFoto] = useState(false);
   const [areas, setAreas] = useState([]);
   const [cargos, setCargos] = useState([]);
 
@@ -81,24 +80,6 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
   const handleCancel = () => {
     setEditando(null);
     setForm({});
-  };
-
-  const handleFotoChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setSubiendoFoto(true);
-    try {
-      const formData = new FormData();
-      formData.append("foto", file);
-      await fetch(`/api/empleados/${empleadoId}/foto`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        body: formData,
-      });
-      const updated = await obtenerEmpleado(empleadoId);
-      setData(updated);
-    } catch {}
-    setSubiendoFoto(false);
   };
 
   const handleSave = async () => {
@@ -178,16 +159,11 @@ export default function EmpleadoPerfilModal({ open, empleadoId, onClose, onSaved
           <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             {/* Header card */}
             <Paper elevation={0} sx={{ p: 3, borderRadius: "16px", border: "1px solid #ECECEC", display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap" }}>
-              <Box sx={{ position: "relative", "&:hover .foto-overlay": { opacity: 1 } }}>
-                <Avatar src={data.foto_url || ""}
-                  sx={{ width: 72, height: 72, bgcolor: "#E8F5E9", color: "#1B5E20", fontSize: 26, fontWeight: 700, cursor: "pointer" }}>
+              <Box>
+                <Avatar
+                  sx={{ width: 72, height: 72, bgcolor: "#E8F5E9", color: "#1B5E20", fontSize: 26, fontWeight: 700 }}>
                   {initials}
                 </Avatar>
-                <Box className="foto-overlay" onClick={() => document.getElementById("perfil-foto-input")?.click()}
-                  sx={{ position: "absolute", inset: 0, borderRadius: "50%", bgcolor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", opacity: 0, transition: "opacity 0.2s", cursor: "pointer" }}>
-                  {subiendoFoto ? <Typography sx={{ fontSize: 10, fontWeight: 600 }}>...</Typography> : <Camera size={20} />}
-                </Box>
-                <input id="perfil-foto-input" type="file" hidden accept="image/*" onChange={handleFotoChange} />
               </Box>
               <Box sx={{ flex: 1, minWidth: 200 }}>
                 <Typography sx={{ fontSize: 22, fontWeight: 700, color: "#111827" }}>{data.nombre} {data.apellido}</Typography>

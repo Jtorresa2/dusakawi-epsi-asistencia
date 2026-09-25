@@ -41,7 +41,15 @@ exports.login = async (req, res) => {
       return res.status(401).json({ mensaje: "Contrasena incorrecta" });
     }
 
-    const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
+    const userRoles = rows.map(r => r.rol).filter(Boolean);
+    const ALLOWED_ROLES = ["Administrador", "Talento Humano"];
+    const authorizedRole = userRoles.find(r => ALLOWED_ROLES.includes(r));
+
+    if (!authorizedRole) {
+      return res.status(403).json({ mensaje: "Acceso denegado: su rol no tiene autorización para acceder al sistema" });
+    }
+
+    const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano" };
     const fullName = `${user.first_name} ${user.first_surname || ''}`.trim();
     const token = jwt.sign(
       {
@@ -49,8 +57,8 @@ exports.login = async (req, res) => {
         empleado_id: user.id,
         username: user.username,
         nombre: fullName,
-        rol: rolesMap[user.rol] || user.rol,
-        roles: [user.rol || 'Empleado'],
+        rol: rolesMap[authorizedRole] || authorizedRole,
+        roles: userRoles.filter(r => ALLOWED_ROLES.includes(r)),
       },
       process.env.JWT_SECRET || 'dusakawi_jwt_secret_2024',
       { expiresIn: "8h" }
@@ -65,7 +73,7 @@ exports.login = async (req, res) => {
         username: user.username,
         nombre: fullName,
         email: user.email,
-        rol: user.rol,
+        rol: authorizedRole,
         area_id: user.area_id,
         cargo_id: user.position_id,
       },
@@ -108,7 +116,7 @@ exports.cambiarPassword = async (req, res) => {
     `, [usuarioId]);
 
     const user = userData[0] || {};
-    const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano", "Empleado": "empleado" };
+    const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano" };
     const fullName = `${user.first_name || ''} ${user.first_surname || ''}`.trim();
     const token = jwt.sign(
       {
@@ -117,7 +125,7 @@ exports.cambiarPassword = async (req, res) => {
         username: user.username,
         nombre: fullName,
         rol: rolesMap[user.rol] || user.rol,
-        roles: [user.rol || 'Empleado'],
+        roles: user.rol ? [user.rol] : [],
       },
       process.env.JWT_SECRET || 'dusakawi_jwt_secret_2024',
       { expiresIn: "8h" }

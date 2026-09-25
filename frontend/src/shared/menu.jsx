@@ -76,28 +76,13 @@ export const menuPorRol = {
     SECCIONES.MANTENIMIENTO,
     SECCIONES.REPORTES,
     SECCIONES.SISTEMA,
+    SECCIONES.MI_CUENTA,
   ],
   talento_humano: [
     SECCIONES.GENERAL,
     SECCIONES.PERSONAL,
     SECCIONES.MANTENIMIENTO,
     SECCIONES.REPORTES,
+    SECCIONES.MI_CUENTA,
   ],
-  empleado: [
-    {
-      section: "GENERAL",
-      items: [
-        { label: "Inicio", path: "/dashboard", icon: <LayoutDashboard size={18} />, modulo: "dashboard" }
-      ]
-    },
-    {
-      section: "OPERACIÓN",
-      items: [
-        { label: "Mi asistencia", path: "/mi-asistencia", icon: <ClipboardCheck size={18} />, modulo: "mi_asistencia" },
-        { label: "Reportar incidencia", path: "/reportar-incidencia", icon: <TriangleAlert size={18} />, modulo: "reportar_incidencia" },
-        { label: "Mis solicitudes", path: "/mis-solicitudes", icon: <FileText size={18} />, modulo: "mis_solicitudes" }
-      ]
-    },
-    SECCIONES.MI_CUENTA
-  ]
 };

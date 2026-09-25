@@ -113,8 +113,6 @@ function drawGreek(doc, x) {
   }
 }
 
-
-
 // ─── drawHeader ───────────────────────────────────
 function drawHeader(doc, metadata) {
   // Metadata

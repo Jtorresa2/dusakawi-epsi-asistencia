@@ -31,8 +31,7 @@ ON CONFLICT (name) DO NOTHING;
 -- ---------------------------------------------------------------------
 INSERT INTO roles (name, description) VALUES
     ('Administrador', 'Acceso total al sistema'),
-    ('Talento Humano', 'Gestión de personal y reportes'),
-    ('Empleado', 'Auto-servicio y marcación')
+    ('Talento Humano', 'Gestión de personal y reportes')
 ON CONFLICT (name) DO NOTHING;
 
 -- ---------------------------------------------------------------------
@@ -128,12 +127,7 @@ VALUES
     ((SELECT id FROM roles WHERE name = 'Talento Humano'), (SELECT id FROM actions WHERE name = 'dispositivos')),
     ((SELECT id FROM roles WHERE name = 'Talento Humano'), (SELECT id FROM actions WHERE name = 'empleados')),
     ((SELECT id FROM roles WHERE name = 'Talento Humano'), (SELECT id FROM actions WHERE name = 'reportes')),
-    ((SELECT id FROM roles WHERE name = 'Talento Humano'), (SELECT id FROM actions WHERE name = 'usuarios')),
-    ((SELECT id FROM roles WHERE name = 'Empleado'), (SELECT id FROM actions WHERE name = 'dashboard')),
-    ((SELECT id FROM roles WHERE name = 'Empleado'), (SELECT id FROM actions WHERE name = 'dispositivos')),
-    ((SELECT id FROM roles WHERE name = 'Empleado'), (SELECT id FROM actions WHERE name = 'empleados')),
-    ((SELECT id FROM roles WHERE name = 'Empleado'), (SELECT id FROM actions WHERE name = 'reportes')),
-    ((SELECT id FROM roles WHERE name = 'Empleado'), (SELECT id FROM actions WHERE name = 'usuarios'))
+    ((SELECT id FROM roles WHERE name = 'Talento Humano'), (SELECT id FROM actions WHERE name = 'usuarios'))
 ON CONFLICT (role_id, action_id) DO NOTHING;
 
 -- ---------------------------------------------------------------------
@@ -215,7 +209,6 @@ ON CONFLICT (document_number) DO NOTHING;
 -- ---------------------------------------------------------------------
 INSERT INTO user_roles (user_id, role_id)
 VALUES
-    ((SELECT id FROM users WHERE username = 'carlos'), (SELECT id FROM roles WHERE name = 'Empleado')),
     ((SELECT id FROM users WHERE username = 'talento'), (SELECT id FROM roles WHERE name = 'Talento Humano')),
     ((SELECT id FROM users WHERE username = 'Jtorresa22'), (SELECT id FROM roles WHERE name = 'Administrador'))
 ON CONFLICT (user_id, role_id) DO NOTHING;
