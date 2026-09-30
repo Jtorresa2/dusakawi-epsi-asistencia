@@ -3,7 +3,6 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
 import { Environment } from '@config/environment.js';
 import { containerScopeMiddleware } from '@config/express/middlewares/container-scope.middleware.js';
 import { ExpressProblemDetailsMapper } from '@config/express/mappers/express-problem-details.mapper.js';
@@ -20,15 +19,14 @@ import config from '@modules/config/presentation/config.presentation';
 import empleados from '@modules/empleados/presentation/empleados.presentation';
 import festivos from '@modules/festivos/presentation/festivos.presentation';
 import novedades from '@modules/novedades/presentation/novedades.presentation';
-import incidencias from '@modules/incidencias/presentation/incidencias.presentation';
 import seguimiento from '@modules/seguimiento/presentation/seguimiento.presentation';
 import asistencia from '@modules/asistencia/presentation/asistencia.presentation';
 import schedules from '@modules/horarios/presentation/schedules.presentation';
 import reports from '@modules/reportes/presentation/reports.presentation';
+import pdf from '@modules/pdf/presentation/pdf.presentation';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const require = createRequire(import.meta.url);
 
 const app = express();
 const container = buildContainer();
@@ -52,24 +50,11 @@ config.addRoutes(app);
 empleados.addRoutes(app);
 festivos.addRoutes(app);
 novedades.addRoutes(app);
-incidencias.addRoutes(app);
 seguimiento.addRoutes(app);
 asistencia.addRoutes(app, '/api/asistencia');
 schedules.addRoutes(app);
 reports.addRoutes(app);
-
-// =======================================================
-// Rutas JavaScript Rescatadas (Coexistencia Híbrida CJS)
-// =======================================================
-const authLegacyRoutes = require('./routes/authRoutes.js');
-const pdfRoutes = require('./routes/pdfRoutes.js');
-const reportesRoutes = require('./routes/reportesRoutes.js');
-
-app.use('/api/auth', authLegacyRoutes);
-app.use('/api/pdf', pdfRoutes);
-app.use('/api/reportes', reportesRoutes);
-
-// =======================================================
+pdf.addRoutes(app);
 
 app.get('/', (_, res) => {
   res.json({

@@ -313,7 +313,7 @@ export class PrismaReportRepository implements ReportRepository {
       LEFT JOIN asistencia.areas ar ON e.area_id = ar.id
       LEFT JOIN asistencia.floors fl ON ar.floor_id = fl.id${roleJoin('e.id')}
       WHERE 1=1${roleFilterByName('r')}
-      ${Prisma.join(conditions, ' ')}
+      ${conditions.length > 0 ? Prisma.join(conditions, ' ') : Prisma.empty}
       ORDER BY a.date DESC, e.first_surname
     `);
   }
@@ -353,7 +353,7 @@ export class PrismaReportRepository implements ReportRepository {
       LEFT JOIN asistencia.document_details dd ON dd.user_id = e.id
       LEFT JOIN asistencia.areas ar ON e.area_id = ar.id
       WHERE 1=1${roleFilterByUserId('i.user_id')}
-      ${Prisma.join(conditions, ' ')}
+      ${conditions.length > 0 ? Prisma.join(conditions, ' ') : Prisma.empty}
       ORDER BY i.created_at DESC
     `);
   }
@@ -392,7 +392,7 @@ export class PrismaReportRepository implements ReportRepository {
       LEFT JOIN asistencia.areas ar ON e.area_id = ar.id
       LEFT JOIN asistencia.floors fl ON ar.floor_id = fl.id
       WHERE a.status = 'late'${roleFilterByUserId('a.user_id')}
-      ${Prisma.join(conditions, ' ')}
+      ${conditions.length > 0 ? Prisma.join(conditions, ' ') : Prisma.empty}
       ORDER BY a.date DESC, a.late_minutes DESC
     `);
   }
@@ -429,7 +429,7 @@ export class PrismaReportRepository implements ReportRepository {
       LEFT JOIN asistencia.areas ar ON e.area_id = ar.id
       LEFT JOIN asistencia.floors fl ON ar.floor_id = fl.id
       WHERE a.status IN ('absent', 'justified')${roleFilterByUserId('a.user_id')}
-      ${Prisma.join(conditions, ' ')}
+      ${conditions.length > 0 ? Prisma.join(conditions, ' ') : Prisma.empty}
       ORDER BY a.date DESC, e.first_surname
     `);
   }
@@ -560,7 +560,7 @@ export class PrismaReportRepository implements ReportRepository {
       LEFT JOIN asistencia.areas ar ON e.area_id = ar.id
       LEFT JOIN asistencia.positions ca ON e.position_id = ca.id
       WHERE 1=1${roleFilterByUserId('e.id')}
-      ${Prisma.join(conditions, ' ')}
+      ${conditions.length > 0 ? Prisma.join(conditions, ' ') : Prisma.empty}
       ORDER BY e.first_surname, e.first_name
     `);
   }
@@ -601,7 +601,7 @@ export class PrismaReportRepository implements ReportRepository {
       LEFT JOIN asistencia.document_details dd ON dd.user_id = e.id
       LEFT JOIN asistencia.areas ar ON e.area_id = ar.id
       WHERE 1=1${roleFilterByUserId('a.user_id')}
-      ${Prisma.join(conditions, ' ')}
+      ${conditions.length > 0 ? Prisma.join(conditions, ' ') : Prisma.empty}
       ORDER BY a.date DESC, a.entry_timestamp DESC
     `);
   }

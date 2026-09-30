@@ -27,8 +27,6 @@ const CargosPage = lazy(() => import("./features/cargos/pages/CargosPage"));
 const PersonalPage = lazy(() => import("./features/personal/pages/PersonalPage"));
 const HorariosPage = lazy(() => import("./features/horarios/pages/HorariosPage"));
 const NovedadesPage = lazy(() => import("./features/novedades/pages/NovedadesPage"));
-const IncidenciasPage = lazy(() => import("./features/incidencias/pages/IncidenciasPage"));
-const IncidenciaExpedientePage = lazy(() => import("./features/incidencias/pages/IncidenciaExpedientePage"));
 const AreasPage = lazy(() => import("./features/areas/pages/AreasPage"));
 const FestivosPage = lazy(() => import("./features/festivos/pages/FestivosPage"));
 const ConfiguracionPage = lazy(() => import("./features/configuracion/pages/ConfiguracionPage"));
@@ -85,8 +83,6 @@ export default function App() {
         <Route path="/horarios" element={<R roles={["admin", "talento_humano"]}><HorariosPage /></R>} />
         <Route path="/novedades" element={<R roles={["admin", "talento_humano"]}><NovedadesPage /></R>} />
         <Route path="/areas" element={<R roles={["admin", "talento_humano"]}><AreasPage /></R>} />
-        <Route path="/incidencias" element={<R roles={["admin", "talento_humano"]}><IncidenciasPage /></R>} />
-        <Route path="/incidencias/:id" element={<R roles={["admin", "talento_humano"]}><IncidenciaExpedientePage /></R>} />
 
         {/* Operacion */}
         <Route path="/asistencia" element={<R roles={["admin", "talento_humano"]}><AsistenciaPage /></R>} />

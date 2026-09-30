@@ -17,8 +17,6 @@ module.exports = (req, res, next) => {
       rolNormalizado = 'admin';
     } else if (rawRol.includes('talento')) {
       rolNormalizado = 'talento_humano';
-    } else if (rawRol.includes('empleado')) {
-      rolNormalizado = 'empleado';
     }
 
     req.user = {

@@ -109,11 +109,6 @@ export const menuPorRol = {
           label: "Empleados",
           path: "/empleados",
           icon: <Users size={18} />
-        },
-        {
-          label: "Incidencias",
-          path: "/incidencias",
-          icon: <TriangleAlert size={18} />
         }
       ]
     },
@@ -130,39 +125,6 @@ export const menuPorRol = {
           label: "Reportes",
           path: "/reportes",
           icon: <FileText size={18} />
-        }
-      ]
-    }
-  ],
-
-  empleado: [
-    {
-      section: "MI ESPACIO",
-      items: [
-        {
-          label: "Inicio",
-          path: "/dashboard",
-          icon: <LayoutDashboard size={18} />
-        },
-        {
-          label: "Mi asistencia",
-          path: "/mi-asistencia",
-          icon: <ClipboardCheck size={18} />
-        },
-        {
-          label: "Mi horario",
-          path: "/mi-horario",
-          icon: <CalendarClock size={18} />
-        },
-        {
-          label: "Reportar incidencia",
-          path: "/reportar-incidencia",
-          icon: <TriangleAlert size={18} />
-        },
-        {
-          label: "Mi perfil",
-          path: "/perfil",
-          icon: <User size={18} />
         }
       ]
     }

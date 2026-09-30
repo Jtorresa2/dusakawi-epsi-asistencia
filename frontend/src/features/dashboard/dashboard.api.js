@@ -7,4 +7,7 @@ export const obtenerIndicadores = (periodo) => {
 
 export const obtenerResumenPorArea = () => apiFetch("/dashboard/resumen-areas");
 
-export const obtenerStatsIncidencias = () => apiFetch("/incidencias/stats");
+export const obtenerActividadHoy = () => {
+  const hoy = new Date().toLocaleDateString("en-CA");
+  return apiFetch(`/asistencia?fecha=${hoy}`);
+};

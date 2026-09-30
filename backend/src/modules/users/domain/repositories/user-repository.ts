@@ -6,4 +6,5 @@ export interface UserRepository extends GenericRepository<User> {
   getUserExists(username: string): Promise<boolean>;
   getUserExistsByDocument(documentNumber: string): Promise<boolean>;
   getUserExistsByEmail(email: string): Promise<boolean>;
+  getPasswordResetRequired(userId: string): Promise<boolean>;
 }

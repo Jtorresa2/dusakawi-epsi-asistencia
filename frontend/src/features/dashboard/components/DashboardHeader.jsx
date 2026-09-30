@@ -7,6 +7,11 @@ export default function DashboardHeader({ usuario }) {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 
+  const rawNombre = usuario?.nombre || "Usuario";
+  const nombreLimpio = rawNombre.toLowerCase().startsWith("administrador")
+    ? "Administrador"
+    : rawNombre;
+
   return (
     <Paper
       elevation={0}
@@ -25,7 +30,7 @@ export default function DashboardHeader({ usuario }) {
     >
       <Box>
         <Typography sx={{ fontSize: 32, fontWeight: 700, lineHeight: 1.2 }}>
-          Hola, {usuario?.nombre || "Usuario"} 👋
+          Hola, {nombreLimpio} 👋
         </Typography>
         <Typography sx={{ mt: 0.5, fontSize: 15, opacity: 0.85 }}>
           Bienvenido al sistema de control de asistencia

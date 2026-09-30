@@ -8,14 +8,6 @@ import { COLORES } from "../constants/colores.js";
 const EXPANDIDO = 260;
 const COLAPSADO = 72;
 
-const scrollStyle = `
-.menu-scroll::-webkit-scrollbar { width: 4px; }
-.menu-scroll::-webkit-scrollbar-track { background: transparent; }
-.menu-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 4px; }
-.menu-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.35); }
-.menu-scroll { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.2) transparent; }
-`;
-
 export default function Sidebar({ abierto, setAbierto, isMobile }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -202,7 +194,6 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
 
       </div>
 
-      <style>{scrollStyle}</style>
       <div className="menu-scroll" style={{
         flex: 1, overflowY: "auto", overflowX: "hidden",
         padding: abierto ? "20px 16px" : "20px 0",
@@ -238,10 +229,10 @@ export default function Sidebar({ abierto, setAbierto, isMobile }) {
           {abierto && (
             <div style={{ flex: 1, textAlign: "left", overflow: "hidden" }}>
               <div style={{ fontSize: 14, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {usuario.nombre || "Usuario"}
+                {(usuario.nombre || "").toLowerCase().startsWith("administrador") ? "Administrador" : (usuario.nombre || "Usuario")}
               </div>
               <div style={{ fontSize: 11, color: "rgba(255,255,255,.5)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {usuario.rol}
+                {usuario.rol === "admin" ? "Administrador" : usuario.rol === "talento_humano" ? "Talento Humano" : (usuario.rol || "Usuario")}
               </div>
             </div>
           )}

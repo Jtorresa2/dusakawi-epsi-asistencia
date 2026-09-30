@@ -34,7 +34,11 @@ export default function LoginPage() {
 
     localStorage.setItem("token", data.token);
     const rolesMap = { "Administrador": "admin", "Talento Humano": "talento_humano" };
-    const user = { ...data.user, rol: rolesMap[data.user.rol] || data.user.rol };
+    let nombre = data.user?.nombre || "Usuario";
+    if (nombre.toLowerCase().startsWith("administrador")) {
+      nombre = "Administrador";
+    }
+    const user = { ...data.user, nombre, rol: rolesMap[data.user.rol] || data.user.rol };
     localStorage.setItem("usuario", JSON.stringify(user));
     await refreshPermissions(true);
     navigate("/dashboard");

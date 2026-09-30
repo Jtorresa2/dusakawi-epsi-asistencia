@@ -17,7 +17,6 @@ import {
   Avatar,
   ListItemText as MuiListItemText,
 } from "@mui/material";
-import { obtenerIncidencias } from "../../features/incidencias/incidencia.api";
 import { COLORES } from "../constants/colores.js";
 
 const TIPOS_ALERTA = {
@@ -35,33 +34,26 @@ function formatFechaCorta(iso) {
 const TITULOS = {
   "/dashboard": "Panel",
   "/asistencia": "Asistencia",
+  "/seguimiento": "Seguimiento de Asistencia",
   "/reportes": "Reportes",
   "/personal": "Personal",
   "/cargos": "Cargos",
   "/horarios": "Horarios",
   "/areas": "Áreas",
-  "/incidencias": "Incidencias",
-  "/configuracion": "Configuración",
-  "/copias-seguridad": "Copias de Seguridad",
-  "/perfil": "Mi perfil",
-  "/mi-asistencia": "Mi asistencia",
-  "/reportar-incidencia": "Reportar incidencia",
   "/novedades": "Novedades Laborales",
-  "/mis-solicitudes": "Mis solicitudes",
-  "/integraciones": "Integraciones",
-  "/seguimiento": "Seguimiento de Asistencia",
   "/festivos": "Festivos",
+  "/configuracion": "Configuración",
   "/roles": "Roles",
-  "/mi-horario": "Mi horario",
+  "/copias-seguridad": "Copias de Seguridad",
+  "/integraciones": "Integraciones",
+  "/perfil": "Mi perfil",
 };
 
 export default function Navbar({ abierto, setAbierto, isMobile }) {
   const location = useLocation();
   const navigate = useNavigate();
   const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
-  const titulo =
-    TITULOS[location.pathname] ||
-    (location.pathname.startsWith("/incidencias/") ? "Incidencias" : "Panel");
+  const titulo = TITULOS[location.pathname] || "Panel";
   const inicial = usuario.nombre ? usuario.nombre[0].toUpperCase() : "U";
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [notifAnchor, setNotifAnchor] = useState(null);
@@ -69,28 +61,6 @@ export default function Navbar({ abierto, setAbierto, isMobile }) {
 
   const rol = usuario.rol;
   const puedeVerAlertas = rol === "admin" || rol === "talento_humano";
-
-  useEffect(() => {
-    let montado = true;
-
-    const cargarAlertas = async () => {
-      if (!puedeVerAlertas) return;
-      try {
-        const data = await obtenerIncidencias({ estado: "pending", prioridad: "high" });
-        if (montado) setAlertas(Array.isArray(data) ? data : []);
-      } catch {
-        // silencioso
-      }
-    };
-
-    cargarAlertas();
-    const intervalo = setInterval(cargarAlertas, 30000);
-
-    return () => {
-      montado = false;
-      clearInterval(intervalo);
-    };
-  }, [puedeVerAlertas]);
 
   const fecha = new Date().toLocaleDateString("es-CO", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",

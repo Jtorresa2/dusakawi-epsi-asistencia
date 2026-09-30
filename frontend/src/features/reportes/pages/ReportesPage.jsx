@@ -13,7 +13,6 @@ import { COLORES } from "../../../shared/constants/colores.js";
 const CARD_DATA = [
   { id: "porEmpleado", icon: "👤", titulo: "Reporte por Empleado", desc: "Resumen mensual de asistencia, tardanzas, ausencias y horas de un empleado.", color: COLORES.success },
   { id: "asistencia", icon: "📊", titulo: "Reporte de Asistencia", desc: "Resumen de asistencia de los empleados por fechas.", color: COLORES.primario },
-  { id: "incidencias", icon: "📄", titulo: "Reporte de Incidencias", desc: "Incidencias registradas y su estado actual.", color: COLORES.danger },
   { id: "tardanzas", icon: "⏰", titulo: "Reporte de Tardanzas", desc: "Tardanzas registradas por los empleados.", color: COLORES.warning },
   { id: "ausencias", icon: "🚫", titulo: "Reporte de Ausencias", desc: "Ausencias y novedades registradas.", color: COLORES.verdeTexto },
   { id: "porAreas", icon: "🏢", titulo: "Reporte por Áreas", desc: "Resumen por empleado: días laborados, puntualidad, tardanzas, ausencias y horas del mes.", color: COLORES.primarioOscuro },

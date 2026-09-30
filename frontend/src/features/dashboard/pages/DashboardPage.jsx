@@ -7,11 +7,10 @@ import StatCard from "../components/StatCard";
 import DonutChart from "../components/DonutChart";
 import OnTimeBarChart from "../components/OnTimeBarChart";
 import SourceMarkingCard from "../components/SourceMarkingCard";
-import PendientesCard from "../components/PendientesCard";
 import TodayActivity from "../components/TodayActivity";
 import ResumenPorArea from "../components/ResumenPorArea";
 
-import { obtenerIndicadores, obtenerResumenPorArea, obtenerStatsIncidencias } from "../dashboard.api";
+import { obtenerIndicadores, obtenerResumenPorArea, obtenerActividadHoy } from "../dashboard.api";
 import DashboardSkeleton from "../components/DashboardSkeleton";
 import { COLORES } from "../../../shared/constants/colores.js";
 
@@ -29,18 +28,17 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(MOCK);
   const [resumenAreas, setResumenAreas] = useState([]);
-  const [statsIncidencias, setStatsIncidencias] = useState(null);
+  const [actividadesHoy, setActividadesHoy] = useState([]);
   const [filtro, setFiltro] = useState("Hoy");
 
   const fetchDashboard = async (periodo) => {
     try {
       setLoading(true);
-      const [res, resumen, stats] = await Promise.all([
+      const [res, resumen, asistenciaHoy] = await Promise.all([
         obtenerIndicadores(periodo),
         obtenerResumenPorArea(),
-        obtenerStatsIncidencias(),
+        obtenerActividadHoy().catch(() => ({ registros: [] })),
       ]);
-      setStatsIncidencias(stats);
       setData({
         puntualidad: res.indicadores?.puntualidad ?? MOCK.puntualidad,
         presentes: res.indicadores?.presentes_hoy ?? MOCK.presentes,
@@ -50,6 +48,7 @@ export default function DashboardPage() {
         total_registrados: res.indicadores?.total_registrados ?? MOCK.total_registrados,
       });
       setResumenAreas(Array.isArray(resumen) ? resumen : []);
+      setActividadesHoy(Array.isArray(asistenciaHoy?.registros) ? asistenciaHoy.registros : (Array.isArray(asistenciaHoy) ? asistenciaHoy : []));
     } catch {
       setData(MOCK);
     } finally {
@@ -90,15 +89,14 @@ export default function DashboardPage() {
         ))}
       </Box>
 
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "repeat(4, 1fr)" }, gap: 2, mb: 2.5 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr", lg: "repeat(3, 1fr)" }, gap: 2, mb: 2.5 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}><DonutChart data={hoyStats} /></Box>
         <Box sx={{ flex: 1, minWidth: 0 }}><OnTimeBarChart data={data} /></Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}><PendientesCard data={statsIncidencias} /></Box>
         <Box sx={{ flex: 1, minWidth: 0 }}><SourceMarkingCard /></Box>
       </Box>
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2.5 }}>
-        <Box sx={{ height: 320 }}><TodayActivity /></Box>
+        <Box sx={{ height: 320 }}><TodayActivity data={actividadesHoy} /></Box>
         <Box sx={{ height: 320 }}><ResumenPorArea data={resumenAreas} /></Box>
       </Box>
     </Box>

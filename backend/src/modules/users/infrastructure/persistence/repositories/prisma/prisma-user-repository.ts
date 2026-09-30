@@ -71,4 +71,12 @@ export class PrismaUserRepository
   async getUserExistsByEmail(email: string): Promise<boolean> {
     return (await prisma.users.count({ where: { email } })) !== 0;
   }
+
+  async getPasswordResetRequired(userId: string): Promise<boolean> {
+    const found = await prisma.users.findUnique({
+      where: { id: userId },
+      select: { password_reset_required: true },
+    });
+    return found?.password_reset_required ?? false;
+  }
 }

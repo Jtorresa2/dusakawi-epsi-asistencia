@@ -12,7 +12,6 @@ usuariosRouter.get('/', auth, rol('admin'), usuariosController.getUsuarios);
 usuariosRouter.post('/', auth, rol('admin'), usuariosController.crearUsuario);
 usuariosRouter.put('/:id', auth, rol('admin'), usuariosController.actualizarUsuario);
 usuariosRouter.delete('/:id', auth, rol('admin'), usuariosController.eliminarUsuario);
-usuariosRouter.post('/generar-masivos', auth, rol('admin'), usuariosController.generarMasivos);
 usuariosRouter.get('/roles', auth, usuariosController.getRoles);
 usuariosRouter.get('/roles/:id/permisos', auth, rol('admin'), usuariosController.getPermisosRol);
 usuariosRouter.put('/roles/:id', auth, rol('admin'), usuariosController.updateRol);

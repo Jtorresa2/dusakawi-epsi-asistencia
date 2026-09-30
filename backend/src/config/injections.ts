@@ -17,11 +17,11 @@ import { registerConfigModule } from '@modules/config/infrastructure/config.regi
 import { registerEmpleadosModule } from '@modules/empleados/infrastructure/empleado.registry.js';
 import { registerFestivosModule } from '@modules/festivos/infrastructure/festivo.registry.js';
 import { registerNovedadesModule } from '@modules/novedades/infrastructure/novedad.registry.js';
-import { registerIncidenciasModule } from '@modules/incidencias/infrastructure/incidencia.registry.js';
 import { registerSeguimientoModule } from '@modules/seguimiento/infrastructure/seguimiento.registry.js';
 import { registerAsistenciaModule } from '@modules/asistencia/infrastructure/asistencia.registry.js';
 import { registerSchedulesModule } from '@modules/horarios/infrastructure/schedule.registry.js';
 import { registerReportsModule } from '@modules/reportes/infrastructure/report.registry.js';
+import { registerPdfModule } from '@modules/pdf/infrastructure/pdf.registry.js';
 
 export function buildContainer(): AwilixContainer {
   const container = createContainer({
@@ -45,11 +45,11 @@ export function buildContainer(): AwilixContainer {
   registerEmpleadosModule(container);
   registerFestivosModule(container);
   registerNovedadesModule(container);
-  registerIncidenciasModule(container);
   registerSeguimientoModule(container);
   registerAsistenciaModule(container);
   registerSchedulesModule(container);
   registerReportsModule(container);
+  registerPdfModule(container);
 
   return container;
 }

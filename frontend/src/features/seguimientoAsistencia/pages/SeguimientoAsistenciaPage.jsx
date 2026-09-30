@@ -153,8 +153,6 @@ export default function SeguimientoAsistenciaPage() {
     }
   }
 
-  const verIncidencia = (row) => navigate(`/incidencias/${row.incidencia_id}`);
-
   const filtrosActivos = contarActivos();
 
   return (
@@ -163,15 +161,15 @@ export default function SeguimientoAsistenciaPage() {
         Inicio / Gestión del personal / Seguimiento de Asistencia
       </Typography>
 
-      {/* COPY SOLO LECTURA (REQ-11) */}
+      {/* INFORMACIÓN CONSOLIDADA */}
       <Paper elevation={0} sx={{ px: 2, py: 1.4, borderRadius: "14px", border: `1px solid ${COLORES.primarioClaro2}`, bgcolor: COLORES.primarioClaro, display: "flex", alignItems: "center", gap: 1.5 }}>
         <Info size={18} style={{ color: COLORES.primarioOscuro, flexShrink: 0 }} />
         <Box>
           <Typography sx={{ fontSize: 13, fontWeight: 700, color: COLORES.primarioOscuro }}>
-            Solo lectura — Use Incidencias para gestionar
+            Seguimiento de Asistencia
           </Typography>
           <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario }}>
-            Aquí se consolidan las situaciones de asistencia detectadas. Las aprobaciones, correcciones y registros se hacen desde el módulo de Incidencias.
+            Aquí se consolidan las situaciones de asistencia detectadas (tardanzas, ausencias y marcaciones).
           </Typography>
         </Box>
       </Paper>
@@ -260,7 +258,6 @@ export default function SeguimientoAsistenciaPage() {
           rows={rows}
           columns={seguimientoColumns({
             onDetalle: (row) => setDetalleRow(row),
-            onVerIncidencia: verIncidencia,
           })}
           loading={loading}
           pageSize={10}

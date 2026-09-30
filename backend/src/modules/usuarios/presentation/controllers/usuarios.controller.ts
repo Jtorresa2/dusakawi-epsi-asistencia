@@ -3,7 +3,6 @@ import type { GetUsuariosHandler } from '@modules/usuarios/application/use-cases
 import type { CreateUsuarioHandler } from '@modules/usuarios/application/use-cases/create-usuario/create-usuario.handler';
 import type { UpdateUsuarioHandler } from '@modules/usuarios/application/use-cases/update-usuario/update-usuario.handler';
 import type { DeleteUsuarioHandler } from '@modules/usuarios/application/use-cases/delete-usuario/delete-usuario.handler';
-import type { GenerateUsuariosMasivosHandler } from '@modules/usuarios/application/use-cases/generate-usuarios-masivos/generate-usuarios-masivos.handler';
 import type { GetRolesHandler } from '@modules/usuarios/application/use-cases/get-roles/get-roles.handler';
 import type { GetRolePermissionsHandler } from '@modules/usuarios/application/use-cases/get-role-permissions/get-role-permissions.handler';
 import type { UpdateRoleHandler } from '@modules/usuarios/application/use-cases/update-role/update-role.handler';
@@ -90,14 +89,6 @@ const eliminarUsuario = async (req: Request<{ id: string }>, res: Response) => {
   }
 };
 
-const generarMasivos = async (req: Request, res: Response) => {
-  const handler = req.container.resolve<GenerateUsuariosMasivosHandler>(
-    'generateUsuariosMasivosHandler',
-  );
-  const result = await handler.handle();
-  res.json(result);
-};
-
 const getRoles = async (req: Request, res: Response) => {
   try {
     const handler = req.container.resolve<GetRolesHandler>('getRolesHandler');
@@ -178,7 +169,6 @@ export default {
   crearUsuario,
   actualizarUsuario,
   eliminarUsuario,
-  generarMasivos,
   getRoles,
   getPermisosRol,
   updateRol,

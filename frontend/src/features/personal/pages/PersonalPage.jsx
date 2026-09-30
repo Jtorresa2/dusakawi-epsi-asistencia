@@ -347,13 +347,13 @@ const handleGuardar = async () => {
           scrollbarWidth: "thin",
           scrollbarColor: `${COLORES.acento} ${COLORES.primarioClaro}`,
         }}>
-          <Table sx={{ minWidth: { xs: 780, md: 1250 } }}>
+          <Table sx={{ minWidth: { xs: 900, md: 1550 } }}>
             <TableHead>
               <TableRow>
-                {["", "Empleado", "Documento", "Cargo", "Área", "Piso", "Horario", "Inas.", "Tard.", "Estado", "Acciones"].map((h) => (
+                {["", "Nombre", "Apellido", "Cédula", "Correo", "Teléfono", "F. Nacimiento", "Cargo", "Área", "Piso", "Horario", "Inas.", "Tard.", "Estado", "Acciones"].map((h) => (
                   <TableCell key={h} sx={{
                     fontWeight: 600, color: COLORES.textoTerciario, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.5, whiteSpace: "nowrap",
-                    display: h === "Cargo" || h === "Área" || h === "Piso" ? { xs: "none", md: "table-cell" }
+                    display: h === "Cargo" || h === "Área" || h === "Piso" || h === "Horario" || h === "Teléfono" || h === "F. Nacimiento" ? { xs: "none", md: "table-cell" }
                       : h === "Rol" || h === "Acciones" ? { xs: "none", sm: "table-cell" } : undefined,
                   }}>
                     {h}
@@ -364,11 +364,11 @@ const handleGuardar = async () => {
             <TableBody>
               {cargando ? (
                 <TableRow>
-                  <TableCell colSpan={11} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>Cargando...</TableCell>
+                  <TableCell colSpan={15} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>Cargando...</TableCell>
                 </TableRow>
               ) : filtrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>
+                  <TableCell colSpan={15} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>
                     {busqueda ? "No se encontraron empleados" : "No hay empleados registrados"}
                   </TableCell>
                 </TableRow>
@@ -383,17 +383,24 @@ filtrados.map((e) => {
                       </TableCell>
                       <TableCell sx={{ py: 1.2 }}>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <Box>
-                            <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>{getName(e)}</Typography>
-                            <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>{e.correo || "—"}</Typography>
-                          </Box>
+                          <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>{e.nombre || "—"}</Typography>
                           <IconButton size="small" onClick={() => setPerfilId(e.id)} title="Ver perfil"
                             sx={{ bgcolor: COLORES.primarioClaro, color: COLORES.primario, borderRadius: "6px", width: 26, height: 26, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}>
                             <Eye size={13} />
                           </IconButton>
                         </Box>
                       </TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoPrimario, fontWeight: 600, whiteSpace: "nowrap" }}>
+                        {e.apellido || "—"}
+                      </TableCell>
                       <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap" }}>{e.cedula || "—"}</TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap" }}>{e.correo || "—"}</TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
+                        {e.telefono || "—"}
+                      </TableCell>
+                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
+                        {e.fecha_nacimiento || "—"}
+                      </TableCell>
                       <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, display: { xs: "none", md: "table-cell" } }}>{e.cargo || "—"}</TableCell>
                       <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
                     {e.area || "—"}

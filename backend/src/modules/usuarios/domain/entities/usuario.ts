@@ -67,14 +67,6 @@ export interface NumeroDocumentoRow {
   document_number: string | null;
 }
 
-export interface ResultadoCredencialesMasivas {
-  mensaje: string;
-  creados: number;
-  emails_enviados: number;
-  emails_fallados: number;
-  resultados: never[];
-}
-
 export interface ResultadoEnvioAcceso {
   enviados: number;
   fallidos: number;

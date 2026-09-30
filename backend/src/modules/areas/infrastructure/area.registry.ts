@@ -11,6 +11,7 @@ import { GetFloorsQueryHandler } from '../application/use-cases/get-floors/get-f
 import { CreateFloorCommandHandler } from '../application/use-cases/create-floor/create-floor-command.handler';
 import { DeleteFloorCommandHandler } from '../application/use-cases/delete-floor/delete-floor-command.handler';
 import { UpdateFloorCommandHandler } from '../application/use-cases/update-floor/update-floor-command.handler';
+import { GetAreaEmployeesHandler } from '../application/use-cases/get-area-employees/get-area-employees.handler';
 
 export function registerAreasModule(container: AwilixContainer) {
   container.register({
@@ -29,5 +30,6 @@ export function registerAreasModule(container: AwilixContainer) {
     createFloorCommandHandler: asClass(CreateFloorCommandHandler).scoped(),
     deleteFloorCommandHandler: asClass(DeleteFloorCommandHandler).scoped(),
     updateFloorCommandHandler: asClass(UpdateFloorCommandHandler).scoped(),
+    getAreaEmployeesHandler: asClass(GetAreaEmployeesHandler).scoped(),
   });
 }

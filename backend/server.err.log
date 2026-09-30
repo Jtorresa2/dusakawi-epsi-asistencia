@@ -1,0 +1,771 @@
+get attendance report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getAttendance (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:316:16)
+    at GetAttendanceReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-attendance-report\get-attendance-report.handler.ts:9:46)
+    at getAttendance (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:77:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get incidents report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getIncidents (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:356:16)
+    at GetIncidentsReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-incidents-report\get-incidents-report.handler.ts:9:46)
+    at getIncidents (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:94:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get late arrivals report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getLateArrivals (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:395:16)
+    at GetLateArrivalsReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-late-arrivals-report\get-late-arrivals-report.handler.ts:8:46)
+    at getLateArrivals (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:111:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get absences report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getAbsences (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:432:16)
+    at GetAbsencesReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-absences-report\get-absences-report.handler.ts:9:46)
+    at getAbsences (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:127:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get employees report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getEmployees (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:563:16)
+    at GetEmployeesReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-employees-report\get-employees-report.handler.ts:8:46)
+    at getEmployees (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:164:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get markings report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getMarkings (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:604:16)
+    at GetMarkingsReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-markings-report\get-markings-report.handler.ts:9:46)
+    at getMarkings (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:178:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get attendance report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getAttendance (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:316:16)
+    at GetAttendanceReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-attendance-report\get-attendance-report.handler.ts:9:46)
+    at getAttendance (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:77:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get attendance report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getAttendance (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:316:16)
+    at GetAttendanceReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-attendance-report\get-attendance-report.handler.ts:9:46)
+    at getAttendance (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:77:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get incidents report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getIncidents (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:356:16)
+    at GetIncidentsReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-incidents-report\get-incidents-report.handler.ts:9:46)
+    at getIncidents (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:94:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get late arrivals report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getLateArrivals (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:395:16)
+    at GetLateArrivalsReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-late-arrivals-report\get-late-arrivals-report.handler.ts:8:46)
+    at getLateArrivals (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:111:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get absences report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getAbsences (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:432:16)
+    at GetAbsencesReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-absences-report\get-absences-report.handler.ts:9:46)
+    at getAbsences (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:127:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get employees report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getEmployees (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:563:16)
+    at GetEmployeesReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-employees-report\get-employees-report.handler.ts:8:46)
+    at getEmployees (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:164:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get markings report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getMarkings (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:604:16)
+    at GetMarkingsReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-markings-report\get-markings-report.handler.ts:9:46)
+    at getMarkings (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:178:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+get attendance report error: TypeError: Expected `join([])` to be called with an array of multiple elements, but got an empty array
+    at Module.join (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client-runtime-utils@7.9.1\node_modules\@prisma\client-runtime-utils\dist\index.js:2510:11)
+    at PrismaReportRepository.getAttendance (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\infrastructure\persistence\repositories\prisma\prisma-report-repository.ts:316:16)
+    at GetAttendanceReportHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\application\use-cases\get-attendance-report\get-attendance-report.handler.ts:9:46)
+    at getAttendance (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\reportes\presentation\controllers\reports.controller.ts:77:34)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at module.exports (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\middlewares\authMiddleware.js:32:5)
+    at Layer.handleRequest (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+^CPrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42601`. Message: `syntax error at or near "["`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async PrismaPdfRepository.getAsistencia (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\infrastructure\persistence\repositories\prisma\prisma-pdf-repository.ts:144:18)
+    at async getAsistencia (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\presentation\controllers\pdf.controller.ts:203:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: syntax error at or near "["
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42601`. Message: `syntax error at or near "["`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async PrismaPdfRepository.getAsistencia (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\infrastructure\persistence\repositories\prisma\prisma-pdf-repository.ts:144:18)
+    at async getAsistencia (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\presentation\controllers\pdf.controller.ts:203:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: syntax error at or near "["
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42601`. Message: `syntax error at or near "["`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async getIncidencias (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\presentation\controllers\pdf.controller.ts:237:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: syntax error at or near "["
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42601`. Message: `syntax error at or near "["`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async getTardanzas (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\presentation\controllers\pdf.controller.ts:364:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: syntax error at or near "["
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42601`. Message: `syntax error at or near "["`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async getAusencias (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\presentation\controllers\pdf.controller.ts:398:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: syntax error at or near "["
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42601`. Message: `syntax error at or near "["`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async getEmpleados (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\presentation\controllers\pdf.controller.ts:430:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: syntax error at or near "["
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42601`. Message: `syntax error at or near "["`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async getMarcaciones (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\presentation\controllers\pdf.controller.ts:466:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: syntax error at or near "["
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42601`. Message: `syntax error at or near "Object"`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async getPorAreas (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\presentation\controllers\pdf.controller.ts:502:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: syntax error at or near "Object"
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42601`. Message: `syntax error at or near "["`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async PrismaPdfRepository.getAsistencia (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\infrastructure\persistence\repositories\prisma\prisma-pdf-repository.ts:144:18)
+    at async getAsistencia (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\presentation\controllers\pdf.controller.ts:203:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: syntax error at or near "["
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42601`. Message: `syntax error at or near "["`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async getTardanzas (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\presentation\controllers\pdf.controller.ts:364:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: syntax error at or near "["
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42601`. Message: `syntax error at or near "Object"`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async getPorAreas (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\presentation\controllers\pdf.controller.ts:502:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: syntax error at or near "Object"
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42601`. Message: `syntax error at or near "["`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async getIncidencias (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\pdf\presentation\controllers\pdf.controller.ts:237:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: syntax error at or near "["
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+error: invalid input syntax for type uuid: "no-uuid"
+    at C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\pg-pool@3.14.0_pg@8.22.0\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async exports.obtenerEmpleadosPorArea (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\controllers\areaController.js:59:20) {
+  length: 139,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $1 = '...'",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'uuid.c',
+  line: '133',
+  routine: 'string_to_uuid'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRaw()` invocation:
+
+
+Raw query failed. Code: `22P02`. Message: `invalid input syntax for type uuid: "no-uuid"`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async GetAreaEmployeesHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\areas\application\use-cases\get-area-employees\get-area-employees.handler.ts:11:20)
+    at async getAreaEmployees (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\areas\presentation\controllers\areas.controller.ts:71:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: invalid input syntax for type uuid: "no-uuid"
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRaw()` invocation:
+
+
+Raw query failed. Code: `22P02`. Message: `invalid input syntax for type uuid: "no-uuid"`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async GetAreaEmployeesHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\areas\application\use-cases\get-area-employees\get-area-employees.handler.ts:17:20)
+    at async getAreaEmployees (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\areas\presentation\controllers\areas.controller.ts:71:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: invalid input syntax for type uuid: "no-uuid"
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRaw()` invocation:
+
+
+Raw query failed. Code: `22P02`. Message: `invalid input syntax for type uuid: "no-uuid"`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async GetAreaEmployeesHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\areas\application\use-cases\get-area-employees\get-area-employees.handler.ts:17:20)
+    at async getAreaEmployees (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\areas\presentation\controllers\areas.controller.ts:71:18) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: invalid input syntax for type uuid: "no-uuid"
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+Error: Illegal arguments: undefined, string
+    at _async (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/bcryptjs@3.0.3/node_modules/bcryptjs/index.js:252:11)
+    at file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/bcryptjs@3.0.3/node_modules/bcryptjs/index.js:280:7
+    at new Promise (<anonymous>)
+    at Object.compare (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/bcryptjs@3.0.3/node_modules/bcryptjs/index.js:279:12)
+    at BcryptjsPasswordHasher.verify (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\auth\infrastructure\security\bcryptjs-password-hasher.ts:15:25)
+    at LoginQueryHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\auth\application\use-cases\login\login-query.handler.ts:22:55)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async login (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\auth\presentation\controllers\auth.controller.ts:13:18)
+PrismaClientValidationError: 
+Invalid `prisma.users.findUnique()` invocation in
+C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\users\infrastructure\persistence\repositories\prisma\prisma-user-repository.ts:51:38
+
+  48 }
+  49 
+  50 async getUserByUsername(username: string): Promise<User | null> {
+→ 51   const found = await prisma.users.findUnique({
+         where: {
+           username: undefined,
+       ?   id?: String,
+       ?   email?: String,
+       ?   AND?: usersWhereInput | usersWhereInput[],
+       ?   OR?: usersWhereInput[],
+       ?   NOT?: usersWhereInput | usersWhereInput[],
+       ?   first_name?: StringFilter | String,
+       ?   middle_name?: StringNullableFilter | String | Null,
+       ?   first_surname?: StringFilter | String,
+       ?   second_surname?: StringNullableFilter | String | Null,
+       ?   date_of_birth?: DateTimeFilter | DateTime,
+       ?   place_of_birth?: StringFilter | String,
+       ?   address?: StringFilter | String,
+       ?   phone?: StringNullableFilter | String | Null,
+       ?   position_id?: UuidFilter | String,
+       ?   area_id?: UuidFilter | String,
+       ?   schedule_id?: UuidNullableFilter | String | Null,
+       ?   password_hash?: StringFilter | String,
+       ?   active?: BoolFilter | Boolean,
+       ?   password_reset_required?: BoolFilter | Boolean,
+       ?   last_access?: DateTimeNullableFilter | DateTime | Null,
+       ?   fingerprint?: StringNullableFilter | String | Null,
+       ?   photo?: StringNullableFilter | String | Null,
+       ?   rfc_card?: StringNullableFilter | String | Null,
+       ?   hire_date?: DateTimeNullableFilter | DateTime | Null,
+       ?   created_at?: DateTimeFilter | DateTime,
+       ?   updated_at?: DateTimeNullableFilter | DateTime | Null,
+       ?   attendances?: AttendancesListRelationFilter,
+       ?   document_details?: Document_detailsNullableScalarRelationFilter | document_detailsWhereInput | Null,
+       ?   incidents_incidents_reviewed_byTousers?: IncidentsListRelationFilter,
+       ?   incidents_incidents_user_idTousers?: IncidentsListRelationFilter,
+       ?   news_news_registered_byTousers?: NewsListRelationFilter,
+       ?   news_news_requested_by_user_idTousers?: NewsListRelationFilter,
+       ?   news_news_user_idTousers?: NewsListRelationFilter,
+       ?   password_reset_tokens?: Password_reset_tokensListRelationFilter,
+       ?   requests?: RequestsListRelationFilter,
+       ?   schedule_assignments_schedule_assignments_assigned_byTousers?: Schedule_assignmentsListRelationFilter,
+       ?   schedule_assignments_schedule_assignments_user_idTousers?: Schedule_assignmentsListRelationFilter,
+       ?   user_roles?: User_rolesListRelationFilter,
+       ?   areas?: AreasScalarRelationFilter | areasWhereInput,
+       ?   positions?: PositionsScalarRelationFilter | positionsWhereInput
+         },
+         include: {
+           positions: true,
+           areas: {
+             include: {
+               floors: true
+             }
+           },
+           document_details: {
+             include: {
+               document_types: true
+             }
+           },
+           user_roles: {
+             include: {
+               roles: true
+             }
+           }
+         }
+       })
+
+Argument `where` of type usersWhereUniqueInput needs at least one of `id`, `username` or `email` arguments. Available options are marked with ?.
+    at throwValidationException (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\errorRendering\throwValidationException.ts:46:9)
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:211:7)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async PrismaUserRepository.getUserByUsername (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\users\infrastructure\persistence\repositories\prisma\prisma-user-repository.ts:51:19)
+    at async LoginQueryHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\auth\application\use-cases\login\login-query.handler.ts:18:18)
+    at async login (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\auth\presentation\controllers\auth.controller.ts:13:18) {
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRaw()` invocation:
+
+
+Raw query failed. Code: `22P02`. Message: `invalid input syntax for type uuid: "firma_ana.pdf"`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async PrismaIncidenciaRepository.obtenerPorId (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\incidencias\infrastructure\persistence\repositories\prisma\prisma-incidencia-repository.ts:83:18)
+    at async GetIncidenciaPorIdQueryHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\incidencias\application\use-cases\get-incidencia-por-id\get-incidencia-por-id-query.handler.ts:8:24)
+    at async obtenerPorId (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\incidencias\presentation\controllers\incidencias.controller.ts:52:24) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: invalid input syntax for type uuid: "firma_ana.pdf"
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRaw()` invocation:
+
+
+Raw query failed. Code: `22P02`. Message: `invalid input syntax for type uuid: "firma_ana.pdf"`
+    at Jr.handleRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at Jr.handleAndLogRequestError (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1014:24)
+    at async PrismaIncidenciaRepository.obtenerPorId (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\incidencias\infrastructure\persistence\repositories\prisma\prisma-incidencia-repository.ts:83:18)
+    at async GetIncidenciaPorIdQueryHandler.handle (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\incidencias\application\use-cases\get-incidencia-por-id\get-incidencia-por-id-query.handler.ts:8:24)
+    at async obtenerPorId (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\src\modules\incidencias\presentation\controllers\incidencias.controller.ts:52:24) {
+  code: 'P2010',
+  meta: {
+    driverAdapterError: DriverAdapterError: invalid input syntax for type uuid: "firma_ana.pdf"
+        at PrismaPgAdapter.onError (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:639:11)
+        at PrismaPgAdapter.performIO (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:634:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (file:///C:/Users/SISTEMAS/Documents/dusakawi/dusakawi-epsi-asistencia/backend/node_modules/.pnpm/@prisma+adapter-pg@7.9.1/node_modules/@prisma/adapter-pg/dist/index.mjs:568:30)
+        at async e.interpretNode (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.run (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async e.execute (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Ut.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:510:22)
+        at async Object.singleLoader (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26)
+        at async Jr.request (C:\Users\SISTEMAS\Documents\dusakawi\dusakawi-epsi-asistencia\backend\node_modules\.pnpm\@prisma+client@7.9.1_prisma_95562c72a0ed400c732b430e6dcd2de0\node_modules\@prisma\client\src\runtime\RequestHandler.ts:149:14) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.9.1'
+}

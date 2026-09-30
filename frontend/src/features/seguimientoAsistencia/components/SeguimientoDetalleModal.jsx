@@ -206,7 +206,7 @@ export default function SeguimientoDetalleModal({ open, onClose, row }) {
           <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start", borderRadius: "14px", px: 2, py: 1.5, bgcolor: COLORES.primarioClaro }}>
             <Info size={17} style={{ color: COLORES.primarioOscuro, flexShrink: 0, marginTop: 1 }} />
             <Typography sx={{ fontSize: 12, color: COLORES.primarioOscuro, lineHeight: 1.45 }}>
-              Solo lectura — use Incidencias para gestionar. Este módulo no permite aprobar, corregir ni cerrar jornadas.
+              Vista informativa de seguimiento de asistencia consolidada.
             </Typography>
           </Box>
         </Box>
@@ -214,15 +214,6 @@ export default function SeguimientoDetalleModal({ open, onClose, row }) {
 
       {/* FOOTER */}
       <DialogActions sx={{ px: 2.5, pt: 2, pb: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
-        {row.tiene_incidencia && row.incidencia_id && (
-          <Button
-            onClick={() => { onClose(); navigate(`/incidencias/${row.incidencia_id}`); }}
-            variant="outlined"
-            sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 42, px: 2.5, color: COLORES.warningOscuro, borderColor: COLORES.warningOscuro, "&:hover": { bgcolor: COLORES.warningFondo, borderColor: COLORES.warningOscuro } }}
-          >
-            Ver en Incidencias
-          </Button>
-        )}
         <Button
           onClick={onClose}
           variant="contained"

@@ -33,7 +33,6 @@ const SECCIONES = {
       { label: "Asistencia", path: "/asistencia", icon: <ClipboardCheck size={18} />, modulo: "asistencia" },
       { label: "Seguimiento de Asistencia", path: "/seguimiento", icon: <ClipboardList size={18} />, modulo: "seguimiento" },
       { label: "Horarios", path: "/horarios", icon: <Clock3 size={18} />, modulo: "horarios" },
-      { label: "Incidencias", path: "/incidencias", icon: <TriangleAlert size={18} />, modulo: "incidencias" },
       { label: "Novedades Laborales", path: "/novedades", icon: <CalendarDays size={18} />, modulo: "novedades" }
     ]
   },

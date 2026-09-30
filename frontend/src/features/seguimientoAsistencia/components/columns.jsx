@@ -152,15 +152,6 @@ export const seguimientoColumns = ({ onDetalle, onVerIncidencia }) => [
         >
           <Eye size={15} />
         </Box>
-        {row.tiene_incidencia && row.incidencia_id && (
-          <Box
-            sx={{ ...btnBase, bgcolor: COLORES.warningFondo, color: COLORES.warningOscuro, "&:hover": { bgcolor: "#FDE68A" } }}
-            title="Ver en Incidencias"
-            onClick={(e) => { e.stopPropagation(); onVerIncidencia?.(row); }}
-          >
-            <TriangleAlert size={15} />
-          </Box>
-        )}
       </Box>
     ),
   },

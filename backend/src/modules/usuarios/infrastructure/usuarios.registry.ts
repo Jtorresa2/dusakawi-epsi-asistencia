@@ -4,7 +4,6 @@ import { GetUsuariosHandler } from '../application/use-cases/get-usuarios/get-us
 import { CreateUsuarioHandler } from '../application/use-cases/create-usuario/create-usuario.handler';
 import { UpdateUsuarioHandler } from '../application/use-cases/update-usuario/update-usuario.handler';
 import { DeleteUsuarioHandler } from '../application/use-cases/delete-usuario/delete-usuario.handler';
-import { GenerateUsuariosMasivosHandler } from '../application/use-cases/generate-usuarios-masivos/generate-usuarios-masivos.handler';
 import { GetRolesHandler } from '../application/use-cases/get-roles/get-roles.handler';
 import { GetRolePermissionsHandler } from '../application/use-cases/get-role-permissions/get-role-permissions.handler';
 import { UpdateRoleHandler } from '../application/use-cases/update-role/update-role.handler';
@@ -18,7 +17,6 @@ export function registerUsuariosModule(container: AwilixContainer) {
     createUsuarioHandler: asClass(CreateUsuarioHandler).scoped(),
     updateUsuarioHandler: asClass(UpdateUsuarioHandler).scoped(),
     deleteUsuarioHandler: asClass(DeleteUsuarioHandler).scoped(),
-    generateUsuariosMasivosHandler: asClass(GenerateUsuariosMasivosHandler).scoped(),
     getRolesHandler: asClass(GetRolesHandler).scoped(),
     getRolePermissionsHandler: asClass(GetRolePermissionsHandler).scoped(),
     updateRoleHandler: asClass(UpdateRoleHandler).scoped(),
