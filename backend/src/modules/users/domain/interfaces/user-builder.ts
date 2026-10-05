@@ -17,7 +17,6 @@ export interface UserBuilder extends Builder<User> {
   placeOfBirth(placeOfBirth: string): this;
   address(address: string): this;
   phone(phone?: string): this;
-  cell(cell: string): this;
   position(position: Position): this;
   area(area: Area): this;
   username(username: string): this;

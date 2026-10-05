@@ -1,8 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { Environment } from '@config/environment.js';
 import { containerScopeMiddleware } from '@config/express/middlewares/container-scope.middleware.js';
 import { ExpressProblemDetailsMapper } from '@config/express/mappers/express-problem-details.mapper.js';
@@ -25,16 +23,12 @@ import schedules from '@modules/horarios/presentation/schedules.presentation';
 import reports from '@modules/reportes/presentation/reports.presentation';
 import pdf from '@modules/pdf/presentation/pdf.presentation';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 const container = buildContainer();
 
 app.use(containerScopeMiddleware(container));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(cors());
 
 // =======================================================

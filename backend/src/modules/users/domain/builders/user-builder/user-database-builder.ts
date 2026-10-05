@@ -20,7 +20,6 @@ export class UserDatabaseBuilder implements UserBuilder {
   private _placeOfBirth?: DataString;
   private _address?: DataString;
   private _phone?: DataString;
-  private _cell?: DataString;
   private _position?: Position;
   private _area?: Area;
   private _username?: DataString;
@@ -76,11 +75,6 @@ export class UserDatabaseBuilder implements UserBuilder {
     return this;
   }
 
-  cell(cell: string): this {
-    this._cell = DataString.create(cell);
-    return this;
-  }
-
   position(position: Position): this {
     this._position = position;
     return this;
@@ -122,14 +116,13 @@ export class UserDatabaseBuilder implements UserBuilder {
       this._firstName!,
       this._firstSurname!,
       this._dateOfBirth!,
-      this._placeOfBirth!,
-      this._address!,
-      this._cell!,
-      this._position!,
-      this._area!,
-      this._username!,
-      this._passwordHash!,
-      this._email!,
+      this._placeOfBirth ?? null,
+      this._address ?? null,
+      this._position ?? null,
+      this._area ?? null,
+      this._username ?? null,
+      this._passwordHash ?? null,
+      this._email ?? null,
       this._roles!,
       this._middleName,
       this._secondSurname,

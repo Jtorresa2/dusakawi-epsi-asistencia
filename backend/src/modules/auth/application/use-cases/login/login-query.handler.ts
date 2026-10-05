@@ -28,7 +28,7 @@ export class LoginQueryHandler {
         return { status: 401, body: { mensaje: 'Usuario no existe' } };
       }
 
-      const isPasswordValid = await bcrypt.compare(password, user.passwordHash.value);
+      const isPasswordValid = await bcrypt.compare(password, user.passwordHash!.value);
 
       if (!isPasswordValid) {
         return { status: 401, body: { mensaje: 'Contrasena incorrecta' } };
@@ -50,7 +50,7 @@ export class LoginQueryHandler {
       }
 
       let fullName = `${user.firstName.value} ${user.firstSurname.value ?? ''}`.trim();
-      if (fullName.toLowerCase().startsWith('administrador') || user.username.value.toLowerCase() === 'administrador') {
+      if (fullName.toLowerCase().startsWith('administrador') || user.username!.value.toLowerCase() === 'administrador') {
         fullName = 'Administrador';
       }
 
@@ -73,7 +73,7 @@ export class LoginQueryHandler {
         {
           id: user.metadata!.id,
           empleado_id: user.metadata!.id,
-          username: user.username.value,
+          username: user.username!.value,
           nombre: fullName,
           rol: rolesMap[authorizedRole] || authorizedRole,
           roles: userRoles.filter((role) => ALLOWED_ROLES.includes(role)),
@@ -90,9 +90,9 @@ export class LoginQueryHandler {
           user: {
             id: user.metadata!.id,
             empleado_id: user.metadata!.id,
-            username: user.username.value,
+            username: user.username!.value,
             nombre: fullName,
-            email: user.email.value,
+            email: user.email!.value,
             rol: authorizedRole,
             area_id: user.area?.metadata?.id ?? null,
             cargo_id: user.position?.metadata?.id ?? null,

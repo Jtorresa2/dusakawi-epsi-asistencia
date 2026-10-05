@@ -3,6 +3,7 @@ import {
 } from "@mui/material";
 import { Filter, X, Download, CalendarDays, FileText } from "lucide-react";
 import { COLORES } from "../../../shared/constants/colores.js";
+import useRol from "../../../shared/hooks/useRol";
 
 const ESTADOS = [
   { value: "", label: "Todos" },
@@ -30,6 +31,7 @@ export default function FiltrosAsistencia({
   vistaPreviaPDF,
   exportarPDF,
 }) {
+  const { puede } = useRol();
   return (
     <Paper elevation={0} sx={{ p: 2, borderRadius: "14px", border: `1px solid ${COLORES.borde}`, mb: 2.5 }}>
       {/* Header */}
@@ -124,10 +126,12 @@ export default function FiltrosAsistencia({
                            sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12, height: 40, px: 2, color: COLORES.textoTerciario, borderColor: COLORES.borde, bgcolor: COLORES.fondoBlanco, "&:hover": { borderColor: COLORES.danger, color: COLORES.danger }, whiteSpace: "nowrap" }}>
             Limpiar
           </Button>
+          {puede("asistencia", "exportar") && (
           <Button variant="outlined" startIcon={<Download size={14} />} onClick={(e) => setExportAnchor(e.currentTarget)}
                            sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12, height: 40, px: 2, color: COLORES.textoTerciario, borderColor: COLORES.borde, bgcolor: COLORES.fondoBlanco, "&:hover": { borderColor: COLORES.primarioOscuro, color: COLORES.primarioOscuro }, whiteSpace: "nowrap" }}>
             Exportar
           </Button>
+          )}
           <Menu anchorEl={exportAnchor} open={Boolean(exportAnchor)} onClose={() => setExportAnchor(null)}
             transformOrigin={{ horizontal: "right", vertical: "top" }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
             slotProps={{ paper: { sx: { borderRadius: "12px", mt: 0.5, minWidth: 150, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" } } }}>

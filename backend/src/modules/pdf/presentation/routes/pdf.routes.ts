@@ -8,11 +8,8 @@ const rol = require('../../../../middlewares/rol.js');
 
 const pdfRouter = Router();
 
-// Orden exacto del legado: paramétrica antes que /incidencias
-pdfRouter.get('/incidencias/:id/plantilla', pdfController.getIncidenciaTemplate);
 pdfRouter.get('/test', pdfController.getTest);
 pdfRouter.get('/asistencia', pdfController.getAsistencia);
-pdfRouter.get('/incidencias', pdfController.getIncidencias);
 pdfRouter.get('/dashboard', pdfController.getDashboard);
 pdfRouter.get('/tardanzas', pdfController.getTardanzas);
 pdfRouter.get('/ausencias', pdfController.getAusencias);

@@ -4,7 +4,6 @@ import { GetMonthlyReportHandler } from '@modules/reportes/application/use-cases
 import { GetIndicatorsHandler } from '@modules/reportes/application/use-cases/get-indicators/get-indicators.handler';
 import { GetTrendHandler } from '@modules/reportes/application/use-cases/get-trend/get-trend.handler';
 import { GetAttendanceReportHandler } from '@modules/reportes/application/use-cases/get-attendance-report/get-attendance-report.handler';
-import { GetIncidentsReportHandler } from '@modules/reportes/application/use-cases/get-incidents-report/get-incidents-report.handler';
 import { GetLateArrivalsReportHandler } from '@modules/reportes/application/use-cases/get-late-arrivals-report/get-late-arrivals-report.handler';
 import { GetAbsencesReportHandler } from '@modules/reportes/application/use-cases/get-absences-report/get-absences-report.handler';
 import { GetEmployeeReportHandler } from '@modules/reportes/application/use-cases/get-employee-report/get-employee-report.handler';
@@ -23,7 +22,6 @@ export function registerReportsModule(container: AwilixContainer) {
     getIndicatorsHandler: asClass(GetIndicatorsHandler).scoped(),
     getTrendHandler: asClass(GetTrendHandler).scoped(),
     getAttendanceReportHandler: asClass(GetAttendanceReportHandler).scoped(),
-    getIncidentsReportHandler: asClass(GetIncidentsReportHandler).scoped(),
     getLateArrivalsReportHandler: asClass(GetLateArrivalsReportHandler).scoped(),
     getAbsencesReportHandler: asClass(GetAbsencesReportHandler).scoped(),
     getEmployeeReportHandler: asClass(GetEmployeeReportHandler).scoped(),

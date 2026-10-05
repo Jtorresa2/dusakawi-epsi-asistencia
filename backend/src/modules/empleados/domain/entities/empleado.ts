@@ -1,6 +1,10 @@
 export interface EmpleadoRow {
   id: string;
   cedula: string;
+  primer_nombre?: string;
+  segundo_nombre?: string;
+  primer_apellido?: string;
+  segundo_apellido?: string;
   nombre: string;
   apellido: string;
   empleado: string;
@@ -18,7 +22,11 @@ export interface EmpleadoRow {
   activo: number;
   estado: string;
   schedule_id: string | null;
+  horario_id?: string | null;
   horario: string;
+  ultimo_acceso?: string | null;
+  rol?: string | null;
+  fingerprint?: string | null;
 }
 
 export interface EmpleadoFiltros {
@@ -28,6 +36,10 @@ export interface EmpleadoFiltros {
 
 export interface CrearEmpleadoData {
   cedula?: string;
+  primer_nombre?: string;
+  segundo_nombre?: string;
+  primer_apellido?: string;
+  segundo_apellido?: string;
   nombre: string;
   apellido?: string;
   correo?: string;
@@ -38,6 +50,10 @@ export interface CrearEmpleadoData {
 }
 
 export interface ActualizarEmpleadoData {
+  primer_nombre?: string;
+  segundo_nombre?: string;
+  primer_apellido?: string;
+  segundo_apellido?: string;
   nombre?: string;
   apellido?: string;
   correo?: string;

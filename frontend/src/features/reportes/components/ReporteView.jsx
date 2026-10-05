@@ -6,23 +6,19 @@ import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 import DataTable from "../../../shared/components/DataTable";
 import { COLORES } from "../../../shared/constants/colores.js";
+import useRol from "../../../shared/hooks/useRol";
 
 const ETIQUETAS = {
-  porEmpleado: "Reporte por Empleado", asistencia: "Reporte de Asistencia", incidencias: "Reporte de Incidencias", tardanzas: "Reporte de Tardanzas",
+  porEmpleado: "Reporte por Empleado", asistencia: "Reporte de Asistencia", tardanzas: "Reporte de Tardanzas",
   ausencias: "Reporte de Ausencias", porAreas: "Reporte por Áreas", marcaciones: "Reporte de Marcaciones",
 };
-const ICONOS = { porEmpleado: "👤", asistencia: "📊", incidencias: "📄", tardanzas: "⏰", ausencias: "🚫", porAreas: "🏢", marcaciones: "📍" };
+const ICONOS = { porEmpleado: "👤", asistencia: "📊", tardanzas: "⏰", ausencias: "🚫", porAreas: "🏢", marcaciones: "📍" };
 
 const API_MAP = {
-  porEmpleado: "obtenerReportePorEmpleado", asistencia: "obtenerReporteAsistencia", incidencias: "obtenerReporteIncidencias", tardanzas: "obtenerReporteTardanzas",
+  porEmpleado: "obtenerReportePorEmpleado", asistencia: "obtenerReporteAsistencia", tardanzas: "obtenerReporteTardanzas",
   ausencias: "obtenerReporteAusencias", porAreas: "obtenerReportePorAreas", marcaciones: "obtenerReporteMarcaciones",
 };
 
-const TIPOS_INC = [
-  {value:"biometric_failure",label:"Falla biométrica"},
-  {value:"other",label:"Otro"},
-];
-const EST_INC = ["pending","approved","rejected"];
 const EST_EMP = [{value:"1",label:"Activo"},{value:"0",label:"Inactivo"}];
 
 const MESES = [
@@ -33,7 +29,6 @@ const MESES = [
 const FILTROS = {
   porEmpleado: ["usuario_id","mes"],
   asistencia: ["fecha_desde","area_id","estado"],
-  incidencias: ["fecha_desde","usuario_id","area_id","estado_incidencia","tipo_incidencia"],
   tardanzas: ["fecha_desde","usuario_id","area_id"],
   ausencias: ["fecha_desde","usuario_id","area_id"],
   porAreas: ["area_id","mes","anio","usuario_id","estado"],
@@ -53,11 +48,6 @@ const COLS = {
     {field:"entrada2",headerName:"Ent. Tarde",width:90,valueFormatter:fm},
     {field:"salida2",headerName:"Sal. Tarde",width:90,valueFormatter:fm},
     {field:"horas_trabajadas",headerName:"Horas",width:70,valueFormatter:v=>v?`${v}h`:"—"},{field:"estado",headerName:"Estado",width:100},
-  ],
-  incidencias: [
-    {field:"empleado",headerName:"Empleado",width:180},{field:"cedula",headerName:"Cédula",width:100},{field:"area",headerName:"Área",width:120},
-    {field:"tipo",headerName:"Tipo",width:150},{field:"fecha",headerName:"Fecha",width:110},{field:"estado",headerName:"Estado",width:110},
-    {field:"descripcion",headerName:"Descripción",width:250,renderCell:p=>{const v=p.value||"";return <span title={v} style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"block",width:"100%"}}>{v||"—"}</span>;}},
   ],
   tardanzas: [
     {field:"empleado",headerName:"Empleado",width:160},{field:"cedula",headerName:"Cédula",width:90},{field:"area",headerName:"Área",width:110},
@@ -91,6 +81,7 @@ const COLS = {
 };
 
 function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onExportarExcel, onLimpiar }) {
+  const { puede } = useRol();
   const [f, setF] = useState({});
   const [areas, setAreas] = useState([]);
   const [cargos, setCargos] = useState([]);
@@ -171,15 +162,6 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
               </TextField>
             </Box>
           );
-          if (c === "estado_incidencia") return (
-            <Box key={c}>
-              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Estado</InputLabel>
-              <TextField select size="small" value={f.estado_incidencia||""} onChange={e => set("estado_incidencia",e.target.value)} sx={{minWidth:130,...SX}}>
-                <MenuItem value="">Todos</MenuItem>
-                {EST_INC.map(e => <MenuItem key={e} value={e}>{e}</MenuItem>)}
-              </TextField>
-            </Box>
-          );
           if (c === "estado_empleado") return (
             <Box key={c}>
               <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Estado</InputLabel>
@@ -189,22 +171,15 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
               </TextField>
             </Box>
           );
-          if (c === "tipo_incidencia") return (
-            <Box key={c}>
-              <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Tipo</InputLabel>
-              <TextField select size="small" value={f.tipo_incidencia||""} onChange={e => set("tipo_incidencia",e.target.value)} sx={{minWidth:200,...SX}}>
-                <MenuItem value="">Todos</MenuItem>
-                {TIPOS_INC.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
-              </TextField>
-            </Box>
-          );
           return null;
         })}
       </Box>
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
         <Button variant="contained" startIcon={<Search size={16}/>} onClick={() => onGenerar(f)} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,fontWeight:600,px:2.5,background:COLORES.primarioOscuro,"&:hover":{background:COLORES.primario}}}>Generar</Button>
+        {puede("reportes", "exportar") && <>
         <Button variant="outlined" startIcon={<FileText size={16}/>} onClick={onExportarPDF} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:COLORES.borde,color:COLORES.textoSecundario,"&:hover":{borderColor:COLORES.primarioOscuro,color:COLORES.primarioOscuro},"&.Mui-disabled":{color:COLORES.borde2,borderColor:COLORES.borde}}}>PDF</Button>
         <Button variant="outlined" startIcon={<FileSpreadsheet size={16}/>} onClick={onExportarExcel} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,borderColor:COLORES.borde,color:COLORES.textoSecundario,"&:hover":{borderColor:COLORES.primarioOscuro,color:COLORES.primarioOscuro}}}>Excel</Button>
+        </>}
         <Button variant="text" startIcon={<RotateCcw size={16}/>} onClick={()=>{setF({}); if(onLimpiar)onLimpiar();}} sx={{borderRadius:"10px",textTransform:"none",fontSize:12,color:COLORES.textoTerciario,"&:hover":{color:COLORES.danger}}}>Limpiar</Button>
       </Box>
     </Box>
@@ -234,7 +209,7 @@ function ResultadosPorEmpleado({ data }) {
       <Typography sx={{fontSize:14}}>Seleccione un empleado y genere el reporte.</Typography>
     </Box>
   );
-  const { empleado, periodo, resumen, permisos, incidencias, detalle } = data;
+  const { empleado, periodo, resumen, permisos, detalle } = data;
   const metricas = resumen ? [
     { label: "Días hábiles", value: periodo?.diasHabiles||0, color: COLORES.verdeTexto },
     { label: "Festivos", value: periodo?.festivos||0, color: COLORES.warningOscuro },
@@ -244,7 +219,6 @@ function ResultadosPorEmpleado({ data }) {
     { label: "Ausentes", value: resumen.ausentes||0, color: COLORES.textoTerciario },
     { label: "Horas total", value: resumen.horas_trabajadas ? `${resumen.horas_trabajadas}h` : "0h", color: COLORES.primario },
     { label: "Novedades", value: permisos?.total||0, color: COLORES.verdeTexto },
-    { label: "Incidencias", value: incidencias?.total||0, color: COLORES.danger },
   ] : [];
 
   return (
@@ -283,15 +257,6 @@ function ResultadosPorEmpleado({ data }) {
         <Box sx={{ mb:2, p:2, background:COLORES.successClaro, borderRadius:"12px", border:`1px solid ${COLORES.successFondo}` }}>
           <Typography sx={{ fontSize:13, fontWeight:600, color:COLORES.primarioOscuro }}>
             Novedades: {permisos.total} ({permisos.dias} días hábiles)
-          </Typography>
-        </Box>
-      )}
-
-      {/* Incidencias - solo resumen numérico por ahora */}
-      {incidencias?.total > 0 && (
-        <Box sx={{ mb:2, p:2, background:COLORES.dangerFondo2, borderRadius:"12px", border:`1px solid ${COLORES.dangerBorde}` }}>
-          <Typography sx={{ fontSize:13, fontWeight:600, color:COLORES.dangerOscuro }}>
-            Incidencias: {incidencias.total} ({incidencias.pendientes} pendientes)
           </Typography>
         </Box>
       )}
@@ -346,9 +311,7 @@ export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarP
       if (f.area_id) p.area_id = f.area_id;
       if (f.cargo_id) p.cargo_id = f.cargo_id;
       if (f.estado) p.estado = f.estado;
-      if (f.estado_incidencia) p.estado = f.estado_incidencia;
       if (f.estado_empleado !== "" && f.estado_empleado !== undefined) p.activo = f.estado_empleado;
-      if (f.tipo_incidencia) p.tipo = f.tipo_incidencia;
       if (f.mes) p.mes = f.mes;
       if (f.anio) p.anio = f.anio;
       const r = await fn(p);

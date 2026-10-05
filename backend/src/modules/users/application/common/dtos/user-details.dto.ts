@@ -1,8 +1,10 @@
 interface DocumentDetailsDto {
   documentType: string;
   documentNumber: string;
-  issueDate: Date;
-  placeOfIssue: string;
+  // issueDate y placeOfIssue son opcionales: no llegan del ERP para los
+  // empleados importados y se dejan en null en vez de inventar el dato.
+  issueDate: Date | null;
+  placeOfIssue: string | null;
 }
 
 interface AreaDetailsDto {
@@ -29,7 +31,6 @@ export interface UserDetailsDto {
   firstSurname: string;
   secondSurname?: string;
   address: string;
-  cell: string;
   phone?: string;
   documentDetails: DocumentDetailsDto;
   area: AreaDetailsDto;

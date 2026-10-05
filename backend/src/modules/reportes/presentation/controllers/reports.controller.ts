@@ -4,7 +4,6 @@ import type { GetMonthlyReportHandler } from '@modules/reportes/application/use-
 import type { GetIndicatorsHandler } from '@modules/reportes/application/use-cases/get-indicators/get-indicators.handler';
 import type { GetTrendHandler } from '@modules/reportes/application/use-cases/get-trend/get-trend.handler';
 import type { GetAttendanceReportHandler } from '@modules/reportes/application/use-cases/get-attendance-report/get-attendance-report.handler';
-import type { GetIncidentsReportHandler } from '@modules/reportes/application/use-cases/get-incidents-report/get-incidents-report.handler';
 import type { GetLateArrivalsReportHandler } from '@modules/reportes/application/use-cases/get-late-arrivals-report/get-late-arrivals-report.handler';
 import type { GetAbsencesReportHandler } from '@modules/reportes/application/use-cases/get-absences-report/get-absences-report.handler';
 import type { GetEmployeeReportHandler } from '@modules/reportes/application/use-cases/get-employee-report/get-employee-report.handler';
@@ -84,23 +83,6 @@ const getAttendance = async (req: Request, res: Response) => {
     res.json(result);
   } catch (error) {
     console.error('get attendance report error:', error);
-    serverError(res, error);
-  }
-};
-
-const getIncidents = async (req: Request, res: Response) => {
-  try {
-    const handler = req.container.resolve<GetIncidentsReportHandler>('getIncidentsReportHandler');
-    const result = await handler.handle({
-      fecha_desde: req.query.fecha_desde as string | undefined,
-      fecha_hasta: req.query.fecha_hasta as string | undefined,
-      estado: req.query.estado as string | undefined,
-      tipo: req.query.tipo as string | undefined,
-      area_id: req.query.area_id as string | undefined,
-    });
-    res.json(result);
-  } catch (error) {
-    console.error('get incidents report error:', error);
     serverError(res, error);
   }
 };
@@ -240,7 +222,6 @@ export default {
   getIndicators,
   getTrend,
   getAttendance,
-  getIncidents,
   getLateArrivals,
   getAbsences,
   getEmployee,

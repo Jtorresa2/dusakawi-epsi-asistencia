@@ -2,9 +2,7 @@ import { Prisma } from '@config/database/prisma/generated/client';
 import { prisma } from '@config/database/prisma/prisma';
 import { createRequire } from 'node:module';
 import type {
-  IncidenciaPlantillaData,
   AsistenciaRow,
-  IncidenciaRow,
   DashboardIndicadores,
   DashboardAsistenciaHoy,
   TardanzaRow,
@@ -57,26 +55,6 @@ function determinarEstado(e1: string | null | undefined, e2: string | null | und
 }
 
 export class PrismaPdfRepository implements PdfRepository {
-  async getIncidenciaPlantilla(id: string): Promise<IncidenciaPlantillaData | null> {
-    const rows = await prisma.$queryRaw<IncidenciaPlantillaData[]>`
-      SELECT i.*,
-        i.type AS tipo,
-        i.description AS descripcion,
-        i.status AS estado,
-        i.rejection_reason AS motivo_rechazo,
-        i.created_at AS fecha,
-        CONCAT(e.first_name, ' ', e.first_surname) AS empleado_nombre,
-        COALESCE(dd.document_number, '') AS cedula,
-        ar.name AS area
-      FROM asistencia.incidents i
-      LEFT JOIN asistencia.users e ON i.user_id = e.id
-      LEFT JOIN asistencia.document_details dd ON dd.user_id = e.id
-      LEFT JOIN asistencia.areas ar ON e.area_id = ar.id${roleJoin('i.user_id')}
-      WHERE i.id = ${id}${roleFilterByName('r')}
-    `;
-    return rows[0] ?? null;
-  }
-
   async getAsistencia(filters: {
     fecha?: string;
     fecha_desde?: string;
@@ -140,34 +118,6 @@ export class PrismaPdfRepository implements PdfRepository {
     }));
   }
 
-  async getIncidencias(filters: {
-    estado?: string;
-    tipo?: string;
-  }): Promise<IncidenciaRow[]> {
-    const conditions: Prisma.Sql[] = [];
-    if (filters.estado) {
-      conditions.push(Prisma.sql`AND i.status = ${filters.estado}`);
-    }
-    if (filters.tipo) {
-      conditions.push(Prisma.sql`AND i.type = ${filters.tipo}`);
-    }
-    return prisma.$queryRaw<IncidenciaRow[]>(Prisma.sql`
-      SELECT i.id,
-        CONCAT(e.first_name, ' ', e.first_surname) AS empleado,
-        COALESCE(dd.document_number, '') AS cedula, ar.name AS area,
-        i.type AS tipo, i.description AS descripcion, i.evidence AS evidencia_url,
-        TO_CHAR(i.created_at, 'DD/MM/YYYY') AS fecha,
-        i.status AS estado, i.rejection_reason AS motivo_rechazo
-      FROM asistencia.incidents i
-      JOIN asistencia.users e ON i.user_id = e.id
-      LEFT JOIN asistencia.document_details dd ON dd.user_id = e.id
-      JOIN asistencia.areas ar ON e.area_id = ar.id
-      WHERE 1=1${roleFilterByUserId('i.user_id')}
-      ${conditions.length > 0 ? Prisma.join(conditions, ' ') : Prisma.empty}
-      ORDER BY i.created_at DESC
-    `);
-  }
-
   async getDashboardIndicadores(): Promise<DashboardIndicadores> {
     const indicadores = await prisma.$queryRaw<DashboardIndicadores[]>`
       SELECT
@@ -183,15 +133,9 @@ export class PrismaPdfRepository implements PdfRepository {
       FROM asistencia.attendances a
       WHERE a.date = CURRENT_DATE${roleFilterByUserId('a.user_id')}
     `;
-    const permisos = await prisma.$queryRaw<{ permisos_hoy: number }[]>`
-      SELECT COUNT(*)::int AS permisos_hoy FROM asistencia.incidents
-      WHERE LOWER(status) IN ('approved', 'aprobado', 'aprobada')
-        AND DATE(created_at) = CURRENT_DATE${roleFilterByUserId('user_id')}
-    `;
     return {
       ...(indicadores[0] || { presentes_hoy: 0, ausentes_hoy: 0, tardanzas_hoy: 0, puntualidad: 100 }),
       ...(extras[0] || { horas_extras_hoy: 0 }),
-      ...(permisos[0] || { permisos_hoy: 0 }),
     };
   }
 
@@ -425,13 +369,6 @@ export class PrismaPdfRepository implements PdfRepository {
       WHERE user_id = ${targetId} AND EXTRACT(MONTH FROM date_from) = ${mesConsulta} AND EXTRACT(YEAR FROM date_from) = ${anioConsulta}${roleFilterByUserId('user_id')}
     `;
 
-    const incidenciasRows = await prisma.$queryRaw<{ total: number; pendientes: number }[]>`
-      SELECT COUNT(*)::int AS total, COUNT(*) FILTER (WHERE status = 'pending')::int AS pendientes
-      FROM asistencia.incidents
-      WHERE user_id = ${targetId} AND EXTRACT(MONTH FROM date) = ${mesConsulta} AND EXTRACT(YEAR FROM date) = ${anioConsulta}${roleFilterByUserId('user_id')}
-    `;
-    const incidencias = incidenciasRows[0] || { total: 0, pendientes: 0 };
-
     const detalle = await prisma.$queryRaw<{
       fecha: string | Date; estado: string; entrada1: string | null; salida1: string | null;
       entrada2: string | null; salida2: string | null; horas_trabajadas: number | null;
@@ -467,7 +404,6 @@ export class PrismaPdfRepository implements PdfRepository {
       empleado,
       resumen,
       permisos: { total: Number(permisos[0]?.total || 0), dias_permiso: Number(permisos[0]?.dias_permiso || 0) },
-      incidencias,
       detalle: detalleConFestivos,
       festivos: festivosDetalle,
       diasHabiles,

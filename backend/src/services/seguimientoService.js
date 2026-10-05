@@ -5,12 +5,11 @@ const pool = require('../config/db');
  *
  * Clasifica cada (usuario, fecha) laboral en EXACTAMENTE una de 5 situaciones
  * (fila única), con precedencia 1→5 y de forma tramo-aware contra
- * schedule_details. Reutiliza attendances, news (SOLO status='approved'),
- * incidents y schedule_details. NO escribe nada.
+ * schedule_details. Reutiliza attendances, news (SOLO status='approved') y
+ * schedule_details. NO escribe nada.
  *
- * Anti-N+1: 3 consultas batch sobre la ventana — universo (usuario,fecha),
- * novedades aprobadas e incidencias vinculables — y toda la clasificación se
- * resuelve en memoria.
+ * Anti-N+1: 2 consultas batch sobre la ventana — universo (usuario,fecha) y
+ * novedades aprobadas — y toda la clasificación se resuelve en memoria.
  */
 
 const SITUACION = Object.freeze({
@@ -20,11 +19,6 @@ const SITUACION = Object.freeze({
   SALIDA_NO_REGISTRADA: 'unregistered_exit',
   JORNADA_ABIERTA: 'open_day',
 });
-
-const INCIDENCIA_POR_SITUACION = {
-  [SITUACION.FALTA_TARDE]: 'afternoon_absence',
-  [SITUACION.SALIDA_NO_REGISTRADA]: 'unregistered_exit',
-};
 
 const PAGE_SIZE_MAX = 500;
 const PAGE_SIZE_DEFAULT = 100;
@@ -198,29 +192,6 @@ async function consultarNovedades(fechaDesde, fechaHasta) {
   return porUsuario;
 }
 
-async function consultarIncidencias(fechaDesde, fechaHasta) {
-  const [rows] = await pool.query(
-    `SELECT i.id, i.user_id AS usuario_id, i.date AS fecha, i.status AS estado, i.type AS tipo
-     FROM incidents i
-     WHERE i.date BETWEEN ? AND ?
-       AND i.type IN ('unregistered_exit', 'afternoon_absence', 'late', 'biometric_failure')`,
-    [fechaDesde, fechaHasta]
-  );
-  const porUsuarioFecha = new Map();
-  for (const inc of rows) {
-    const key = `${inc.usuario_id}|${fmtDate(inc.fecha)}`;
-    if (!porUsuarioFecha.has(key)) porUsuarioFecha.set(key, []);
-    porUsuarioFecha.get(key).push(inc);
-  }
-  return porUsuarioFecha;
-}
-
-function elegirIncidencia(incidencias, situacion) {
-  if (!incidencias || incidencias.length === 0) return null;
-  const preferido = INCIDENCIA_POR_SITUACION[situacion];
-  return incidencias.find((i) => i.tipo === preferido) || incidencias[0];
-}
-
 function tramoDelDia(fila) {
   const hasManana = Boolean(fila.exp_ent_manana && fila.exp_sal_manana);
   const hasTarde = Boolean(fila.exp_ent_tarde && fila.exp_sal_tarde);
@@ -229,7 +200,7 @@ function tramoDelDia(fila) {
   return 'afternoon';
 }
 
-function armarRegistro(fila, situacion, incidencia) {
+function armarRegistro(fila, situacion) {
   return {
     usuario_id: fila.usuario_id,
     cedula: fila.cedula,
@@ -247,9 +218,6 @@ function armarRegistro(fila, situacion, incidencia) {
     esperado_salida_manana: fila.exp_sal_manana || null,
     esperado_entrada_tarde: fila.exp_ent_tarde || null,
     esperado_salida_tarde: fila.exp_sal_tarde || null,
-    tiene_incidencia: Boolean(incidencia),
-    incidencia_estado: incidencia ? incidencia.estado : null,
-    incidencia_id: incidencia ? incidencia.id : null,
   };
 }
 
@@ -265,10 +233,9 @@ async function clasificar(filtros) {
   const fechaHasta = filtros.fecha_hasta;
   const hoy = hoyISO();
 
-  const [filas, novedadesPorUsuario, incidenciasPorUsuarioFecha] = await Promise.all([
+  const [filas, novedadesPorUsuario] = await Promise.all([
     consultarUniverso(filtros),
     consultarNovedades(fechaDesde, fechaHasta),
-    consultarIncidencias(fechaDesde, fechaHasta),
   ]);
 
   const clasificados = [];
@@ -287,9 +254,7 @@ async function clasificar(filtros) {
 
     if (filtros.situacion && situacion !== filtros.situacion) continue;
 
-    const incidencias = incidenciasPorUsuarioFecha.get(`${fila.usuario_id}|${fechaISO}`) || [];
-    const incidencia = elegirIncidencia(incidencias, situacion);
-    clasificados.push(armarRegistro(fila, situacion, incidencia));
+    clasificados.push(armarRegistro(fila, situacion));
   }
 
   const totalVentana = Object.values(conteos).reduce((acc, n) => acc + n, 0);

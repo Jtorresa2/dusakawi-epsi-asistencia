@@ -42,7 +42,10 @@ $$ LANGUAGE plpgsql;
 
 -- ---------------------------------------------------------------------
 -- Function: listar_empleados
--- Trae empleados activos desde el esquema administrativo de la empresa
+-- Trae empleados activos desde el esquema administrativo de la empresa.
+-- Ese esquema es externo (ERP) y opcional: si no esta disponible la funcion
+-- devuelve cero filas en lugar de fallar, de modo que el modulo de empleados
+-- siga funcionando en entornos sin acceso a la base corporativa.
 -- ---------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION asistencia.listar_empleados()
 RETURNS TABLE (
@@ -61,6 +64,13 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql AS $$
 BEGIN
+    -- El ERP es una dependencia externa. to_regclass devuelve NULL (sin error)
+    -- cuando el esquema o la tabla no existen, y el RETURN temprano evita que
+    -- el SELECT interno llegue a planificarse contra un objeto inexistente.
+    IF to_regclass('administrativo.sc_empleado') IS NULL THEN
+        RETURN;
+    END IF;
+
     RETURN QUERY
     SELECT
         e.consecutivo_empleado,

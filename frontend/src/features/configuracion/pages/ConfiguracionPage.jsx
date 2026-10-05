@@ -44,9 +44,6 @@ const DEFAULT_CONFIG = {
   permitir_espacios_contrasena: true,
   exigir_cambio_periodico: false,
   // Notificaciones
-  notificar_incidencias_creadas: true,
-  notificar_incidencias_aprobadas: true,
-  notificar_incidencias_rechazadas: true,
   notificar_acumulacion_tardanzas: false,
   recordatorios_marcacion: false,
   // General
@@ -418,24 +415,6 @@ export default function ConfiguracionPage() {
 
           {tab === "notificaciones" && (
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", xl: "1fr 1fr 1fr" }, gap: 1.75 }}>
-              <ConfigCard
-                icon={<Bell size={18} />}
-                titulo="Incidencias creadas"
-                descripcion="Notifica cuando un empleado registra una nueva incidencia."
-                control={switchControl("notificar_incidencias_creadas", "Incidencias creadas")}
-              />
-              <ConfigCard
-                icon={<Bell size={18} />}
-                titulo="Incidencias aprobadas"
-                descripcion="Notifica cuando una incidencia es aprobada."
-                control={switchControl("notificar_incidencias_aprobadas", "Incidencias aprobadas")}
-              />
-              <ConfigCard
-                icon={<Bell size={18} />}
-                titulo="Incidencias rechazadas"
-                descripcion="Notifica cuando una incidencia es rechazada."
-                control={switchControl("notificar_incidencias_rechazadas", "Incidencias rechazadas")}
-              />
               <ConfigCard
                 icon={<Bell size={18} />}
                 titulo="Acumulación de tardanzas"

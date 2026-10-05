@@ -83,10 +83,6 @@ export class GetEmployeeReportHandler {
           total: Number(report.permits[0]?.total || 0),
           dias: Number(report.permits[0]?.dias_permiso || 0),
         },
-        incidencias: {
-          total: Number(report.incidents[0]?.total || 0),
-          pendientes: Number(report.incidents[0]?.pendientes || 0),
-        },
         detalle: detail,
       },
     };

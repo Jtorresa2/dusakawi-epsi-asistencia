@@ -74,8 +74,10 @@ model document_details {
   document_type_id String         @db.Uuid
   user_id          String         @unique(map: "uq_document_details_user_id") @db.Uuid
   document_number  String         @unique(map: "uq_document_details_document_number") @db.VarChar(50)
-  issue_date       DateTime       @db.Date
-  place_of_issue   String         @db.VarChar(150)
+  // issue_date y place_of_issue no llegan del ERP: se dejan NULL en vez de
+  // inventar una fecha y un lugar de expedicion falsos.
+  issue_date       DateTime?      @db.Date
+  place_of_issue   String?        @db.VarChar(150)
   created_at       DateTime       @default(now()) @db.Timestamptz(6)
   updated_at       DateTime?      @db.Timestamptz(6)
   document_types   document_types @relation(fields: [document_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -114,29 +116,6 @@ model holidays {
   created_at DateTime  @default(now()) @db.Timestamptz(6)
   updated_at DateTime? @db.Timestamptz(6)
 
-  @@schema("asistencia")
-}
-
-model incidents {
-  id                                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id                            String    @db.Uuid
-  type                               String    @db.VarChar(50)
-  description                        String
-  date                               DateTime  @db.Date
-  status                             String    @db.VarChar(50)
-  priority                           String    @db.VarChar(20)
-  evidence                           String?
-  observation                        String?
-  rejection_reason                   String?
-  signed_file                        String?   @db.VarChar(255)
-  reviewed_by                        String?   @db.Uuid
-  created_at                         DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at                         DateTime? @db.Timestamptz(6)
-  users_incidents_reviewed_byTousers users?    @relation("incidents_reviewed_byTousers", fields: [reviewed_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_incidents_user_idTousers     users     @relation("incidents_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@index([reviewed_by], map: "idx_incidents_reviewed_by")
-  @@index([user_id], map: "idx_incidents_user_id")
   @@schema("asistencia")
 }
 
@@ -183,7 +162,7 @@ model password_reset_tokens {
 
 model positions {
   id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String    @unique(map: "uq_positions_name") @db.VarChar(100)
+  name        String    @unique(map: "uq_positions_name") @db.VarChar(150)
   description String
   active      Boolean   @default(true)
   area_id     String?   @db.Uuid
@@ -317,15 +296,18 @@ model users {
   first_surname                                                String                  @db.VarChar(100)
   second_surname                                               String?                 @db.VarChar(100)
   date_of_birth                                                DateTime                @db.Date
-  place_of_birth                                               String                  @db.VarChar(150)
-  address                                                      String                  @db.VarChar(255)
+  place_of_birth                                               String?                 @db.VarChar(150)
+  address                                                      String?                 @db.VarChar(255)
   phone                                                        String?                 @db.VarChar(20)
-  position_id                                                  String                  @db.Uuid
-  area_id                                                      String                  @db.Uuid
+  position_id                                                  String?                 @db.Uuid
+  area_id                                                      String?                 @db.Uuid
   schedule_id                                                  String?                 @db.Uuid
-  username                                                     String                  @unique(map: "uq_users_username") @db.VarChar(50)
-  password_hash                                                String                  @db.VarChar(255)
-  email                                                        String                  @unique(map: "uq_users_email") @db.VarChar(150)
+  // Credenciales opcionales: una persona puede existir sin cuenta de acceso.
+  username                                                     String?                 @db.VarChar(50)
+  password_hash                                                String?                 @db.VarChar(255)
+  email                                                        String?                 @db.VarChar(150)
+  // is_account distingue la cuenta de acceso del simple registro de persona.
+  is_account                                                   Boolean                 @default(true)
   active                                                       Boolean                 @default(true)
   password_reset_required                                      Boolean                 @default(true)
   last_access                                                  DateTime?               @db.Timestamptz(6)
@@ -337,8 +319,6 @@ model users {
   updated_at                                                   DateTime?               @db.Timestamptz(6)
   attendances                                                  attendances[]
   document_details                                             document_details?
-  incidents_incidents_reviewed_byTousers                       incidents[]             @relation("incidents_reviewed_byTousers")
-  incidents_incidents_user_idTousers                           incidents[]             @relation("incidents_user_idTousers")
   news_news_registered_byTousers                               news[]                  @relation("news_registered_byTousers")
   news_news_requested_by_user_idTousers                        news[]                  @relation("news_requested_by_user_idTousers")
   news_news_user_idTousers                                     news[]                  @relation("news_user_idTousers")
@@ -347,11 +327,15 @@ model users {
   schedule_assignments_schedule_assignments_assigned_byTousers schedule_assignments[]  @relation("schedule_assignments_assigned_byTousers")
   schedule_assignments_schedule_assignments_user_idTousers     schedule_assignments[]  @relation("schedule_assignments_user_idTousers")
   user_roles                                                   user_roles[]
-  areas                                                        areas                   @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  positions                                                    positions               @relation(fields: [position_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  areas                                                        areas?                  @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  positions                                                    positions?              @relation(fields: [position_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([area_id], map: "idx_users_area_id")
   @@index([position_id], map: "idx_users_position_id")
   @@index([schedule_id], map: "idx_users_schedule_id")
+  // UNIQUE parciales: solo se aplica a quienes tienen valor. Con UNIQUE
+  // absoluto, varios NULL colisionarian entre si.
+  @@unique([username], map: "uq_users_username")
+  @@unique([email], map: "uq_users_email")
   @@schema("asistencia")
 }

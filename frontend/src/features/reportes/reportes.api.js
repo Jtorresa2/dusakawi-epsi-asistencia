@@ -5,7 +5,6 @@ export const obtenerIndicadores = () => apiFetch("/reportes/indicadores");
 export const obtenerTendencia = () => apiFetch("/reportes/tendencia");
 
 export const obtenerReporteAsistencia = (p = {}) => { const q = new URLSearchParams(p).toString(); return apiFetch(`/reportes/asistencia${q ? `?${q}` : ""}`); };
-export const obtenerReporteIncidencias = (p = {}) => { const q = new URLSearchParams(p).toString(); return apiFetch(`/reportes/incidencias${q ? `?${q}` : ""}`); };
 export const obtenerReporteTardanzas = (p = {}) => { const q = new URLSearchParams(p).toString(); return apiFetch(`/reportes/tardanzas${q ? `?${q}` : ""}`); };
 export const obtenerReporteAusencias = (p = {}) => { const q = new URLSearchParams(p).toString(); return apiFetch(`/reportes/ausencias${q ? `?${q}` : ""}`); };
 export const obtenerReportePorAreas = (p = {}) => { const q = new URLSearchParams(p).toString(); return apiFetch(`/reportes/por-areas${q ? `?${q}` : ""}`); };

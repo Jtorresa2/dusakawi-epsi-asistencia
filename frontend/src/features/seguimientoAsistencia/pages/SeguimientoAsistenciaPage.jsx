@@ -15,6 +15,7 @@ import { obtenerSeguimiento, descargarPdfSeguimiento } from "../seguimientoAsist
 import { obtenerAreas } from "../../areas/area.api";
 import { seguimientoColumns } from "../components/columns";
 import SeguimientoDetalleModal from "../components/SeguimientoDetalleModal";
+import useRol from "../../../shared/hooks/useRol";
 
 const SITUACION_OPTIONS = [
   { value: "", label: "Todas las situaciones" },
@@ -35,8 +36,12 @@ const STAT_CARDS = [
 ];
 
 const KPIS_DEFAULT = {
-  total: 0, ausencia: 0, falta_manana: 0, falta_tarde: 0,
-  salida_no_registrada: 0, jornada_abierta: 0,
+  total: 0,
+  absence: 0,
+  missing_morning: 0,
+  missing_afternoon: 0,
+  unregistered_exit: 0,
+  open_day: 0,
 };
 
 /** 'YYYY-MM-DD' en zona local (no toISOString, que desplaza el día). */
@@ -56,6 +61,7 @@ function rangoDefault() {
 
 export default function SeguimientoAsistenciaPage() {
   const navigate = useNavigate();
+  const { puede } = useRol();
   const { fecha_desde: fdInit, fecha_hasta: fhInit } = rangoDefault();
 
   const [loading, setLoading] = useState(true);
@@ -134,7 +140,6 @@ export default function SeguimientoAsistenciaPage() {
       Fecha: r.fecha || "",
       Situación: SITUACION_OPTIONS.find((s) => s.value === r.situacion)?.label || r.situacion,
       Tramo: r.tramo || "",
-      Incidencia: r.tiene_incidencia ? (r.incidencia_estado || "Vinculada") : "—",
     }));
     if (data.length === 0) return;
     exportarExcel(data, `Seguimiento_Asistencia_${filtros.fecha_desde}_a_${filtros.fecha_hasta}`);
@@ -248,10 +253,12 @@ export default function SeguimientoAsistenciaPage() {
               ({total} en la ventana)
             </Typography>
           </Typography>
+          {puede("seguimiento", "exportar") && (
           <Button variant="outlined" startIcon={<Download size={16} />} onClick={(e) => setExportAnchor(e.currentTarget)}
             sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12, height: 40, px: 2, color: COLORES.textoTerciario, borderColor: COLORES.borde, "&:hover": { borderColor: COLORES.primarioOscuro, color: COLORES.primarioOscuro, bgcolor: COLORES.fondoGris } }}>
             Exportar
           </Button>
+          )}
         </Box>
 
         <DataTable

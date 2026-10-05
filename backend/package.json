@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "tsx watch src/main.ts",
     "build": "tsup",
-    "start": "node dist/main.js"
+    "start": "node dist/main.js",
+    "db:generate": "prisma generate --config src/config/database/prisma/prisma.config.ts",
+    "postinstall": "prisma generate --config src/config/database/prisma/prisma.config.ts"
   },
   "keywords": [],
   "author": "",

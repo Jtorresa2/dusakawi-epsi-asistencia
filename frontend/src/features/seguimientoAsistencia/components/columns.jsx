@@ -1,12 +1,10 @@
 import { Box, Typography } from "@mui/material";
-import { Eye, TriangleAlert } from "lucide-react";
+import { Eye } from "lucide-react";
 import { COLORES } from "../../../shared/constants/colores.js";
 
 /**
- * Columnas del módulo Seguimiento de Asistencia (REQ-08/10).
- * Situación y tramo como badges, estado de la incidencia vinculada y
- * acciones SOLO de lectura: Ver detalle y Ver en Incidencias
- * (este último únicamente cuando existe incidencia formal — REQ-10).
+ * Columnas del módulo Seguimiento de Asistencia (REQ-08).
+ * Situación y tramo como badges, con acción SOLO de lectura: Ver detalle.
  */
 
 export const SITUACION_STYLES = {
@@ -21,13 +19,6 @@ export const TRAMO_STYLES = {
   morning: { bg: COLORES.fondoGris2, color: COLORES.textoTerciario, label: "Mañana" },
   afternoon: { bg: COLORES.fondoGris2, color: COLORES.textoTerciario, label: "Tarde" },
   full: { bg: COLORES.successClaro, color: COLORES.verdeTexto, label: "Completo" },
-};
-
-export const INCIDENCIA_ESTADO_STYLES = {
-  pending: { bg: COLORES.warningFondo, color: COLORES.warningOscuro, label: "Pendiente" },
-  under_review: { bg: COLORES.primarioClaro, color: COLORES.primarioOscuro, label: "En revisión" },
-  approved: { bg: COLORES.successFondo, color: COLORES.verdeTexto, label: "Aprobada" },
-  rejected: { bg: COLORES.dangerFondo, color: COLORES.dangerOscuro, label: "Rechazada" },
 };
 
 function Badge({ style, value }) {
@@ -63,7 +54,7 @@ const btnBase = {
   transition: "all .2s ease",
 };
 
-export const seguimientoColumns = ({ onDetalle, onVerIncidencia }) => [
+export const seguimientoColumns = ({ onDetalle }) => [
   {
     field: "empleado",
     headerName: "Empleado",
@@ -113,18 +104,6 @@ export const seguimientoColumns = ({ onDetalle, onVerIncidencia }) => [
     width: 105,
     sortable: false,
     renderCell: ({ value }) => <Badge style={TRAMO_STYLES[value]} value={value} />,
-  },
-  {
-    field: "incidencia",
-    headerName: "Incidencia",
-    width: 120,
-    sortable: false,
-    renderCell: ({ row }) => {
-      if (!row.tiene_incidencia || !row.incidencia_estado) {
-        return <Typography sx={{ fontSize: 12, color: COLORES.textoSuave }}>—</Typography>;
-      }
-      return <Badge style={INCIDENCIA_ESTADO_STYLES[row.incidencia_estado]} value={row.incidencia_estado} />;
-    },
   },
   {
     field: "fecha",

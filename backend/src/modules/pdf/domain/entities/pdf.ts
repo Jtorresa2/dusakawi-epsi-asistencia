@@ -5,19 +5,6 @@ export interface PdfMeta {
   vigencia: string;
 }
 
-export interface IncidenciaPlantillaData {
-  id: string;
-  tipo: string;
-  descripcion: string;
-  estado: string;
-  motivo_rechazo: string | null;
-  fecha: string;
-  empleado_nombre: string;
-  cedula: string;
-  area: string;
-  evidencia_url: string | null;
-}
-
 export interface AsistenciaRow {
   id: string;
   cedula: string;
@@ -38,26 +25,12 @@ export interface AsistenciaRow {
   empleado: string;
 }
 
-export interface IncidenciaRow {
-  id: string;
-  empleado: string;
-  cedula: string;
-  area: string;
-  tipo: string;
-  descripcion: string;
-  evidencia_url: string | null;
-  fecha: string;
-  estado: string;
-  motivo_rechazo: string | null;
-}
-
 export interface DashboardIndicadores {
   presentes_hoy: number;
   ausentes_hoy: number;
   tardanzas_hoy: number;
   puntualidad: number;
   horas_extras_hoy: number;
-  permisos_hoy: number;
 }
 
 export interface DashboardAsistenciaHoy {
@@ -143,10 +116,6 @@ export interface PorEmpleadoData {
     total: number;
     dias_permiso: number;
   };
-  incidencias: {
-    total: number;
-    pendientes: number;
-  };
   detalle: Array<{
     fecha: string | Date;
     estado: string;
@@ -194,9 +163,6 @@ export interface SeguimientoRow {
   esperado_salida_manana: string | null;
   esperado_entrada_tarde: string | null;
   esperado_salida_tarde: string | null;
-  tiene_incidencia: boolean;
-  incidencia_estado: string | null;
-  incidencia_id: string | null;
 }
 
 export interface SeguimientoResult {

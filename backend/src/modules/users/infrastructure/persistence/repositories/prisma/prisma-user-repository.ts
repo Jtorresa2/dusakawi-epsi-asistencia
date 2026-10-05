@@ -48,8 +48,10 @@ export class PrismaUserRepository
   }
 
   async getUserByUsername(username: string): Promise<User | null> {
-    const found = await prisma.users.findUnique({
-      where: { username },
+    // Solo las cuentas de acceso pueden autenticarse. Los empleados importados
+    // como personas tienen is_account = FALSE y username NULL.
+    const found = await prisma.users.findFirst({
+      where: { username, is_account: true },
       include: includeEntities,
     });
 
@@ -57,7 +59,7 @@ export class PrismaUserRepository
   }
 
   async getUserExists(username: string): Promise<boolean> {
-    return (await prisma.users.count({ where: { username } })) !== 0;
+    return (await prisma.users.count({ where: { username, is_account: true } })) !== 0;
   }
 
   async getUserExistsByDocument(documentNumber: string): Promise<boolean> {

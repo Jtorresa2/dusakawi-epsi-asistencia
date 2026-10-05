@@ -9,7 +9,7 @@ export class ObtenerSeguimientoQueryHandler {
     const fechaDesde = filtros.fecha_desde || '';
     const fechaHasta = filtros.fecha_hasta || '';
 
-    const [filas, novedades, incidencias] = await Promise.all([
+    const [filas, novedades] = await Promise.all([
       this.seguimientoRepository.consultarUniverso({
         fecha_desde: fechaDesde,
         fecha_hasta: fechaHasta,
@@ -18,9 +18,8 @@ export class ObtenerSeguimientoQueryHandler {
         busqueda: filtros.busqueda,
       }),
       this.seguimientoRepository.consultarNovedades(fechaDesde, fechaHasta),
-      this.seguimientoRepository.consultarIncidencias(fechaDesde, fechaHasta),
     ]);
 
-    return clasificar({ filas, novedades, incidencias, filtros });
+    return clasificar({ filas, novedades, filtros });
   }
 }

@@ -108,6 +108,12 @@ const assignSchedule = async (req: Request, res: Response) => {
     if (result.status === 'missing-fields') {
       return res.status(400).json({ mensaje: 'usuario_id y horario_id son obligatorios' });
     }
+    if (result.status === 'invalid-user-id') {
+      return res.status(400).json({ mensaje: 'usuario_id no es un id válido' });
+    }
+    if (result.status === 'invalid-schedule-id') {
+      return res.status(400).json({ mensaje: 'horario_id no es un id válido' });
+    }
     if (result.status === 'end-before-today') {
       return res.status(400).json({ mensaje: 'La vigencia hasta no puede ser anterior a hoy' });
     }
@@ -147,6 +153,9 @@ const massAssignSchedule = async (req: Request, res: Response) => {
     if (result.status === 'invalid-user-ids') {
       return res.status(400).json({ mensaje: 'usuario_ids debe ser un arreglo de ids' });
     }
+    if (result.status === 'invalid-schedule-id') {
+      return res.status(400).json({ mensaje: 'horario_id no es un id válido' });
+    }
     if (result.status === 'end-before-today') {
       return res.status(400).json({ mensaje: 'La vigencia hasta no puede ser anterior a hoy' });
     }
@@ -161,6 +170,7 @@ const massAssignSchedule = async (req: Request, res: Response) => {
     res.status(200).json({
       mensaje: `Horario asignado a ${result.count} empleados correctamente`,
       cantidad: result.count,
+      descartados: result.discardedIds,
     });
   } catch (error) {
     serverError(res, error);
@@ -173,6 +183,9 @@ const unassignSchedule = async (req: Request, res: Response) => {
     const result = await handler.handle(req.body.usuario_id);
     if (result.status === 'missing-user') {
       return res.status(400).json({ mensaje: 'usuario_id es obligatorio' });
+    }
+    if (result.status === 'invalid-user-id') {
+      return res.status(400).json({ mensaje: 'usuario_id no es un id válido' });
     }
     if (result.status === 'user-not-found') {
       return res.status(404).json({ mensaje: 'Usuario no encontrado' });

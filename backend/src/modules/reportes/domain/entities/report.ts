@@ -79,8 +79,6 @@ export interface IndicatorData {
   previousAttendance: string | null;
   late: string;
   previousLate: string;
-  incidents: string;
-  previousIncidents: string;
   absences: string;
   previousAbsences: string;
   reports: string;
@@ -118,27 +116,6 @@ export interface AttendanceRecord extends ReportRecord {
   tipo_marcacion: string;
   estado: string;
   observacion: string | null;
-}
-
-export interface IncidentFilters {
-  fecha_desde?: string;
-  fecha_hasta?: string;
-  estado?: string;
-  tipo?: string;
-  area_id?: string;
-}
-
-export interface IncidentRecord extends ReportRecord {
-  id: string;
-  tipo: string;
-  descripcion: string;
-  evidencia_url: string | null;
-  estado: string;
-  fecha: string;
-  empleado: string;
-  cedula: string;
-  area: string;
-  motivo_rechazo: string | null;
 }
 
 export interface LateArrivalFilters {
@@ -217,11 +194,6 @@ export interface PermitSummaryRow extends ReportRecord {
   dias_permiso: string;
 }
 
-export interface IncidentSummaryRow extends ReportRecord {
-  total: string;
-  pendientes: string;
-}
-
 export interface EmployeeDetailRow extends ReportRecord {
   fecha: string;
   estado: string;
@@ -240,7 +212,6 @@ export interface EmployeeReportData {
   holidays: HolidayCountRow[];
   attendanceSummary: EmployeeSummaryRow[];
   permits: PermitSummaryRow[];
-  incidents: IncidentSummaryRow[];
   detail: EmployeeDetailRow[];
   detailHolidays: HolidayRow[];
 }

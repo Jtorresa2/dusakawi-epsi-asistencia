@@ -12,7 +12,7 @@ import { X, Clock, User, Sun, Moon, FileText, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import IconBox from "../../../shared/components/IconBox";
 import { COLORES } from "../../../shared/constants/colores.js";
-import { SITUACION_STYLES, TRAMO_STYLES, INCIDENCIA_ESTADO_STYLES } from "./columns";
+import { SITUACION_STYLES, TRAMO_STYLES } from "./columns";
 
 function formatFechaLarga(fechaStr) {
   if (!fechaStr) return "—";
@@ -26,11 +26,10 @@ function formatFechaLarga(fechaStr) {
 }
 
 /**
- * Modal de detalle del módulo Seguimiento (REQ-08/10) — patrón
+ * Modal de detalle del módulo Seguimiento (REQ-08) — patrón
  * DetalleAsistenciaModal adaptado al shape de /api/seguimiento: badge de
- * situación, tramo, estado de la incidencia vinculada y comparativa
- * "Esperado vs Real" por tramo cuando el horario lo define.
- * Acciones SOLO de lectura: Ver asistencia y Ver en Incidencias.
+ * situación, tramo y comparativa "Esperado vs Real" por tramo cuando el
+ * horario lo define. Acciones SOLO de lectura.
  */
 export default function SeguimientoDetalleModal({ open, onClose, row }) {
   const navigate = useNavigate();
@@ -182,33 +181,11 @@ export default function SeguimientoDetalleModal({ open, onClose, row }) {
           </Box>
         )}
 
-        {/* TARJETA 3: INCIDENCIA VINCULADA + AVISO SOLO LECTURA */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {row.tiene_incidencia && (
-            <Box sx={{ border: `1px solid ${COLORES.grisContorno}`, borderRadius: "16px", p: 2, bgcolor: COLORES.fondoGris }}>
-              <Typography sx={{ fontSize: 11, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase" }}>
-                Incidencia vinculada
-              </Typography>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-                <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.textoPrimario }}>#{row.incidencia_id || "—"}</Typography>
-                {(() => {
-                  const ic = INCIDENCIA_ESTADO_STYLES[row.incidencia_estado] || { bg: COLORES.fondoGris2, color: COLORES.textoSecundario, label: row.incidencia_estado };
-                  return (
-                    <Typography sx={{ fontSize: 11, fontWeight: 600, px: 1.2, py: 0.4, borderRadius: "8px", bgcolor: ic.bg, color: ic.color }}>
-                      {ic.label}
-                    </Typography>
-                  );
-                })()}
-              </Box>
-            </Box>
-          )}
-
-          <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start", borderRadius: "14px", px: 2, py: 1.5, bgcolor: COLORES.primarioClaro }}>
-            <Info size={17} style={{ color: COLORES.primarioOscuro, flexShrink: 0, marginTop: 1 }} />
-            <Typography sx={{ fontSize: 12, color: COLORES.primarioOscuro, lineHeight: 1.45 }}>
-              Vista informativa de seguimiento de asistencia consolidada.
-            </Typography>
-          </Box>
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start", borderRadius: "14px", px: 2, py: 1.5, bgcolor: COLORES.primarioClaro }}>
+          <Info size={17} style={{ color: COLORES.primarioOscuro, flexShrink: 0, marginTop: 1 }} />
+          <Typography sx={{ fontSize: 12, color: COLORES.primarioOscuro, lineHeight: 1.45 }}>
+            Vista informativa de seguimiento de asistencia consolidada.
+          </Typography>
         </Box>
       </DialogContent>
 

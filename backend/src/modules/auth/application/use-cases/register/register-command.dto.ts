@@ -13,7 +13,6 @@ export interface RegisterCommandDto {
   dateOfBirth: Date;
   placeOfBirth: string;
   address: string;
-  cell: string;
   phone?: string;
   areaId: Uuid;
   positionId: Uuid;

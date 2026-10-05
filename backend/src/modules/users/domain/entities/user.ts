@@ -16,7 +16,6 @@ export interface BasicData {
   dateOfBirth?: Date;
   placeOfBirth?: string;
   address?: string;
-  cell?: string;
   middleName?: string;
   secondSurname?: string;
   phone?: string;
@@ -34,14 +33,13 @@ export class User extends GenericEntity {
     private _firstName: Name,
     private _firstSurname: Name,
     private _dateOfBirth: Date,
-    private _placeOfBirth: DataString,
-    private _address: DataString,
-    private _cell: DataString,
-    private _position: Position,
-    private _area: Area,
-    private _username: DataString,
-    private _passwordHash: HashedPassword,
-    private _email: Email,
+    private _placeOfBirth: DataString | null,
+    private _address: DataString | null,
+    private _position: Position | null,
+    private _area: Area | null,
+    private _username: DataString | null,
+    private _passwordHash: HashedPassword | null,
+    private _email: Email | null,
     private _roles: Role[],
     private _middleName?: Name,
     private _secondSurname?: Name,
@@ -51,7 +49,7 @@ export class User extends GenericEntity {
     super(metadata);
   }
 
-  get passwordHash(): HashedPassword {
+  get passwordHash(): HashedPassword | null {
     return this._passwordHash;
   }
 
@@ -71,16 +69,12 @@ export class User extends GenericEntity {
     return this._dateOfBirth;
   }
 
-  get placeOfBirth(): DataString {
+  get placeOfBirth(): DataString | null {
     return this._placeOfBirth;
   }
 
-  get address(): DataString {
+  get address(): DataString | null {
     return this._address;
-  }
-
-  get cell(): DataString {
-    return this._cell;
   }
 
   get middleName(): Name | undefined {
@@ -95,19 +89,19 @@ export class User extends GenericEntity {
     return this._phone;
   }
 
-  get position(): Position {
+  get position(): Position | null {
     return this._position;
   }
 
-  get area(): Area {
+  get area(): Area | null {
     return this._area;
   }
 
-  get username(): DataString {
+  get username(): DataString | null {
     return this._username;
   }
 
-  get email(): Email {
+  get email(): Email | null {
     return this._email;
   }
 
@@ -140,9 +134,6 @@ export class User extends GenericEntity {
     this._address = basicData.address
       ? DataString.create(basicData.address)
       : this._address;
-    this._cell = basicData.cell
-      ? DataString.create(basicData.cell)
-      : this._cell;
     this._phone = basicData.phone
       ? DataString.create(basicData.phone)
       : this._phone;

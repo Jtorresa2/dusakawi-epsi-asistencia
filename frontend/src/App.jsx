@@ -33,7 +33,6 @@ const ConfiguracionPage = lazy(() => import("./features/configuracion/pages/Conf
 const RolesPage = lazy(() => import("./features/roles/pages/RolesPage"));
 const CopiasSeguridadPage = lazy(() => import("./features/copiasSeguridad/pages/CopiasSeguridadPage"));
 const MiPerfilPage = lazy(() => import("./features/miperfil/pages/MiPerfilPage"));
-const IntegracionesPage = lazy(() => import("./features/integraciones/pages/IntegracionesPage"));
 
 const routeFallback = (
   <div style={{ padding: 40, textAlign: "center", color: COLORES.textoSuave }}>Cargando...</div>
@@ -95,7 +94,6 @@ export default function App() {
         <Route path="/roles" element={<R roles={["admin"]}><RolesPage /></R>} />
         <Route path="/copias-seguridad" element={<R roles={["admin"]}><CopiasSeguridadPage /></R>} />
         <Route path="/festivos" element={<R roles={["admin", "talento_humano"]}><FestivosPage /></R>} />
-        <Route path="/integraciones" element={<R roles={["admin"]}><IntegracionesPage /></R>} />
 
         {/* Cuenta */}
         <Route path="/perfil" element={<ErrorBoundary><R roles={["admin", "talento_humano"]}><MiPerfilPage /></R></ErrorBoundary>} />

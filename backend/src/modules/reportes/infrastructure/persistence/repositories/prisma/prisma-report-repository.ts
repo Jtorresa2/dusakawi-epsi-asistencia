@@ -17,9 +17,6 @@ import type {
   EmployeeRow,
   EmployeeSummaryRow,
   HistoryRow,
-  IncidentFilters,
-  IncidentRecord,
-  IncidentSummaryRow,
   IndicatorData,
   LateArrivalFilters,
   LateArrivalRecord,
@@ -201,18 +198,6 @@ export class PrismaReportRepository implements ReportRepository {
         AND EXTRACT(YEAR FROM date) = ${previousYear}${roleFilterByUserId('user_id')}
         AND status = 'late'
     `;
-    const incidentRows = await prisma.$queryRaw<{ inc: string }[]>`
-      SELECT COUNT(*)::text AS inc
-      FROM asistencia.incidents
-      WHERE status = 'pending'${roleFilterByUserId('user_id')}
-    `;
-    const previousIncidentRows = await prisma.$queryRaw<{ inc: string }[]>`
-      SELECT COUNT(*)::text AS inc
-      FROM asistencia.incidents
-      WHERE status = 'pending'
-        AND EXTRACT(MONTH FROM created_at) = ${previousMonth}
-        AND EXTRACT(YEAR FROM created_at) = ${previousYear}${roleFilterByUserId('user_id')}
-    `;
     const absenceRows = await prisma.$queryRaw<{ aus: string }[]>`
       SELECT COUNT(*)::text AS aus
       FROM asistencia.attendances
@@ -247,8 +232,6 @@ export class PrismaReportRepository implements ReportRepository {
       previousAttendance: previousAttendanceRows[0]?.asis ?? null,
       late: lateRows[0]?.tard ?? '',
       previousLate: previousLateRows[0]?.tard ?? '',
-      incidents: incidentRows[0]?.inc ?? '',
-      previousIncidents: previousIncidentRows[0]?.inc ?? '',
       absences: absenceRows[0]?.aus ?? '',
       previousAbsences: previousAbsenceRows[0]?.aus ?? '',
       reports: reportRows[0]?.reps ?? '',
@@ -315,46 +298,6 @@ export class PrismaReportRepository implements ReportRepository {
       WHERE 1=1${roleFilterByName('r')}
       ${conditions.length > 0 ? Prisma.join(conditions, ' ') : Prisma.empty}
       ORDER BY a.date DESC, e.first_surname
-    `);
-  }
-
-  async getIncidents(filters: IncidentFilters): Promise<IncidentRecord[]> {
-    const conditions: Prisma.Sql[] = [];
-    if (filters.fecha_desde) {
-      conditions.push(Prisma.sql`AND DATE(i.created_at) >= ${filters.fecha_desde}`);
-    }
-    if (filters.fecha_hasta) {
-      conditions.push(Prisma.sql`AND DATE(i.created_at) <= ${filters.fecha_hasta}`);
-    }
-    if (filters.estado) {
-      conditions.push(Prisma.sql`AND LOWER(i.status) = LOWER(${filters.estado})`);
-    }
-    if (filters.tipo) {
-      conditions.push(Prisma.sql`AND LOWER(i.type) = LOWER(${filters.tipo})`);
-    }
-    if (filters.area_id) {
-      conditions.push(Prisma.sql`AND e.area_id = ${filters.area_id}`);
-    }
-
-    return prisma.$queryRaw<IncidentRecord[]>(Prisma.sql`
-      SELECT
-        i.id,
-        i.type AS tipo,
-        i.description AS descripcion,
-        i.evidence AS evidencia_url,
-        i.status AS estado,
-        TO_CHAR(i.created_at, 'YYYY-MM-DD') AS fecha,
-        TRIM(CONCAT(e.first_name, ' ', e.first_surname)) AS empleado,
-        COALESCE(dd.document_number, '') AS cedula,
-        COALESCE(ar.name, '') AS area,
-        i.rejection_reason AS motivo_rechazo
-      FROM asistencia.incidents i
-      JOIN asistencia.users e ON i.user_id = e.id
-      LEFT JOIN asistencia.document_details dd ON dd.user_id = e.id
-      LEFT JOIN asistencia.areas ar ON e.area_id = ar.id
-      WHERE 1=1${roleFilterByUserId('i.user_id')}
-      ${conditions.length > 0 ? Prisma.join(conditions, ' ') : Prisma.empty}
-      ORDER BY i.created_at DESC
     `);
   }
 
@@ -461,7 +404,6 @@ export class PrismaReportRepository implements ReportRepository {
         holidays: [],
         attendanceSummary: [],
         permits: [],
-        incidents: [],
         detail: [],
         detailHolidays: [],
       };
@@ -499,13 +441,6 @@ export class PrismaReportRepository implements ReportRepository {
         AND EXTRACT(MONTH FROM date_from) = ${month}
         AND EXTRACT(YEAR FROM date_from) = ${year}${roleFilterByUserId('user_id')}
     `;
-    const incidents = await prisma.$queryRaw<IncidentSummaryRow[]>`
-      SELECT COUNT(*)::text AS total, COUNT(*) FILTER (WHERE status = 'pending')::text AS pendientes
-      FROM asistencia.incidents
-      WHERE user_id = ${employeeId}
-        AND EXTRACT(MONTH FROM created_at) = ${month}
-        AND EXTRACT(YEAR FROM created_at) = ${year}${roleFilterByUserId('user_id')}
-    `;
     const detail = await prisma.$queryRaw<EmployeeDetailRow[]>`
       SELECT
         TO_CHAR(a.date, 'YYYY-MM-DD') AS fecha,
@@ -532,7 +467,7 @@ export class PrismaReportRepository implements ReportRepository {
         AND EXTRACT(YEAR FROM date) = ${year}
     `;
 
-    return { employee, holidays, attendanceSummary, permits, incidents, detail, detailHolidays };
+    return { employee, holidays, attendanceSummary, permits, detail, detailHolidays };
   }
 
   async getEmployees(filters: EmployeeReportFilters): Promise<EmployeeReportRecord[]> {

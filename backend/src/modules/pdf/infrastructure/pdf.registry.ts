@@ -1,8 +1,6 @@
 import { asClass, type AwilixContainer } from 'awilix';
-import { GetIncidenciaTemplateHandler } from '../application/use-cases/get-incidencia-template/get-incidencia-template.handler';
 import { GetTestPdfHandler } from '../application/use-cases/get-test-pdf/get-test-pdf.handler';
 import { GetAsistenciaPdfHandler } from '../application/use-cases/get-asistencia-pdf/get-asistencia-pdf.handler';
-import { GetIncidenciasPdfHandler } from '../application/use-cases/get-incidencias-pdf/get-incidencias-pdf.handler';
 import { GetDashboardPdfHandler } from '../application/use-cases/get-dashboard-pdf/get-dashboard-pdf.handler';
 import { GetTardanzasPdfHandler } from '../application/use-cases/get-tardanzas-pdf/get-tardanzas-pdf.handler';
 import { GetAusenciasPdfHandler } from '../application/use-cases/get-ausencias-pdf/get-ausencias-pdf.handler';
@@ -23,10 +21,8 @@ export function registerPdfModule(container: AwilixContainer) {
     pdfTemplateService: asClass(PdfTemplateService).singleton(),
 
     // use-cases
-    getIncidenciaTemplateHandler: asClass(GetIncidenciaTemplateHandler).scoped(),
     getTestPdfHandler: asClass(GetTestPdfHandler).scoped(),
     getAsistenciaPdfHandler: asClass(GetAsistenciaPdfHandler).scoped(),
-    getIncidenciasPdfHandler: asClass(GetIncidenciasPdfHandler).scoped(),
     getDashboardPdfHandler: asClass(GetDashboardPdfHandler).scoped(),
     getTardanzasPdfHandler: asClass(GetTardanzasPdfHandler).scoped(),
     getAusenciasPdfHandler: asClass(GetAusenciasPdfHandler).scoped(),

@@ -12,7 +12,6 @@ reportsRouter.get('/mensual', auth, reportsController.getMonthly);
 reportsRouter.get('/indicadores', auth, reportsController.getIndicators);
 reportsRouter.get('/tendencia', auth, reportsController.getTrend);
 reportsRouter.get('/asistencia', auth, reportsController.getAttendance);
-reportsRouter.get('/incidencias', auth, reportsController.getIncidents);
 reportsRouter.get('/tardanzas', auth, reportsController.getLateArrivals);
 reportsRouter.get('/ausencias', auth, reportsController.getAbsences);
 reportsRouter.get('/por-empleado', auth, reportsController.getEmployee);

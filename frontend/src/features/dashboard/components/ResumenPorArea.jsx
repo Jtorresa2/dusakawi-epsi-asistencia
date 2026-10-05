@@ -25,29 +25,41 @@ export default function ResumenPorArea({ data = [] }) {
       elevation={0}
       sx={{
         height: "100%",
-        borderRadius: 4,
+        borderRadius: "20px",
         border: `1px solid ${COLORES.grisContorno}`,
-        px: 2,
-        py: 1.5,
+        p: 2.5,
         boxShadow: "0 4px 20px rgba(0,0,0,.04)",
         display: "flex",
         flexDirection: "column",
       }}
     >
       {/* Encabezado */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
-        <IconBox icon={<BarChart3 />} color={COLORES.primarioOscuro} size={32} iconSize={16} />
-        <Typography sx={{ fontSize: 15, fontWeight: 600, color: COLORES.textoPrimario, flex: 1 }}>
-          Asistencia por área
-        </Typography>
-        <Box onClick={() => navigate("/reportes?tipo=asistencia")}
-          sx={{ display: "flex", alignItems: "center", gap: 0.3, color: COLORES.primarioOscuro, cursor: "pointer", fontSize: 11, fontWeight: 600, "&:hover": { color: COLORES.primarioOscuro } }}>
-          Ver reporte <ArrowRight size={12} />
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+          <IconBox icon={<BarChart3 />} color={COLORES.primarioOscuro} size={32} iconSize={16} />
+          <Typography sx={{ fontSize: 15, fontWeight: 700, color: "#374151" }}>
+            Asistencia por área
+          </Typography>
+        </Box>
+        <Box
+          onClick={() => navigate("/reportes?tipo=asistencia")}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.4,
+            color: COLORES.primarioOscuro,
+            cursor: "pointer",
+            fontSize: 12,
+            fontWeight: 600,
+            "&:hover": { color: COLORES.primario },
+          }}
+        >
+          Ver reporte <ArrowRight size={13} />
         </Box>
       </Box>
 
       {/* Tabla */}
-      <Box sx={{ flex: 1, overflowY: "auto", overflowX: "auto", mx: -2, px: 2 }}>
+      <Box sx={{ flex: 1, overflowY: "auto", overflowX: "auto", mx: -2.5, px: 2.5 }}>
         {/* Header de la tabla */}
         <Box sx={{ display: "flex", alignItems: "center", px: 1, py: 0.6, borderBottom: `1px solid ${COLORES.fondoGris2}`, mb: 0.5 }}>
           <Typography sx={{ fontSize: 10, fontWeight: 700, color: COLORES.textoSuave, textTransform: "uppercase", width: "30%", minWidth: 80 }}>Área</Typography>

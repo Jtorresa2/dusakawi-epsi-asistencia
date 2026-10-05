@@ -69,13 +69,6 @@ export class PrismaDashboardIndicadoresRepository implements DashboardIndicadore
       WHERE a.date BETWEEN ${start} AND ${end}
     `;
 
-    // Permisos/incidencias aprobadas en el período
-    const permisos = await prisma.$queryRaw<{ total: bigint }[]>`
-      SELECT COUNT(*) AS total FROM asistencia.incidents
-      WHERE LOWER(status) IN ('approved', 'aprobado', 'aprobada')
-        AND DATE(created_at) BETWEEN ${start} AND ${end}
-    `;
-
     // Asistencia de hoy (registros)
     const asistenciaHoy = await prisma.$queryRaw<{
       id: string;
@@ -140,6 +133,15 @@ export class PrismaDashboardIndicadoresRepository implements DashboardIndicadore
       ORDER BY mes
     `;
 
+    // Total de colaboradores registrados activos
+    const totalRegistradosResult = await prisma.$queryRaw<{ count: bigint }[]>`
+      SELECT COUNT(*)::bigint AS count
+      FROM asistencia.users u
+      WHERE u.active = true
+        AND u.is_account = FALSE
+        AND (u.username IS NULL OR LOWER(u.username) NOT IN ('admin', 'administrador', 'talento'))
+    `;
+
     const ind = indicadores[0] || { presentes_hoy: 0n, ausentes_hoy: 0n, tardanzas_hoy: 0n, puntualidad: 100 };
 
     return {
@@ -149,7 +151,7 @@ export class PrismaDashboardIndicadoresRepository implements DashboardIndicadore
         ausentes_hoy: Number(ind.ausentes_hoy),
         tardanzas_hoy: Number(ind.tardanzas_hoy),
         horas_extras_hoy: extras[0]?.horas_extras ?? 0,
-        permisos_hoy: Number(permisos[0]?.total ?? 0),
+        total_registrados: Number(totalRegistradosResult[0]?.count ?? 0),
       },
       registros,
       semanal: semanal.map((s) => ({

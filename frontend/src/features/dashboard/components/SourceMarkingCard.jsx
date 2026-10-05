@@ -12,14 +12,30 @@ const INDICADORES = [
 
 export default function SourceMarkingCard() {
   return (
-    <Paper elevation={0} sx={{
-      p: 3, borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`,
-      height: 320,
-      display: "flex", flexDirection: "column", justifyContent: "space-between",
-    }}>
-      <Typography sx={{ fontSize: 15, fontWeight: 600, color: COLORES.textoPrimario }}>
-        Fuente de marcado
-      </Typography>
+    <Paper
+      elevation={0}
+      sx={{
+        p: 2.5,
+        borderRadius: "20px",
+        border: `1px solid ${COLORES.grisContorno}`,
+        boxShadow: "0 4px 20px rgba(0,0,0,.04)",
+        height: 320,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+      }}
+    >
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+          <IconBox icon={<Radio />} color={COLORES.primario} size={32} iconSize={16} />
+          <Typography sx={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>
+            Fuente de marcado
+          </Typography>
+        </Box>
+        <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoSuave }}>
+          Dispositivos
+        </Typography>
+      </Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, flex: 1 }}>
         {INDICADORES.map((item) => (
           <Box key={item.label} sx={{ 

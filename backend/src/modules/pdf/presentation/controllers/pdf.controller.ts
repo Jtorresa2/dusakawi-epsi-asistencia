@@ -3,7 +3,6 @@ import { createRequire } from 'node:module';
 import type { PdfTemplateService } from '@modules/pdf/infrastructure/services/pdf-template.service';
 import type { GetTestPdfHandler } from '@modules/pdf/application/use-cases/get-test-pdf/get-test-pdf.handler';
 import type { GetAsistenciaPdfHandler } from '@modules/pdf/application/use-cases/get-asistencia-pdf/get-asistencia-pdf.handler';
-import type { GetIncidenciasPdfHandler } from '@modules/pdf/application/use-cases/get-incidencias-pdf/get-incidencias-pdf.handler';
 import type { GetDashboardPdfHandler } from '@modules/pdf/application/use-cases/get-dashboard-pdf/get-dashboard-pdf.handler';
 import type { GetTardanzasPdfHandler } from '@modules/pdf/application/use-cases/get-tardanzas-pdf/get-tardanzas-pdf.handler';
 import type { GetAusenciasPdfHandler } from '@modules/pdf/application/use-cases/get-ausencias-pdf/get-ausencias-pdf.handler';
@@ -12,7 +11,6 @@ import type { GetMarcacionesPdfHandler } from '@modules/pdf/application/use-case
 import type { GetPorAreasPdfHandler } from '@modules/pdf/application/use-cases/get-por-areas-pdf/get-por-areas-pdf.handler';
 import type { GetPorEmpleadoPdfHandler } from '@modules/pdf/application/use-cases/get-por-empleado-pdf/get-por-empleado-pdf.handler';
 import type { GetSeguimientoPdfHandler } from '@modules/pdf/application/use-cases/get-seguimiento-pdf/get-seguimiento-pdf.handler';
-import type { GetIncidenciaTemplateHandler } from '@modules/pdf/application/use-cases/get-incidencia-template/get-incidencia-template.handler';
 import type {
   PdfMeta,
   AsistenciaRow,
@@ -158,25 +156,6 @@ function drawTableSeguimiento(
   });
 }
 
-// ─── Plantilla individual de incidencia ────────────────────────────────
-const getIncidenciaTemplate = async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id as string;
-    const handler = req.container.resolve<GetIncidenciaTemplateHandler>('getIncidenciaTemplateHandler');
-    const row = await handler.handle(id);
-    if (!row) return res.status(404).json({ mensaje: 'Incidencia no encontrada' });
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename=plantilla_incidencia_${id}.pdf`);
-    const template = req.container.resolve<PdfTemplateService>('pdfTemplateService');
-    template.generarMembrete(res, META, (doc) => {
-      template.generarPlantillaIncidencia(doc, row);
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error al generar la plantilla PDF' });
-  }
-};
-
 // ─── GET /api/pdf/test ────────────────────────────────────────────────
 const getTest = (req: Request, res: Response) => {
   res.setHeader('Content-Type', 'application/pdf');
@@ -228,65 +207,6 @@ const getAsistencia = async (req: Request, res: Response) => {
   }
 };
 
-// ─── GET /api/pdf/incidencias ─────────────────────────────────────────
-const getIncidencias = async (req: Request, res: Response) => {
-  try {
-    const estado = str(req.query.estado);
-    const tipo = str(req.query.tipo);
-    const handler = req.container.resolve<GetIncidenciasPdfHandler>('getIncidenciasPdfHandler');
-    const rows = await handler.handle({ estado, tipo });
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'inline; filename=incidencias_dusakawi.pdf');
-    const template = req.container.resolve<PdfTemplateService>('pdfTemplateService');
-    template.generarMembrete(res, META, (doc) => {
-      doc.font('Helvetica-Bold').fontSize(12).fillColor('#1B5E20');
-      doc.text('REPORTE DE INCIDENCIAS', { align: 'center' });
-      doc.moveDown(0.5);
-      doc.font('Helvetica').fontSize(8).fillColor('#6B7280');
-      if (estado) doc.text(`Estado: ${estado}`, { align: 'center' });
-      if (tipo) doc.text(`Tipo: ${tipo}`, { align: 'center' });
-      doc.moveDown(1);
-      if (rows.length === 0) {
-        doc.fontSize(10).fillColor('#6B7280');
-        doc.text('No hay registros para los filtros seleccionados.', { align: 'center' });
-      } else {
-        doc.font('Helvetica').fontSize(7).fillColor('#6B7280');
-        doc.text(`Total: ${rows.length} registros`, PDF_BODY_X, doc.y, { align: 'right', width: 465 });
-        doc.moveDown(0.3);
-        const pageW = 595.28, contentW = pageW - PDF_BODY_X * 2 - 10;
-        const colW = [Math.round(contentW * 0.20), Math.round(contentW * 0.13), Math.round(contentW * 0.14), Math.round(contentW * 0.30), Math.round(contentW * 0.11), Math.round(contentW * 0.12)];
-        const headerH = 20; const rowH = 18;
-        let y = doc.y;
-        const headers = ['Empleado', 'Área', 'Tipo', 'Descripción', 'Fecha', 'Estado'];
-        doc.font('Helvetica-Bold').fontSize(7).fillColor('#FFFFFF');
-        doc.roundedRect(PDF_BODY_X, y, contentW, headerH, 3).fill('#1B5E20');
-        let hx = PDF_BODY_X + 3;
-        headers.forEach((h, i) => { doc.fillColor('#FFFFFF').text(h, hx + 3, y + 6, { width: colW[i] - 3 }); hx += colW[i]; });
-        y += headerH;
-        doc.fillColor('#111827').font('Helvetica').fontSize(6.5);
-        rows.forEach((r, idx) => {
-          const descLines = doc.heightOfString(r.descripcion || '', { width: colW[3] - 6 });
-          const lineCount = Math.max(1, Math.ceil(descLines / (6.5 * 1.2)));
-          const rh = Math.max(rowH, lineCount * 10 + 6);
-          if (y + rh > 700) { doc.addPage(); y = PDF_BODY_Y; }
-          if (idx % 2 === 0) doc.rect(PDF_BODY_X, y, contentW, rh).fill('#F9FAFB');
-          hx = PDF_BODY_X + 3;
-          const cells = [
-            r.empleado || '', r.area || '', r.tipo || '',
-            r.descripcion || '', r.fecha || '', r.estado || '',
-          ];
-          cells.forEach((val, i) => { doc.fillColor('#111827').text(val, hx + 3, y + 3, { width: colW[i] - 6 }); hx += colW[i]; });
-          y += rh;
-        });
-      }
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ mensaje: 'Error al generar PDF', error: (err as Error).message });
-  }
-};
-
 // ─── GET /api/pdf/dashboard ───────────────────────────────────────────
 const getDashboard = async (req: Request, res: Response) => {
   try {
@@ -309,7 +229,6 @@ const getDashboard = async (req: Request, res: Response) => {
         { label: 'Ausentes hoy', value: String(ind.ausentes_hoy ?? '—') },
         { label: 'Tardanzas', value: String(ind.tardanzas_hoy ?? '—') },
         { label: 'Horas extra', value: String(ind.horas_extras_hoy ?? '—') },
-        { label: 'Permisos', value: String(ind.permisos_hoy ?? '—') },
       ];
       const pageW = 595.28, contentW = pageW - PDF_BODY_X * 2 - 10;
       const kpiW = (contentW - 10) / 3;
@@ -546,7 +465,7 @@ const getPorEmpleado = async (req: Request, res: Response) => {
     const data = await handler.handle({ empleado_id, usuario_id, mes, anio });
     if (!data) return res.status(404).json({ mensaje: 'Empleado no encontrado' });
 
-    const { empleado, resumen, permisos, incidencias, detalle: detalleConFestivos, diasHabiles, totalFestivos, diasEsperados } = data;
+    const { empleado, resumen, permisos, detalle: detalleConFestivos, diasHabiles, totalFestivos, diasEsperados } = data;
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline; filename=reporte-por-empleado.pdf');
@@ -576,7 +495,6 @@ const getPorEmpleado = async (req: Request, res: Response) => {
         { label: 'Ausentes', value: `${aus}` },
         { label: 'Horas trabajadas', value: `${Number(resumen.horas_trabajadas)} h` },
         { label: 'Permisos', value: `${Number(permisos.total || 0)}` },
-        { label: 'Incidencias', value: `${Number(incidencias.total || 0)}` },
       ];
       const pw = 595.28, contentW = pw - PDF_BODY_X * 2 - 10;
       const colW = contentW / 3, gridH = 30;
@@ -694,10 +612,8 @@ const getSeguimiento = async (req: Request, res: Response) => {
 };
 
 export default {
-  getIncidenciaTemplate,
   getTest,
   getAsistencia,
-  getIncidencias,
   getDashboard,
   getTardanzas,
   getAusencias,

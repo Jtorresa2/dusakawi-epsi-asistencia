@@ -1,3 +1,4 @@
+import { isValidUuid } from '@modules/horarios/application/services/id-validation';
 import { getLocalDate } from '@modules/horarios/application/services/local-date';
 import type {
   ScheduleAssignmentFilters,
@@ -27,6 +28,9 @@ export class MassAssignScheduleHandler {
     ) {
       return { status: 'invalid-user-ids' as const };
     }
+    if (command.scheduleId && !isValidUuid(String(command.scheduleId))) {
+      return { status: 'invalid-schedule-id' as const };
+    }
 
     const validFrom = command.validFrom || getLocalDate();
     const validUntil = command.validUntil || null;
@@ -40,10 +44,22 @@ export class MassAssignScheduleHandler {
       return { status: 'schedule-not-found' as const };
     }
 
+    // `getActiveUserIdsByIds` castea a uuid[]: si UN id viniera mal, Postgres
+    // responde 22P02 y no se asigna nadie. Se filtran los invalidos antes.
+    const requestedIds = Array.isArray(command.userIds)
+      ? (command.userIds as unknown[]).map((id) => String(id))
+      : null;
+    const validIds = requestedIds
+      ? requestedIds.filter((id) => isValidUuid(id))
+      : null;
+    const discardedIds = requestedIds && validIds ? requestedIds.length - validIds.length : 0;
+
     const userIds =
-      Array.isArray(command.userIds) && command.userIds.length > 0
-        ? await this.scheduleRepository.getActiveUserIdsByIds(command.userIds as string[])
-        : await this.scheduleRepository.getActiveUserIdsByFilters(command.filters);
+      validIds && validIds.length > 0
+        ? await this.scheduleRepository.getActiveUserIdsByIds(validIds)
+        : requestedIds && requestedIds.length > 0
+          ? []
+          : await this.scheduleRepository.getActiveUserIdsByFilters(command.filters);
 
     await this.scheduleRepository.assignUsers(userIds, {
       userId: '',
@@ -54,6 +70,6 @@ export class MassAssignScheduleHandler {
       assignedBy: command.assignedBy ?? null,
     });
 
-    return { status: 'assigned' as const, count: userIds.length };
+    return { status: 'assigned' as const, count: userIds.length, discardedIds };
   }
 }

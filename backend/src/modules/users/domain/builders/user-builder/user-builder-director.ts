@@ -17,7 +17,6 @@ export class UserBuilderDirector {
     dateOfBirth: Date,
     placeOfBirth: string,
     address: string,
-    cell: string,
     phone?: string,
     middleName?: string,
     secondSurname?: string,
@@ -33,7 +32,6 @@ export class UserBuilderDirector {
       .dateOfBirth(dateOfBirth)
       .placeOfBirth(placeOfBirth)
       .address(address)
-      .cell(cell)
       .phone(phone);
 
     return this;

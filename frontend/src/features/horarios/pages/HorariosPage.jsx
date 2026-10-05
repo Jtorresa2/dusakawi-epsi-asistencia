@@ -3,7 +3,7 @@ import {
   Box, Paper, Typography, TextField, Button, MenuItem, Chip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   IconButton, Select, Switch, FormControlLabel, Divider, CircularProgress,
-  Checkbox, Tabs, Tab,
+  Checkbox, Tabs, Tab, Avatar, InputAdornment, TablePagination, Tooltip,
 } from "@mui/material";
 import {
   Plus, Clock, X, Search, UserPlus, UserMinus, Users, Filter,
@@ -121,24 +121,295 @@ function fmtFecha(v) {
   }
 }
 
-const COLUMNAS_HISTORIAL = ["Empleado", "Horario anterior", "Horario nuevo", "Fecha", "Usuario", "Motivo"];
+function toTitleCaseLocal(str) {
+  if (!str) return "—";
+  return String(str)
+    .trim()
+    .toLowerCase()
+    .replace(/(?:^|\s|-|\/)\S/g, (c) => c.toUpperCase());
+}
+
+function getInitialsLocal(str) {
+  if (!str) return "?";
+  const parts = str.trim().split(/\s+/);
+  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  return (parts[0]?.[0] || "?").toUpperCase();
+}
+
+function fmtFechaHora(v) {
+  if (!v) return "—";
+  try {
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return String(v);
+    const dia = String(d.getDate()).padStart(2, "0");
+    const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    const mes = meses[d.getMonth()] || "";
+    const anio = d.getFullYear();
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    return `${dia} ${mes} ${anio}, ${hh}:${mm}`;
+  } catch {
+    return String(v);
+  }
+}
+
+const REGLAS = [
+  {
+    icon: <Timer size={14} />,
+    titulo: "Modalidad Estricto",
+    texto: "Cálculo de tardanzas según hora de entrada y salida configuradas.",
+  },
+  {
+    icon: <Clock4 size={14} />,
+    titulo: "Modalidad Flexible",
+    texto: "Registra asistencia sin generar tardanzas ni sanciones de ingreso.",
+  },
+  {
+    icon: <Info size={14} />,
+    titulo: "Tipo Fija",
+    texto: "Horarios predeterminados de entrada y salida por cada día.",
+  },
+  {
+    icon: <Hourglass size={14} />,
+    titulo: "Tipo Por Horas",
+    texto: "Cómputo según meta acumulada de horas trabajadas en la jornada.",
+  },
+];
+
+const COLUMNAS_HISTORIAL = [
+  { id: "empleado", label: "Empleado", width: "22%" },
+  { id: "horario_anterior", label: "Jornada Anterior", width: "15%" },
+  { id: "horario_nuevo", label: "Nueva Jornada", width: "15%" },
+  { id: "fecha", label: "Fecha Asignación", width: "14%" },
+  { id: "usuario", label: "Asignado Por", width: "11%" },
+  { id: "motivo", label: "Motivo / Origen", width: "23%" },
+];
 
 function HistorialGlobalTable({ data = [], cargando = false }) {
+  const [busqueda, setBusqueda] = useState("");
+  const [pagina, setPagina] = useState(0);
+  const [filasPorPagina, setFilasPorPagina] = useState(5);
+
+  const filtrados = useMemo(() => {
+    if (!busqueda.trim()) return data;
+    const q = busqueda.toLowerCase().trim();
+    return data.filter((r) =>
+      `${r.empleado || ""} ${r.horario_anterior || ""} ${r.horario_nuevo || ""} ${r.usuario || ""} ${r.motivo || ""}`
+        .toLowerCase()
+        .includes(q)
+    );
+  }, [data, busqueda]);
+
+  const paginados = useMemo(() => {
+    return filtrados.slice(pagina * filasPorPagina, pagina * filasPorPagina + filasPorPagina);
+  }, [filtrados, pagina, filasPorPagina]);
+
   return (
-    <Paper elevation={0} sx={{ borderRadius: "16px", border: `1px solid ${PALETA.borde}`, overflow: "hidden" }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2.5, pt: 2, pb: 1.5 }}>
-        <History size={16} color={PALETA.verdeOscuro} />
-        <Typography sx={{ fontSize: 13, fontWeight: 700, color: PALETA.texto }}>
-          Historial global de asignaciones
-        </Typography>
+    <Paper
+      elevation={0}
+      sx={{
+        borderRadius: "16px",
+        border: `1px solid ${PALETA.borde}`,
+        bgcolor: COLORES.fondoBlanco,
+        overflow: "hidden",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.03)",
+      }}
+    >
+      {/* 1. ENCABEZADO Y BUSCADOR */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1.5,
+          p: 2,
+          pb: 1.75,
+          bgcolor: COLORES.fondoBlanco,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+          <Box
+            sx={{
+              width: 34,
+              height: 34,
+              borderRadius: "10px",
+              bgcolor: PALETA.verdeClaro,
+              color: PALETA.verdeOscuro,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <History size={17} />
+          </Box>
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography sx={{ fontSize: 14, fontWeight: 700, color: PALETA.texto }}>
+                Historial global de asignaciones
+              </Typography>
+              <Chip
+                label={`${filtrados.length} ${filtrados.length === 1 ? "registro" : "registros"}`}
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  bgcolor: PALETA.verdeClaro,
+                  color: PALETA.verdeOscuro,
+                  borderRadius: "5px",
+                }}
+              />
+            </Box>
+            <Typography sx={{ fontSize: 11.5, color: PALETA.grisTexto }}>
+              Auditoría cronológica de cambios y asignaciones de jornadas a empleados
+            </Typography>
+          </Box>
+        </Box>
+
+        <TextField
+          size="small"
+          placeholder="Buscar por empleado, horario o motivo..."
+          value={busqueda}
+          onChange={(e) => {
+            setBusqueda(e.target.value);
+            setPagina(0);
+          }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search size={14} color={PALETA.grisTexto} />
+                </InputAdornment>
+              ),
+            },
+          }}
+          sx={{
+            width: { xs: "100%", sm: 290 },
+            bgcolor: COLORES.fondoGris,
+            borderRadius: "9px",
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "9px",
+              fontSize: 12,
+              height: 36,
+              "& fieldset": { borderColor: COLORES.grisContorno },
+              "&:hover fieldset": { borderColor: PALETA.verde },
+              "&.Mui-focused fieldset": { borderColor: PALETA.verdeOscuro },
+            },
+          }}
+        />
       </Box>
-      <TableContainer sx={{ maxHeight: 300, overflowY: "auto" }}>
-        <Table size="small" stickyHeader>
+
+      {/* 2. REGLAS DEL SISTEMA (CINTA COMPACTA INTEGRADA - CERO ESPACIOS EN BLANCO) */}
+      <Box
+        sx={{
+          px: 2,
+          py: 1.25,
+          bgcolor: COLORES.fondoGris,
+          borderTop: `1px solid ${COLORES.grisContorno}`,
+          borderBottom: `1px solid ${COLORES.grisContorno}`,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.85 }}>
+          <Info size={13} color={PALETA.verdeOscuro} />
+          <Typography sx={{ fontSize: 11, fontWeight: 700, color: PALETA.texto, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+            Reglas del sistema de asistencia
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr 1fr" },
+            gap: 1,
+          }}
+        >
+          {REGLAS.map((r) => (
+            <Box
+              key={r.titulo}
+              sx={{
+                bgcolor: COLORES.fondoBlanco,
+                borderRadius: "8px",
+                p: 1,
+                px: 1.2,
+                border: `1px solid ${COLORES.grisContorno}`,
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 1,
+                transition: "all 0.15s ease",
+                "&:hover": {
+                  borderColor: PALETA.verde,
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: "5px",
+                  bgcolor: PALETA.verdeClaro,
+                  color: PALETA.verdeOscuro,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  mt: 0.15,
+                }}
+              >
+                {r.icon}
+              </Box>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ fontSize: 11.5, fontWeight: 700, color: PALETA.texto, lineHeight: 1.2 }}>
+                  {r.titulo}
+                </Typography>
+                <Typography sx={{ fontSize: 10.5, color: PALETA.grisTexto, lineHeight: 1.3, mt: 0.25 }}>
+                  {r.texto}
+                </Typography>
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+
+      {/* 3. TABLA AJUSTADA A CONTENIDO REAL (CERO ESPACIOS EN BLANCO SOBRANTES) */}
+      <TableContainer
+        sx={{
+          maxHeight: 440,
+          overflowX: "auto",
+          borderTop: `1px solid ${COLORES.grisContorno}`,
+          "&::-webkit-scrollbar": { height: 6, width: 6 },
+          "&::-webkit-scrollbar-track": { bgcolor: COLORES.fondoGris },
+          "&::-webkit-scrollbar-thumb": {
+            bgcolor: "rgba(46, 125, 50, 0.3)",
+            borderRadius: "3px",
+            "&:hover": { bgcolor: PALETA.verdeOscuro },
+          },
+        }}
+      >
+        <Table stickyHeader size="small" sx={{ width: "100%", minWidth: 920, tableLayout: "fixed" }}>
           <TableHead>
             <TableRow>
               {COLUMNAS_HISTORIAL.map((c) => (
-                <TableCell key={c} sx={{ fontWeight: 600, color: PALETA.grisTexto, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.1, whiteSpace: "nowrap" }}>
-                  {c}
+                <TableCell
+                  key={c.id}
+                  sx={{
+                    width: c.width,
+                    fontWeight: 700,
+                    color: PALETA.grisTexto,
+                    fontSize: 11,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.4px",
+                    bgcolor: COLORES.fondoGris,
+                    py: 1,
+                    px: 1,
+                    borderBottom: `1px solid ${COLORES.grisContorno}`,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {c.label}
                 </TableCell>
               ))}
             </TableRow>
@@ -146,80 +417,354 @@ function HistorialGlobalTable({ data = [], cargando = false }) {
           <TableBody>
             {cargando ? (
               <TableRow>
-                <TableCell colSpan={COLUMNAS_HISTORIAL.length} align="center" sx={{ py: 6 }}>
-                  <CircularProgress size={22} sx={{ color: PALETA.verde }} />
+                <TableCell colSpan={COLUMNAS_HISTORIAL.length} align="center" sx={{ py: 5 }}>
+                  <CircularProgress size={24} sx={{ color: PALETA.verdeOscuro }} />
+                  <Typography sx={{ fontSize: 13, color: PALETA.grisTexto, mt: 1 }}>
+                    Cargando historial de asignaciones...
+                  </Typography>
                 </TableCell>
               </TableRow>
-            ) : data.length === 0 ? (
+            ) : filtrados.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={COLUMNAS_HISTORIAL.length} align="center" sx={{ py: 6, color: PALETA.gris, fontSize: 13 }}>
-                  Sin asignaciones registradas
+                <TableCell colSpan={COLUMNAS_HISTORIAL.length} align="center" sx={{ py: 5 }}>
+                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.75 }}>
+                    <Box
+                      sx={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: "50%",
+                        bgcolor: COLORES.fondoGris,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: PALETA.grisTexto,
+                      }}
+                    >
+                      <History size={18} />
+                    </Box>
+                    <Typography sx={{ fontSize: 13, fontWeight: 600, color: PALETA.texto }}>
+                      {busqueda ? "No se encontraron coincidencias" : "Sin asignaciones registradas"}
+                    </Typography>
+                    <Typography sx={{ fontSize: 12, color: PALETA.grisTexto }}>
+                      {busqueda ? "Prueba ajustando el texto de búsqueda" : "Las asignaciones de jornada que realices aparecerán aquí"}
+                    </Typography>
+                  </Box>
                 </TableCell>
               </TableRow>
             ) : (
-              data.map((r, i) => (
-                <TableRow key={r.id ?? i} sx={{ "&:hover": { bgcolor: COLORES.fondoGris } }}>
-                  <TableCell sx={{ fontSize: 13, fontWeight: 600, color: PALETA.texto, py: 1, whiteSpace: "nowrap" }}>{r.empleado || "—"}</TableCell>
-                  <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1, whiteSpace: "nowrap" }}>{r.horario_anterior || "—"}</TableCell>
-                  <TableCell sx={{ fontSize: 13, color: PALETA.verdeOscuro, fontWeight: 600, py: 1, whiteSpace: "nowrap" }}>{r.horario_nuevo || "—"}</TableCell>
-                  <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1, whiteSpace: "nowrap" }}>{fmtFecha(r.fecha)}</TableCell>
-                  <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1, whiteSpace: "nowrap" }}>{r.usuario || "—"}</TableCell>
-                  <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1 }}>{r.motivo || "—"}</TableCell>
+              paginados.map((r, i) => (
+                <TableRow
+                  key={r.id ?? `${r.fecha}-${i}`}
+                  sx={{
+                    "&:hover": { bgcolor: COLORES.fondoGris },
+                    transition: "background 0.12s ease",
+                  }}
+                >
+                  {/* EMPLEADO */}
+                  <TableCell sx={{ py: 0.85, px: 1, overflow: "hidden" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
+                      <Avatar
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          bgcolor: PALETA.verdeClaro,
+                          color: PALETA.verdeOscuro,
+                          flexShrink: 0,
+                          border: "1px solid rgba(46,125,50,0.2)",
+                        }}
+                      >
+                        {getInitialsLocal(r.empleado)}
+                      </Avatar>
+                      <Tooltip
+                        title={toTitleCaseLocal(r.empleado)}
+                        arrow
+                        placement="top"
+                        enterDelay={200}
+                        slotProps={{
+                          tooltip: {
+                            sx: {
+                              bgcolor: "#1e293b",
+                              color: "#ffffff",
+                              fontSize: 12,
+                              fontWeight: 500,
+                              px: 1.5,
+                              py: 0.75,
+                              borderRadius: "7px",
+                              boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
+                            },
+                          },
+                          arrow: { sx: { color: "#1e293b" } },
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontSize: 12.5,
+                            fontWeight: 600,
+                            color: PALETA.texto,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            cursor: "default",
+                          }}
+                        >
+                          {toTitleCaseLocal(r.empleado)}
+                        </Typography>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+
+                  {/* HORARIO ANTERIOR */}
+                  <TableCell sx={{ py: 0.85, px: 1, overflow: "hidden" }}>
+                    {r.horario_anterior ? (
+                      <Tooltip
+                        title={r.horario_anterior}
+                        arrow
+                        placement="top"
+                        enterDelay={100}
+                        slotProps={{
+                          tooltip: {
+                            sx: {
+                              bgcolor: "#1e293b",
+                              color: "#ffffff",
+                              fontSize: 12,
+                              fontWeight: 500,
+                              px: 1.5,
+                              py: 0.75,
+                              borderRadius: "7px",
+                              boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
+                              maxWidth: 340,
+                            },
+                          },
+                          arrow: { sx: { color: "#1e293b" } },
+                        }}
+                      >
+                        <Box component="span" sx={{ display: "inline-flex", maxWidth: "100%", cursor: "pointer" }}>
+                          <Chip
+                            icon={<Clock size={11} style={{ color: PALETA.grisTexto }} />}
+                            label={r.horario_anterior}
+                            size="small"
+                            sx={{
+                              height: 22,
+                              fontSize: 11,
+                              bgcolor: COLORES.fondoGris,
+                              color: PALETA.grisTexto,
+                              borderRadius: "5px",
+                              fontWeight: 500,
+                              border: `1px solid ${COLORES.grisContorno}`,
+                              maxWidth: "100%",
+                              "& .MuiChip-label": {
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              },
+                            }}
+                          />
+                        </Box>
+                      </Tooltip>
+                    ) : (
+                      <Typography sx={{ fontSize: 11.5, color: COLORES.textoMuted, fontStyle: "italic" }}>
+                        Sin jornada previa
+                      </Typography>
+                    )}
+                  </TableCell>
+
+                  {/* HORARIO NUEVO */}
+                  <TableCell sx={{ py: 0.85, px: 1, overflow: "hidden" }}>
+                    <Tooltip
+                      title={r.horario_nuevo || "—"}
+                      arrow
+                      placement="top"
+                      enterDelay={100}
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            bgcolor: "#1e293b",
+                            color: "#ffffff",
+                            fontSize: 12,
+                            fontWeight: 500,
+                            px: 1.5,
+                            py: 0.75,
+                            borderRadius: "7px",
+                            boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
+                            maxWidth: 340,
+                          },
+                        },
+                        arrow: { sx: { color: "#1e293b" } },
+                      }}
+                    >
+                      <Box component="span" sx={{ display: "inline-flex", maxWidth: "100%", cursor: "pointer" }}>
+                        <Chip
+                          icon={<Check size={11} style={{ color: PALETA.verdeOscuro }} />}
+                          label={r.horario_nuevo || "—"}
+                          size="small"
+                          sx={{
+                            height: 22,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            bgcolor: "rgba(46, 125, 50, 0.10)",
+                            color: PALETA.verdeOscuro,
+                            border: "1px solid rgba(46, 125, 50, 0.22)",
+                            borderRadius: "5px",
+                            maxWidth: "100%",
+                            "& .MuiChip-label": {
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            },
+                          }}
+                        />
+                      </Box>
+                    </Tooltip>
+                  </TableCell>
+
+                  {/* FECHA */}
+                  <TableCell sx={{ py: 0.85, px: 1, whiteSpace: "nowrap" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
+                      <CalendarDays size={12} style={{ color: PALETA.verdeOscuro, flexShrink: 0 }} />
+                      <Typography sx={{ fontSize: 12, color: PALETA.texto, fontWeight: 500 }}>
+                        {fmtFechaHora(r.fecha)}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+
+                  {/* USUARIO QUE ASIGNÓ */}
+                  <TableCell sx={{ py: 0.85, px: 1, overflow: "hidden" }}>
+                    <Tooltip
+                      title={toTitleCaseLocal(r.usuario)}
+                      arrow
+                      placement="top"
+                      enterDelay={100}
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            bgcolor: "#1e293b",
+                            color: "#ffffff",
+                            fontSize: 12,
+                            fontWeight: 500,
+                            px: 1.5,
+                            py: 0.75,
+                            borderRadius: "7px",
+                            boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
+                            maxWidth: 340,
+                          },
+                        },
+                        arrow: { sx: { color: "#1e293b" } },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 0.6,
+                          px: 0.75,
+                          py: 0.25,
+                          bgcolor: COLORES.fondoGris,
+                          borderRadius: "5px",
+                          border: `1px solid ${COLORES.grisContorno}`,
+                          maxWidth: "100%",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <Users size={11} style={{ color: PALETA.verdeOscuro, flexShrink: 0 }} />
+                        <Typography
+                          sx={{
+                            fontSize: 11.5,
+                            fontWeight: 600,
+                            color: PALETA.texto,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {toTitleCaseLocal(r.usuario)}
+                        </Typography>
+                      </Box>
+                    </Tooltip>
+                  </TableCell>
+
+                  {/* MOTIVO / ORIGEN (CON TOOLTIP COMPLETO AL PASAR EL CURSOR) */}
+                  <TableCell sx={{ py: 0.85, px: 1, overflow: "hidden" }}>
+                    <Tooltip
+                      title={r.motivo || "Sin motivo registrado"}
+                      arrow
+                      placement="top"
+                      enterDelay={100}
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            bgcolor: "#1e293b",
+                            color: "#ffffff",
+                            fontSize: 12,
+                            fontWeight: 500,
+                            px: 1.5,
+                            py: 0.75,
+                            borderRadius: "7px",
+                            boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
+                            maxWidth: 340,
+                          },
+                        },
+                        arrow: { sx: { color: "#1e293b" } },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          maxWidth: "100%",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontSize: 12,
+                            color: PALETA.texto,
+                            fontWeight: 500,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {r.motivo || "—"}
+                        </Typography>
+                      </Box>
+                    </Tooltip>
+                  </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
       </TableContainer>
-    </Paper>
-  );
-}
 
-const REGLAS = [
-  {
-    icon: <Timer size={16} />,
-    titulo: "Modalidad Estricto",
-    texto: "El sistema calcula tardanzas utilizando la hora de entrada y salida configuradas.",
-  },
-  {
-    icon: <Clock4 size={16} />,
-    titulo: "Modalidad Flexible",
-    texto: "El sistema registra la asistencia pero no genera tardanzas ni sanciones por hora de ingreso.",
-  },
-  {
-    icon: <Info size={16} />,
-    titulo: "Tipo Fija",
-    texto: "La jornada posee horarios definidos de entrada y salida.",
-  },
-  {
-    icon: <Hourglass size={16} />,
-    titulo: "Tipo Por Horas",
-    texto: "La jornada se evalúa por el total de horas trabajadas según las horas esperadas configuradas.",
-  },
-];
-
-function ReglasCard() {
-  return (
-    <Paper elevation={0} sx={{ borderRadius: "16px", border: `1px solid ${PALETA.borde}`, p: 2.5 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
-        <Info size={16} color={PALETA.verdeOscuro} />
-        <Typography sx={{ fontSize: 13, fontWeight: 700, color: PALETA.texto }}>
-          Reglas del sistema de asistencia
-        </Typography>
-      </Box>
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5 }}>
-        {REGLAS.map((r) => (
-          <Box key={r.titulo} sx={{ bgcolor: COLORES.fondoGris, borderRadius: "12px", p: 1.5, display: "flex", gap: 1.25, alignItems: "flex-start" }}>
-            <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: PALETA.verdeClaro, color: PALETA.verdeOscuro, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              {r.icon}
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: 12, fontWeight: 700, color: PALETA.texto, mb: 0.25 }}>{r.titulo}</Typography>
-              <Typography sx={{ fontSize: 11, color: PALETA.grisTexto, lineHeight: 1.45 }}>{r.texto}</Typography>
-            </Box>
-          </Box>
-        ))}
-      </Box>
+      {/* 4. PAGINACIÓN */}
+      {!cargando && filtrados.length > 0 && (
+        <TablePagination
+          component="div"
+          count={filtrados.length}
+          page={pagina}
+          onPageChange={(e, newPage) => setPagina(newPage)}
+          rowsPerPage={filasPorPagina}
+          onRowsPerPageChange={(e) => {
+            setFilasPorPagina(parseInt(e.target.value, 10));
+            setPagina(0);
+          }}
+          rowsPerPageOptions={[5, 10, 25]}
+          labelRowsPerPage="Filas:"
+          labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
+          sx={{
+            borderTop: `1px solid ${COLORES.grisContorno}`,
+            px: 1.5,
+            py: 0.25,
+            "& .MuiTablePagination-toolbar": { minHeight: 42 },
+            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
+              fontSize: 11.5,
+              color: PALETA.grisTexto,
+            },
+          }}
+        />
+      )}
     </Paper>
   );
 }
@@ -1451,10 +1996,9 @@ export default function HorariosPage() {
         </Box>
       )}
 
-      {/* Reglas e historial global */}
+      {/* Historial global de asignaciones con reglas de asistencia integradas */}
       {(esAdmin || esTH) && (
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" }, gap: 2.5, mt: 2.5, alignItems: "start" }}>
-          <ReglasCard />
+        <Box sx={{ mt: 2.5 }}>
           <HistorialGlobalTable data={historialGlobal} cargando={historialCargando} />
         </Box>
       )}

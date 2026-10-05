@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Box, Paper, Typography, Chip, Button, Snackbar, Alert, Divider,
 } from "@mui/material";
-import { ShieldCheck, Badge, UserRound, Plus, Eye, Info, Layers, Users } from "lucide-react";
+import { ShieldCheck, Badge, UserRound, Eye, Info, Layers, Users } from "lucide-react";
 import { obtenerRoles, obtenerPermisosRol } from "../roles.api";
 import RolDrawer from "../components/RolDrawer";
 import { MODULOS_PERMISOS, ACCIONES } from "../config/modulosPermisos";
@@ -81,14 +81,6 @@ export default function RolesPage() {
             Administra los roles y permisos que definen el acceso y las acciones dentro del sistema.
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Plus size={17} />}
-          onClick={() => setSnack({ tipo: "info", mensaje: "La creación de roles se administra desde la base de datos del sistema" })}
-          sx={{ borderRadius: "11px", textTransform: "none", fontWeight: 600, fontSize: 13.5, px: 3, height: 42, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } }}
-        >
-          Nuevo rol
-        </Button>
       </Box>
 
       {/* TARJETAS */}
@@ -199,9 +191,8 @@ export default function RolesPage() {
             Administración de roles
           </Typography>
           <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, mt: 0.3, lineHeight: 1.55 }}>
-            Los roles determinan qué módulos y acciones puede ejecutar cada usuario dentro del sistema. Los tres roles
-            (Administrador, Talento Humano y Empleado) son fijos de la plataforma; sus permisos pueden ajustarse desde
-            "Ver detalles" en cada tarjeta.
+            Los roles de la plataforma son fijos y definen qué módulos y acciones puede ejecutar cada usuario dentro del
+            sistema; sus permisos pueden ajustarse desde "Ver detalles" en cada tarjeta.
           </Typography>
         </Box>
       </Paper>

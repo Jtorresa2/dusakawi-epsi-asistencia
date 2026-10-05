@@ -69,7 +69,6 @@ export class RegisterCommandHandler {
         request.dateOfBirth,
         request.placeOfBirth,
         request.address,
-        request.cell,
         request.phone,
         request.middleName,
         request.secondSurname,

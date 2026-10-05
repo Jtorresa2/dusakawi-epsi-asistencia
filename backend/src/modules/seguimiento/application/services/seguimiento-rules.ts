@@ -2,20 +2,18 @@
 //
 // Clasifica cada (usuario, fecha) laboral en EXACTAMENTE una de 5 situaciones
 // (fila única), con precedencia 1→5 y de forma tramo-aware contra
-// schedule_details. Reutiliza attendances, news (SOLO status='approved'),
-// incidents y schedule_details. NO escribe nada.
+// schedule_details. Reutiliza attendances, news (SOLO status='approved') y
+// schedule_details. NO escribe nada.
 //
 // Nótese que `mark_type` de news es la MODALIDAD (full_day/morning/
 // afternoon/hours) — el módulo novedades la escribe ahí (news_type es el
 // tipo). Por eso aquí `n.tipo` se compara contra tramos/modalidades.
 
 import {
-  INCIDENCIA_POR_SITUACION,
   PAGE_SIZE_DEFAULT,
   PAGE_SIZE_MAX,
   SITUACION,
   type FilaUniversoSeguimiento,
-  type IncidenciaVinculoRow,
   type KpisSeguimiento,
   type NovedadVinculoRow,
   type RegistroSeguimiento,
@@ -130,15 +128,6 @@ function clasificarFila(
   return SITUACION.JORNADA_ABIERTA;
 }
 
-function elegirIncidencia(
-  incidencias: IncidenciaVinculoRow[] | undefined | null,
-  situacion: string
-): IncidenciaVinculoRow | null {
-  if (!incidencias || incidencias.length === 0) return null;
-  const preferido = INCIDENCIA_POR_SITUACION[situacion];
-  return incidencias.find((i) => i.tipo === preferido) || incidencias[0];
-}
-
 function tramoDelDia(fila: FilaUniversoSeguimiento): 'full' | 'morning' | 'afternoon' {
   const hasManana = Boolean(fila.exp_ent_manana && fila.exp_sal_manana);
   const hasTarde = Boolean(fila.exp_ent_tarde && fila.exp_sal_tarde);
@@ -149,8 +138,7 @@ function tramoDelDia(fila: FilaUniversoSeguimiento): 'full' | 'morning' | 'after
 
 function armarRegistro(
   fila: FilaUniversoSeguimiento,
-  situacion: string,
-  incidencia: IncidenciaVinculoRow | null
+  situacion: string
 ): RegistroSeguimiento {
   return {
     usuario_id: fila.usuario_id,
@@ -169,21 +157,17 @@ function armarRegistro(
     esperado_salida_manana: fila.exp_sal_manana || null,
     esperado_entrada_tarde: fila.exp_ent_tarde || null,
     esperado_salida_tarde: fila.exp_sal_tarde || null,
-    tiene_incidencia: Boolean(incidencia),
-    incidencia_estado: incidencia ? incidencia.estado : null,
-    incidencia_id: incidencia ? incidencia.id : null,
   };
 }
 
 export interface ClasificarInput {
   filas: FilaUniversoSeguimiento[];
   novedades: NovedadVinculoRow[];
-  incidencias: IncidenciaVinculoRow[];
   filtros: { situacion?: string; page?: string | number; pageSize?: string | number };
 }
 
 export async function clasificar(input: ClasificarInput): Promise<ResultadoSeguimiento> {
-  const { filas, novedades, incidencias, filtros } = input;
+  const { filas, novedades, filtros } = input;
   const page = Math.max(1, Number.parseInt(String(filtros.page), 10) || 1);
   const pageSizeRaw = Number.parseInt(String(filtros.pageSize), 10);
   const pageSize = Number.isNaN(pageSizeRaw)
@@ -198,13 +182,6 @@ export async function clasificar(input: ClasificarInput): Promise<ResultadoSegui
     if (!novedadesPorUsuario.has(n.usuario_id)) novedadesPorUsuario.set(n.usuario_id, []);
     novedadesPorUsuario.get(n.usuario_id)!.push(n);
   }
-  const incidenciasPorUsuarioFecha = new Map<string, IncidenciaVinculoRow[]>();
-  for (const inc of incidencias) {
-    const key = `${inc.usuario_id}|${fmtDate(inc.fecha)}`;
-    if (!incidenciasPorUsuarioFecha.has(key)) incidenciasPorUsuarioFecha.set(key, []);
-    incidenciasPorUsuarioFecha.get(key)!.push(inc);
-  }
-
   const clasificados: RegistroSeguimiento[] = [];
   const conteos: Record<string, number> = {};
   for (const slug of Object.values(SITUACION) as string[]) conteos[slug] = 0;
@@ -221,10 +198,7 @@ export async function clasificar(input: ClasificarInput): Promise<ResultadoSegui
 
     if (filtros.situacion && situacion !== filtros.situacion) continue;
 
-    const incidenciasVinculables =
-      incidenciasPorUsuarioFecha.get(`${fila.usuario_id}|${fechaISO}`) || [];
-    const incidencia = elegirIncidencia(incidenciasVinculables, situacion);
-    clasificados.push(armarRegistro(fila, situacion, incidencia));
+    clasificados.push(armarRegistro(fila, situacion));
   }
 
   const totalVentana = Object.values(conteos).reduce((acc, n) => acc + n, 0);

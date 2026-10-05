@@ -459,11 +459,13 @@ export default function CargosPage() {
             <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario }}>
               &nbsp;
             </Typography>
+            {puede("cargos", "exportar") && (
             <Button variant="outlined" startIcon={<Download size={16} />} onClick={() => setOpenExport(true)}
               sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 2.5, color: COLORES.textoTerciario, borderColor: COLORES.grisContorno,
                 "&:hover": { borderColor: COLORES.primarioOscuro, color: COLORES.primarioOscuro, bgcolor: COLORES.fondoGris } }}>
               Exportar
             </Button>
+            )}
           </Box>
         </Box>
       </Paper>

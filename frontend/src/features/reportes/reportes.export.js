@@ -7,7 +7,7 @@ export const MESES = [
   {v:7,l:"Julio"},{v:8,l:"Agosto"},{v:9,l:"Septiembre"},{v:10,l:"Octubre"},{v:11,l:"Noviembre"},{v:12,l:"Diciembre"},
 ];
 
-export const NOMBRES = { porEmpleado: "Reporte por Empleado", asistencia: "Reporte de Asistencia", incidencias: "Reporte de Incidencias", tardanzas: "Reporte de Tardanzas", ausencias: "Reporte de Ausencias", porAreas: "Reporte por Áreas", marcaciones: "Reporte de Marcaciones" };
+export const NOMBRES = { porEmpleado: "Reporte por Empleado", asistencia: "Reporte de Asistencia", tardanzas: "Reporte de Tardanzas", ausencias: "Reporte de Ausencias", porAreas: "Reporte por Áreas", marcaciones: "Reporte de Marcaciones" };
 
 export const buildPdfUrl = (tipo, f) => {
   const p = new URLSearchParams();
@@ -19,8 +19,6 @@ export const buildPdfUrl = (tipo, f) => {
   if (f.area_id) p.append("area_id", f.area_id);
   if (f.cargo_id) p.append("cargo_id", f.cargo_id);
   if (f.estado) p.append("estado", f.estado);
-  if (f.estado_incidencia) p.append("estado", f.estado_incidencia);
-  if (f.tipo_incidencia) p.append("tipo", f.tipo_incidencia);
   if (f.estado_empleado) p.append("activo", f.estado_empleado);
   if (f.mes) p.append("mes", f.mes);
   if (f.anio) p.append("anio", f.anio);
@@ -68,7 +66,7 @@ function estilizarCelda(worksheet, r, c, estilo) {
 }
 
 function construirHojaPorEmpleado(registros) {
-  const { empleado, periodo, resumen, permisos, incidencias, detalle } = registros || {};
+   const { empleado, periodo, resumen, permisos, detalle } = registros || {};
 
   const nombreEmpleado = `${empleado?.nombre || ""} ${empleado?.apellido || ""}`.trim() || "Sin nombre";
   const etiquetaMes = MESES.find((m) => m.v === periodo?.mes)?.l || "";
@@ -81,7 +79,7 @@ function construirHojaPorEmpleado(registros) {
     [titulo, ...Array(F - 1).fill(null)],
     [periodoTxt, ...Array(F - 1).fill(null)],
     [],
-    ["Días hábiles", "Festivos", "Asistencia %", "Puntuales", "Tardanzas", "Ausentes", "Horas total", "Permisos", "Incidencias"],
+    ["Días hábiles", "Festivos", "Asistencia %", "Puntuales", "Tardanzas", "Ausentes", "Horas total", "Permisos"],
     [
       periodo?.diasHabiles || 0,
       periodo?.festivos || 0,
@@ -91,7 +89,6 @@ function construirHojaPorEmpleado(registros) {
       resumen?.ausentes || 0,
       resumen?.horas_trabajadas || 0,
       permisos?.total || 0,
-      incidencias?.total || 0,
     ],
     [],
     ["Fecha", "Ent. Mañana", "Sal. Mañana", "Ent. Tarde", "Sal. Tarde", "Horas", "Estado", "Festivo"],
@@ -178,7 +175,6 @@ function construirHojaPorEmpleado(registros) {
 }
 
 const ESTADO_ASIS_MAPA = { on_time: "Puntual", late: "Tardanza", absent: "Ausente", justified: "Justificado" };
-const ESTADO_INC_MAPA = { pendiente: "Pendiente", aprobado: "Aprobado", rechazado: "Rechazado" };
 
 // Mapeo de cada reporte a columnas legibles. Nunca se exponen IDs internos (UUIDs):
 // en su lugar va un correlativo "#" desde 1.
@@ -192,11 +188,6 @@ const MAPA_EXCEL = {
     Tardanza: r.minutos_tardanza ? `${r.minutos_tardanza} min` : "—",
     Marcación: r.tipo_marcacion || "—", Estado: ESTADO_ASIS_MAPA[r.estado] || r.estado || "—",
     Observación: r.observacion || "",
-  }),
-  incidencias: (r) => ({
-    "#": null, Empleado: r.empleado, Cédula: r.cedula, Área: r.area,
-    Tipo: r.tipo, Descripción: r.descripcion, Fecha: r.fecha,
-    Estado: ESTADO_INC_MAPA[r.estado] || r.estado, Motivo: r.motivo_rechazo || "",
   }),
   tardanzas: (r) => ({
     "#": null, Empleado: r.empleado, Cédula: r.cedula, Área: r.area, Piso: r.piso ?? "",

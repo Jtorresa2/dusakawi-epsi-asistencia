@@ -37,6 +37,9 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
       LEFT JOIN asistencia.document_details dd ON dd.user_id = u.id
       LEFT JOIN asistencia.areas a ON u.area_id = a.id
       LEFT JOIN asistencia.floors fl ON a.floor_id = fl.id
+      -- Solo las cuentas de acceso al portal. Los empleados importados como
+      -- personas tienen is_account = FALSE y no deben aparecer en esta pantalla.
+      WHERE u.is_account = TRUE
       ORDER BY u.created_at DESC
     `;
   }
@@ -173,6 +176,7 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
         LIMIT 1
       ) t ON TRUE
       WHERE u.active = TRUE
+        AND u.is_account = TRUE
         AND u.email IS NOT NULL AND u.email <> ''
         AND (u.password_reset_required = TRUE OR t.ultimo_envio IS NOT NULL)
       ORDER BY u.password_reset_required DESC, u.first_name, u.first_surname
@@ -186,6 +190,7 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
       JOIN asistencia.user_roles ur ON ur.user_id = u.id
       JOIN asistencia.roles r ON r.id = ur.role_id AND r.name IN ('Administrador', 'Talento Humano')
       WHERE u.active = TRUE
+        AND u.is_account = TRUE
         AND u.email IS NOT NULL AND u.email <> ''
         AND u.password_reset_required = TRUE
     `;

@@ -16,7 +16,9 @@ export class PrismaDocumentDetailsMapper {
       PrismaDocumentTypeMapper.toDomain(likeDocumentDetails.document_types),
       DocumentNumber.create(likeDocumentDetails.document_number),
       likeDocumentDetails.issue_date,
-      DataString.create(likeDocumentDetails.place_of_issue),
+      likeDocumentDetails.place_of_issue
+        ? DataString.create(likeDocumentDetails.place_of_issue)
+        : null,
     );
   }
 
@@ -31,7 +33,7 @@ export class PrismaDocumentDetailsMapper {
       },
       document_number: documentDetails.documentNumber.value,
       issue_date: documentDetails.issueDate,
-      place_of_issue: documentDetails.placeOfIssue.value,
+      place_of_issue: documentDetails.placeOfIssue?.value ?? null,
     };
   }
 
@@ -46,7 +48,7 @@ export class PrismaDocumentDetailsMapper {
       },
       document_number: documentDetails.documentNumber.value,
       issue_date: documentDetails.issueDate,
-      place_of_issue: documentDetails.placeOfIssue.value,
+      place_of_issue: documentDetails.placeOfIssue?.value ?? null,
     };
   }
 }

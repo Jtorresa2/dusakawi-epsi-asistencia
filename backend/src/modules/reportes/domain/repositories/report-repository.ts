@@ -11,8 +11,6 @@ import type {
   EmployeeReportFilters,
   EmployeeReportRecord,
   HistoryRow,
-  IncidentRecord,
-  IncidentFilters,
   IndicatorData,
   LateArrivalRecord,
   LateArrivalFilters,
@@ -35,7 +33,6 @@ export interface ReportRepository {
   ): Promise<IndicatorData>;
   getTrend(): Promise<TrendRow[]>;
   getAttendance(filters: AttendanceFilters): Promise<AttendanceRecord[]>;
-  getIncidents(filters: IncidentFilters): Promise<IncidentRecord[]>;
   getLateArrivals(filters: LateArrivalFilters): Promise<LateArrivalRecord[]>;
   getAbsences(filters: AbsenceFilters): Promise<AbsenceRecord[]>;
   getEmployeeReport(

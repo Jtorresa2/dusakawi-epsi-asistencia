@@ -5,7 +5,7 @@ export interface GetIndicadoresResponseDto {
     ausentes_hoy: number;
     tardanzas_hoy: number;
     horas_extras_hoy: number;
-    permisos_hoy: number;
+    total_registrados: number;
   };
   registros: Array<{
     id: string;

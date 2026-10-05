@@ -4,7 +4,7 @@ import {
   Button, Divider, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Checkbox, FormControlLabel, Tooltip, CircularProgress,
 } from "@mui/material";
-import { X, Pencil, Check, Minus, Save, ShieldCheck, Badge, UserRound } from "lucide-react";
+import { X, Pencil, Check, Minus, Save, ShieldCheck, Badge } from "lucide-react";
 import { MODULOS_PERMISOS, ACCIONES } from "../config/modulosPermisos";
 import { obtenerPermisosRol, guardarRol } from "../roles.api";
 import { COLORES } from "../../../shared/constants/colores.js";
@@ -14,14 +14,12 @@ const ACCION_LABELS = {
   crear: "Crear",
   editar: "Editar",
   eliminar: "Eliminar",
-  aprobar: "Aprobar",
   exportar: "Exportar",
 };
 
 const ROL_ICON = {
   Administrador: { icon: <ShieldCheck size={22} />, bg: COLORES.warningFondo, color: COLORES.warningOscuro },
   "Talento Humano": { icon: <Badge size={22} />, bg: COLORES.primarioClaro, color: COLORES.primarioOscuro },
-  Empleado: { icon: <UserRound size={22} />, bg: COLORES.primarioClaro, color: COLORES.primarioOscuro },
 };
 const fallbackIcon = { icon: <ShieldCheck size={22} />, bg: COLORES.fondoGris2, color: COLORES.textoSecundario };
 

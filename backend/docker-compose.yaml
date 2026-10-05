@@ -11,7 +11,10 @@ services:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./src/config/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      # Nombres numerados: initdb los ejecuta en orden alfabetico y schema.sql
+      # debe existir antes de que seed.sql inserte en sus tablas.
+      - ./src/config/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./src/config/database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s

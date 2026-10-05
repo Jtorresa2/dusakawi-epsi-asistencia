@@ -21,8 +21,6 @@ export class GetIndicatorsHandler {
     const previousAttendance = Number(data.previousAttendance) || 0;
     const late = Number(data.late) || 0;
     const previousLate = Number(data.previousLate) || late;
-    const incidents = Number(data.incidents) || 0;
-    const previousIncidents = Number(data.previousIncidents) || incidents;
     const absences = Number(data.absences) || 0;
     const previousAbsences = Number(data.previousAbsences) || absences;
     const reports = Number(data.reports) || 0;
@@ -40,10 +38,6 @@ export class GetIndicatorsHandler {
       tardanzas_mes: {
         valor: late,
         variacion: late - previousLate,
-      },
-      incidencias_abiertas: {
-        valor: incidents,
-        variacion: incidents - previousIncidents,
       },
       ausencias_mes: {
         valor: absences,

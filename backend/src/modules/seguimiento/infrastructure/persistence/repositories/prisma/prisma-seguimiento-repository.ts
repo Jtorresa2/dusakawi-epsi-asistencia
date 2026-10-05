@@ -3,7 +3,6 @@ import { prisma } from '@config/database/prisma/prisma';
 import type { SeguimientoRepository } from '@modules/seguimiento/domain/repositories/seguimiento-repository';
 import type {
   FilaUniversoSeguimiento,
-  IncidenciaVinculoRow,
   NovedadVinculoRow,
 } from '@modules/seguimiento/domain/entities/seguimiento';
 
@@ -54,6 +53,7 @@ async function consultarUniverso(filtros: {
     WHERE hd.schedule_id IS NOT NULL
       AND hol.id IS NULL
       AND h.modality NOT IN ('flexible', 'by_hours')
+      AND EXISTS (SELECT 1 FROM asistencia.attendances att WHERE att.date = d.fecha)
     ${filtros.area ? Prisma.sql`AND ar.name LIKE ${`%${filtros.area}%`}` : Prisma.empty}
     ${pisoNum !== null ? Prisma.sql`AND NULLIF(regexp_replace(fl.name, '\\D', '', 'g'), '')::int = ${pisoNum}` : Prisma.empty}
     ${
@@ -77,24 +77,11 @@ async function consultarNovedades(
            n.time_from AS hora_desde, n.time_to AS hora_hasta
     FROM asistencia.news n
     WHERE n.status = 'approved'
-      AND n.date_from <= ${fechaDesde} AND n.date_to >= ${fechaHasta}
-  `;
-}
-
-async function consultarIncidencias(
-  fechaDesde: string,
-  fechaHasta: string
-): Promise<IncidenciaVinculoRow[]> {
-  return prisma.$queryRaw<IncidenciaVinculoRow[]>`
-    SELECT i.id, i.user_id AS usuario_id, i.date::text AS fecha, i.status AS estado, i.type AS tipo
-    FROM asistencia.incidents i
-    WHERE i.date BETWEEN ${fechaDesde} AND ${fechaHasta}
-      AND i.type IN ('unregistered_exit', 'afternoon_absence', 'late', 'biometric_failure')
+      AND n.date_from <= ${fechaHasta}::date AND n.date_to >= ${fechaDesde}::date
   `;
 }
 
 export class PrismaSeguimientoRepository implements SeguimientoRepository {
   consultarUniverso = consultarUniverso;
   consultarNovedades = consultarNovedades;
-  consultarIncidencias = consultarIncidencias;
 }

@@ -22,13 +22,6 @@ const NOVEDADES = {
     editar: [R.ADMIN],
     eliminar: [R.ADMIN],
   },
-  incidencias: {
-    ver: [R.ADMIN, R.TH],
-    crear: [R.ADMIN, R.TH],
-    editar: [R.ADMIN, R.TH],
-    eliminar: [R.ADMIN],
-    aprobar: [R.ADMIN, R.TH],
-  },
   asistencia: {
     ver: [R.ADMIN, R.TH],
     registrar: [R.ADMIN, R.TH],

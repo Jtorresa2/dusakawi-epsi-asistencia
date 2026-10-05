@@ -1,5 +1,5 @@
 -- =====================================================================
--- SEED DATA: User, attendance and incident management system
+-- SEED DATA: User and attendance management system
 -- Target engine: PostgreSQL
 -- Notes:
 --   * Rows are referenced by natural/unique keys via subqueries (name,
@@ -8,13 +8,17 @@
 --   * ON CONFLICT ... DO NOTHING is used wherever a UNIQUE constraint
 --     exists, so this script can be re-run safely against catalog and
 --     master-data tables.
---   * requests, attendances and incidents represent discrete events
+--   * requests and attendances represent discrete events
 --     rather than catalog data, so they are inserted as plain INSERTs
 --     (re-running the script would duplicate them by design).
 --   * Run this after schema.sql has been executed.
 -- =====================================================================
 
 BEGIN;
+
+-- Tables live in the "asistencia" namespace. The SET search_path in
+-- schema.sql is session-scoped, so it does not carry over into this script.
+SET search_path TO asistencia, public;
 
 -- ---------------------------------------------------------------------
 -- document_types
@@ -35,14 +39,40 @@ INSERT INTO roles (name, description) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- ---------------------------------------------------------------------
--- actions (used by role permissions)
+-- actions (permission matrix)
+--
+-- The canonical catalog is the frontend module map:
+--   frontend/src/features/roles/config/modulosPermisos.js
+--     ACCIONES         -> 5 verbs (ver, crear, editar, eliminar, exportar)
+--     MODULOS_PERMISOS -> 14 module keys
+--
+-- The UI builds the key "<module>.<action>" and POSTs it to
+-- PUT /usuarios/roles/:id, so these rows MUST mirror that file 1:1.
+-- A permission absent here can never be granted to any role.
+-- 14 modules x 5 actions = 70.
 -- ---------------------------------------------------------------------
-INSERT INTO actions (name, description) VALUES
-    ('dashboard', 'Acceso al panel de control'),
-    ('dispositivos', 'Acceso a la gestión de dispositivos'),
-    ('empleados', 'Acceso a la gestión de empleados'),
-    ('reportes', 'Acceso a los reportes'),
-    ('usuarios', 'Acceso a la gestión de usuarios')
+INSERT INTO actions (name, description)
+SELECT m.clave || '.' || v.accion,
+       m.titulo || ' — ' || initcap(v.accion)
+FROM (VALUES
+    ('dashboard',        'Dashboard'),
+    ('personal',         'Personal'),
+    ('asistencia',       'Asistencia'),
+    ('seguimiento',      'Seguimiento de Asistencia'),
+    ('horarios',         'Horarios'),
+    ('novedades',        'Novedades Laborales'),
+    ('cargos',           'Cargos'),
+    ('areas',            'Áreas'),
+    ('festivos',         'Festivos'),
+    ('reportes',         'Reportes'),
+    ('roles',            'Roles'),
+    ('configuracion',    'Configuración'),
+    ('copias_seguridad', 'Copias de Seguridad'),
+    ('perfil',           'Mi Perfil')
+) AS m(clave, titulo)
+CROSS JOIN (VALUES
+    ('ver'), ('crear'), ('editar'), ('eliminar'), ('exportar')
+) AS v(accion)
 ON CONFLICT (name) DO NOTHING;
 
 -- ---------------------------------------------------------------------
@@ -115,37 +145,115 @@ ON CONFLICT (name) DO NOTHING;
 
 -- ---------------------------------------------------------------------
 -- role_actions (permissions mapping)
+--
+-- Administrador: every action (108).
+-- Talento Humano: the 11 operational modules x 6 actions (66).
+-- It is deliberately NOT granted roles, configuracion,
+-- copias_seguridad, dispositivos, turnos, mi_asistencia or
+-- mis_solicitudes: those are administration-only or personal to
+-- each employee.
 -- ---------------------------------------------------------------------
 INSERT INTO role_actions (role_id, action_id)
-VALUES
-    ((SELECT id FROM roles WHERE name = 'Administrador'), (SELECT id FROM actions WHERE name = 'dashboard')),
-    ((SELECT id FROM roles WHERE name = 'Administrador'), (SELECT id FROM actions WHERE name = 'dispositivos')),
-    ((SELECT id FROM roles WHERE name = 'Administrador'), (SELECT id FROM actions WHERE name = 'empleados')),
-    ((SELECT id FROM roles WHERE name = 'Administrador'), (SELECT id FROM actions WHERE name = 'reportes')),
-    ((SELECT id FROM roles WHERE name = 'Administrador'), (SELECT id FROM actions WHERE name = 'usuarios')),
-    ((SELECT id FROM roles WHERE name = 'Talento Humano'), (SELECT id FROM actions WHERE name = 'dashboard')),
-    ((SELECT id FROM roles WHERE name = 'Talento Humano'), (SELECT id FROM actions WHERE name = 'dispositivos')),
-    ((SELECT id FROM roles WHERE name = 'Talento Humano'), (SELECT id FROM actions WHERE name = 'empleados')),
-    ((SELECT id FROM roles WHERE name = 'Talento Humano'), (SELECT id FROM actions WHERE name = 'reportes')),
-    ((SELECT id FROM roles WHERE name = 'Talento Humano'), (SELECT id FROM actions WHERE name = 'usuarios'))
+SELECT r.id, a.id
+FROM roles r
+CROSS JOIN actions a
+WHERE r.name = 'Administrador'
+ON CONFLICT (role_id, action_id) DO NOTHING;
+
+INSERT INTO role_actions (role_id, action_id)
+SELECT r.id, a.id
+FROM roles r
+CROSS JOIN actions a
+WHERE r.name = 'Talento Humano'
+  AND split_part(a.name, '.', 1) IN (
+      'areas', 'asistencia', 'cargos', 'dashboard', 'festivos',
+      'horarios', 'novedades', 'perfil', 'personal', 'reportes',
+      'seguimiento'
+  )
 ON CONFLICT (role_id, action_id) DO NOTHING;
 
 -- ---------------------------------------------------------------------
 -- holidays
--- no UNIQUE constraint exists on this table, so a NOT EXISTS guard is
--- used to keep the script idempotent.
+-- One holiday per date: holidays carries UNIQUE (date), so the guard
+-- checks the date alone. type is stored in Spanish ('nacional'); the
+-- legacy English 'national' value was purged from production.
 -- ---------------------------------------------------------------------
 INSERT INTO holidays (name, type, date, active)
-SELECT v.name, v.type, v.date, v.active
+SELECT v.name, 'nacional', v.date, TRUE
 FROM (VALUES
-    ('Año Nuevo', 'nacional', DATE '2026-01-01', TRUE),
-    ('Día del Trabajo', 'nacional', DATE '2026-05-01', TRUE),
-    ('Independencia Nacional', 'nacional', DATE '2026-07-20', TRUE),
-    ('Navidad', 'nacional', DATE '2026-12-25', TRUE)
-) AS v(name, type, date, active)
+    ('Año Nuevo',                  DATE '2026-01-01'),
+    ('Día de los Reyes Magos',     DATE '2026-01-12'),
+    ('Día de San José',            DATE '2026-03-23'),
+    ('Jueves Santo',               DATE '2026-04-02'),
+    ('Viernes Santo',              DATE '2026-04-03'),
+    ('Domingo de Resurrección',    DATE '2026-04-05'),
+    ('Día del Trabajo',            DATE '2026-05-01'),
+    ('Ascensión del Señor',        DATE '2026-05-18'),
+    ('Corpus Christi',             DATE '2026-06-08'),
+    ('Sagrado Corazón de Jesús',   DATE '2026-06-15'),
+    ('San Pedro y San Pablo',      DATE '2026-06-29'),
+    ('Virgen de Chiquinquirá',      DATE '2026-07-13'),
+    ('Día de la Independencia',    DATE '2026-07-20'),
+    ('Batalla de Boyacá',          DATE '2026-08-07'),
+    ('Asunción de la Virgen',      DATE '2026-08-17'),
+    ('Día de la Raza',             DATE '2026-10-12'),
+    ('Todos los Santos',           DATE '2026-11-02'),
+    ('Independencia de Cartagena', DATE '2026-11-16'),
+    ('Inmaculada Concepción',      DATE '2026-12-08'),
+    ('Navidad',                    DATE '2026-12-25')
+) AS v(name, date)
 WHERE NOT EXISTS (
-    SELECT 1 FROM holidays h WHERE h.name = v.name AND h.date = v.date
+    SELECT 1 FROM holidays h WHERE h.date = v.date
 );
+
+-- ---------------------------------------------------------------------
+-- schedules
+-- is_default marks Administrativo Estricto as the company default
+-- (5 min entry tolerance). No user is bound to a schedule yet: the
+-- seed does not fabricate assignments.
+-- ---------------------------------------------------------------------
+INSERT INTO schedules (name, modality, workday_type, tolerance_minutes,
+                       tolerance_departure_minutes, expected_hours,
+                       description, active, is_default)
+VALUES
+    ('Administrativo Estricto',  'strict',   'fixed',   5, 0, NULL,
+     NULL, TRUE, TRUE),
+    ('Administrativo Flexible', 'flexible', 'fixed',   0, 0, NULL,
+     NULL, TRUE, FALSE),
+    ('Call Center',             'flexible', 'by_hours', 0, 0, 6.50,
+     'Jornada por horas trabajadas (6h, 6.5h, nocturno 11h)', TRUE, FALSE),
+    ('Operativo de Aseo',       'strict',   'fixed',   0, 0, NULL,
+     'Horario fijo 06:00-11:00 y 13:00-15:00', TRUE, FALSE)
+ON CONFLICT (name) DO NOTHING;
+
+-- ---------------------------------------------------------------------
+-- schedule_details (daily breakdown)
+-- Call Center has no rows: production defines it by_hours (jornada
+-- rotativa), not by a fixed daily window, so there is nothing to seed.
+-- ---------------------------------------------------------------------
+INSERT INTO schedule_details (schedule_id, day_of_week,
+                              morning_entry, morning_exit,
+                              afternoon_entry, afternoon_exit)
+SELECT s.id, v.dia, v.ent::time, v.sal_man::time, v.ent_tar::time, v.sal_tar::time
+FROM (VALUES
+    ('Administrativo Estricto',  'Lunes',     '07:00', '12:00', '14:00', '18:00'),
+    ('Administrativo Estricto',  'Martes',    '07:00', '12:00', '14:00', '18:00'),
+    ('Administrativo Estricto',  'Miércoles', '07:00', '12:00', '14:00', '17:00'),
+    ('Administrativo Estricto',  'Jueves',    '07:00', '12:00', '14:00', '17:00'),
+    ('Administrativo Estricto',  'Viernes',   '07:00', '12:00', '14:00', '17:00'),
+    ('Administrativo Flexible', 'Lunes',     '07:00', '12:00', '14:00', '18:00'),
+    ('Administrativo Flexible', 'Martes',    '07:00', '12:00', '14:00', '18:00'),
+    ('Administrativo Flexible', 'Miércoles', '07:00', '12:00', '14:00', '17:00'),
+    ('Administrativo Flexible', 'Jueves',    '07:00', '12:00', '14:00', '17:00'),
+    ('Administrativo Flexible', 'Viernes',   '07:00', '12:00', '14:00', '17:00'),
+    ('Operativo de Aseo',       'Lunes',     '06:00', '11:00', '13:00', '15:00'),
+    ('Operativo de Aseo',       'Martes',    '06:00', '11:00', '13:00', '15:00'),
+    ('Operativo de Aseo',       'Miércoles', '06:00', '11:00', '13:00', '15:00'),
+    ('Operativo de Aseo',       'Jueves',    '06:00', '11:00', '13:00', '15:00'),
+    ('Operativo de Aseo',       'Viernes',   '06:00', '11:00', '13:00', '15:00')
+) AS v(horario, dia, ent, sal_man, ent_tar, sal_tar)
+JOIN schedules s ON s.name = v.horario
+ON CONFLICT (schedule_id, day_of_week) DO NOTHING;
 
 -- ---------------------------------------------------------------------
 -- users
@@ -154,31 +262,27 @@ WHERE NOT EXISTS (
 -- ---------------------------------------------------------------------
 INSERT INTO users (
     first_name, middle_name, first_surname, second_surname,
-    date_of_birth, place_of_birth, address, phone, cell,
+    date_of_birth, place_of_birth, address, phone,
     position_id, area_id, username, password_hash, email
 ) VALUES
     (
-        'Juliana', NULL, 'Torres', 'Aaron',
-        '1995-04-12', 'Astrea', 'Calle 10 # 5-23', NULL, '3001234567',
+        'Administrador', NULL, '', '',
+        '2004-03-22', '', '', '3022451642',
         (SELECT id FROM positions WHERE name = 'Técnico de Sistemas'),
         (SELECT a.id FROM areas a JOIN floors f ON a.floor_id = f.id WHERE a.name = 'Sistemas' AND f.name = 'Piso 3'),
-        'Jtorresa22', '$2a$12$w5cCwla/RnLBWFTrLn0snOODkQlsZ2Lw96igxODh4KrdWy3ScyS8K', 'jtorresa@email.com'
+        'Administrador', '$2b$10$zn/sS718ZiJPpRGQ4nQNJu/bhi/.OBwEVgV8SNmXLa85qoAtjLjU6', 'torresaaronjuliana@gmail.com'
     ),
     (
         'María', NULL, 'Lopez', 'Peréz',
-        '1990-09-25', 'Valledupar', 'Carrera 15 # 20-14', NULL, '3009876543',
+        '1990-09-25', 'Valledupar', 'Carrera 15 # 20-14', '3009876543',
         (SELECT id FROM positions WHERE name = 'Coordinador de Talento Humano'),
         (SELECT a.id FROM areas a JOIN floors f ON a.floor_id = f.id WHERE a.name = 'Talento Humano' AND f.name = 'Piso 4'),
         'talento', '$2b$10$FnNwnu0sg.DOrspnoCm91.PVx/HHmKhXM7fUGh6i1mZQLN7JhIVR.', 'm.lopez@dusakawi.com'
-    ),
-    (
-        'Carlos', NULL, 'Rodríguez', 'Rojas',
-        '1992-11-05', 'Barranquilla', 'Calle 72 # 8-90', '3155556677', '3184455667',
-        (SELECT id FROM positions WHERE name = 'Contador'),
-        (SELECT a.id FROM areas a JOIN floors f ON a.floor_id = f.id WHERE a.name = 'Contabilidad' AND f.name = 'Piso 3'),
-        'carlos', '$2b$10$QfVbkqSfSztAqeMBBcIOxuyeCFGxeCa/X3ErYjTvG5YSKbzM5SHvG', 'c.rodriguez@dusakawi.com'
     )
-ON CONFLICT (username) DO NOTHING;
+-- El indice uq_users_username es PARCIAL (WHERE username IS NOT NULL), asi que
+-- el conflict target debe repetir el mismo predicado: un ON CONFLICT (username)
+-- sin predicado no encuentra indice y aborta el seed.
+ON CONFLICT (username) WHERE username IS NOT NULL DO NOTHING;
 
 -- ---------------------------------------------------------------------
 -- document_details
@@ -189,18 +293,13 @@ INSERT INTO document_details (
 VALUES
     (
         (SELECT id FROM document_types WHERE name = 'Cédula de Ciudadanía'),
-        (SELECT id FROM users WHERE username = 'Jtorresa22'),
-        '1065432187', '2012-03-15', 'Valledupar'
+        (SELECT id FROM users WHERE username = 'Administrador'),
+        '111111111', '2012-03-15', 'Valledupar'
     ),
     (
         (SELECT id FROM document_types WHERE name = 'Cédula de Ciudadanía'),
         (SELECT id FROM users WHERE username = 'talento'),
         '1073654298', '2015-07-22', 'Valledupar'
-    ),
-    (
-        (SELECT id FROM document_types WHERE name = 'Cédula de Extranjería'),
-        (SELECT id FROM users WHERE username = 'carlos'),
-        '1007654321', '2018-05-30', 'Barranquilla'
     )
 ON CONFLICT (document_number) DO NOTHING;
 
@@ -210,7 +309,7 @@ ON CONFLICT (document_number) DO NOTHING;
 INSERT INTO user_roles (user_id, role_id)
 VALUES
     ((SELECT id FROM users WHERE username = 'talento'), (SELECT id FROM roles WHERE name = 'Talento Humano')),
-    ((SELECT id FROM users WHERE username = 'Jtorresa22'), (SELECT id FROM roles WHERE name = 'Administrador'))
+    ((SELECT id FROM users WHERE username = 'Administrador'), (SELECT id FROM roles WHERE name = 'Administrador'))
 ON CONFLICT (user_id, role_id) DO NOTHING;
 
 -- ---------------------------------------------------------------------
@@ -218,43 +317,17 @@ ON CONFLICT (user_id, role_id) DO NOTHING;
 -- event data: inserted as-is, not guarded with ON CONFLICT.
 -- ---------------------------------------------------------------------
 INSERT INTO requests (user_id, start_date, end_date, type) VALUES
-    ((SELECT id FROM users WHERE username = 'carlos'), '2026-08-10', '2026-08-12', 'vacaciones'),
     ((SELECT id FROM users WHERE username = 'talento'), '2026-08-20', '2026-08-20', 'permiso_médico'),
     (NULL, '2026-09-01', '2026-09-05', 'mantenimiento_general');
 
 -- ---------------------------------------------------------------------
 -- attendances
--- event data: inserted as-is, not guarded with ON CONFLICT.
+-- NOT seeded on purpose.
+--
+-- Attendance is transactional data written by the biometric device
+-- (huella / RFID), not reference data. Seeding it would inject fabricated
+-- marks into a real attendance history, so this table is left empty here
+-- and populated at runtime by the device ingestion flow.
 -- ---------------------------------------------------------------------
-INSERT INTO attendances (user_id, first_entry_time, last_entry_time, first_departure_time, last_departure_time) VALUES
-    ((SELECT id FROM users WHERE username = 'carlos'), '08:00:00', '08:00:00', '17:00:00', '17:05:00'),
-    ((SELECT id FROM users WHERE username = 'talento'), '08:15:00', '08:15:00', '17:10:00', '17:10:00'),
-    ((SELECT id FROM users WHERE username = 'Jtorresa22'), '07:55:00', '07:55:00', '16:58:00', '16:58:00');
--- ---------------------------------------------------------------------
--- incidents
--- event data: inserted as-is, not guarded with ON CONFLICT.
--- ---------------------------------------------------------------------
-INSERT INTO incidents (
-    user_id, type, description, status, priority,
-    evidence, observation, rejection_reason, signed_file, reviewed_by
-) VALUES
-    (
-        (SELECT id FROM users WHERE username = 'talento'),
-        'llegada_tarde', 'Llegada 20 minutos tarde por corte de vía', 'aprobado', 'baja',
-        'evidencia_transito.jpg', 'Justificación validada con reporte de tránsito', NULL,
-        'firma_luis.pdf', (SELECT id FROM users WHERE username = 'carlos')
-    ),
-    (
-        (SELECT id FROM users WHERE username = 'Jtorresa22'),
-        'ausencia', 'Ausencia sin previo aviso', 'rechazado', 'alta',
-        NULL, 'No se presentó soporte médico', 'Falta de justificación válida',
-        'firma_ana.pdf', (SELECT id FROM users WHERE username = 'talento')
-    ),
-    (
-        (SELECT id FROM users WHERE username = 'carlos'),
-        'equipo_dañado', 'Equipo de cómputo presenta fallas de encendido', 'pendiente', 'media',
-        'foto_equipo.jpg', NULL, NULL,
-        NULL, (SELECT id FROM users WHERE username = 'carlos')
-    );
 
 COMMIT;

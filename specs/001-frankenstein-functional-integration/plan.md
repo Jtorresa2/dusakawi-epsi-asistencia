@@ -86,7 +86,6 @@ backend/
 │   │   ├── injections.ts                    # Contenedor Awilix (TS)
 │   │   └── database/
 │   │       ├── schema.sql                   # Esquema base PostgreSQL
-│   │       ├── complementary_tables.sql     # Tablas complementarias (horarios, config)
 │   │       └── prisma/schema.prisma         # Prisma client para módulos TS
 │   ├── modules/                             # MÓDULOS REFACTORIZADOS (TypeScript - Fuente de verdad)
 │   │   ├── auth/                            # Autenticación, JWT y contraseñas

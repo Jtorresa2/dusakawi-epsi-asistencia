@@ -1,35 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Menu, Bell, User, Settings, LogOut, AlertTriangle } from "lucide-react";
+import { Menu, User, Settings, LogOut } from "lucide-react";
 import {
   Menu as MuiMenu,
   MenuItem,
   ListItemIcon,
   ListItemText,
   Divider,
-  Popover,
-  Box,
-  Typography,
-  Badge,
-  List,
-  ListItemButton,
-  ListItemAvatar,
-  Avatar,
-  ListItemText as MuiListItemText,
 } from "@mui/material";
 import { COLORES } from "../constants/colores.js";
-
-const TIPOS_ALERTA = {
-  falla_biometrica: "Falla biométrica",
-  tardanza_justificada: "Tardanza justificada",
-  otro: "Otro",
-};
-
-function formatFechaCorta(iso) {
-  if (!iso) return "—";
-  try { return new Date(iso).toLocaleDateString("es-CO", { day: "2-digit", month: "short" }); }
-  catch { return "—"; }
-}
 
 const TITULOS = {
   "/dashboard": "Panel",
@@ -45,7 +24,6 @@ const TITULOS = {
   "/configuracion": "Configuración",
   "/roles": "Roles",
   "/copias-seguridad": "Copias de Seguridad",
-  "/integraciones": "Integraciones",
   "/perfil": "Mi perfil",
 };
 
@@ -56,11 +34,7 @@ export default function Navbar({ abierto, setAbierto, isMobile }) {
   const titulo = TITULOS[location.pathname] || "Panel";
   const inicial = usuario.nombre ? usuario.nombre[0].toUpperCase() : "U";
   const [menuAnchor, setMenuAnchor] = useState(null);
-  const [notifAnchor, setNotifAnchor] = useState(null);
-  const [alertas, setAlertas] = useState([]);
-
   const rol = usuario.rol;
-  const puedeVerAlertas = rol === "admin" || rol === "talento_humano";
 
   const fecha = new Date().toLocaleDateString("es-CO", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
@@ -97,58 +71,6 @@ export default function Navbar({ abierto, setAbierto, isMobile }) {
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 20 }}>
-        <Box sx={{ position: "relative", display: "inline-flex" }}>
-          <Badge
-            badgeContent={puedeVerAlertas ? alertas.length : 0}
-            color="error"
-            overlap="circular"
-            slotProps={{ badge: { sx: { fontSize: 10, minWidth: 16, height: 16, fontWeight: 700, display: alertas.length > 0 ? "flex" : "none" } } }}
-          >
-            <Bell size={19} color={COLORES.textoTerciario} style={{ cursor: "pointer" }} onClick={(e) => setNotifAnchor(e.currentTarget)} />
-          </Badge>
-        </Box>
-
-        <Popover
-          open={Boolean(notifAnchor)}
-          anchorEl={notifAnchor}
-          onClose={() => setNotifAnchor(null)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          transformOrigin={{ vertical: "top", horizontal: "right" }}
-          slotProps={{ paper: { sx: { borderRadius: "12px", mt: 1, width: 320, maxHeight: 360, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" } } }}
-        >
-          <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${COLORES.grisContorno}` }}>
-            <Typography sx={{ fontSize: 14, fontWeight: 700, color: COLORES.textoPrimario }}>
-              Alertas pendientes
-            </Typography>
-            <Typography sx={{ fontSize: 11, color: COLORES.textoSuave }}>
-              {alertas.length > 0 ? `${alertas.length} incidencias de alta prioridad` : "Sin alertas"}
-            </Typography>
-          </Box>
-          {alertas.length === 0 ? (
-            <Box sx={{ p: 3, textAlign: "center" }}>
-              <AlertTriangle size={24} color={COLORES.borde2} />
-              <Typography sx={{ mt: 1, fontSize: 12, color: COLORES.textoSuave }}>No hay alertas pendientes</Typography>
-            </Box>
-          ) : (
-            <List disablePadding sx={{ maxHeight: 260, overflowY: "auto" }}>
-              {alertas.slice(0, 10).map((a) => (
-                <ListItemButton key={a.id} divider sx={{ px: 2, py: 1.2 }} onClick={() => { setNotifAnchor(null); navigate("/incidencias"); }}>
-                  <ListItemAvatar sx={{ minWidth: 36 }}>
-                    <Avatar sx={{ width: 28, height: 28, bgcolor: COLORES.dangerFondo, color: COLORES.danger, fontSize: 12 }}>
-                      <AlertTriangle size={14} />
-                    </Avatar>
-                  </ListItemAvatar>
-                  <MuiListItemText
-                    primary={`${a.empleado_nombre || "—"} ${a.apellido || ""}`}
-                    secondary={`${a.tipo ? TIPOS_ALERTA[a.tipo] || a.tipo : ""} · ${formatFechaCorta(a.fecha)}`}
-                    primaryTypographyProps={{ fontSize: 13, fontWeight: 600, color: COLORES.textoPrimario }}
-                    secondaryTypographyProps={{ fontSize: 11, color: COLORES.textoSuave }}
-                  />
-                </ListItemButton>
-              ))}
-            </List>
-          )}
-        </Popover>
         <div
           onClick={(e) => setMenuAnchor(e.currentTarget)}
           style={{

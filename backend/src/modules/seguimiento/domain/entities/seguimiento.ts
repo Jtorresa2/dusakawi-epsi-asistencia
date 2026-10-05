@@ -13,11 +13,6 @@ export const SITUACION = Object.freeze({
 export const PAGE_SIZE_MAX = 500;
 export const PAGE_SIZE_DEFAULT = 100;
 
-export const INCIDENCIA_POR_SITUACION: Record<string, string> = {
-  [SITUACION.FALTA_TARDE]: 'afternoon_absence',
-  [SITUACION.SALIDA_NO_REGISTRADA]: 'unregistered_exit',
-};
-
 export interface FiltrosSeguimiento {
   fecha_desde?: string;
   fecha_hasta?: string;
@@ -60,15 +55,6 @@ export interface NovedadVinculoRow {
   hora_hasta: string | null;
 }
 
-// Incidencia vinculable (solo los tipos que importan al seguimiento).
-export interface IncidenciaVinculoRow {
-  id: string;
-  usuario_id: string;
-  fecha: string | Date;
-  estado: string;
-  tipo: string;
-}
-
 // Registro clasificado final (contrato exacto del frontend).
 export interface RegistroSeguimiento {
   usuario_id: string;
@@ -87,9 +73,6 @@ export interface RegistroSeguimiento {
   esperado_salida_manana: string | null;
   esperado_entrada_tarde: string | null;
   esperado_salida_tarde: string | null;
-  tiene_incidencia: boolean;
-  incidencia_estado: string | null;
-  incidencia_id: string | null;
 }
 
 export interface KpisSeguimiento {

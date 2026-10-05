@@ -15,8 +15,10 @@
 
 **Propósito**: Preparación de esquemas de base de datos y configuración del entorno
 
-- [X] T001 Crear script de tablas complementarias `backend/src/config/database/complementary_tables.sql` con las tablas `horarios`, `horario_detalle` y `configuracion` con datos semilla iniciales
-- [X] T002 Ejecutar script de tablas complementarias en el contenedor PostgreSQL de Docker `dusakawi-postgres`
+- [X] T001 ~~Crear script de tablas complementarias `backend/src/config/database/complementary_tables.sql` con las tablas `horarios`, `horario_detalle` y `configuracion` con datos semilla iniciales~~
+  > Eliminado el 2026-10-02. Era un parche legacy en el schema `public` sin `search_path`, por lo que colisionaba con el catálogo de `asistencia`. Su DDL quedó absorbido por `backend/src/config/database/schema.sql`, que crea las mismas entidades en `asistencia` con nombres en inglés (`schedules`, `schedule_details`, `config`). Las 6 semillas de `configuracion` insertaban en una tabla que nadie leía: backend y frontend nunca consumieron esas claves.
+- [X] T002 ~~Ejecutar script de tablas complementarias en el contenedor PostgreSQL de Docker `dusakawi-postgres`~~
+  > Obsoleto. El único pipeline de inicialización válido es `01-schema.sql` + `02-seed.sql` montados en `backend/docker-compose.yaml` y ejecutados por `/docker-entrypoint-initdb.d/` en un volumen limpio. `complementary_tables.sql` nunca estuvo montado y no tiene consumidores en el código actual.
 - [X] T003 [P] Configurar variables de entorno en `backend/.env` para conectar al PostgreSQL local y definir `JWT_SECRET` institucional
 
 ---

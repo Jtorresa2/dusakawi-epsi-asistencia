@@ -18,7 +18,8 @@ import { onlyDigits } from "../../../shared/validators";
 import { COLORES } from "../../../shared/constants/colores.js";
 
 const initialForm = {
-  cedula: "", nombre: "", apellido: "", correo: "", telefono: "", fecha_nacimiento: "",
+  cedula: "", primer_nombre: "", segundo_nombre: "", primer_apellido: "", segundo_apellido: "",
+  correo: "", telefono: "", fecha_nacimiento: "",
   area_id: "", cargo_id: "", piso: "", horario_id: "", activo: true,
 };
 
@@ -31,6 +32,13 @@ const selectMenuSx = {
 };
 
 const verdeBoton = { bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } };
+
+const formatPisoLabel = (val) => {
+  if (!val || val === "—") return "";
+  const str = String(val).trim();
+  if (/^piso/i.test(str)) return str;
+  return `Piso ${str}`;
+};
 
 // ─── Estilos del modal premium (Nuevo/Editar colaborador) ───────────────────
 const modalFieldSx = {
@@ -167,12 +175,14 @@ export default function PersonalPage() {
     setModalAbierto(true);
   };
 
-const abrirEditar = (e) => {
+  const abrirEditar = (e) => {
     setEditando(e);
     setForm({
       cedula: e.cedula || "",
-      nombre: e.nombre || "",
-      apellido: e.apellido || "",
+      primer_nombre: e.primer_nombre || e.nombre || "",
+      segundo_nombre: e.segundo_nombre || "",
+      primer_apellido: e.primer_apellido || e.apellido || "",
+      segundo_apellido: e.segundo_apellido || "",
       correo: e.correo || "",
       telefono: e.telefono || "",
       fecha_nacimiento: e.fecha_nacimiento ? String(e.fecha_nacimiento).slice(0, 10) : "",
@@ -186,15 +196,17 @@ const abrirEditar = (e) => {
     setModalAbierto(true);
   };
 
-const handleGuardar = async () => {
-    if (!form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim() || !form.correo.trim()) {
-      return mostrarToast("Completa los campos obligatorios", "err");
+  const handleGuardar = async () => {
+    if (!form.primer_nombre?.trim() || !form.primer_apellido?.trim() || !form.cedula?.trim() || !form.correo?.trim()) {
+      return mostrarToast("Completa los campos obligatorios (Primer nombre, Primer apellido, Cédula y Correo)", "err");
     }
     setGuardando(true);
     try {
-      const { horario_id: horarioSel, ...rest } = form;
+      const { horario_id: horarioSel, touchedCorreo, ...rest } = form;
       const payload = {
         ...rest,
+        nombre: form.primer_nombre,
+        apellido: form.primer_apellido,
         area_id: form.area_id || null,
         cargo_id: form.cargo_id || null,
         piso: form.piso !== "" && form.piso !== null ? Number(form.piso) : null,
@@ -206,14 +218,14 @@ const handleGuardar = async () => {
         const original = editando.horario_id ? String(editando.horario_id) : "";
         const nuevo = horarioSel || "";
         if (nuevo !== original) {
-          if (nuevo) await asignarHorario({ usuario_id: editando.id, horario_id: nuevo, motivo: "Asignación desde edición de colaborador" });
+          if (nuevo) await asignarHorario({ usuario_id: editando.id, horario_id: nuevo, motivo: "Edición de ficha de empleado" });
           else await desasignarHorario(editando.id);
         }
         mostrarToast(res?.mensaje || "Empleado actualizado correctamente", "ok");
       } else {
         const res = await crearPersonal(payload);
-        if (horarioSel) {
-          await asignarHorario({ usuario_id: res.id, horario_id: horarioSel, motivo: "Asignación desde creación de colaborador" });
+        if (horarioSel && res?.id) {
+          await asignarHorario({ usuario_id: res.id, horario_id: horarioSel, motivo: "Creación de nuevo empleado" });
         }
         mostrarToast(res?.mensaje || "Empleado creado correctamente", "ok");
       }
@@ -339,7 +351,7 @@ const handleGuardar = async () => {
       {/* TABLA PRINCIPAL */}
       <Paper elevation={0} sx={{ borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`, overflow: "hidden" }}>
         <TableContainer sx={{
-          overflowX: "auto",
+          overflowX: { xs: "auto", lg: "hidden" },
           "&::-webkit-scrollbar": { height: 8 },
           "&::-webkit-scrollbar-track": { background: COLORES.primarioClaro, borderRadius: 4 },
           "&::-webkit-scrollbar-thumb": { background: COLORES.acento, borderRadius: 4 },
@@ -347,109 +359,152 @@ const handleGuardar = async () => {
           scrollbarWidth: "thin",
           scrollbarColor: `${COLORES.acento} ${COLORES.primarioClaro}`,
         }}>
-          <Table sx={{ minWidth: { xs: 900, md: 1550 } }}>
+          <Table sx={{ width: "100%", tableLayout: "auto" }}>
             <TableHead>
               <TableRow>
-                {["", "Nombre", "Apellido", "Cédula", "Correo", "Teléfono", "F. Nacimiento", "Cargo", "Área", "Piso", "Horario", "Inas.", "Tard.", "Estado", "Acciones"].map((h) => (
-                  <TableCell key={h} sx={{
-                    fontWeight: 600, color: COLORES.textoTerciario, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.5, whiteSpace: "nowrap",
-                    display: h === "Cargo" || h === "Área" || h === "Piso" || h === "Horario" || h === "Teléfono" || h === "F. Nacimiento" ? { xs: "none", md: "table-cell" }
-                      : h === "Rol" || h === "Acciones" ? { xs: "none", sm: "table-cell" } : undefined,
-                  }}>
-                    {h}
-                  </TableCell>
-                ))}
+                <TableCell sx={{ fontWeight: 600, color: COLORES.textoTerciario, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.5, pl: 3 }}>
+                  Empleado
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: COLORES.textoTerciario, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.5, width: 140, whiteSpace: "nowrap" }}>
+                  Cédula
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600, color: COLORES.textoTerciario, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.5, width: 85, whiteSpace: "nowrap" }}>
+                  Inas.
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600, color: COLORES.textoTerciario, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.5, width: 85, whiteSpace: "nowrap" }}>
+                  Tard.
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600, color: COLORES.textoTerciario, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.5, width: 110, whiteSpace: "nowrap" }}>
+                  Estado
+                </TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, color: COLORES.textoTerciario, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.5, width: 130, pr: 3, whiteSpace: "nowrap" }}>
+                  Acciones
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {cargando ? (
                 <TableRow>
-                  <TableCell colSpan={15} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>Cargando...</TableCell>
+                  <TableCell colSpan={6} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>Cargando...</TableCell>
                 </TableRow>
               ) : filtrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={15} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>
+                  <TableCell colSpan={6} align="center" sx={{ py: 6, color: COLORES.textoSuave, fontSize: 14 }}>
                     {busqueda ? "No se encontraron empleados" : "No hay empleados registrados"}
                   </TableCell>
                 </TableRow>
               ) : (
-filtrados.map((e) => {
-                    return (
-                    <TableRow key={e.id} sx={{ "&:hover": { bgcolor: COLORES.fondoGris }, transition: "background .15s" }}>
-                      <TableCell sx={{ py: 1.2 }}>
-                        <Avatar sx={{ width: 34, height: 34, bgcolor: COLORES.primarioClaro, color: COLORES.primario, fontSize: 12, fontWeight: 700 }}>
-                          {getInitials(e) || "?"}
-                        </Avatar>
-                      </TableCell>
-                      <TableCell sx={{ py: 1.2 }}>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <Typography sx={{ fontSize: 14, fontWeight: 600, color: COLORES.textoPrimario }}>{e.nombre || "—"}</Typography>
-                          <IconButton size="small" onClick={() => setPerfilId(e.id)} title="Ver perfil"
-                            sx={{ bgcolor: COLORES.primarioClaro, color: COLORES.primario, borderRadius: "6px", width: 26, height: 26, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}>
-                            <Eye size={13} />
-                          </IconButton>
+                filtrados.map((e) => {
+                  const nombreCompleto = e.empleado || `${e.nombre || ""} ${e.apellido || ""}`.trim() || "—";
+                  return (
+                    <TableRow
+                      key={e.id}
+                      onClick={() => setPerfilId(e.id)}
+                      sx={{
+                        "&:hover": { bgcolor: COLORES.fondoGris, cursor: "pointer" },
+                        transition: "background .15s",
+                      }}
+                    >
+                      {/* EMPLEADO (Solo Avatar + Nombre Completo) */}
+                      <TableCell sx={{ py: 1.3, pl: 3 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                          <Avatar sx={{ width: 34, height: 34, bgcolor: COLORES.primarioClaro, color: COLORES.primario, fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
+                            {getInitials(e) || "?"}
+                          </Avatar>
+                          <Typography sx={{ fontSize: 13.5, fontWeight: 600, color: COLORES.textoPrimario, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {nombreCompleto}
+                          </Typography>
                         </Box>
                       </TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoPrimario, fontWeight: 600, whiteSpace: "nowrap" }}>
-                        {e.apellido || "—"}
+
+                      {/* CÉDULA */}
+                      <TableCell sx={{ py: 1.3, fontSize: 13, color: COLORES.textoMuted, fontWeight: 500, whiteSpace: "nowrap" }}>
+                        {e.cedula || "—"}
                       </TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap" }}>{e.cedula || "—"}</TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap" }}>{e.correo || "—"}</TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
-                        {e.telefono || "—"}
-                      </TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
-                        {e.fecha_nacimiento || "—"}
-                      </TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, display: { xs: "none", md: "table-cell" } }}>{e.cargo || "—"}</TableCell>
-                      <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
-                    {e.area || "—"}
-                  </TableCell>
-                  <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
-                    {e.piso || "—"}
-                  </TableCell>
-                  <TableCell sx={{ py: 1.2, fontSize: 13, color: COLORES.textoMuted, whiteSpace: "nowrap", display: { xs: "none", md: "table-cell" } }}>
-                    {e.horario || "—"}
-                  </TableCell>
-                      <TableCell sx={{ py: 1.2 }}>
-                        <Chip label={e.inasistencias ?? 0} size="small"
-                          sx={{ height: 24, fontSize: 11, fontWeight: 700, minWidth: 32,
+
+                      {/* INASISTENCIAS */}
+                      <TableCell align="center" sx={{ py: 1.3 }}>
+                        <Chip
+                          label={e.inasistencias ?? 0}
+                          size="small"
+                          sx={{
+                            height: 24, fontSize: 11, fontWeight: 700, minWidth: 32,
                             bgcolor: (e.inasistencias ?? 0) > 0 ? COLORES.dangerFondo : COLORES.fondoGris2,
-                            color: (e.inasistencias ?? 0) > 0 ? COLORES.danger : COLORES.textoSuave }} />
+                            color: (e.inasistencias ?? 0) > 0 ? COLORES.danger : COLORES.textoSuave,
+                          }}
+                        />
                       </TableCell>
-                      <TableCell sx={{ py: 1.2 }}>
-                        <Chip label={e.llegadas_tardias ?? 0} size="small"
-                          sx={{ height: 24, fontSize: 11, fontWeight: 700, minWidth: 32,
+
+                      {/* TARDANZAS */}
+                      <TableCell align="center" sx={{ py: 1.3 }}>
+                        <Chip
+                          label={e.llegadas_tardias ?? 0}
+                          size="small"
+                          sx={{
+                            height: 24, fontSize: 11, fontWeight: 700, minWidth: 32,
                             bgcolor: (e.llegadas_tardias ?? 0) > 0 ? COLORES.warningFondo : COLORES.fondoGris2,
-                            color: (e.llegadas_tardias ?? 0) > 0 ? COLORES.warningOscuro : COLORES.textoSuave }} />
+                            color: (e.llegadas_tardias ?? 0) > 0 ? COLORES.warningOscuro : COLORES.textoSuave,
+                          }}
+                        />
                       </TableCell>
-                      <TableCell sx={{ py: 1.2 }}>
-                        <Button size="small" onClick={() => toggleActivo(e)} title="Cambiar estado"
-                          sx={{ borderRadius: "20px", fontSize: 11, fontWeight: 600, minWidth: 0, px: 1.5, textTransform: "none",
+
+                      {/* ESTADO */}
+                      <TableCell align="center" sx={{ py: 1.3 }}>
+                        <Button
+                          size="small"
+                          onClick={(evt) => { evt.stopPropagation(); toggleActivo(e); }}
+                          title="Cambiar estado"
+                          sx={{
+                            borderRadius: "20px", fontSize: 11, fontWeight: 600, minWidth: 0, px: 1.5, textTransform: "none",
                             bgcolor: isActive(e) ? COLORES.successFondo : COLORES.dangerFondo,
                             color: isActive(e) ? COLORES.verdeTexto : COLORES.dangerOscuro,
-                            "&:hover": { bgcolor: isActive(e) ? COLORES.successFondo : COLORES.dangerBorde } }}>
+                            "&:hover": { bgcolor: isActive(e) ? COLORES.successFondo : COLORES.dangerBorde },
+                          }}
+                        >
                           {isActive(e) ? "Activo" : "Inactivo"}
                         </Button>
                       </TableCell>
-                      <TableCell sx={{ py: 1.2 }}>
-                        <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
-                          <Box onClick={() => abrirEditar(e)} title="Editar" sx={{
-                            width: 34, height: 34, borderRadius: "9px",
-                            bgcolor: COLORES.primarioClaro, color: COLORES.primario, cursor: "pointer",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            transition: "all .2s", flexShrink: 0,
-                            "&:hover": { bgcolor: COLORES.primarioClaro2 },
-                          }}>
+
+                      {/* ACCIONES */}
+                      <TableCell align="right" sx={{ py: 1.3, pr: 3 }}>
+                        <Box sx={{ display: "flex", gap: 0.6, alignItems: "center", justifyContent: "flex-end" }}>
+                          <Box
+                            onClick={(evt) => { evt.stopPropagation(); setPerfilId(e.id); }}
+                            title="Ver perfil completo"
+                            sx={{
+                              width: 32, height: 32, borderRadius: "8px",
+                              bgcolor: COLORES.primarioClaro, color: COLORES.primario, cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              transition: "all .2s", flexShrink: 0,
+                              "&:hover": { bgcolor: COLORES.primarioClaro2 },
+                            }}
+                          >
+                            <Eye size={15} />
+                          </Box>
+                          <Box
+                            onClick={(evt) => { evt.stopPropagation(); abrirEditar(e); }}
+                            title="Editar"
+                            sx={{
+                              width: 32, height: 32, borderRadius: "8px",
+                              bgcolor: COLORES.fondoGris2, color: COLORES.textoSecundario, cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              transition: "all .2s", flexShrink: 0,
+                              "&:hover": { bgcolor: COLORES.borde2 },
+                            }}
+                          >
                             <Edit3 size={15} />
                           </Box>
-                          <Box onClick={() => setConfirmEliminar(e)} title="Eliminar" sx={{
-                            width: 34, height: 34, borderRadius: "9px",
-                            bgcolor: COLORES.dangerFondo, color: COLORES.danger, cursor: "pointer",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            transition: "all .2s", flexShrink: 0,
-                            "&:hover": { bgcolor: COLORES.dangerBorde },
-                          }}>
+                          <Box
+                            onClick={(evt) => { evt.stopPropagation(); setConfirmEliminar(e); }}
+                            title="Eliminar"
+                            sx={{
+                              width: 32, height: 32, borderRadius: "8px",
+                              bgcolor: COLORES.dangerFondo, color: COLORES.danger, cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              transition: "all .2s", flexShrink: 0,
+                              "&:hover": { bgcolor: COLORES.dangerBorde },
+                            }}
+                          >
                             <Trash2 size={15} />
                           </Box>
                         </Box>
@@ -506,26 +561,32 @@ filtrados.map((e) => {
                 <Typography sx={modalSeccionSubtitulo}>Datos básicos del empleado</Typography>
               </Box>
             </Box>
-            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 1.5 }}>
-              <TextField required label="Nombre" value={form.nombre}
-                onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr 1fr" }, gap: 1.5 }}>
+              <TextField required label="Primer Nombre" value={form.primer_nombre || ""}
+                onChange={(e) => setForm({ ...form, primer_nombre: e.target.value })}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
-              <TextField required label="Apellido" value={form.apellido}
-                onChange={(e) => setForm({ ...form, apellido: e.target.value })}
+              <TextField label="Segundo Nombre" value={form.segundo_nombre || ""}
+                onChange={(e) => setForm({ ...form, segundo_nombre: e.target.value })}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
-              <TextField required label="Cédula" value={form.cedula}
+              <TextField required label="Primer Apellido" value={form.primer_apellido || ""}
+                onChange={(e) => setForm({ ...form, primer_apellido: e.target.value })}
+                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
+              <TextField label="Segundo Apellido" value={form.segundo_apellido || ""}
+                onChange={(e) => setForm({ ...form, segundo_apellido: e.target.value })}
+                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
+              <TextField required label="Cédula" value={form.cedula || ""}
                 onChange={(e) => setForm({ ...form, cedula: onlyDigits(e.target.value) })}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, htmlInput: { inputMode: "numeric", maxLength: 15 } }} sx={modalFieldSx} />
-              <TextField label="Teléfono*" value={form.telefono}
+              <TextField label="Teléfono" value={form.telefono || ""}
                 onChange={(e) => setForm({ ...form, telefono: onlyDigits(e.target.value) })}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, htmlInput: { inputMode: "numeric", maxLength: 15 } }} sx={modalFieldSx} />
-              <TextField required label="Correo electrónico" value={form.correo}
+              <TextField required label="Correo electrónico" value={form.correo || ""}
                 onChange={(e) => setForm({ ...form, correo: e.target.value })}
-                error={form.correo.trim() === "" && form.touchedCorreo}
-                helperText={form.correo.trim() === "" && form.touchedCorreo ? "El correo es obligatorio" : ""}
+                error={form.correo?.trim() === "" && form.touchedCorreo}
+                helperText={form.correo?.trim() === "" && form.touchedCorreo ? "El correo es obligatorio" : ""}
                 onBlur={() => setForm((f) => ({ ...f, touchedCorreo: true }))}
                 slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, formHelperText: { sx: { fontSize: 11 } } }} sx={modalFieldSx} />
-              <TextField label="Fecha de nacimiento" type="date" value={form.fecha_nacimiento}
+              <TextField label="Fecha de nacimiento" type="date" value={form.fecha_nacimiento || ""}
                 onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })}
                 slotProps={{ inputLabel: { shrink: true, sx: { fontSize: 12.5 } } }} sx={modalFieldSx} />
             </Box>
@@ -543,17 +604,41 @@ filtrados.map((e) => {
               </Box>
             </Box>
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 1.5 }}>
+              {/* ÁREA */}
               <FormControl fullWidth>
                 <InputLabel sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>Área</InputLabel>
                 <Select value={form.area_id} label="Área" sx={{ ...modalSelectSx, ...selectIconAdornment }}
                   slotProps={{ input: { startAdornment: <InputAdornment position="start"><Building2 size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment> }, menu: selectMenuSx }}
-                  onChange={(e) => setForm({ ...form, area_id: e.target.value })}>
+                  onChange={(e) => {
+                    const sel = areas.find((a) => String(a.id) === String(e.target.value));
+                    const cleanPiso = sel?.piso ? String(sel.piso).replace(/^piso\s*/i, "").trim() : "";
+                    setForm({ ...form, area_id: e.target.value, piso: cleanPiso });
+                  }}>
                   <MenuItem value=""><em>Sin área</em></MenuItem>
                   {areas.map((a) => (
-                    <MenuItem key={a.id} value={String(a.id)}>{a.nombre}</MenuItem>
+                    <MenuItem key={a.id} value={String(a.id)}>
+                      {a.nombre}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
+
+              {/* PISO (AUTOMÁTICO) - AL LADO DE ÁREA */}
+              <TextField
+                label="Piso"
+                value={form.piso ? formatPisoLabel(form.piso) : "—"}
+                slotProps={{
+                  input: {
+                    readOnly: true,
+                    startAdornment: <InputAdornment position="start"><Layers size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment>
+                  },
+                  formHelperText: { sx: { fontSize: 11 } }
+                }}
+                helperText={form.piso ? "Asignado automáticamente por el área" : "Se configura al elegir el área"}
+                sx={modalFieldSx}
+              />
+
+              {/* CARGO */}
               <FormControl fullWidth>
                 <InputLabel sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>Cargo</InputLabel>
                 <Select value={form.cargo_id} label="Cargo" sx={{ ...modalSelectSx, ...selectIconAdornment }}
@@ -565,9 +650,8 @@ filtrados.map((e) => {
                   ))}
                 </Select>
               </FormControl>
-              <TextField label="Piso" type="number" value={form.piso}
-                onChange={(e) => setForm({ ...form, piso: e.target.value === "" ? "" : Number(e.target.value) })}
-                slotProps={{ inputLabel: { sx: { fontSize: 12.5 } }, htmlInput: { min: 1 }, input: { startAdornment: <InputAdornment position="start"><Layers size={15} style={{ color: COLORES.textoSuave }} /></InputAdornment> } }} sx={modalFieldSx} />
+
+              {/* HORARIO ASIGNADO */}
               <FormControl fullWidth>
                 <InputLabel sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>Horario asignado</InputLabel>
                 <Select value={form.horario_id || ""} label="Horario asignado"
@@ -579,8 +663,9 @@ filtrados.map((e) => {
                     <MenuItem key={h.id} value={String(h.id)}>{h.nombre}</MenuItem>
                   ))}
                 </Select>
-                
               </FormControl>
+
+              {/* ESTADO ACTIVO */}
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <FormControlLabel
                   control={<Switch checked={form.activo} onChange={(e) => setForm({ ...form, activo: e.target.checked })} />}
@@ -600,7 +685,7 @@ filtrados.map((e) => {
             Cancelar
           </Button>
           <Button variant="contained" startIcon={<Plus size={16} />} onClick={handleGuardar}
-            disabled={guardando || !form.nombre.trim() || !form.apellido.trim() || !form.cedula.trim() || !form.correo.trim()}
+            disabled={guardando || !form.primer_nombre?.trim() || !form.primer_apellido?.trim() || !form.cedula?.trim() || !form.correo?.trim()}
             sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, fontWeight: 600, px: 3.5, py: 0.75, ...verdeBoton }}>
             {guardando ? "Guardando..." : editando ? "Actualizar empleado" : "Crear empleado"}
           </Button>

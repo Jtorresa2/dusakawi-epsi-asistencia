@@ -1,7 +1,5 @@
 import type {
-  IncidenciaPlantillaData,
   AsistenciaRow,
-  IncidenciaRow,
   DashboardIndicadores,
   DashboardAsistenciaHoy,
   TardanzaRow,
@@ -15,7 +13,6 @@ import type {
 } from '@modules/pdf/domain/entities/pdf';
 
 export interface PdfRepository {
-  getIncidenciaPlantilla(id: string): Promise<IncidenciaPlantillaData | null>;
   getAsistencia(filters: {
     fecha?: string;
     fecha_desde?: string;
@@ -26,10 +23,6 @@ export interface PdfRepository {
     empleado_id?: string;
     area_id?: string;
   }): Promise<AsistenciaRow[]>;
-  getIncidencias(filters: {
-    estado?: string;
-    tipo?: string;
-  }): Promise<IncidenciaRow[]>;
   getDashboardIndicadores(): Promise<DashboardIndicadores>;
   getDashboardAsistenciaHoy(): Promise<DashboardAsistenciaHoy[]>;
   getTardanzas(filters: {

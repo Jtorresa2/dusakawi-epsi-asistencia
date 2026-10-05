@@ -14,20 +14,36 @@ Esta guía describe los pasos necesarios para levantar el entorno completo y ver
    cd backend
    docker compose up -d
    ```
-2. **Tablas Complementarias**: Aplicar el script de inicialización para `horarios`, `horario_detalle` y `configuracion` en la base de datos PostgreSQL:
-   ```bash
-   docker exec -i dusakawi-postgres psql -U postgres -d dusakawi < backend/src/config/database/complementary_tables.sql
-   ```
-3. **Variables de Entorno**:
-   Verificar que `backend/.env` contenga las credenciales correctas:
+2. **Variables de Entorno**:
+   Crear `backend/.env` a mano: el archivo está ignorado por git y **no se
+   versiona**, así que un `clone` limpio no lo trae. El backend toma la
+   conexión de `DB_URL`; el bloque `DB_HOST`/`DB_PORT`/`DB_USER`/`DB_PASSWORD`/
+   `DB_NAME` se lee en `environment.ts` pero Prisma no lo usa:
+
    ```env
    PORT=5000
-   DB_HOST=localhost
-   DB_PORT=5432
-   DB_USER=postgres
-   DB_PASSWORD=postgres
-   DB_NAME=dusakawi
+   DB_URL=postgresql://postgres:postgres@localhost:5432/dusakawi?schema=asistencia
    JWT_SECRET=supersecretkey_dusakawi_2026
+   FRONTEND_URL=http://localhost:5173
+   ```
+
+   > **Entorno actual**: el `backend/.env` de esta instalación apunta a la base
+   > de datos corporativa de la empresa, no al contenedor local. Docker Compose
+   > levanta PostgreSQL para aplicar el DDL y la semilla, pero el backend conecta
+   > donde diga `DB_URL`. Apuntarlo al contenedor local es una decisión consciente:
+   > sin acceso al ERP, `asistencia.listar_empleados()` devuelve 0 filas por
+   > diseño (ver el guard `to_regclass` en `schema.sql`).
+
+3. **Scripts de inicialización**:
+   `docker-compose.yaml` monta `schema.sql` y `seed.sql` como
+   `01-schema.sql` y `02-seed.sql` en `/docker-entrypoint-initdb.d/`. PostgreSQL
+   los ejecuta **solo cuando el volumen está vacío**. Si ya existía un volumen
+   con el esqueleto legacy, hay que recrearlo:
+
+   ```bash
+   cd backend
+   docker compose down -v
+   docker compose up -d
    ```
 
 ---
@@ -65,19 +81,33 @@ Aplicación accesible en `http://localhost:5173` o `http://localhost:3000`.
 
 ### Escenario 1: Autenticación y Carga de Menús
 1. Acceder a la página de login.
-2. Ingresar con las credenciales de administrador (`jtorresa` / contraseña configurada).
-3. **Resultado esperado**: Redirección inmediata al dashboard, saludo con el nombre del usuario y visualización de la barra lateral con todas las opciones operativas.
+2. Ingresar con las credenciales creadas por `02-seed.sql`. Los usernames reales
+   son `Administrador` y `talento` (verificables con
+   `SELECT username FROM asistencia.users;`). No existe un usuario `jtorresa`.
+3. **Resultado esperado**: Redirección inmediata al dashboard, saludo con el nombre del usuario y visualización de la barra lateral con las opciones que corresponden al rol.
 
-### Escenario 2: Marcación de Asistencia ("Mi Asistencia")
-1. Iniciar sesión como empleado o navegar a la sección de marcación.
-2. Pulsar sobre el botón de registro de asistencia diaria.
-3. **Resultado esperado**: Notificación de éxito en menos de 5 segundos; el registro matutino aparece con la hora actual en la tabla de historial mensual.
+### Escenario 2: Marcación de Asistencia (marcación manual por Talento Humano)
+1. Iniciar sesión como Administrador o Talento Humano.
+2. Ir a "Asistencia" (`/asistencia`) y seleccionar al empleado.
+3. Registrar la marcación de entrada del día.
+4. **Resultado esperado**: La marca aparece en la tabla del día con la hora actual.
 
-### Escenario 3: Radicación y Aprobación de Incidencias
-1. Desde la cuenta de empleado, ingresar a "Reportar Incidencia", llenar los campos (tipo Permiso, justificación) y adjuntar un archivo de prueba.
-2. Enviar la solicitud.
-3. Iniciar sesión como Administrador o Talento Humano, ingresar a la bandeja de "Incidencias", abrir la solicitud pendiente y presionar "Aprobar".
-4. **Resultado esperado**: El estado de la incidencia cambia a "Aprobada" y queda registrado el revisor en la base de datos.
+   > **Nota**: los empleados son *personas registradas*, no usuarios del portal.
+   > `import-empleados-personas.sql` los carga con `is_account = FALSE`, y ninguna
+   > ruta de `App.jsx` acepta el rol `empleado`. La marcación la hace TH/admin por
+   > el empleado; no hay auto-registro de asistencia por parte del empleado.
+
+### Escenario 3: Novedades Laborales
+1. Iniciar sesión como Administrador o Talento Humano.
+2. Ir a "Novedades Laborales" (`/novedades`).
+3. Crear una novedad y luego editarla.
+4. **Resultado esperado**: La novedad queda registrada y visible en el listado.
+
+   > **Nota**: `POST`, `PUT` y `DELETE` de `/api/novedades` están restringidos a
+   > `admin` y `talento_humano` (`novedades.routes.ts`). **No hay flujo de
+   > aprobación**: no existe endpoint de aprobar/rechazar, y ningún escenario
+   > empieza desde una cuenta de empleado. El módulo de Incidencias con
+   > "Aprobar/Rechazar" ya no forma parte del sistema.
 
 ### Escenario 4: Horarios y Estructura Organizacional
 1. Acceder a "Horarios" como administrador.
