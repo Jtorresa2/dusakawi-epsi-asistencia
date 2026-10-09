@@ -8,17 +8,7 @@ import type {
   ResultadoEnvioAccesoItem,
 } from '@modules/usuarios/domain/entities/usuario';
 import type { UsuarioRepository } from '@modules/usuarios/domain/repositories/usuario-repository';
-
-const require = createRequire(import.meta.url);
-const { enviarResetPassword } = require('../../../../../services/emailService.js') as {
-  enviarResetPassword(input: {
-    email: string;
-    nombre: string;
-    username: string;
-    link: string;
-    primerIngreso: boolean;
-  }): Promise<EmailServiceResult>;
-};
+import { enviarResetPassword } from '../../../../../services/email.service.js';
 
 export interface SendAccessEmailCommand {
   userIds?: string[];

@@ -43,6 +43,9 @@ export class MassAssignScheduleHandler {
     if (!(await this.scheduleRepository.scheduleExists(command.scheduleId))) {
       return { status: 'schedule-not-found' as const };
     }
+    if (!(await this.scheduleRepository.isScheduleActive(command.scheduleId))) {
+      return { status: 'schedule-inactive' as const };
+    }
 
     // `getActiveUserIdsByIds` castea a uuid[]: si UN id viniera mal, Postgres
     // responde 22P02 y no se asigna nadie. Se filtran los invalidos antes.

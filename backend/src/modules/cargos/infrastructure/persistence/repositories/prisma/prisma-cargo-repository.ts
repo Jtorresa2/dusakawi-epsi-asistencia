@@ -7,14 +7,14 @@ import type { CargoRepository } from '@modules/cargos/domain/repositories/cargo-
 import { PrismaCargoMapper } from '@modules/cargos/infrastructure/mappers/prisma/prisma-cargo-mapper';
 
 type PrismaCargoWithCount = Prisma.positionsGetPayload<{
-  include: { _count: { select: { users: true } } };
+  include: { areas: true; _count: { select: { users: true } } };
 }>;
 
 export class PrismaCargoRepository implements CargoRepository {
   async getAll(): Promise<CargoWithCount[]> {
     const positions = await prisma.positions.findMany({
       orderBy: { name: 'asc' },
-      include: { _count: { select: { users: true } } },
+      include: { areas: true, _count: { select: { users: true } } },
     });
 
     return positions.map((position: PrismaCargoWithCount) => ({
@@ -24,7 +24,10 @@ export class PrismaCargoRepository implements CargoRepository {
   }
 
   async getById(id: Uuid): Promise<Cargo | null> {
-    const position = await prisma.positions.findUnique({ where: { id } });
+    const position = await prisma.positions.findUnique({
+      where: { id },
+      include: { areas: true },
+    });
 
     return position ? PrismaCargoMapper.toDomain(position) : null;
   }

@@ -25,7 +25,7 @@ const seguimientoService = require('../../../../services/seguimientoService.js')
   SITUACION: Record<string, string>;
 };
 
-const META: PdfMeta = { codigo: 'GA-F-001', version: '01', emision: '01/01/2024', vigencia: '01/01/2026' };
+const META: PdfMeta = { version: '01' };
 
 const PDF_BODY_X = 65;
 const PDF_BODY_Y = 130;
@@ -474,78 +474,141 @@ const getPorEmpleado = async (req: Request, res: Response) => {
     const template = req.container.resolve<PdfTemplateService>('pdfTemplateService');
 
     template.generarMembrete(res, META, (doc) => {
-      doc.font('Helvetica-Bold').fontSize(12).fillColor('#1B5E20').text('REPORTE POR EMPLEADO', { align: 'center' });
+      const pw = 595.28;
+      const contentW = pw - PDF_BODY_X * 2 - 10;
+
+      // 1. TÍTULO
+      doc.font('Helvetica-Bold').fontSize(13).fillColor('#1B5E20').text('REPORTE INDIVIDUAL DE ASISTENCIA', PDF_BODY_X, doc.y, { width: contentW, align: 'center' });
       doc.moveDown(0.6);
 
-      doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#111827').text(`Empleado: ${empleado.nombre || ''} ${empleado.apellido || ''}`);
-      doc.font('Helvetica').fontSize(8).fillColor('#4B5563');
-      doc.text(`Cédula: ${empleado.cedula || '—'}   Área: ${empleado.area || '—'}   Cargo: ${empleado.cargo || '—'}   Fecha de ingreso: ${empleado.fecha_ingreso || '—'}`);
-      doc.moveDown(0.4);
-      doc.font('Helvetica-Bold').fontSize(9).fillColor('#1B5E20').text(`Período: ${NOMBRES_MESES[Number(mesConsulta) - 1]} ${anioConsulta}`, { align: 'center' });
-      doc.moveDown(0.4);
+      // 2. FICHA DE DATOS DEL FUNCIONARIO Y PERÍODO (2 columnas en caja estilizada)
+      let y = doc.y;
+      const fichaH = 46;
+      doc.roundedRect(PDF_BODY_X, y, contentW, fichaH, 4).fillAndStroke('#F9FAFB', '#E5E7EB');
 
-      const [punt, tard, aus, jus] = [Number(resumen.puntuales), Number(resumen.tardanzas), Number(resumen.ausentes), Number(resumen.justificados)];
+      const col1X = PDF_BODY_X + 12;
+      const col2X = PDF_BODY_X + Math.round(contentW / 2) + 10;
+      const colWInfo = Math.round(contentW / 2) - 20;
+
+      // Columna 1
+      doc.font('Helvetica-Bold').fontSize(8).fillColor('#111827').text('Funcionario: ', col1X, y + 8, { continued: true, width: colWInfo });
+      doc.font('Helvetica').fillColor('#374151').text(`${empleado.nombre || ''} ${empleado.apellido || ''}`);
+
+      doc.font('Helvetica-Bold').fontSize(8).fillColor('#111827').text('Documento: ', col1X, y + 20, { continued: true, width: colWInfo });
+      doc.font('Helvetica').fillColor('#374151').text(`C.C. ${empleado.cedula || '—'}`);
+
+      doc.font('Helvetica-Bold').fontSize(8).fillColor('#111827').text('Cargo: ', col1X, y + 32, { continued: true, width: colWInfo });
+      doc.font('Helvetica').fillColor('#374151').text(`${empleado.cargo || '—'}`);
+
+      // Columna 2
+      doc.font('Helvetica-Bold').fontSize(8).fillColor('#111827').text('Período: ', col2X, y + 8, { continued: true, width: colWInfo });
+      doc.font('Helvetica').fillColor('#374151').text(`${NOMBRES_MESES[Number(mesConsulta) - 1]} ${anioConsulta}`);
+
+      doc.font('Helvetica-Bold').fontSize(8).fillColor('#111827').text('Área: ', col2X, y + 20, { continued: true, width: colWInfo });
+      doc.font('Helvetica').fillColor('#374151').text(`${empleado.area || '—'}`);
+
+      doc.font('Helvetica-Bold').fontSize(8).fillColor('#111827').text('Días laborales: ', col2X, y + 32, { continued: true, width: colWInfo });
+      doc.font('Helvetica').fillColor('#374151').text(`${diasEsperados} días hábiles previstos`);
+
+      y += fichaH + 10;
+      doc.x = PDF_BODY_X;
+      doc.y = y;
+
+      // 3. BALANCE GENERAL DEL MES (Métricas en cuadrícula simétrica 4x2)
+      const [punt, tard, aus, jus] = [Number(resumen.puntuales || 0), Number(resumen.tardanzas || 0), Number(resumen.ausentes || 0), Number(resumen.justificados || 0)];
       const pAsistencia = Math.round((punt + tard + jus) / Math.max(diasEsperados, 1) * 100);
       const metas = [
-        { label: 'Días hábiles', value: `${diasHabiles}` },
-        { label: 'Festivos', value: `${totalFestivos}` },
-        { label: 'Asistencia %', value: `${pAsistencia}%` },
-        { label: 'Puntuales', value: `${punt}` },
-        { label: 'Tardanzas', value: `${tard}` },
-        { label: 'Ausentes', value: `${aus}` },
-        { label: 'Horas trabajadas', value: `${Number(resumen.horas_trabajadas)} h` },
-        { label: 'Permisos', value: `${Number(permisos.total || 0)}` },
+        { label: 'DÍAS HÁBILES', value: `${diasHabiles}` },
+        { label: 'FESTIVOS', value: `${totalFestivos}` },
+        { label: 'HORAS TOTAL', value: `${Number(resumen.horas_trabajadas || 0)} h` },
+        { label: 'ASISTENCIA %', value: `${pAsistencia}%` },
+        { label: 'PUNTUALES', value: `${punt}` },
+        { label: 'TARDANZAS', value: `${tard}` },
+        { label: 'AUSENCIAS', value: `${aus}` },
+        { label: 'PERMISOS', value: `${Number(permisos.total || 0)}` },
       ];
-      const pw = 595.28, contentW = pw - PDF_BODY_X * 2 - 10;
-      const colW = contentW / 3, gridH = 30;
-      let y = doc.y;
+
+      const colW = Math.floor(contentW / 4);
+      const gridH = 30;
       metas.forEach((m, i) => {
-        const col = i % 3, rowIdx = Math.floor(i / 3);
+        const col = i % 4;
+        const rowIdx = Math.floor(i / 4);
         const cx = PDF_BODY_X + col * colW;
         const cy = y + rowIdx * gridH;
-        doc.rect(cx, cy, colW - 4, gridH - 4).fill(i % 2 === 0 ? '#F9FAFB' : '#FFFFFF');
-        doc.font('Helvetica').fontSize(6.5).fillColor('#6B7280').text(m.label, cx + 6, cy + 5, { width: colW - 16 });
-        doc.font('Helvetica-Bold').fontSize(10).fillColor('#111827').text(m.value, cx + 6, cy + 14, { width: colW - 16 });
+        doc.roundedRect(cx, cy, colW - 5, gridH - 4, 3).fillAndStroke('#F9FAFB', '#E5E7EB');
+        doc.font('Helvetica-Bold').fontSize(6).fillColor('#6B7280').text(m.label, cx + 6, cy + 4, { width: colW - 14, align: 'center' });
+        doc.font('Helvetica-Bold').fontSize(10).fillColor('#111827').text(m.value, cx + 6, cy + 13, { width: colW - 14, align: 'center' });
       });
-      y += 3 * gridH;
+
+      y += 2 * gridH + 10;
+      doc.x = PDF_BODY_X;
       doc.y = y;
-      doc.moveDown(0.6);
 
       if (!detalleConFestivos.length) {
-        doc.font('Helvetica').fontSize(10).fillColor('#6B7280').text('Sin registros de asistencia en el período.', { align: 'center' });
+        const emptyH = 40;
+        doc.roundedRect(PDF_BODY_X, y, contentW, emptyH, 4).fillAndStroke('#F9FAFB', '#E5E7EB');
+        doc.font('Helvetica').fontSize(9).fillColor('#6B7280').text(
+          'Sin registros de asistencia en el período.',
+          PDF_BODY_X,
+          y + 14,
+          { width: contentW, align: 'center' }
+        );
         return;
       }
-      doc.moveDown(0.2);
-      const cw = [Math.round(contentW * 0.14), Math.round(contentW * 0.115), Math.round(contentW * 0.115), Math.round(contentW * 0.115), Math.round(contentW * 0.115), Math.round(contentW * 0.09), Math.round(contentW * 0.16), Math.round(contentW * 0.105)];
+
+      // 4. TABLA DE DETALLE DIARIO
+      const cw = [60, 52, 52, 52, 52, 48, 80, 59];
       const headers = ['Fecha', 'Ent. Mañana', 'Sal. Mañana', 'Ent. Tarde', 'Sal. Tarde', 'Horas', 'Estado', 'Festivo'];
-      const rh = 18, hh = 20;
+      const rh = 16;
+      const hh = 18;
+
       const drawHeaderDetalle = () => {
-        doc.font('Helvetica-Bold').fontSize(7).fillColor('#FFFFFF');
         doc.roundedRect(PDF_BODY_X, y, contentW, hh, 3).fill('#1B5E20');
-        let hx = PDF_BODY_X + 3;
-        headers.forEach((h, i) => { doc.fillColor('#FFFFFF').text(h, hx + 3, y + 6, { width: cw[i] - 3 }); hx += cw[i]; });
+        let hx = PDF_BODY_X;
+        headers.forEach((h, i) => {
+          doc.font('Helvetica-Bold').fontSize(6.5).fillColor('#FFFFFF').text(h, hx, y + 5, { width: cw[i], align: 'center' });
+          hx += cw[i];
+        });
         y += hh;
       };
+
       drawHeaderDetalle();
-      doc.fillColor('#111827').font('Helvetica').fontSize(6.5);
+
       detalleConFestivos.forEach((r, i) => {
-        if (y + rh > 700) { doc.addPage(); y = PDF_BODY_Y; drawHeaderDetalle(); doc.fillColor('#111827').font('Helvetica').fontSize(6.5); }
-        if (i % 2 === 0) doc.rect(PDF_BODY_X, y, contentW, rh).fill('#F9FAFB');
-        let hx = PDF_BODY_X + 3;
+        if (y + rh > 730) {
+          doc.addPage();
+          y = PDF_BODY_Y;
+          drawHeaderDetalle();
+        }
+
+        if (i % 2 === 0) {
+          doc.rect(PDF_BODY_X, y, contentW, rh).fill('#F9FAFB');
+        }
+
+        let hx = PDF_BODY_X;
         const fechaStr = r.fecha instanceof Date
           ? `${String(r.fecha.getDate()).padStart(2, '0')}/${String(r.fecha.getMonth() + 1).padStart(2, '0')}/${r.fecha.getFullYear()}`
           : (() => { const s = String(r.fecha).substring(0, 10).split('-'); return `${s[2]}/${s[1]}/${s[0]}`; })();
+
+        const estadoNombre = ETIQUETA_ESTADO[r.estado] || r.estado || '—';
+        const estadoColor = r.estado === 'on_time' ? '#16A34A' : r.estado === 'late' ? '#D97706' : r.estado === 'absent' ? '#DC2626' : '#4B5563';
+
         const cells = [
-          fechaStr,
-          r.entrada1 || '—',
-          r.salida1 || '—',
-          r.entrada2 || '—',
-          r.salida2 || '—',
-          r.horas_trabajadas != null ? `${r.horas_trabajadas} h` : '—',
-          ETIQUETA_ESTADO[r.estado] || r.estado || '—',
-          r.esFestivo ? 'Sí' : 'No',
+          { text: fechaStr, color: '#111827', align: 'center' as const, bold: false },
+          { text: r.entrada1 || '—', color: r.entrada1 ? '#111827' : '#9CA3AF', align: 'center' as const, bold: false },
+          { text: r.salida1 || '—', color: r.salida1 ? '#111827' : '#9CA3AF', align: 'center' as const, bold: false },
+          { text: r.entrada2 || '—', color: r.entrada2 ? '#111827' : '#9CA3AF', align: 'center' as const, bold: false },
+          { text: r.salida2 || '—', color: r.salida2 ? '#111827' : '#9CA3AF', align: 'center' as const, bold: false },
+          { text: r.horas_trabajadas != null ? `${r.horas_trabajadas} h` : '—', color: '#111827', align: 'center' as const, bold: false },
+          { text: estadoNombre, color: estadoColor, align: 'center' as const, bold: true },
+          { text: r.esFestivo ? 'Sí' : 'No', color: r.esFestivo ? '#D97706' : '#9CA3AF', align: 'center' as const, bold: false },
         ];
-        cells.forEach((v, j) => { doc.fillColor('#111827').text(String(v), hx + 3, y + 5, { width: cw[j] - 3 }); hx += cw[j]; });
+
+        cells.forEach((c, j) => {
+          doc.font(c.bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(6.5).fillColor(c.color).text(c.text, hx, y + 4.5, { width: cw[j], align: c.align });
+          hx += cw[j];
+        });
+
         y += rh;
       });
     });

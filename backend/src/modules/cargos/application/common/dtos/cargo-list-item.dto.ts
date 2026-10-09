@@ -4,6 +4,9 @@ export interface CargoListItemDto {
   name: string;
   descripcion: string;
   description: string;
-  estado: 'activo';
+  estado: 'activo' | 'inactivo';
+  area_id: string | null;
+  area: { id: string; nombre: string } | null;
+  areas: string;
   empleados_count: number;
 }

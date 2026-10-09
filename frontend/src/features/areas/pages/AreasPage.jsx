@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   Box, Button, Paper, TextField, Typography,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -7,17 +7,21 @@ import {
   Collapse, FormControl, InputLabel, Select, MenuItem,
   Snackbar, Alert,
 } from "@mui/material";
-import { Plus, Edit2, Trash2, Search, Building2, Users, ChevronDown, ChevronRight, X, Building, Layers, MapPin } from "lucide-react";
+import { Plus, Edit3, Trash2, Search, Building2, Users, ChevronDown, ChevronRight, X, Building, Layers, MapPin } from "lucide-react";
 
 import { obtenerAreas, crearArea, actualizarArea, eliminarArea, obtenerEmpleadosPorArea } from "../area.api";
 import useRol from "../../../shared/hooks/useRol";
 import ConfirmDialog from "../../../shared/components/ConfirmDialog";
+import PageBreadcrumbs from "../../../shared/components/PageBreadcrumbs";
 import { COLORES } from "../../../shared/constants/colores.js";
+import AreaDetailModal from "../components/AreaDetailModal";
 
 const initialForm = { nombre: "", piso: "", descripcion: "" };
 
 export default function AreasPage() {
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const expandidaQuery = searchParams.get("expandida");
+  const detalleQuery = searchParams.get("detalle");
   const [areas, setAreas] = useState([]);
   const [buscar, setBuscar] = useState("");
   const [loading, setLoading] = useState(true);
@@ -28,22 +32,69 @@ export default function AreasPage() {
   const [guardando, setGuardando] = useState(false);
   const [orden, setOrden] = useState("nombre");
   const { puede } = useRol();
-  const tieneAcciones = puede("areas", "editar") || puede("areas", "eliminar");
+  const tieneAcciones = true;
   const [areaExpandida, setAreaExpandida] = useState(null);
+  const [verArea, setVerArea] = useState(null);
   const [empleados, setEmpleados] = useState([]);
   const [cargandoEmpleados, setCargandoEmpleados] = useState(false);
   const [snack, setSnack] = useState({ open: false, severity: "success", mensaje: "" });
 
-  useEffect(() => { fetchAreas(); }, []);
+  const cargarEmpleadosArea = async (area) => {
+    setAreaExpandida(area);
+    setCargandoEmpleados(true);
+    try {
+      const data = await obtenerEmpleadosPorArea(area.id);
+      setEmpleados(data || []);
+    } catch { setEmpleados([]); }
+    finally { setCargandoEmpleados(false); }
+  };
+
+  const abrirVerArea = (area) => {
+    setVerArea(area);
+    const next = new URLSearchParams(searchParams);
+    next.set("detalle", String(area.id));
+    setSearchParams(next, { replace: true });
+  };
+
+  const cerrarVerArea = () => {
+    setVerArea(null);
+    const next = new URLSearchParams(searchParams);
+    next.delete("detalle");
+    setSearchParams(next, { replace: true });
+  };
 
   const fetchAreas = async () => {
     try {
       setLoading(true);
       const res = await obtenerAreas();
-      setAreas(res || []);
+      const lista = res || [];
+      setAreas(lista);
+      if (expandidaQuery) {
+        const found = lista.find((a) => String(a.id) === String(expandidaQuery));
+        if (found) cargarEmpleadosArea(found);
+      }
+      if (detalleQuery) {
+        const foundDet = lista.find((a) => String(a.id) === String(detalleQuery));
+        if (foundDet) setVerArea(foundDet);
+      }
     } catch { setAreas([]); }
     finally { setLoading(false); }
   };
+
+  useEffect(() => { fetchAreas(); }, []);
+
+  useEffect(() => {
+    if (!detalleQuery) {
+      if (verArea) setVerArea(null);
+      return;
+    }
+    if (areas.length > 0) {
+      const found = areas.find((a) => String(a.id) === String(detalleQuery));
+      if (found && (!verArea || String(verArea.id) !== String(found.id))) {
+        setVerArea(found);
+      }
+    }
+  }, [detalleQuery, areas]);
 
   const filtrados = areas
     .filter((a) =>
@@ -98,24 +149,22 @@ export default function AreasPage() {
     if (areaExpandida?.id === area.id) {
       setAreaExpandida(null);
       setEmpleados([]);
+      const next = new URLSearchParams(searchParams);
+      next.delete("expandida");
+      setSearchParams(next, { replace: true });
       return;
     }
-    setAreaExpandida(area);
-    setCargandoEmpleados(true);
-    try {
-      const data = await obtenerEmpleadosPorArea(area.id);
-      setEmpleados(data || []);
-    } catch { setEmpleados([]); }
-    finally { setCargandoEmpleados(false); }
+    const next = new URLSearchParams(searchParams);
+    next.set("expandida", String(area.id));
+    setSearchParams(next, { replace: true });
+    await cargarEmpleadosArea(area);
   };
 
   return (
     <Box sx={{ p: 3 }}>
       {/* HEADER */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
-        <Box>
-          <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>Inicio / Gestión de mantenimiento / Áreas</Typography>
-        </Box>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <PageBreadcrumbs items={["Gestión de mantenimiento", "Áreas"]} sx={{ mb: 0 }} />
         {puede("areas", "crear") && (
           <Button variant="contained" startIcon={<Plus size={18} />}
             onClick={abrirCrear}
@@ -215,7 +264,7 @@ export default function AreasPage() {
                           {areaExpandida?.id === a.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                         </IconButton>
                         <Building2 size={16} style={{ color: COLORES.primarioOscuro }} />
-                        <Button onClick={() => navigate(`/empleados?area=${encodeURIComponent(a.nombre)}`)}
+                        <Button onClick={() => abrirVerArea(a)}
                           sx={{ textTransform: "none", p: 0, minWidth: 0, color: COLORES.textoPrimario, fontWeight: 600, fontSize: 14, "&:hover": { textDecoration: "underline", color: COLORES.primarioOscuro } }}>
                           {a.nombre}
                         </Button>
@@ -229,15 +278,22 @@ export default function AreasPage() {
                     {tieneAcciones && (
                       <TableCell sx={{ py: 1.2 }}>
                         <Box sx={{ display: "flex", gap: 0.5 }}>
+                          <Box onClick={() => abrirVerArea(a)}
+                            title="Ver empleados asignados"
+                            sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: COLORES.primarioClaro, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.primarioOscuro, cursor: "pointer", transition: "all 0.2s", "&:hover": { bgcolor: COLORES.borde2 } }}>
+                            <Users size={15} />
+                          </Box>
                           {puede("areas", "editar") && (
                             <Box onClick={() => abrirEditar(a)}
-                              sx={{ width: 32, height: 32, borderRadius: "10px", bgcolor: COLORES.primarioClaro, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.primario, cursor: "pointer", transition: "all 0.2s", "&:hover": { bgcolor: COLORES.primarioClaro2 } }}>
-                              <Edit2 size={15} />
+                              title="Editar"
+                              sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: COLORES.fondoGris2, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.textoSecundario, cursor: "pointer", transition: "all 0.2s", "&:hover": { bgcolor: COLORES.borde2 } }}>
+                              <Edit3 size={15} />
                             </Box>
                           )}
                           {puede("areas", "eliminar") && (
                             <Box onClick={() => setConfirmDelete(a)}
-                              sx={{ width: 32, height: 32, borderRadius: "10px", bgcolor: COLORES.dangerFondo, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.danger, cursor: "pointer", transition: "all 0.2s", "&:hover": { bgcolor: COLORES.dangerBorde } }}>
+                              title="Eliminar"
+                              sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: COLORES.dangerFondo, display: "flex", alignItems: "center", justifyContent: "center", color: COLORES.danger, cursor: "pointer", transition: "all 0.2s", "&:hover": { bgcolor: COLORES.dangerBorde } }}>
                               <Trash2 size={15} />
                             </Box>
                           )}
@@ -326,7 +382,7 @@ export default function AreasPage() {
           </IconButton>
         </DialogTitle>
         <Divider />
-        <DialogContent sx={{ px: 3, py: 1.75, overflowY: "auto", bgcolor: COLORES.fondoBlanco }}>
+        <DialogContent sx={{ px: 3, py: 2, overflowY: "auto", bgcolor: COLORES.fondoGris }}>
           <Box sx={{ border: `1px solid ${COLORES.grisContorno}`, borderRadius: "12px", bgcolor: COLORES.fondoBlanco, p: 2 }}>
             <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: COLORES.textoPrimario, mb: 1.25 }}>
               Información del área
@@ -386,6 +442,14 @@ export default function AreasPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* MODAL DETALLE DE ÁREA */}
+      <AreaDetailModal
+        open={Boolean(verArea)}
+        onClose={cerrarVerArea}
+        area={verArea}
+        onEditar={puede("areas", "editar") ? abrirEditar : undefined}
+      />
 
       {/* CONFIRMAR ELIMINAR */}
       <ConfirmDialog

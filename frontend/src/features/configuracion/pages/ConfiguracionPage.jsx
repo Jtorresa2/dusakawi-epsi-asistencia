@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Box, Paper, Typography, Tabs, Tab, TextField, Switch, Button,
   Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions,
@@ -10,6 +11,7 @@ import {
   Lock, X, Mail,
 } from "lucide-react";
 import { obtenerConfig, actualizarConfig, obtenerPendientesEmail, enviarEmailAcceso } from "../config.api";
+import PageBreadcrumbs from "../../../shared/components/PageBreadcrumbs";
 import { COLORES } from "../../../shared/constants/colores.js";
 import { PALETA } from "../../../shared/constants/paleta.js";
 
@@ -130,7 +132,10 @@ function EstadoChip({ estado }) {
 }
 
 export default function ConfiguracionPage() {
-  const [tab, setTab] = useState("asistencia");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabQuery = searchParams.get("tab");
+  const tabInicial = TABS.some((t) => t.id === tabQuery) ? tabQuery : "asistencia";
+  const [tab, setTab] = useState(tabInicial);
   const [form, setForm] = useState({ ...DEFAULT_CONFIG });
   const [guardando, setGuardando] = useState(false);
   const [snack, setSnack] = useState(null);
@@ -141,6 +146,18 @@ export default function ConfiguracionPage() {
   const [enviando, setEnviando] = useState(false);
   const [snackCorreo, setSnackCorreo] = useState(null);
   const [filtroCorreo, setFiltroCorreo] = useState("todos");
+
+  useEffect(() => {
+    const q = searchParams.get("tab");
+    if (TABS.some((t) => t.id === q)) {
+      setTab(q);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (_, v) => {
+    setTab(v);
+    setSearchParams({ tab: v });
+  };
 
   useEffect(() => {
     (async () => {
@@ -282,19 +299,17 @@ export default function ConfiguracionPage() {
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2.5 }}>
       {/* ENCABEZADO */}
-      <Box>
-        <Typography sx={{ fontSize: 13, color: COLORES.textoMuted, mb: 0.5 }}>
-          Inicio / Gestión del sistema / Configuración
-        </Typography>
-        
-      </Box>
+      <PageBreadcrumbs
+        items={["Gestión del sistema", "Configuración"]}
+        sx={{ mb: 0 }}
+      />
 
       {/* PESTAÑAS */}
       <Paper elevation={0} sx={{ borderRadius: "20px", border: `1px solid ${COLORES.grisContorno}`, overflow: "hidden", bgcolor: COLORES.fondoBlanco }}>
         <Box sx={{ px: 2.5, pt: 1, borderBottom: `1px solid ${COLORES.grisContorno}`, bgcolor: COLORES.fondoBlanco }}>
           <Tabs
             value={tab}
-            onChange={(_, v) => setTab(v)}
+            onChange={handleTabChange}
             variant="scrollable"
             scrollButtons="auto"
             allowScrollButtonsMobile

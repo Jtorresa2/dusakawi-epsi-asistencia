@@ -41,15 +41,16 @@ const createSchedule = async (req: Request, res: Response) => {
   try {
     const handler = req.container.resolve<CreateScheduleHandler>('createScheduleHandler');
     const result = await handler.handle({
-      name: req.body.nombre,
-      modality: req.body.modalidad,
-      workdayType: req.body.tipo_jornada,
-      description: req.body.descripcion,
-      expectedHours: req.body.horas_esperadas,
-      toleranceMinutes: req.body.tolerancia_minutos,
-      toleranceDepartureMinutes: req.body.tolerancia_salida_minutos,
-      active: req.body.activo,
-      details: req.body.detalles,
+      name: req.body.nombre ?? req.body.name,
+      modality: req.body.modalidad ?? req.body.modality,
+      workdayType: req.body.tipo_jornada ?? req.body.workday_type,
+      description: req.body.descripcion ?? req.body.description,
+      expectedHours: req.body.horas_esperadas ?? req.body.expected_hours,
+      toleranceMinutes: req.body.tolerancia_minutos ?? req.body.tolerance_minutes,
+      toleranceDepartureMinutes:
+        req.body.tolerancia_salida_minutos ?? req.body.tolerance_departure_minutes,
+      active: req.body.activo !== undefined ? req.body.activo : req.body.active,
+      details: req.body.detalles ?? req.body.details,
     });
     if (result.status === 'missing-name') {
       return res.status(400).json({ mensaje: 'El nombre es obligatorio' });
@@ -63,13 +64,24 @@ const createSchedule = async (req: Request, res: Response) => {
 const updateSchedule = async (req: Request<{ id: string }>, res: Response) => {
   try {
     const handler = req.container.resolve<UpdateScheduleHandler>('updateScheduleHandler');
+    const activeValue =
+      req.body.activo !== undefined
+        ? req.body.activo
+        : req.body.active !== undefined
+        ? req.body.active
+        : undefined;
+
     await handler.handle(req.params.id, {
-      name: req.body.nombre,
-      toleranceMinutes: req.body.tolerancia_minutos,
-      details: req.body.detalles,
-      description: req.body.description,
-      modality: req.body.modality,
-      workdayType: req.body.workday_type,
+      name: req.body.nombre ?? req.body.name,
+      toleranceMinutes: req.body.tolerancia_minutos ?? req.body.tolerance_minutes,
+      toleranceDepartureMinutes:
+        req.body.tolerancia_salida_minutos ?? req.body.tolerance_departure_minutes,
+      details: req.body.detalles ?? req.body.details,
+      description: req.body.descripcion ?? req.body.description,
+      modality: req.body.modalidad ?? req.body.modality,
+      workdayType: req.body.tipo_jornada ?? req.body.workday_type,
+      expectedHours: req.body.horas_esperadas ?? req.body.expected_hours,
+      active: activeValue,
     });
     res.json({ mensaje: 'Horario actualizado correctamente' });
   } catch (error) {
@@ -128,6 +140,9 @@ const assignSchedule = async (req: Request, res: Response) => {
     if (result.status === 'schedule-not-found') {
       return res.status(404).json({ mensaje: 'Horario no encontrado' });
     }
+    if (result.status === 'schedule-inactive') {
+      return res.status(400).json({ mensaje: 'No se puede asignar un horario inactivo' });
+    }
     res.status(201).json({ mensaje: 'Horario asignado correctamente' });
   } catch (error) {
     serverError(res, error);
@@ -166,6 +181,9 @@ const massAssignSchedule = async (req: Request, res: Response) => {
     }
     if (result.status === 'schedule-not-found') {
       return res.status(404).json({ mensaje: 'Horario no encontrado' });
+    }
+    if (result.status === 'schedule-inactive') {
+      return res.status(400).json({ mensaje: 'No se puede asignar un horario inactivo' });
     }
     res.status(200).json({
       mensaje: `Horario asignado a ${result.count} empleados correctamente`,

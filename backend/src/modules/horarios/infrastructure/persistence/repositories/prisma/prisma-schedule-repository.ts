@@ -120,9 +120,12 @@ export class PrismaScheduleRepository implements ScheduleRepository {
       SET
         name = ${data.name},
         tolerance_minutes = ${data.toleranceMinutes},
-        description = COALESCE(${data.description}, description),
+        tolerance_departure_minutes = COALESCE(${data.toleranceDepartureMinutes ?? null}, tolerance_departure_minutes),
+        description = ${data.description ?? null},
         modality = COALESCE(${data.modality}, modality),
-        workday_type = COALESCE(${data.workdayType}, workday_type)
+        workday_type = COALESCE(${data.workdayType}, workday_type),
+        expected_hours = CASE WHEN ${data.expectedHours === undefined} THEN expected_hours ELSE ${data.expectedHours ?? null} END,
+        active = COALESCE(${data.active ?? null}, active)
       WHERE id = ${id}
     `;
 
@@ -147,6 +150,13 @@ export class PrismaScheduleRepository implements ScheduleRepository {
       SELECT id FROM asistencia.schedules WHERE id = ${id}
     `;
     return rows.length > 0;
+  }
+
+  async isScheduleActive(id: string): Promise<boolean> {
+    const rows = await prisma.$queryRaw<{ active: boolean }[]>`
+      SELECT active FROM asistencia.schedules WHERE id = ${id}
+    `;
+    return Boolean(rows[0]?.active);
   }
 
   async userExists(id: string): Promise<boolean> {

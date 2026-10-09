@@ -22,6 +22,8 @@ import asistencia from '@modules/asistencia/presentation/asistencia.presentation
 import schedules from '@modules/horarios/presentation/schedules.presentation';
 import reports from '@modules/reportes/presentation/reports.presentation';
 import pdf from '@modules/pdf/presentation/pdf.presentation';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from '@config/swagger/swagger.spec.js';
 
 const app = express();
 const container = buildContainer();
@@ -30,6 +32,22 @@ app.use(containerScopeMiddleware(container));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+
+// =======================================================
+// Documentación Interactiva Swagger / OpenAPI
+// =======================================================
+app.use(
+  '/api/docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customSiteTitle: 'Dusakawi EPSI - Documentación de API',
+    customCss: '.swagger-ui .topbar { display: none }',
+  })
+);
+app.get('/api/docs.json', (_, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
 
 // =======================================================
 // Rutas TypeScript (Fuente de verdad)
@@ -52,7 +70,8 @@ pdf.addRoutes(app);
 
 app.get('/', (_, res) => {
   res.json({
-    mensaje: 'API Dusakawi EPSI activa (Frankenstein Funcional)',
+    mensaje: 'API Dusakawi EPSI activa',
+    documentacion: '/api/docs',
   });
 });
 

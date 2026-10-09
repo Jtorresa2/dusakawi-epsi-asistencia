@@ -1,16 +1,7 @@
 import crypto from 'node:crypto';
-import { createRequire } from 'node:module';
 import { prisma } from '@config/database/prisma/prisma';
 import type { LegacyResult } from '../../common/legacy-result';
-
-const require = createRequire(import.meta.url);
-const { enviarResetPassword } = require('../../../../../services/emailService.js') as {
-  enviarResetPassword: (args: {
-    email: string;
-    nombre: string;
-    link: string;
-  }) => Promise<unknown>;
-};
+import { enviarResetPassword } from '../../../../../services/email.service.js';
 
 interface RequestResetBody {
   correo?: string;

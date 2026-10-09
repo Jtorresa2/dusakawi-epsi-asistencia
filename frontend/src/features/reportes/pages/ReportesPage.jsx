@@ -12,7 +12,6 @@ import {
   IconButton,
 } from "@mui/material";
 import {
-  ChevronRight,
   FileText,
   Eye,
   Download,
@@ -30,6 +29,7 @@ import {
   User,
 } from "lucide-react";
 import Loading from "../../../shared/components/Loading";
+import PageBreadcrumbs from "../../../shared/components/PageBreadcrumbs";
 import DataTable from "../../../shared/components/DataTable";
 import ReporteView from "../components/ReporteView";
 import {
@@ -117,7 +117,7 @@ const API_FNS = {
 const NOMBRES_REV = Object.fromEntries(Object.entries(NOMBRES).map(([k, v]) => [v, k]));
 
 export default function ReportesPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const tipoQuery = searchParams.get("tipo");
   const tipoInicial = CARD_DATA.some((r) => r.id === tipoQuery) ? tipoQuery : null;
   const [tipoActivo, setTipoActivo] = useState(tipoInicial);
@@ -127,6 +127,15 @@ export default function ReportesPage() {
   const [cargando, setCargando] = useState(true);
   const [pdfPreview, setPdfPreview] = useState(null);
   const [filtrosIniciales, setFiltrosIniciales] = useState(null);
+
+  useEffect(() => {
+    const tipo = searchParams.get("tipo");
+    if (CARD_DATA.some((r) => r.id === tipo)) {
+      setTipoActivo(tipo);
+    } else if (!tipo) {
+      setTipoActivo(null);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     Promise.all([obtenerIndicadores(), obtenerTendencia(), obtenerHistorial()])
@@ -147,17 +156,12 @@ export default function ReportesPage() {
     <>
       <Box sx={{ p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 3 }}>
         {/* Breadcrumb y Encabezado */}
-        <Box>
-          <Typography sx={{ fontSize: 13, color: COLORES.textoMuted, mb: 0.5 }}>
-            Inicio / Gestión de reportes / Centro de reportes
-          </Typography>
-          <Typography sx={{ fontSize: 22, fontWeight: 700, color: COLORES.textoPrimario }}>
-            Centro de Reportes y Análisis
-          </Typography>
-          <Typography sx={{ fontSize: 13, color: COLORES.textoTerciario, mt: 0.3 }}>
-            Genera, consulta y exporta consolidados institucionales de asistencia, puntualidad y cumplimiento.
-          </Typography>
-        </Box>
+        {!tipoActivo && (
+          <PageBreadcrumbs
+            items={["Gestión de reportes", "Reportes"]}
+            sx={{ mb: -1 }}
+          />
+        )}
 
         {tipoActivo ? (
           <ReporteView
@@ -167,6 +171,7 @@ export default function ReportesPage() {
             onVolver={() => {
               setTipoActivo(null);
               setFiltrosIniciales(null);
+              setSearchParams({});
             }}
             onExportarPDF={handlePDF}
             onExportarExcel={handleExcel}
@@ -397,7 +402,10 @@ export default function ReportesPage() {
                       <Button
                         variant="contained"
                         endIcon={<ArrowRight size={15} />}
-                        onClick={() => setTipoActivo(r.id)}
+                        onClick={() => {
+                          setTipoActivo(r.id);
+                          setSearchParams({ tipo: r.id });
+                        }}
                         sx={{
                           borderRadius: "10px",
                           textTransform: "none",
@@ -514,6 +522,7 @@ export default function ReportesPage() {
                                   } catch {}
                                   setFiltrosIniciales(filtros || {});
                                   setTipoActivo(key);
+                                  setSearchParams({ tipo: key });
                                 }
                               }}
                             >

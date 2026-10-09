@@ -37,6 +37,9 @@ export class AssignScheduleHandler {
     if (!(await this.scheduleRepository.scheduleExists(command.scheduleId))) {
       return { status: 'schedule-not-found' as const };
     }
+    if (!(await this.scheduleRepository.isScheduleActive(command.scheduleId))) {
+      return { status: 'schedule-inactive' as const };
+    }
 
     await this.scheduleRepository.assignUser({
       userId: command.userId,

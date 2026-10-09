@@ -15,18 +15,18 @@ import {
   CircularProgress,
 } from "@mui/material";
 import {
-  Briefcase,
   Building2,
   Users,
   FileText,
   X,
-  CheckCircle2,
-  XCircle,
   Search,
+  MapPin,
+  Briefcase,
+  Edit3,
   ChevronRight,
 } from "lucide-react";
 import { COLORES } from "../../../shared/constants/colores.js";
-import { obtenerPersonal } from "../../personal/personal.api";
+import { obtenerEmpleadosPorArea } from "../area.api.js";
 import EmpleadoDetalleResumenModal from "../../personal/components/EmpleadoDetalleResumenModal.jsx";
 
 const modalSeccionCard = {
@@ -61,21 +61,22 @@ const infoValueSx = {
   mt: 0.3,
 };
 
-export default function CargoDetailModal({ open, onClose, cargo }) {
+export default function AreaDetailModal({ open, onClose, area, onEditar }) {
   const [colaboradores, setColaboradores] = useState([]);
   const [cargandoColabs, setCargandoColabs] = useState(false);
   const [busquedaColab, setBusquedaColab] = useState("");
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
 
   useEffect(() => {
-    if (!open || !cargo?.nombre) return;
+    if (!open || !area?.id) return;
     let cancelado = false;
     setCargandoColabs(true);
     setBusquedaColab("");
-    obtenerPersonal({ cargo: cargo.nombre })
+    obtenerEmpleadosPorArea(area.id)
       .then((res) => {
         if (!cancelado) {
-          setColaboradores(res?.empleados || []);
+          const lista = Array.isArray(res) ? res : res?.items || [];
+          setColaboradores(lista);
         }
       })
       .catch(() => {
@@ -84,23 +85,33 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
       .finally(() => {
         if (!cancelado) setCargandoColabs(false);
       });
-    return () => { cancelado = true; };
-  }, [open, cargo?.nombre]);
+    return () => {
+      cancelado = true;
+    };
+  }, [open, area?.id]);
 
   const colabsFiltrados = useMemo(() => {
     if (!busquedaColab.trim()) return colaboradores;
     const q = busquedaColab.toLowerCase().trim();
     return colaboradores.filter((emp) => {
-      const nombre = (emp.empleado || `${emp.nombre || ""} ${emp.apellido || ""}`).toLowerCase();
+      const nombre = `${emp.nombre || ""} ${emp.apellido || ""}`.toLowerCase();
       const cedula = String(emp.cedula || "");
-      const correo = (emp.correo || "").toLowerCase();
-      return nombre.includes(q) || cedula.includes(q) || correo.includes(q);
+      const cargo = (emp.cargo || "").toLowerCase();
+      const correo = (emp.correo || emp.email || "").toLowerCase();
+      return (
+        nombre.includes(q) ||
+        cedula.includes(q) ||
+        cargo.includes(q) ||
+        correo.includes(q)
+      );
     });
   }, [colaboradores, busquedaColab]);
 
-  if (!cargo) return null;
+  if (!area) return null;
 
-  const activo = cargo.estado !== "inactivo";
+  const totalActivos = colaboradores.filter(
+    (c) => c.activo === 1 || c.activo === true || c.estado === "activo"
+  ).length;
 
   return (
     <>
@@ -144,7 +155,7 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
               flexShrink: 0,
             }}
           >
-            <Briefcase size={20} />
+            <Building2 size={20} />
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, flexWrap: "wrap" }}>
@@ -156,24 +167,18 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
                   lineHeight: 1.2,
                 }}
               >
-                {cargo.nombre}
+                {area.nombre}
               </Typography>
               <Chip
-                icon={
-                  activo ? (
-                    <CheckCircle2 size={13} color={COLORES.verdeTexto} />
-                  ) : (
-                    <XCircle size={13} color={COLORES.danger} />
-                  )
-                }
-                label={activo ? "Activo" : "Inactivo"}
+                icon={<MapPin size={13} color={COLORES.primario} />}
+                label={area.piso !== null && area.piso !== undefined ? `Piso ${area.piso}` : "Sin piso"}
                 size="small"
                 sx={{
                   height: 24,
                   fontSize: 11.5,
                   fontWeight: 600,
-                  bgcolor: activo ? COLORES.successFondo : COLORES.dangerFondo,
-                  color: activo ? COLORES.verdeTexto : COLORES.danger,
+                  bgcolor: COLORES.primarioClaro,
+                  color: COLORES.primarioOscuro,
                   borderRadius: "8px",
                 }}
               />
@@ -183,13 +188,9 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
                 fontSize: 12,
                 color: COLORES.textoTerciario,
                 mt: 0.25,
-                display: "flex",
-                alignItems: "center",
-                gap: 0.6,
               }}
             >
-              <Building2 size={13} style={{ color: COLORES.textoSuave }} />
-              {cargo.areas || "Área sin asignar"}
+              Módulo de Áreas institucionales
             </Typography>
           </Box>
         </Box>
@@ -211,7 +212,7 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
       </DialogTitle>
       <Divider />
 
-      {/* CUERPO SCROLLEABLE */}
+      {/* CUERPO SCROLLEABLE CON SCROLL VERDE INSTITUCIONAL */}
       <DialogContent
         sx={{
           px: 3,
@@ -249,22 +250,24 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
               gap: 1,
             }}
           >
-            Detalles institucionales
+            Detalles del área
           </Typography>
 
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" },
               gap: 1.5,
             }}
           >
             <Box sx={infoCardSx}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.4 }}>
-                <Building2 size={14} color={COLORES.textoSuave} />
-                <Typography sx={infoLabelSx}>Área</Typography>
+                <MapPin size={14} color={COLORES.textoSuave} />
+                <Typography sx={infoLabelSx}>Ubicación</Typography>
               </Box>
-              <Typography sx={infoValueSx}>{cargo.areas || "—"}</Typography>
+              <Typography sx={infoValueSx}>
+                {area.piso !== null && area.piso !== undefined ? `Piso ${area.piso}` : "Sin piso"}
+              </Typography>
             </Box>
 
             <Box sx={infoCardSx}>
@@ -273,7 +276,17 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
                 <Typography sx={infoLabelSx}>Empleados</Typography>
               </Box>
               <Typography sx={{ ...infoValueSx, color: COLORES.primarioOscuro }}>
-                {cargo.empleados_count ?? 0} asignados
+                {colaboradores.length} asignados
+              </Typography>
+            </Box>
+
+            <Box sx={infoCardSx}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.4 }}>
+                <Users size={14} color={COLORES.verdeTexto} />
+                <Typography sx={infoLabelSx}>Activos</Typography>
+              </Box>
+              <Typography sx={{ ...infoValueSx, color: COLORES.verdeTexto }}>
+                {totalActivos} activos
               </Typography>
             </Box>
           </Box>
@@ -297,7 +310,7 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
               <FileText size={14} />
             </Box>
             <Typography sx={{ fontSize: 13, fontWeight: 700, color: COLORES.textoPrimario }}>
-              Descripción y responsabilidades
+              Descripción del área
             </Typography>
           </Box>
           <Typography
@@ -311,7 +324,7 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
               border: `1px solid ${COLORES.grisContorno}`,
             }}
           >
-            {cargo.descripcion || "No hay una descripción registrada para este cargo."}
+            {area.descripcion || "No hay una descripción registrada para esta área."}
           </Typography>
         </Box>
 
@@ -350,36 +363,46 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
               />
             </Box>
 
-            {colaboradores.length > 3 && (
+            {colaboradores.length > 0 && (
               <TextField
-                size="small"
-                placeholder="Buscar empleado..."
+                placeholder="Buscar por nombre, cédula o cargo..."
                 value={busquedaColab}
                 onChange={(e) => setBusquedaColab(e.target.value)}
+                size="small"
                 slotProps={{
                   input: {
-                    startAdornment: <Search size={14} style={{ color: COLORES.textoSuave, marginRight: 6 }} />,
-                    sx: { height: 32, fontSize: 12, borderRadius: "8px", bgcolor: COLORES.fondoGris, py: 0 },
+                    startAdornment: <Search size={14} style={{ marginRight: 6, color: COLORES.textoSuave }} />,
                   },
                 }}
-                sx={{ width: { xs: "100%", sm: 200 } }}
+                sx={{
+                  minWidth: { xs: "100%", sm: 260 },
+                  "& .MuiOutlinedInput-root": {
+                    height: 32,
+                    fontSize: 12,
+                    bgcolor: COLORES.fondoGris,
+                    borderRadius: "8px",
+                    "& fieldset": { borderColor: COLORES.grisContorno },
+                    "&:hover fieldset": { borderColor: COLORES.borde2 },
+                    "&.Mui-focused fieldset": { borderColor: COLORES.primarioOscuro },
+                  },
+                }}
               />
             )}
           </Box>
 
           {cargandoColabs ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 3, gap: 1, alignItems: "center" }}>
-              <CircularProgress size={20} sx={{ color: COLORES.primarioOscuro }} />
-              <Typography sx={{ fontSize: 12.5, color: COLORES.textoTerciario }}>
+            <Box sx={{ py: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+              <CircularProgress size={24} sx={{ color: COLORES.primario }} />
+              <Typography sx={{ fontSize: 12.5, color: COLORES.textoSuave }}>
                 Cargando empleados asignados...
               </Typography>
             </Box>
           ) : colabsFiltrados.length === 0 ? (
-            <Box sx={{ p: 2.5, textAlign: "center", bgcolor: COLORES.fondoGris, borderRadius: "10px", border: `1px dashed ${COLORES.borde2}` }}>
+            <Box sx={{ p: 2.5, textAlign: "center", bgcolor: COLORES.fondoGris, borderRadius: "10px", border: `1px solid ${COLORES.grisContorno}` }}>
               <Typography sx={{ fontSize: 12.5, color: COLORES.textoSuave }}>
                 {busquedaColab
                   ? "No se encontraron empleados que coincidan con la búsqueda."
-                  : "No hay empleados asignados a este cargo actualmente."}
+                  : "No hay empleados asignados a esta área actualmente."}
               </Typography>
             </Box>
           ) : (
@@ -392,7 +415,7 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
             >
               {colabsFiltrados.map((emp) => {
                 const nombreCompleto = emp.empleado || `${emp.nombre || ""} ${emp.apellido || ""}`.trim() || "Empleado";
-                const iniciales = `${(emp.primer_nombre || emp.nombre || "")[0] || ""}${(emp.primer_apellido || emp.apellido || "")[0] || ""}`.toUpperCase() || "E";
+                const iniciales = `${emp.nombre?.[0] || ""}${emp.apellido?.[0] || ""}`.toUpperCase() || "E";
                 const esActivo = emp.activo === 1 || emp.activo === true || emp.estado === "activo";
 
                 return (
@@ -440,9 +463,17 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
                               C.C. {emp.cedula}
                             </Typography>
                           )}
-                          {emp.correo && (
+                          {emp.cargo && (
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.4 }}>
+                              <Briefcase size={11} color={COLORES.textoSuave} />
+                              <Typography sx={{ fontSize: 11, color: COLORES.textoTerciario }}>
+                                {emp.cargo}
+                              </Typography>
+                            </Box>
+                          )}
+                          {(emp.correo || emp.email) && (
                             <Typography sx={{ fontSize: 11, color: COLORES.textoSuave }}>
-                              • {emp.correo}
+                              • {emp.correo || emp.email}
                             </Typography>
                           )}
                         </Box>
@@ -475,7 +506,34 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
 
       {/* FOOTER FIJO */}
       <Divider />
-      <DialogActions sx={{ px: 3, py: 2, justifyContent: "flex-end" }}>
+      <DialogActions sx={{ px: 3, py: 2, justifyContent: "space-between" }}>
+        <Box>
+          {onEditar && (
+            <Button
+              variant="outlined"
+              startIcon={<Edit3 size={15} />}
+              onClick={() => {
+                onClose();
+                onEditar(area);
+              }}
+              sx={{
+                borderRadius: "10px",
+                textTransform: "none",
+                fontSize: 13,
+                fontWeight: 600,
+                color: COLORES.textoSecundario,
+                borderColor: COLORES.grisContorno,
+                bgcolor: COLORES.fondoGris2,
+                "&:hover": {
+                  borderColor: COLORES.borde2,
+                  bgcolor: COLORES.borde2,
+                },
+              }}
+            >
+              Editar área
+            </Button>
+          )}
+        </Box>
         <Button
           variant="contained"
           onClick={onClose}
@@ -501,8 +559,8 @@ export default function CargoDetailModal({ open, onClose, cargo }) {
       id={empleadoSeleccionado?.id}
       empleadoData={{
         ...empleadoSeleccionado,
-        cargo: cargo.nombre,
-        area: cargo.areas || cargo.area,
+        area: area.nombre,
+        piso: area.piso,
       }}
       onClose={() => setEmpleadoSeleccionado(null)}
     />

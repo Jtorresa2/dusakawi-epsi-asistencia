@@ -16,10 +16,7 @@ import type {
 } from '@modules/pdf/domain/entities/pdf';
 import type { PdfRepository } from '@modules/pdf/domain/repositories/pdf-repository';
 
-const require = createRequire(import.meta.url);
-const { excluirRolesPorNombre, excluirRolesPorUserId, joinRoles } = require(
-  '../../../../../../services/rolesFiltro.js',
-);
+import { excluirRolesPorNombre, excluirRolesPorUserId, joinRoles } from '../../../../../../services/rolesFiltro.js';
 
 const qualifyRoleSql = (sql: string) =>
   sql

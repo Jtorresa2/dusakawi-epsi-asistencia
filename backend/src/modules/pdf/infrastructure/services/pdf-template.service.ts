@@ -28,10 +28,10 @@ const HEADER = {
   text4: { x: 145, y: 58 },
   textWidth: 220,
   metadataX: 470,
-  metadataY: 24,
-  metadataLineGap: 10,
+  metadataY: 28,
+  metadataLineGap: 11,
   metadataWidth: 100,
-  pageNumY: 66,
+  pageNumY: 40,
   separatorLineY: 98,
 };
 
@@ -110,17 +110,12 @@ function drawGreek(doc: PDFKit.PDFDocument, x: number) {
 }
 
 function drawHeader(doc: PDFKit.PDFDocument, metadata: PdfMeta) {
-  doc.font('Helvetica').fontSize(7).fillColor(COLORS.grisTexto);
-  const lines = [
-    `Código: ${metadata?.codigo ?? '_______________'}`,
-    `Versión: ${metadata?.version ?? '_______________'}`,
-    `Emisión: ${metadata?.emision ?? '___/___/______'}`,
-    `Vigencia: ${metadata?.vigencia ?? '___/___/______'}`,
-  ];
-  let my = HEADER.metadataY;
-  for (const linea of lines) {
-    doc.text(linea, HEADER.metadataX, my, { align: 'right', width: HEADER.metadataWidth });
-    my += HEADER.metadataLineGap;
+  doc.font('Helvetica').fontSize(7.5).fillColor(COLORS.grisTexto);
+  if (metadata?.version) {
+    doc.text(`Versión: ${metadata.version}`, HEADER.metadataX, HEADER.metadataY, {
+      align: 'right',
+      width: HEADER.metadataWidth,
+    });
   }
 
   doc.moveTo(BODY_X, HEADER.separatorLineY)
@@ -155,7 +150,7 @@ function drawFooter(doc: PDFKit.PDFDocument) {
 }
 
 function drawPageNumber(doc: PDFKit.PDFDocument, page: number, total: number) {
-  doc.font('Helvetica').fontSize(7).fillColor(COLORS.grisTexto);
+  doc.font('Helvetica').fontSize(7.5).fillColor(COLORS.grisTexto);
   doc.text(`Página ${page} de ${total}`, HEADER.metadataX, HEADER.pageNumY, {
     align: 'right', width: HEADER.metadataWidth,
   });

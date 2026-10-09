@@ -76,7 +76,7 @@ const getAttendance = async (req: Request, res: Response) => {
     const result = await handler.handle({
       fecha_desde: req.query.fecha_desde as string | undefined,
       fecha_hasta: req.query.fecha_hasta as string | undefined,
-      empleado_id: req.query.empleado_id as string | undefined,
+      empleado_id: (req.query.empleado_id || req.query.usuario_id) as string | undefined,
       area_id: req.query.area_id as string | undefined,
       estado: req.query.estado as string | undefined,
     });
@@ -94,7 +94,7 @@ const getLateArrivals = async (req: Request, res: Response) => {
       fecha_desde: req.query.fecha_desde as string | undefined,
       fecha_hasta: req.query.fecha_hasta as string | undefined,
       area_id: req.query.area_id as string | undefined,
-      empleado_id: req.query.empleado_id as string | undefined,
+      empleado_id: (req.query.empleado_id || req.query.usuario_id) as string | undefined,
     });
     res.json(result);
   } catch (error) {
@@ -110,7 +110,7 @@ const getAbsences = async (req: Request, res: Response) => {
       fecha_desde: req.query.fecha_desde as string | undefined,
       fecha_hasta: req.query.fecha_hasta as string | undefined,
       area_id: req.query.area_id as string | undefined,
-      empleado_id: req.query.empleado_id as string | undefined,
+      empleado_id: (req.query.empleado_id || req.query.usuario_id) as string | undefined,
     });
     res.json(result);
   } catch (error) {
@@ -123,7 +123,7 @@ const getEmployee = async (req: Request, res: Response) => {
   try {
     const handler = req.container.resolve<GetEmployeeReportHandler>('getEmployeeReportHandler');
     const result = await handler.handle({
-      employeeId: req.query.empleado_id as string | undefined,
+      employeeId: (req.query.empleado_id || req.query.usuario_id) as string | undefined,
       month: req.query.mes as string | undefined,
       year: req.query.anio as string | undefined,
     });
@@ -160,7 +160,7 @@ const getMarkings = async (req: Request, res: Response) => {
     const result = await handler.handle({
       fecha_desde: req.query.fecha_desde as string | undefined,
       fecha_hasta: req.query.fecha_hasta as string | undefined,
-      empleado_id: req.query.empleado_id as string | undefined,
+      empleado_id: (req.query.empleado_id || req.query.usuario_id) as string | undefined,
       area_id: req.query.area_id as string | undefined,
     });
     res.json(result);

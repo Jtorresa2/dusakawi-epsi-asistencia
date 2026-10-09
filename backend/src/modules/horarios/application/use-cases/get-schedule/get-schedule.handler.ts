@@ -11,11 +11,20 @@ export class GetScheduleHandler {
     return {
       id: row.id,
       nombre: row.name,
+      tolerancia_minutos: row.toleranceMinutes,
+      tolerancia_salida_minutos: row.toleranceDepartureMinutes,
       description: row.description,
+      descripcion: row.description,
       modality: row.modality,
+      modalidad: row.modality,
       workday_type: row.workdayType,
+      tipo_jornada: row.workdayType,
       expected_hours: row.expectedHours,
+      horas_esperadas: row.expectedHours,
       active: row.active,
+      activo: row.active,
+      es_por_defecto: Boolean(row.isDefault),
+      is_default: Boolean(row.isDefault),
       detalles: rows
         .filter((item) => item.dayOfWeek)
         .map((item) => ({

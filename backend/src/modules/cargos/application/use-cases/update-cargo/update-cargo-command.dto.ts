@@ -6,4 +6,8 @@ export interface UpdateCargoCommandDto {
   name?: string;
   descripcion?: string;
   description?: string;
+  area_id?: string | null;
+  areaId?: string | null;
+  estado?: string;
+  active?: boolean;
 }

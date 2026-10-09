@@ -34,10 +34,7 @@ import type {
 } from '@modules/reportes/domain/entities/report';
 import type { ReportRepository } from '@modules/reportes/domain/repositories/report-repository';
 
-const require = createRequire(import.meta.url);
-const { excluirRolesPorNombre, excluirRolesPorUserId, joinRoles } = require(
-  '../../../../../../services/rolesFiltro.js',
-);
+import { excluirRolesPorNombre, excluirRolesPorUserId, joinRoles } from '../../../../../../services/rolesFiltro.js';
 
 const qualifyRoleSql = (sql: string) =>
   sql

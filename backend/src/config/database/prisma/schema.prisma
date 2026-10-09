@@ -26,8 +26,9 @@ model areas {
   description String?
   created_at  DateTime  @default(now()) @db.Timestamptz(6)
   updated_at  DateTime? @db.Timestamptz(6)
-  floors      floors    @relation(fields: [floor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  floors      floors      @relation(fields: [floor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users       users[]
+  positions   positions[]
 
   @@unique([name, floor_id], map: "uq_area_name_floor")
   @@index([floor_id], map: "idx_area_floor_id")
@@ -169,6 +170,7 @@ model positions {
   created_at  DateTime  @default(now()) @db.Timestamptz(6)
   updated_at  DateTime? @db.Timestamptz(6)
   users       users[]
+  areas       areas?    @relation(fields: [area_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("asistencia")
 }

@@ -3,9 +3,10 @@ import {
   Box, Paper, Typography, TextField, Button, MenuItem, Chip, Snackbar,
   Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Divider, Select,
 } from "@mui/material";
-import { Plus, Trash2, Pencil, CalendarDays, Wand2, X, Save } from "lucide-react";
+import { Plus, Trash2, Edit3, CalendarDays, Wand2, X, Save } from "lucide-react";
 import DataTable from "../../../shared/components/DataTable";
 import Loading from "../../../shared/components/Loading";
+import PageBreadcrumbs from "../../../shared/components/PageBreadcrumbs";
 import { obtenerFestivos, crearFestivo, eliminarFestivo, actualizarFestivo, generarFestivos } from "../festivos.api";
 import { COLORES } from "../../../shared/constants/colores.js";
 
@@ -180,9 +181,9 @@ export default function FestivosPage() {
     { field: "acciones", headerName: "Acciones", width: 90, sortable: false,
       renderCell: ({ row }) => (
         <Box sx={{ display: "flex", gap: 0.5 }}>
-          <Box sx={{ ...estiloBtn, bgcolor: COLORES.primarioClaro, color: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioClaro2 } }} title="Editar"
+          <Box sx={{ ...estiloBtn, bgcolor: COLORES.fondoGris2, color: COLORES.textoSecundario, "&:hover": { bgcolor: COLORES.borde2 } }} title="Editar"
             onClick={() => abrirEditar(row)}>
-            <Pencil size={14} />
+            <Edit3 size={14} />
           </Box>
           <Box sx={{ ...estiloBtn, bgcolor: COLORES.dangerFondo, color: COLORES.danger, "&:hover": { bgcolor: COLORES.dangerBorde } }} title="Eliminar"
             onClick={() => setDialogEliminar(row.id)}>
@@ -197,7 +198,7 @@ export default function FestivosPage() {
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2.5 }}>
-      <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>Inicio / Gestión de mantenimiento / Festivos</Typography>
+      <PageBreadcrumbs items={["Gestión de mantenimiento", "Festivos"]} sx={{ mb: 0 }} />
 
       {/* Formulario */}
       <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}` }}>

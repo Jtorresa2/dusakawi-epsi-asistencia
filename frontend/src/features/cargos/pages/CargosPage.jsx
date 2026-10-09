@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Box, Button, Paper, TextField, Typography, Select, MenuItem,
   Menu, MenuItem as MuiMenuItem, ListItemIcon, ListItemText, Divider,
@@ -15,6 +15,7 @@ import DataTable from "../../../shared/components/DataTable";
 import Loading from "../../../shared/components/Loading";
 import EmptyState from "../../../shared/components/EmptyState";
 import IconBox from "../../../shared/components/IconBox";
+import PageBreadcrumbs from "../../../shared/components/PageBreadcrumbs";
 import CargoModal from "../components/CargoModal";
 import CargoDetailModal from "../components/CargoDetailModal";
 import {
@@ -27,17 +28,6 @@ import { obtenerAreas } from "../../areas/area.api";
 import useRol from "../../../shared/hooks/useRol";
 import { exportarExcel } from "../../../shared/utils/exportarExcel";
 import { COLORES } from "../../../shared/constants/colores.js";
-
-const MOCK = [
-  { id: 1, nombre: "Médico General", descripcion: "Atención médica general a pacientes", areas: "Alto Costo", empleados_count: 12, estado: "activo" },
-  { id: 2, nombre: "Enfermero", descripcion: "Cuidado y asistencia de enfermería", areas: "Baja Complejidad", empleados_count: 8, estado: "activo" },
-  { id: 3, nombre: "Psicólogo", descripcion: "Atención psicológica a pacientes", areas: "Psicología", empleados_count: 5, estado: "activo" },
-  { id: 4, nombre: "Auxiliar Administrativo", descripcion: "Soporte administrativo general", areas: "Dirección Administrativa", empleados_count: 3, estado: "activo" },
-  { id: 5, nombre: "Recepcionista", descripcion: "Atención al público y recepción", areas: "Recepción", empleados_count: 2, estado: "inactivo" },
-  { id: 6, nombre: "Fisioterapeuta", descripcion: "Rehabilitación física de pacientes", areas: "Mediana y Alta Complejidad", empleados_count: 4, estado: "activo" },
-  { id: 7, nombre: "Odontólogo", descripcion: "Atención odontológica general", areas: "PQR", empleados_count: 3, estado: "activo" },
-  { id: 8, nombre: "Trabajador Social", descripcion: "Intervención social con pacientes", areas: "Intercultural", empleados_count: 2, estado: "inactivo" },
-];
 
 const ESTADOS = ["Todos", "Activo", "Inactivo"];
 const AREAS_FALLBACK = ["Todas", "SIAU", "PQR", "Call Center", "Aseguramiento", "Autorización", "Psicología", "Recepción", "Transporte", "MIPRES", "Portabilidad", "Referencia", "Auditoría de Cuentas Médicas", "Radicación", "Archivo", "SARLAFT", "Contabilidad", "Presupuesto", "Cartera", "Recobro", "Dirección Administrativa", "Estadística", "Sistemas", "Tesorería", "Alto Costo", "Baja Complejidad", "Comunicación", "Dirección de Riesgos", "Mediana y Alta Complejidad", "PYM", "Talento Humano", "Calidad", "Gerencia", "Contratación", "Control Interno", "Intercultural", "Jurídica"];
@@ -156,7 +146,7 @@ const cargoColumns = ({ onEditar, onVer, onMenuOpen, onNombreClick }) => [
     renderCell: ({ row }) => (
       <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
         <Box
-          sx={{ ...btnBase, bgcolor: COLORES.primarioClaro, color: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}
+          sx={{ ...btnBase, bgcolor: COLORES.fondoGris2, color: COLORES.textoSecundario, "&:hover": { bgcolor: COLORES.borde2 } }}
           title="Editar"
           onClick={(e) => {
             e.stopPropagation();
@@ -176,7 +166,7 @@ const cargoColumns = ({ onEditar, onVer, onMenuOpen, onNombreClick }) => [
           <Eye size={15} />
         </Box>
         <Box
-          sx={{ ...btnBase, bgcolor: COLORES.primarioClaro, color: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}
+          sx={{ ...btnBase, bgcolor: COLORES.dangerFondo, color: COLORES.danger, "&:hover": { bgcolor: COLORES.dangerBorde } }}
           title="Más opciones"
           onClick={(e) => {
             e.stopPropagation();
@@ -192,13 +182,18 @@ const cargoColumns = ({ onEditar, onVer, onMenuOpen, onNombreClick }) => [
 
 export default function CargosPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const detalleQuery = searchParams.get("detalle");
+  const estadoQuery = searchParams.get("estado");
+  const areaQuery = searchParams.get("area");
+
   const [cargos, setCargos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [areas, setAreas] = useState([]);
   const [areasRaw, setAreasRaw] = useState([]);
   const [search, setSearch] = useState("");
-  const [filtroEstado, setFiltroEstado] = useState("Todos");
-  const [filtroArea, setFiltroArea] = useState("Todas");
+  const [filtroEstado, setFiltroEstado] = useState(() => estadoQuery || "Todos");
+  const [filtroArea, setFiltroArea] = useState(() => areaQuery || "Todas");
   const [orden, setOrden] = useState("Nombre A-Z");
 
   const [openModal, setOpenModal] = useState(false);
@@ -212,6 +207,22 @@ export default function CargosPage() {
   const [openExport, setOpenExport] = useState(false);
   const [snack, setSnack] = useState({ open: false, severity: "success", mensaje: "" });
   const { puede } = useRol();
+
+  const cambiarFiltroEstado = (nuevo) => {
+    setFiltroEstado(nuevo);
+    const next = new URLSearchParams(searchParams);
+    if (nuevo && nuevo !== "Todos") next.set("estado", nuevo);
+    else next.delete("estado");
+    setSearchParams(next, { replace: true });
+  };
+
+  const cambiarFiltroArea = (nuevo) => {
+    setFiltroArea(nuevo);
+    const next = new URLSearchParams(searchParams);
+    if (nuevo && nuevo !== "Todas") next.set("area", nuevo);
+    else next.delete("area");
+    setSearchParams(next, { replace: true });
+  };
 
   useEffect(() => { cargarCargos(); }, []);
 
@@ -234,9 +245,14 @@ export default function CargosPage() {
     try {
       setLoading(true);
       const data = await obtenerCargos();
-      setCargos(data && data.length > 0 ? data : MOCK);
+      const lista = Array.isArray(data) ? data : (data?.cargos || []);
+      setCargos(lista);
+      if (detalleQuery) {
+        const found = lista.find((c) => String(c.id) === String(detalleQuery));
+        if (found) setVerCargo(found);
+      }
     } catch {
-      setCargos(MOCK);
+      setCargos([]);
     } finally {
       setLoading(false);
     }
@@ -251,7 +267,17 @@ export default function CargosPage() {
 
   function abrirEditar(cargo) {
     setCargoSeleccionado(cargo);
-    setForm({ nombre: cargo.nombre, descripcion: cargo.descripcion || "", estado: cargo.estado || "activo", area_id: cargo.area_id ?? "" });
+    const matchedArea = areasRaw.find(
+      (a) => a.id === cargo.area_id || (cargo.areas && a.nombre?.toLowerCase() === cargo.areas?.toLowerCase())
+    );
+    const resolvedAreaId = cargo.area_id || cargo.area?.id || matchedArea?.id || "";
+
+    setForm({
+      nombre: cargo.nombre || "",
+      descripcion: cargo.descripcion || "",
+      estado: cargo.estado || "activo",
+      area_id: resolvedAreaId,
+    });
     setErrors({});
     setOpenModal(true);
   }
@@ -288,6 +314,16 @@ export default function CargosPage() {
 
   function abrirVer(cargo) {
     setVerCargo(cargo);
+    const next = new URLSearchParams(searchParams);
+    next.set("detalle", String(cargo.id));
+    setSearchParams(next, { replace: true });
+  }
+
+  function cerrarVer() {
+    setVerCargo(null);
+    const next = new URLSearchParams(searchParams);
+    next.delete("detalle");
+    setSearchParams(next, { replace: true });
   }
 
   async function duplicarCargo(cargo) {
@@ -366,12 +402,11 @@ export default function CargosPage() {
   return (
     <Box sx={{ p: 3, bgcolor: COLORES.grisAzulado, minHeight: "100vh" }}>
       {/* 1. ENCABEZADO */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
-        <Box>
-          <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>
-            Inicio / Gestión de mantenimiento / Cargos
-          </Typography>
-        </Box>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <PageBreadcrumbs
+          items={["Gestión de mantenimiento", "Cargos"]}
+          sx={{ mb: 0 }}
+        />
         <Button
           variant="contained"
           startIcon={<Plus size={18} />}
@@ -432,7 +467,7 @@ export default function CargosPage() {
             <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario }}>
               Estado
             </Typography>
-            <Select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} size="small"
+            <Select value={filtroEstado} onChange={(e) => cambiarFiltroEstado(e.target.value)} size="small"
               sx={{ borderRadius: "10px", fontSize: 13, height: 40, minWidth: 120, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.grisContorno } }}>
               {ESTADOS.map((e) => <MenuItem key={e} value={e}>{e}</MenuItem>)}
             </Select>
@@ -441,7 +476,7 @@ export default function CargosPage() {
             <Typography sx={{ fontSize: 12, fontWeight: 500, color: COLORES.textoTerciario }}>
               Área
             </Typography>
-            <Select value={filtroArea} onChange={(e) => setFiltroArea(e.target.value)} size="small"
+            <Select value={filtroArea} onChange={(e) => cambiarFiltroArea(e.target.value)} size="small"
               sx={{ borderRadius: "10px", fontSize: 13, height: 40, minWidth: 140, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.grisContorno } }}>
               {["Todas", ...areas].map((a) => <MenuItem key={a} value={a}>{a}</MenuItem>)}
             </Select>
@@ -477,7 +512,7 @@ export default function CargosPage() {
         ) : (
           <DataTable
             rows={filtrados}
-            columns={cargoColumns({ onEditar: abrirEditar, onVer: abrirVer, onMenuOpen: handleMenuOpen, onNombreClick: (row) => navigate(`/empleados?cargo=${encodeURIComponent(row.nombre || "")}`) })}
+            columns={cargoColumns({ onEditar: abrirEditar, onVer: abrirVer, onMenuOpen: handleMenuOpen, onNombreClick: (row) => abrirVer(row) })}
             loading={loading}
             getRowHeight={() => "auto"}
           />
@@ -495,7 +530,7 @@ export default function CargosPage() {
           paper: { sx: { borderRadius: "12px", boxShadow: "0 8px 30px rgba(0,0,0,.12)", minWidth: 200 } },
         }}
       >
-        <MuiMenuItem onClick={() => { navigate(`/empleados?cargo=${encodeURIComponent(menuCargo?.nombre || "")}`); handleMenuClose(); }} sx={{ fontSize: 13, py: 1.2 }}>
+        <MuiMenuItem onClick={() => { abrirVer(menuCargo); handleMenuClose(); }} sx={{ fontSize: 13, py: 1.2 }}>
           <ListItemIcon><UsersIcon size={16} /></ListItemIcon>
           <ListItemText>Ver empleados asignados</ListItemText>
         </MuiMenuItem>
@@ -535,52 +570,183 @@ export default function CargosPage() {
       {/* 7. MODAL VER DETALLE */}
       <CargoDetailModal
         open={Boolean(verCargo)}
-        onClose={() => setVerCargo(null)}
+        onClose={cerrarVer}
         cargo={verCargo}
       />
 
       {/* 8. MODAL EXPORTAR */}
-      <Dialog open={openExport} onClose={() => setOpenExport(false)} maxWidth="md" fullWidth
-        sx={{ "& .MuiPaper-root": { backgroundColor: COLORES.fondoBlanco } }}
-        slotProps={{ paper: { sx: { borderRadius: "16px", position: "relative", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" } } }}>
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 700, color: COLORES.textoPrimario }}>
-          Exportar cargos ({filtrados.length})
-          <IconButton aria-label="Cerrar exportación" onClick={() => setOpenExport(false)} size="small" sx={{ position: "absolute", top: 8, right: 8, color: COLORES.textoSuave, "&:hover": { bgcolor: COLORES.fondoGris2 } }}>
+      <Dialog
+        open={openExport}
+        onClose={() => setOpenExport(false)}
+        maxWidth="md"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: "18px",
+              position: "relative",
+              boxShadow: "0 24px 70px rgba(0,0,0,0.25)",
+              backgroundColor: COLORES.fondoBlanco,
+              maxHeight: "92vh",
+            },
+          },
+        }}
+        sx={{
+          "& .MuiBackdrop-root": {
+            bgcolor: "rgba(17, 24, 39, 0.5)",
+            backdropFilter: "blur(4px)",
+          },
+        }}
+      >
+        <DialogTitle sx={{ px: 3, py: 2, position: "relative", pb: 1.5 }}>
+          <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: "12px",
+                bgcolor: COLORES.primarioClaro,
+                color: COLORES.primarioOscuro,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Download size={20} />
+            </Box>
+            <Box>
+              <Typography sx={{ fontSize: 17, fontWeight: 700, color: COLORES.textoPrimario, lineHeight: 1.2 }}>
+                Exportar cargos
+              </Typography>
+              <Typography sx={{ fontSize: 12, color: COLORES.textoTerciario, mt: 0.15 }}>
+                Vista previa de los {filtrados.length} cargos listados para exportación a Excel.
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton
+            aria-label="Cerrar exportación"
+            onClick={() => setOpenExport(false)}
+            size="small"
+            sx={{
+              position: "absolute",
+              top: 12,
+              right: 12,
+              color: COLORES.textoSuave,
+              bgcolor: COLORES.fondoGris2,
+              "&:hover": { color: COLORES.textoPrimario, bgcolor: COLORES.borde },
+            }}
+          >
             <X size={18} />
           </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ pt: 2, overflow: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-            <thead>
-              <tr>
-                {["Nombre", "Descripción", "Área", "Empleados", "Estado"].map(h => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 8px", borderBottom: `2px solid ${COLORES.borde}`, fontWeight: 600, color: COLORES.textoTerciario, fontSize: 11, textTransform: "uppercase" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtrados.map(r => (
-                <tr key={r.id}>
-                  <td style={{ padding: "10px 8px", borderBottom: `1px solid ${COLORES.fondoGris2}`, fontWeight: 500, color: COLORES.textoPrimario }}>{r.nombre}</td>
-                  <td style={{ padding: "10px 8px", borderBottom: `1px solid ${COLORES.fondoGris2}`, color: COLORES.textoTerciario }}>{r.descripcion || "—"}</td>
-                  <td style={{ padding: "10px 8px", borderBottom: `1px solid ${COLORES.fondoGris2}`, color: COLORES.textoTerciario }}>{r.areas || "—"}</td>
-                  <td style={{ padding: "10px 8px", borderBottom: `1px solid ${COLORES.fondoGris2}`, color: COLORES.textoTerciario }}>{r.empleados_count ?? 0}</td>
-                  <td style={{ padding: "10px 8px", borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
-                    <Chip label={r.estado === "inactivo" ? "Inactivo" : "Activo"} size="small"
-                      sx={{ borderRadius: "8px", fontSize: 11, fontWeight: 600, bgcolor: r.estado === "inactivo" ? COLORES.dangerFondo : COLORES.successFondo, color: r.estado === "inactivo" ? COLORES.dangerOscuro : COLORES.verdeTexto }} />
-                  </td>
+        <Divider />
+
+        <DialogContent sx={{ px: 3, py: 2, overflowY: "auto", bgcolor: COLORES.fondoGris }}>
+          <Box sx={{ border: `1px solid ${COLORES.grisContorno}`, borderRadius: "14px", bgcolor: COLORES.fondoBlanco, overflow: "hidden" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr style={{ background: COLORES.fondoGris }}>
+                  {["Nombre", "Descripción", "Área", "Empleados", "Estado"].map((h) => (
+                    <th
+                      key={h}
+                      style={{
+                        textAlign: "left",
+                        padding: "10px 14px",
+                        borderBottom: `1px solid ${COLORES.grisContorno}`,
+                        fontWeight: 600,
+                        color: COLORES.textoTerciario,
+                        fontSize: 11,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.03em",
+                      }}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtrados.map((r, i) => (
+                  <tr key={r.id} style={{ background: i % 2 === 0 ? COLORES.fondoBlanco : COLORES.fondoGris }}>
+                    <td style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORES.fondoGris2}`, fontWeight: 600, color: COLORES.textoPrimario }}>
+                      {r.nombre}
+                    </td>
+                    <td style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORES.fondoGris2}`, color: COLORES.textoTerciario }}>
+                      {r.descripcion || "—"}
+                    </td>
+                    <td style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORES.fondoGris2}`, color: COLORES.textoTerciario }}>
+                      {r.areas || "—"}
+                    </td>
+                    <td style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORES.fondoGris2}`, color: COLORES.textoPrimario, fontWeight: 700 }}>
+                      {r.empleados_count ?? 0}
+                    </td>
+                    <td style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORES.fondoGris2}` }}>
+                      <Chip
+                        label={r.estado === "inactivo" ? "Inactivo" : "Activo"}
+                        size="small"
+                        sx={{
+                          borderRadius: "8px",
+                          fontSize: 11,
+                          fontWeight: 600,
+                          bgcolor: r.estado === "inactivo" ? COLORES.dangerFondo : COLORES.successFondo,
+                          color: r.estado === "inactivo" ? COLORES.dangerOscuro : COLORES.verdeTexto,
+                        }}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button onClick={() => setOpenExport(false)}
-            sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, color: COLORES.textoTerciario }}>Cancelar</Button>
-          <Button variant="contained" startIcon={<Download size={16} />} onClick={() => {
-            exportarExcel(filtrados.map(r => ({ Nombre: r.nombre, Descripción: r.descripcion || "", Área: r.areas || "", Empleados: r.empleados_count ?? 0, Estado: r.estado === "inactivo" ? "Inactivo" : "Activo" })), "Cargos");
-            setOpenExport(false);
-          }} sx={{ borderRadius: "10px", textTransform: "none", fontSize: 13, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } }}>
+
+        <Divider />
+        <DialogActions sx={{ px: 3, py: 2, gap: 1.5 }}>
+          <Button
+            onClick={() => setOpenExport(false)}
+            sx={{
+              borderRadius: "10px",
+              textTransform: "none",
+              fontSize: 13,
+              fontWeight: 600,
+              color: COLORES.textoSecundario,
+              bgcolor: COLORES.fondoBlanco,
+              border: `1px solid ${COLORES.borde2}`,
+              px: 3,
+              py: 0.75,
+              "&:hover": { bgcolor: COLORES.fondoGris },
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<Download size={16} />}
+            onClick={() => {
+              exportarExcel(
+                filtrados.map((r) => ({
+                  Nombre: r.nombre,
+                  Descripción: r.descripcion || "",
+                  Área: r.areas || "",
+                  Empleados: r.empleados_count ?? 0,
+                  Estado: r.estado === "inactivo" ? "Inactivo" : "Activo",
+                })),
+                "Cargos"
+              );
+              setOpenExport(false);
+            }}
+            sx={{
+              borderRadius: "10px",
+              textTransform: "none",
+              fontSize: 13,
+              fontWeight: 600,
+              px: 3.5,
+              py: 0.75,
+              bgcolor: COLORES.primarioOscuro,
+              "&:hover": { bgcolor: COLORES.primario },
+            }}
+          >
             Descargar Excel
           </Button>
         </DialogActions>

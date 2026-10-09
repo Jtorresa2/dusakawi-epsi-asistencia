@@ -78,9 +78,12 @@ export interface ScheduleData {
 export interface ScheduleUpdateData {
   name: ScheduleSqlValue;
   toleranceMinutes: ScheduleSqlValue;
+  toleranceDepartureMinutes?: ScheduleSqlValue;
   description: ScheduleSqlValue;
   modality: ScheduleSqlValue;
   workdayType: ScheduleSqlValue;
+  expectedHours?: ScheduleSqlValue;
+  active?: ScheduleSqlValue;
   details: unknown;
 }
 

@@ -1,8 +1,8 @@
 export interface PdfMeta {
-  codigo: string;
-  version: string;
-  emision: string;
-  vigencia: string;
+  codigo?: string;
+  version?: string;
+  emision?: string;
+  vigencia?: string;
 }
 
 export interface AsistenciaRow {

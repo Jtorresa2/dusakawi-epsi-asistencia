@@ -1,6 +1,7 @@
 import { Chip, Box, Typography, Button } from "@mui/material";
 import { Eye, Edit3, MoreVertical, UserRound } from "lucide-react";
 import IconBox from "../../../shared/components/IconBox";
+import { COLORES } from "../../../shared/constants/colores.js";
 
 const btnBase = {
   width: 32, height: 32, borderRadius: "8px", border: "none",
@@ -115,7 +116,7 @@ export const cargoColumns = ({ onEditar, onVer, onMenuOpen, onNombreClick }) => 
     renderCell: ({ row }) => (
       <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
         <Box
-          sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }}
+          sx={{ ...btnBase, bgcolor: COLORES.fondoGris2, color: COLORES.textoSecundario, "&:hover": { bgcolor: COLORES.borde2 } }}
           title="Editar"
           onClick={(e) => {
             e.stopPropagation();
@@ -125,7 +126,7 @@ export const cargoColumns = ({ onEditar, onVer, onMenuOpen, onNombreClick }) => 
           <Edit3 size={15} />
         </Box>
         <Box
-          sx={{ ...btnBase, bgcolor: "#EFF6FF", color: "#1565C0", "&:hover": { bgcolor: "#DBEAFE" } }}
+          sx={{ ...btnBase, bgcolor: COLORES.primarioClaro, color: COLORES.primario, "&:hover": { bgcolor: COLORES.primarioClaro2 } }}
           title="Ver"
           onClick={(e) => {
             e.stopPropagation();
@@ -135,7 +136,7 @@ export const cargoColumns = ({ onEditar, onVer, onMenuOpen, onNombreClick }) => 
           <Eye size={15} />
         </Box>
         <Box
-          sx={{ ...btnBase, bgcolor: "#FEF3C7", color: "#92400E", "&:hover": { bgcolor: "#FDE68A" } }}
+          sx={{ ...btnBase, bgcolor: COLORES.dangerFondo, color: COLORES.danger, "&:hover": { bgcolor: COLORES.dangerBorde } }}
           title="Más opciones"
           onClick={(e) => {
             e.stopPropagation();

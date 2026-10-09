@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Box, Paper, Typography, TextField, Button, MenuItem, Chip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -19,6 +20,7 @@ import { obtenerPersonal } from "../../personal/personal.api";
 import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 import IconBox from "../../../shared/components/IconBox";
+import PageBreadcrumbs from "../../../shared/components/PageBreadcrumbs";
 import NuevoHorarioModal from "../components/NuevoHorarioModal";
 import { COLORES } from "../../../shared/constants/colores.js";
 import { PALETA } from "../../../shared/constants/paleta.js";
@@ -779,11 +781,16 @@ function HorarioCard({
   onDuplicar,
   onEliminar,
   onPorDefecto,
+  estirar = false,
 }) {
-  const esPorHoras = h.tipo_jornada === "by_hours";
+  const estaActivo = h.activo ?? h.active ?? true;
+  const modalidadVal = h.modalidad || h.modality || "strict";
+  const tipoJornadaVal = h.tipo_jornada || h.workday_type || "fixed";
+  const horasEsperadasVal = h.horas_esperadas ?? h.expected_hours;
+  const esPorHoras = tipoJornadaVal === "by_hours";
   const conteo = Array.isArray(asignados) ? asignados.length : 0;
   const chipModalidad =
-    h.modalidad === "flexible"
+    modalidadVal === "flexible"
       ? { bgcolor: COLORES.warningFondo, color: COLORES.warningOscuro }
       : { bgcolor: COLORES.successClaro, color: PALETA.verdeOscuro };
 
@@ -795,9 +802,10 @@ function HorarioCard({
         borderRadius: "16px",
         border: `1.5px solid ${seleccionado ? PALETA.verde : PALETA.borde}`,
         bgcolor: seleccionado ? COLORES.verdeVariante3 : COLORES.fondoBlanco,
-        p: 2.5,
+        opacity: estaActivo ? 1 : 0.85,
+        p: 2.25,
         cursor: "pointer",
-        flex: "1 1 0",
+        flex: estirar ? "1 1 0" : "0 0 auto",
         display: "flex",
         flexDirection: "column",
         transition: "all .15s",
@@ -806,7 +814,7 @@ function HorarioCard({
     >
       {/* Cabecera */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
-        <IconBox icon={<Clock />} color={PALETA.verde} size={40} iconSize={18} />
+        <IconBox icon={<Clock />} color={estaActivo ? PALETA.verde : PALETA.gris} size={40} iconSize={18} />
         <Typography
           sx={{
             flex: 1, minWidth: 0, fontSize: 15, fontWeight: 700, color: PALETA.texto,
@@ -819,12 +827,12 @@ function HorarioCard({
           <Box
             sx={{
               width: 8, height: 8, borderRadius: "50%",
-              bgcolor: h.active ? PALETA.verde : COLORES.textoSuave,
-              boxShadow: `0 0 0 3px ${h.active ? PALETA.verdeClaro : COLORES.grisContorno}`,
+              bgcolor: estaActivo ? PALETA.verde : COLORES.textoSuave,
+              boxShadow: `0 0 0 3px ${estaActivo ? PALETA.verdeClaro : COLORES.grisContorno}`,
             }}
           />
-          <Typography sx={{ fontSize: 12, fontWeight: 600, color: h.active ? PALETA.verdeOscuro : PALETA.gris }}>
-            {h.active ? "Activo" : "Inactivo"}
+          <Typography sx={{ fontSize: 12, fontWeight: 600, color: estaActivo ? PALETA.verdeOscuro : PALETA.gris }}>
+            {estaActivo ? "Activo" : "Inactivo"}
           </Typography>
         </Box>
       </Box>
@@ -833,16 +841,16 @@ function HorarioCard({
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1.5 }}>
         <Chip label={esPorHoras ? "Jornada por horas" : "Horario fijo"} size="small"
           sx={{ borderRadius: "8px", fontWeight: 600, fontSize: 11, bgcolor: PALETA.grisClaro, color: PALETA.grisTexto }} />
-        <Chip label={h.modalidad === "flexible" ? "No controla tardanzas" : "Controla tardanzas"} size="small"
+        <Chip label={modalidadVal === "flexible" ? "No controla tardanzas" : "Controla tardanzas"} size="small"
           sx={{ borderRadius: "8px", fontWeight: 600, fontSize: 11, ...chipModalidad }} />
-        {esPorHoras && h.horas_esperadas && (
-          <Chip label={`${parseFloat(h.horas_esperadas)} horas esperadas`} size="small"
+        {esPorHoras && horasEsperadasVal && (
+          <Chip label={`${parseFloat(horasEsperadasVal)} horas esperadas`} size="small"
             sx={{ borderRadius: "8px", fontWeight: 600, fontSize: 11, bgcolor: PALETA.verdeClaro, color: PALETA.verdeOscuro }} />
         )}
       </Box>
 
       {/* Asignados */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2, flex: 1 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5, flex: estirar ? 1 : "initial" }}>
         <Box sx={{ width: 30, height: 30, borderRadius: "9px", bgcolor: PALETA.verdeClaro, color: PALETA.verde, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <Users size={14} />
         </Box>
@@ -857,7 +865,7 @@ function HorarioCard({
       </Box>
 
       {/* Acciones */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, pt: 1.5, borderTop: `1px solid ${PALETA.borde}` }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, pt: 1.5, borderTop: `1px solid ${PALETA.borde}`, mt: estirar ? "auto" : 0 }}>
         {esAdmin && (
           <Button size="small" variant="contained" startIcon={<Edit3 size={13} />} onClick={() => onSelect?.(h)}
             sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 12, height: 40, px: 1.5, bgcolor: PALETA.verdeOscuro, "&:hover": { bgcolor: PALETA.verde } }}>
@@ -935,15 +943,19 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
       setBloque2Dias(new Set());
       return;
     }
+    const estaActivo = horario.activo ?? horario.active ?? true;
     setForm({
       nombre: horario.nombre || "",
-      descripcion: horario.descripcion || "",
-      tipo_jornada: horario.workday_type || horario.tipo_jornada || "fixed",
-      modalidad: horario.modalidad || "strict",
-      horas_esperadas: horario.horas_esperadas != null ? String(horario.horas_esperadas) : "",
+      descripcion: horario.descripcion || horario.description || "",
+      tipo_jornada: horario.tipo_jornada || horario.workday_type || "fixed",
+      modalidad: horario.modalidad || horario.modality || "strict",
+      horas_esperadas:
+        (horario.horas_esperadas ?? horario.expected_hours) != null
+          ? String(horario.horas_esperadas ?? horario.expected_hours)
+          : "",
       tolerancia_minutos: horario.tolerancia_minutos ?? 0,
       tolerancia_salida_minutos: horario.tolerancia_salida_minutos ?? 0,
-      activo: horario.activo,
+      activo: Boolean(estaActivo),
       dias: buildDias(horario),
     });
     setBloque2Dias(
@@ -1013,10 +1025,12 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
         modalidad: form.modalidad,
         tipo_jornada: form.tipo_jornada,
         descripcion: form.descripcion.trim() || null,
-        horas_esperadas: esFija ? (horario.horas_esperadas ?? null) : (form.horas_esperadas || null),
+        horas_esperadas: esFija
+          ? (horario.horas_esperadas ?? horario.expected_hours ?? null)
+          : (form.horas_esperadas || null),
         tolerancia_minutos: Number(form.tolerancia_minutos) || 0,
         tolerancia_salida_minutos: Number(form.tolerancia_salida_minutos) || 0,
-        activo: form.activo,
+        activo: Boolean(form.activo),
       };
       if (esFija) {
         payload.detalles = form.dias.map((d) => ({
@@ -1277,10 +1291,10 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
         {/* Estado */}
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${PALETA.borde}`, pt: 2 }}>
           <FormControlLabel
-            control={<Switch checked={!!form.activo} onChange={(e) => setCampo("activo", e.target.checked)} disabled={readonly}
+            control={<Switch checked={Boolean(form.activo)} onChange={(e) => setCampo("activo", e.target.checked)} disabled={readonly}
               sx={{ "& .MuiSwitch-switchBase.Mui-checked": { color: PALETA.verde }, "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": { bgcolor: PALETA.verde } }} />}
-            label="Horario activo"
-            sx={{ "& .MuiFormControlLabel-label": { fontSize: 13, fontWeight: 500, color: PALETA.grisTexto } }}
+            label={form.activo ? "Horario activo" : "Horario inactivo"}
+            sx={{ "& .MuiFormControlLabel-label": { fontSize: 13, fontWeight: 600, color: form.activo ? PALETA.verdeOscuro : PALETA.grisTexto } }}
           />
           {esAdmin && (
             <Button size="small" startIcon={<Star size={14} />} onClick={handlePorDefecto}
@@ -1314,8 +1328,26 @@ function DetalleHorarioForm({ horario, esAdmin = true, soloLectura = false, onNo
   );
 }
 
-function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos = [], onNotificar, onReload }) {
-  const [tab, setTab] = useState(0);
+function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos = [], onNotificar, onReload, searchParams, setSearchParams }) {
+  const asignacionQuery = searchParams?.get("asignacion");
+  const [tab, setTab] = useState(() => (asignacionQuery === "masiva" ? 1 : 0));
+
+  useEffect(() => {
+    if (asignacionQuery === "masiva" && tab !== 1) setTab(1);
+    else if (asignacionQuery !== "masiva" && tab !== 0 && asignacionQuery !== null) setTab(0);
+  }, [asignacionQuery]);
+
+  const cambiarTab = (v) => {
+    setTab(v);
+    setAsignarA(null);
+    setMostrarMasivo(false);
+    if (setSearchParams && searchParams) {
+      const next = new URLSearchParams(searchParams);
+      if (v === 1) next.set("asignacion", "masiva");
+      else next.delete("asignacion");
+      setSearchParams(next, { replace: true });
+    }
+  };
 
   // Individual
   const [busqueda, setBusqueda] = useState("");
@@ -1464,11 +1496,16 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
   const selectHorarios = (value, onChange) => (
     <Select size="small" fullWidth value={value} onChange={(e) => onChange(e.target.value)} sx={modalFieldSx} displayEmpty>
       <MenuItem value="" disabled>Selecciona un horario</MenuItem>
-      {horarios.map((h) => (
-        <MenuItem key={h.id} value={String(h.id)}>
-          {h.nombre} — {h.tipo_jornada === "by_hours" ? "Por horas" : "Fija"} ({h.modalidad === "flexible" ? "Flexible" : "Estricto"})
-        </MenuItem>
-      ))}
+      {horarios.map((h) => {
+        const estaActivo = h.activo ?? h.active ?? true;
+        const tipoLabel = (h.tipo_jornada || h.workday_type) === "by_hours" ? "Por horas" : "Fija";
+        const modLabel = (h.modalidad || h.modality) === "flexible" ? "Flexible" : "Estricto";
+        return (
+          <MenuItem key={h.id} value={String(h.id)} disabled={!estaActivo}>
+            {h.nombre} — {tipoLabel} ({modLabel}) {!estaActivo ? "— [Inactivo]" : ""}
+          </MenuItem>
+        );
+      })}
     </Select>
   );
 
@@ -1476,20 +1513,36 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
     <TableHead>
       <TableRow>
         {cols.map((c) => (
-          <TableCell key={c} sx={{ fontWeight: 600, color: PALETA.grisTexto, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.25, whiteSpace: "nowrap" }}>{c}</TableCell>
+          <TableCell
+            key={c}
+            sx={{
+              fontWeight: 700,
+              color: COLORES.textoTerciario,
+              fontSize: 11.5,
+              textTransform: "uppercase",
+              letterSpacing: "0.03em",
+              bgcolor: COLORES.fondoGris2,
+              py: 1.25,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {c}
+          </TableCell>
         ))}
       </TableRow>
     </TableHead>
   );
 
   const panelLateralSx = {
-    width: 320,
+    width: { xs: "100%", lg: 320 },
     flexShrink: 0,
-    bgcolor: COLORES.fondoGris,
-    borderRadius: "12px",
-    border: `1px solid ${PALETA.borde}`,
-    p: 2,
+    bgcolor: COLORES.fondoBlanco,
+    borderRadius: "14px",
+    border: `1px solid ${COLORES.grisContorno}`,
+    boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+    p: 2.5,
     alignSelf: "flex-start",
+    boxSizing: "border-box",
   };
 
   return (
@@ -1502,7 +1555,7 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
             Asignación de horarios
           </Typography>
         </Box>
-        <Tabs value={tab} onChange={(_, v) => { setTab(v); setAsignarA(null); setMostrarMasivo(false); }}
+        <Tabs value={tab} onChange={(_, v) => cambiarTab(v)}
           sx={{
             minHeight: 40,
             "& .MuiTabs-indicator": { bgcolor: PALETA.verdeOscuro, borderRadius: "3px 3px 0 0" },
@@ -1517,40 +1570,40 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
       <Divider sx={{ borderColor: PALETA.borde, mt: 1 }} />
 
       {/* Contenido */}
-      <Box sx={{ p: 2.5 }}>
+      <Box sx={{ p: { xs: 1.5, sm: 2.5 } }}>
         {tab === 0 ? (
-          <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", lg: "row" }, gap: 2.5, alignItems: "flex-start" }}>
+            <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
               {/* Filtros individual */}
-              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 2fr" }, gap: 1.5, mb: 2 }}>
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "190px 190px 1fr" }, gap: 1.5, mb: 2 }}>
                 <Select size="small" value={filtroAreaInd} onChange={(e) => setFiltroAreaInd(e.target.value)} displayEmpty
-                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: PALETA.borde } }}>
+                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.grisContorno } }}>
                   <MenuItem value=""><em>Todas las áreas</em></MenuItem>
                   {areasList.map((a) => <MenuItem key={a.id} value={a.id}>{a.nombre}</MenuItem>)}
                 </Select>
                 <Select size="small" value={filtroCargoInd} onChange={(e) => setFiltroCargoInd(e.target.value)} displayEmpty
-                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: PALETA.borde } }}>
+                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.grisContorno } }}>
                   <MenuItem value=""><em>Todos los cargos</em></MenuItem>
                   {cargosList.map((c) => <MenuItem key={c.id} value={c.id}>{c.nombre}</MenuItem>)}
                 </Select>
-                <TextField aria-label="Buscar empleado" placeholder="Buscar empleado por nombre, cargo, área, correo..." value={busqueda}
+                <TextField aria-label="Buscar empleado" placeholder="Buscar empleado por nombre, cargo, correo..." value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
                   slotProps={{
                     input: {
-                      startAdornment: <Search size={15} style={{ color: PALETA.gris, marginRight: 8 }} />,
-                      sx: { borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, py: 0, "& fieldset": { borderColor: PALETA.borde } },
+                      startAdornment: <Search size={15} style={{ color: COLORES.textoTerciario, marginRight: 8 }} />,
+                      sx: { borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, py: 0, "& fieldset": { borderColor: COLORES.grisContorno } },
                     },
                   }} />
               </Box>
 
               {/* Tabla individual */}
-              <TableContainer sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", overflowX: "auto" }}>
+              <TableContainer sx={{ border: `1px solid ${COLORES.grisContorno}`, borderRadius: "12px", overflowX: "auto", bgcolor: COLORES.fondoBlanco, boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
                 <Table size="small">
-                  {tablaHead(["Empleado", "Área", "Cargo", "Horario actual", "Estado", "Acción"])}
+                  {tablaHead(["Empleado", "Cargo", "Horario actual", "Estado", "Acción"])}
                   <TableBody>
                     {filtradosInd.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} align="center" sx={{ py: 5, color: PALETA.gris, fontSize: 13 }}>
+                        <TableCell colSpan={5} align="center" sx={{ py: 5, color: COLORES.textoTerciario, fontSize: 13 }}>
                           {busqueda || filtroAreaInd || filtroCargoInd ? "No se encontraron empleados" : "No hay empleados para asignar"}
                         </TableCell>
                       </TableRow>
@@ -1558,34 +1611,97 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
                       filtradosInd.map((e) => {
                         const actual = horarioNombre(e.horario_id);
                         return (
-                          <TableRow key={e.id} sx={{ "&:hover": { bgcolor: COLORES.fondoGris } }}>
-                            <TableCell sx={{ fontSize: 13, fontWeight: 600, color: PALETA.texto, py: 1.1, whiteSpace: "nowrap" }}>
-                              {nombreEmpleado(e)}
-                              {e.correo && <Typography sx={{ fontSize: 11, color: PALETA.gris }}>{e.correo}</Typography>}
+                          <TableRow key={e.id} sx={{ "&:hover": { bgcolor: COLORES.fondoGris }, transition: "background-color 0.15s ease" }}>
+                            <TableCell sx={{ py: 1.2, whiteSpace: "nowrap" }}>
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+                                <Avatar sx={{ width: 32, height: 32, fontSize: 12, fontWeight: 700, bgcolor: `${COLORES.primario}14`, color: COLORES.primarioOscuro }}>
+                                  {nombreEmpleado(e).slice(0, 2).toUpperCase()}
+                                </Avatar>
+                                <Box sx={{ minWidth: 0 }}>
+                                  <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#111827", lineHeight: 1.2 }}>
+                                    {nombreEmpleado(e)}
+                                  </Typography>
+                                  {e.correo && (
+                                    <Typography sx={{ fontSize: 11, color: COLORES.textoTerciario, mt: 0.2 }}>
+                                      {e.correo}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              </Box>
                             </TableCell>
-                            <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1.1 }}>{e.area || "—"}</TableCell>
-                            <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1.1 }}>{e.cargo || "—"}</TableCell>
-                            <TableCell sx={{ py: 1.1 }}>
+                            <TableCell sx={{ fontSize: 12.5, color: COLORES.textoSecundario, py: 1.2, fontWeight: 500 }}>
+                              {e.cargo || "—"}
+                            </TableCell>
+                            <TableCell sx={{ py: 1.2 }}>
                               {actual ? (
-                                <Chip label={actual} size="small"
-                                  sx={{ borderRadius: "8px", fontWeight: 600, fontSize: 11, bgcolor: PALETA.verdeClaro, color: PALETA.verdeOscuro }} />
+                                <Chip
+                                  icon={<Clock size={12} style={{ color: "inherit" }} />}
+                                  label={actual}
+                                  size="small"
+                                  sx={{
+                                    borderRadius: "8px",
+                                    fontWeight: 600,
+                                    fontSize: 11,
+                                    bgcolor: `${COLORES.primario}12`,
+                                    color: COLORES.primarioOscuro,
+                                    height: 24,
+                                  }}
+                                />
                               ) : (
-                                <Typography sx={{ fontSize: 12, color: PALETA.gris }}>Sin asignar</Typography>
+                                <Chip
+                                  label="Sin asignar"
+                                  size="small"
+                                  sx={{
+                                    borderRadius: "8px",
+                                    fontWeight: 500,
+                                    fontSize: 11,
+                                    bgcolor: COLORES.fondoGris2,
+                                    color: COLORES.textoTerciario,
+                                    height: 24,
+                                  }}
+                                />
                               )}
                             </TableCell>
-                            <TableCell sx={{ py: 1.1 }}><EstadoChip activo={!!e.activo} /></TableCell>
-                            <TableCell sx={{ py: 1.1 }}>
+                            <TableCell sx={{ py: 1.2 }}><EstadoChip activo={!!e.activo} /></TableCell>
+                            <TableCell sx={{ py: 1.2 }}>
                               <Box sx={{ display: "flex", gap: 0.75, alignItems: "center" }}>
-                                <Button size="small" startIcon={<UserPlus size={13} />} onClick={() => abrirAsignacion(e)}
-                                  sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: 11, height: 28, whiteSpace: "nowrap", px: 1.25, bgcolor: PALETA.verdeOscuro, color: COLORES.fondoBlanco, "&:hover": { bgcolor: PALETA.verde } }}>
-                                  Asignar horario
+                                <Button
+                                  size="small"
+                                  startIcon={<UserPlus size={13} />}
+                                  onClick={() => abrirAsignacion(e)}
+                                  sx={{
+                                    borderRadius: "8px",
+                                    textTransform: "none",
+                                    fontWeight: 600,
+                                    fontSize: 11.5,
+                                    height: 30,
+                                    whiteSpace: "nowrap",
+                                    px: 1.5,
+                                    bgcolor: COLORES.primarioOscuro,
+                                    color: COLORES.fondoBlanco,
+                                    "&:hover": { bgcolor: COLORES.primario },
+                                  }}
+                                >
+                                  Asignar
                                 </Button>
                                 {actual && (
-                                  <IconButton size="small" onClick={() => quitar(e)} disabled={quitandoId === e.id}
-                                    title="Quitar horario"
-                                    sx={{ width: 28, height: 28, borderRadius: "8px", color: PALETA.rojo, bgcolor: PALETA.rojoBg, "&:hover": { bgcolor: COLORES.dangerBorde } }}>
-                                    <UserMinus size={14} />
-                                  </IconButton>
+                                  <Tooltip title="Quitar horario" arrow>
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => quitar(e)}
+                                      disabled={quitandoId === e.id}
+                                      sx={{
+                                        width: 30,
+                                        height: 30,
+                                        borderRadius: "8px",
+                                        color: COLORES.danger,
+                                        bgcolor: COLORES.dangerFondo,
+                                        "&:hover": { bgcolor: COLORES.dangerBorde },
+                                      }}
+                                    >
+                                      <UserMinus size={14} />
+                                    </IconButton>
+                                  </Tooltip>
                                 )}
                               </Box>
                             </TableCell>
@@ -1647,72 +1763,114 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
             )}
           </Box>
         ) : (
-          <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", lg: "row" }, gap: 2.5, alignItems: "flex-start" }}>
+            <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
               {/* Filtros masiva */}
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5, mb: 2 }}>
                 <Select size="small" value={filtroArea} onChange={(e) => setFiltroArea(e.target.value)} displayEmpty
-                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: PALETA.borde } }}>
+                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.grisContorno } }}>
                   <MenuItem value=""><em>Todas las áreas</em></MenuItem>
                   {areasList.map((a) => <MenuItem key={a.id} value={a.id}>{a.nombre}</MenuItem>)}
                 </Select>
                 <Select size="small" value={filtroCargo} onChange={(e) => setFiltroCargo(e.target.value)} displayEmpty
-                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: PALETA.borde } }}>
+                  sx={{ borderRadius: "10px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.grisContorno } }}>
                   <MenuItem value=""><em>Todos los cargos</em></MenuItem>
                   {cargosList.map((c) => <MenuItem key={c.id} value={c.id}>{c.nombre}</MenuItem>)}
                 </Select>
               </Box>
 
               {/* Contador + botón */}
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, mb: 1.5 }}>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1, mb: 1.5 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Filter size={14} color={PALETA.gris} />
-                  <Typography sx={{ fontSize: 12, fontWeight: 600, color: PALETA.grisTexto }}>
+                  <Filter size={14} color={COLORES.textoTerciario} />
+                  <Typography sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoSecundario }}>
                     {filtradosMasivo.length} empleado{filtradosMasivo.length === 1 ? "" : "s"} · {seleccionados.size} seleccionado{seleccionados.size === 1 ? "" : "s"}
                   </Typography>
                 </Box>
                 <Button variant="contained" startIcon={<UserPlus size={15} />} onClick={abrirSelectorMasivo} disabled={seleccionados.size === 0}
-                  sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 38, px: 2, bgcolor: PALETA.verdeOscuro, "&:hover": { bgcolor: PALETA.verde } }}>
+                  sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 38, px: 2, bgcolor: COLORES.primarioOscuro, "&:hover": { bgcolor: COLORES.primario } }}>
                   Asignar horario
                 </Button>
               </Box>
 
               {/* Tabla masiva con checkboxes */}
-              <TableContainer sx={{ border: `1px solid ${PALETA.borde}`, borderRadius: "12px", overflowX: "auto", maxHeight: 400 }}>
+              <TableContainer sx={{ border: `1px solid ${COLORES.grisContorno}`, borderRadius: "12px", overflowX: "auto", maxHeight: 420, bgcolor: COLORES.fondoBlanco, boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
                 <Table size="small" stickyHeader>
                   <TableHead>
                     <TableRow>
-                      <TableCell padding="checkbox" sx={{ bgcolor: COLORES.fondoGris, py: 1.25 }}>
+                      <TableCell padding="checkbox" sx={{ bgcolor: COLORES.fondoGris2, py: 1.25 }}>
                         <Checkbox size="small" checked={todosSeleccionados} indeterminate={seleccionados.size > 0 && !todosSeleccionados}
                           onChange={toggleTodos}
-                          sx={{ color: PALETA.gris, "&.Mui-checked": { color: PALETA.verdeOscuro } }} />
+                          sx={{ color: COLORES.textoTerciario, "&.Mui-checked": { color: COLORES.primarioOscuro } }} />
                       </TableCell>
-                      {["Empleado", "Área", "Cargo", "Horario actual", "Estado"].map((c) => (
-                        <TableCell key={c} sx={{ fontWeight: 600, color: PALETA.grisTexto, fontSize: 12, bgcolor: COLORES.fondoGris, py: 1.25, whiteSpace: "nowrap" }}>{c}</TableCell>
+                      {["Empleado", "Cargo", "Horario actual", "Estado"].map((c) => (
+                        <TableCell key={c} sx={{ fontWeight: 700, color: COLORES.textoTerciario, fontSize: 11.5, textTransform: "uppercase", letterSpacing: "0.03em", bgcolor: COLORES.fondoGris2, py: 1.25, whiteSpace: "nowrap" }}>{c}</TableCell>
                       ))}
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {filtradosMasivo.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} align="center" sx={{ py: 5, color: PALETA.gris, fontSize: 13 }}>
+                        <TableCell colSpan={5} align="center" sx={{ py: 5, color: COLORES.textoTerciario, fontSize: 13 }}>
                           No hay empleados con los filtros seleccionados
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filtradosMasivo.map((e) => (
-                        <TableRow key={e.id} hover sx={{ "&:hover": { bgcolor: COLORES.fondoGris } }}>
-                          <TableCell padding="checkbox" sx={{ py: 1 }}>
-                            <Checkbox size="small" checked={seleccionados.has(e.id)} onChange={() => toggleSeleccion(e.id)}
-                              sx={{ color: PALETA.gris, "&.Mui-checked": { color: PALETA.verdeOscuro } }} />
-                          </TableCell>
-                          <TableCell sx={{ fontSize: 13, fontWeight: 600, color: PALETA.texto, py: 1, whiteSpace: "nowrap" }}>{nombreEmpleado(e)}</TableCell>
-                          <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1 }}>{e.area || "—"}</TableCell>
-                          <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1 }}>{e.cargo || "—"}</TableCell>
-                          <TableCell sx={{ fontSize: 13, color: COLORES.textoMuted, py: 1 }}>{horarioNombre(e.horario_id) || "—"}</TableCell>
-                          <TableCell sx={{ py: 1 }}><EstadoChip activo={!!e.activo} /></TableCell>
-                        </TableRow>
-                      ))
+                      filtradosMasivo.map((e) => {
+                        const actual = horarioNombre(e.horario_id);
+                        return (
+                          <TableRow key={e.id} hover sx={{ "&:hover": { bgcolor: COLORES.fondoGris }, transition: "background-color 0.15s ease" }}>
+                            <TableCell padding="checkbox" sx={{ py: 1 }}>
+                              <Checkbox size="small" checked={seleccionados.has(e.id)} onChange={() => toggleSeleccion(e.id)}
+                                sx={{ color: COLORES.textoTerciario, "&.Mui-checked": { color: COLORES.primarioOscuro } }} />
+                            </TableCell>
+                            <TableCell sx={{ py: 1.2, whiteSpace: "nowrap" }}>
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+                                <Avatar sx={{ width: 32, height: 32, fontSize: 12, fontWeight: 700, bgcolor: `${COLORES.primario}14`, color: COLORES.primarioOscuro }}>
+                                  {nombreEmpleado(e).slice(0, 2).toUpperCase()}
+                                </Avatar>
+                                <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>
+                                  {nombreEmpleado(e)}
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell sx={{ fontSize: 12.5, color: COLORES.textoSecundario, py: 1.2, fontWeight: 500 }}>
+                              {e.cargo || "—"}
+                            </TableCell>
+                            <TableCell sx={{ py: 1.2 }}>
+                              {actual ? (
+                                <Chip
+                                  icon={<Clock size={12} style={{ color: "inherit" }} />}
+                                  label={actual}
+                                  size="small"
+                                  sx={{
+                                    borderRadius: "8px",
+                                    fontWeight: 600,
+                                    fontSize: 11,
+                                    bgcolor: `${COLORES.primario}12`,
+                                    color: COLORES.primarioOscuro,
+                                    height: 24,
+                                  }}
+                                />
+                              ) : (
+                                <Chip
+                                  label="Sin asignar"
+                                  size="small"
+                                  sx={{
+                                    borderRadius: "8px",
+                                    fontWeight: 500,
+                                    fontSize: 11,
+                                    bgcolor: COLORES.fondoGris2,
+                                    color: COLORES.textoTerciario,
+                                    height: 24,
+                                  }}
+                                />
+                              )}
+                            </TableCell>
+                            <TableCell sx={{ py: 1.2 }}><EstadoChip activo={!!e.activo} /></TableCell>
+                          </TableRow>
+                        );
+                      })
                     )}
                   </TableBody>
                 </Table>
@@ -1768,6 +1926,10 @@ function AsignacionSection({ empleados = [], horarios = [], areas = [], cargos =
 }
 
 export default function HorariosPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const estadoQuery = searchParams.get("estado") || "todos";
+  const horarioQuery = searchParams.get("horario");
+
   const [usuario, setUsuario] = useState({ rol: "" });
   useEffect(() => {
     try { const u = JSON.parse(localStorage.getItem("usuario") || "{}"); setUsuario(u); } catch {}
@@ -1785,6 +1947,9 @@ export default function HorariosPage() {
   const [cargando, setCargando] = useState(true);
   const [seleccionadoId, setSeleccionadoId] = useState(null);
   const [abrirNuevo, setAbrirNuevo] = useState(false);
+  const [filtroEstado, setFiltroEstado] = useState(() =>
+    ["todos", "activos", "inactivos"].includes(estadoQuery) ? estadoQuery : "todos"
+  );
 
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
@@ -1796,6 +1961,41 @@ export default function HorariosPage() {
   };
 
   const seleccionado = horarios.find((h) => h.id === seleccionadoId) || null;
+
+  const horariosFiltrados = useMemo(() => {
+    return horarios.filter((h) => {
+      const act = Boolean(h.activo ?? h.active ?? true);
+      if (filtroEstado === "activos") return act;
+      if (filtroEstado === "inactivos") return !act;
+      return true;
+    });
+  }, [horarios, filtroEstado]);
+
+  const seleccionarHorario = (id) => {
+    setSeleccionadoId(id);
+    const next = new URLSearchParams(searchParams);
+    if (id) next.set("horario", String(id));
+    else next.delete("horario");
+    setSearchParams(next, { replace: true });
+  };
+
+  const cambiarFiltroEstado = (nuevoFiltro) => {
+    setFiltroEstado(nuevoFiltro);
+    const next = new URLSearchParams(searchParams);
+    if (nuevoFiltro && nuevoFiltro !== "todos") next.set("estado", nuevoFiltro);
+    else next.delete("estado");
+    setSearchParams(next, { replace: true });
+
+    const lista = horarios.filter((h) => {
+      const act = Boolean(h.activo ?? h.active ?? true);
+      if (nuevoFiltro === "activos") return act;
+      if (nuevoFiltro === "inactivos") return !act;
+      return true;
+    });
+    if (!lista.some((h) => String(h.id) === String(seleccionadoId))) {
+      seleccionarHorario(lista[0]?.id ?? null);
+    }
+  };
 
   async function cargarHorarios() {
     setCargando(true);
@@ -1822,9 +2022,12 @@ export default function HorariosPage() {
       );
       setAsignadosMap(map);
 
-      setSeleccionadoId((prev) =>
-        prev && lista.some((h) => h.id === prev) ? prev : (lista[0]?.id ?? null)
-      );
+      setSeleccionadoId((prev) => {
+        if (horarioQuery && lista.some((h) => String(h.id) === String(horarioQuery))) {
+          return lista.find((h) => String(h.id) === String(horarioQuery)).id;
+        }
+        return prev && lista.some((h) => h.id === prev) ? prev : (lista[0]?.id ?? null);
+      });
     } catch {
       setHorarios([]);
       setAsignadosMap({});
@@ -1897,13 +2100,13 @@ export default function HorariosPage() {
     try {
       await crearHorario({
         nombre: `${h.nombre} (copia)`,
-        descripcion: h.descripcion || null,
-        modalidad: h.modalidad,
-        tipo_jornada: h.tipo_jornada,
-        horas_esperadas: h.horas_esperadas || null,
+        descripcion: h.descripcion || h.description || null,
+        modalidad: h.modalidad || h.modality || "strict",
+        tipo_jornada: h.tipo_jornada || h.workday_type || "fixed",
+        horas_esperadas: h.horas_esperadas || h.expected_hours || null,
         tolerancia_minutos: Number(h.tolerancia_minutos) || 0,
         tolerancia_salida_minutos: Number(h.tolerancia_salida_minutos) || 0,
-        activo: h.active,
+        activo: Boolean(h.activo ?? h.active ?? true),
         detalles: (h.detalles || []).map((d) => ({ ...d })),
       });
       mostrarToast("Horario duplicado correctamente", "ok");
@@ -1947,15 +2150,8 @@ export default function HorariosPage() {
     <Box sx={{ p: 3, bgcolor: COLORES.grisAzulado, minHeight: "100vh" }}>
       {/* Header */}
       <Box sx={{ mb: 3 }}>
-        <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>Inicio / Gestión del personal / Horarios</Typography>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, mt: 1, flexWrap: "wrap" }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            
-            <Box>
-              <Typography sx={{ fontSize: 22, fontWeight: 700, color: PALETA.texto, lineHeight: 1.15 }}></Typography>
-              
-            </Box>
-          </Box>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}>
+          <PageBreadcrumbs items={["Gestión del personal", "Horarios"]} sx={{ mb: 0 }} />
           {esAdmin && (
             <Button variant="contained" onClick={() => setAbrirNuevo(true)}
               sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, height: 40, px: 2.5, bgcolor: PALETA.verdeOscuro, "&:hover": { bgcolor: PALETA.verde } }}>
@@ -1966,21 +2162,61 @@ export default function HorariosPage() {
       </Box>
 
       {/* Fila superior: listado + detalle */}
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "400px 1fr" }, gap: 2.5, alignItems: "stretch" }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "390px 1fr" }, gap: 2.5, alignItems: "stretch" }}>
         {/* Listado de tarjetas */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-          {horarios.map((h) => (
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, height: "100%" }}>
+          {/* Filtro rápido Activos / Inactivos */}
+          <Box sx={{ display: "flex", gap: 0.75, bgcolor: COLORES.fondoBlanco, p: 0.5, borderRadius: "12px", border: `1px solid ${PALETA.borde}` }}>
+            {[
+              { id: "todos", label: "Todos", count: horarios.length },
+              { id: "activos", label: "Activos", count: horarios.filter((h) => Boolean(h.activo ?? h.active ?? true)).length },
+              { id: "inactivos", label: "Inactivos", count: horarios.filter((h) => !Boolean(h.activo ?? h.active ?? true)).length },
+            ].map((f) => {
+              const sel = filtroEstado === f.id;
+              return (
+                <Button
+                  key={f.id}
+                  size="small"
+                  onClick={() => cambiarFiltroEstado(f.id)}
+                  sx={{
+                    flex: 1,
+                    py: 0.5,
+                    fontSize: 12,
+                    fontWeight: sel ? 700 : 500,
+                    textTransform: "none",
+                    borderRadius: "8px",
+                    bgcolor: sel ? PALETA.verdeClaro : "transparent",
+                    color: sel ? PALETA.verdeOscuro : PALETA.grisTexto,
+                    "&:hover": { bgcolor: sel ? PALETA.verdeClaro : COLORES.fondoGris },
+                  }}
+                >
+                  {f.label} ({f.count})
+                </Button>
+              );
+            })}
+          </Box>
+
+          {horariosFiltrados.map((h) => (
             <HorarioCard key={h.id} h={h}
               asignados={asignadosMap[h.id]}
               cargandoAsignados={!asignadosMap[h.id] && cargando}
               seleccionado={seleccionadoId === h.id}
               esAdmin={esAdmin}
-              onSelect={(x) => setSeleccionadoId(x.id)}
+              estirar={horariosFiltrados.length > 1}
+              onSelect={(x) => seleccionarHorario(x.id)}
               onDuplicar={duplicar}
               onEliminar={eliminar}
               onPorDefecto={porDefecto}
             />
           ))}
+
+          {horariosFiltrados.length === 0 && (
+            <Paper elevation={0} sx={{ p: 3, textAlign: "center", borderRadius: "14px", border: `1px dashed ${PALETA.borde}`, color: PALETA.gris }}>
+              <Typography sx={{ fontSize: 13, color: PALETA.gris }}>
+                No hay horarios {filtroEstado === "activos" ? "activos" : filtroEstado === "inactivos" ? "inactivos" : "registrados"}.
+              </Typography>
+            </Paper>
+          )}
         </Box>
 
         {/* Detalle / formulario */}
@@ -1992,7 +2228,8 @@ export default function HorariosPage() {
       {(esAdmin || esTH) && (
         <Box sx={{ mt: 2.5 }}>
           <AsignacionSection empleados={empleados} horarios={horarios} areas={areas} cargos={cargos}
-            onNotificar={mostrarToast} onReload={relanzarTodo} />
+            onNotificar={mostrarToast} onReload={relanzarTodo}
+            searchParams={searchParams} setSearchParams={setSearchParams} />
         </Box>
       )}
 

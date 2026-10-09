@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Box, Paper, Typography,
 } from "@mui/material";
@@ -7,6 +8,7 @@ import DataTable from "../../../shared/components/DataTable";
 import Loading from "../../../shared/components/Loading";
 import EmptyState from "../../../shared/components/EmptyState";
 import PDFPreviewModal from "../../../shared/components/PDFPreviewModal";
+import PageBreadcrumbs from "../../../shared/components/PageBreadcrumbs";
 import { asistenciaColumns } from "../components/columns";
 import { obtenerRegistros } from "../asistencia.api";
 import { obtenerAreas } from "../../areas/area.api";
@@ -25,9 +27,29 @@ const AREAS_FALLBACK = [
 ];
 
 export default function AsistenciaPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const VISTAS = ["dia", "semana", "mes"];
+  const vistaQuery = searchParams.get("vista");
+  const vistaInicial = VISTAS.includes(vistaQuery) ? vistaQuery : "dia";
   const [registros, setRegistros] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [vista, setVista] = useState("dia");
+  const [vista, setVistaState] = useState(vistaInicial);
+
+  useEffect(() => {
+    const v = searchParams.get("vista");
+    if (VISTAS.includes(v)) {
+      setVistaState(v);
+    }
+  }, [searchParams]);
+
+  const setVista = (v) => {
+    setVistaState(v);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("vista", v);
+      return next;
+    });
+  };
   const [fecha, setFecha] = useState(new Date().toISOString().split("T")[0]);
   const [fechaDesde, setFechaDesde] = useState(() => {
     const d = new Date(); d.setDate(d.getDate() - d.getDay() + 1); return d.toISOString().split("T")[0];
@@ -186,11 +208,10 @@ export default function AsistenciaPage() {
   return (
     <Box sx={{ p: 3, bgcolor: COLORES.grisAzulado, minHeight: "100vh" }}>
       {/* 1. ENCABEZADO */}
-      <Box sx={{ mb: 3 }}>
-        <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>
-          Inicio / Gestión del personal / Asistencia
-        </Typography>
-      </Box>
+      <PageBreadcrumbs
+        items={["Gestión del personal", "Asistencia"]}
+        sx={{ mb: 3 }}
+      />
 
       {/* 2. TARJETAS RESUMEN */}
       <ResumenCards

@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { obtenerPersonalPorId, actualizarPersonal } from "../../personal/personal.api";
 import { apiFetch } from "../../../shared/api/api";
+import PageBreadcrumbs from "../../../shared/components/PageBreadcrumbs";
 import { COLORES } from "../../../shared/constants/colores.js";
 
 function formatUltimoAcceso(iso) {
@@ -251,10 +252,11 @@ export default function MiPerfilPage() {
       }}
     >
       {/* Breadcrumb */}
-      <Box sx={{ textAlign: "center" }}>
-        <Typography sx={{ fontSize: 13, color: COLORES.textoMuted, mb: 0.5 }}>
-          Inicio / Mi cuenta / Perfil institucional
-        </Typography>
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <PageBreadcrumbs
+          items={["Mi cuenta", "Perfil institucional"]}
+          sx={{ mb: 1, justifyContent: "center" }}
+        />
         <Typography sx={{ fontSize: 24, fontWeight: 700, color: COLORES.textoPrimario }}>
           Perfil de Usuario
         </Typography>

@@ -153,24 +153,78 @@ export default function SeguimientoDetalleModal({ open, onClose, row }) {
                 const IconoTurno = t.icon;
                 const tieneEntrada = !!t.entrada;
                 const tieneSalida = !!t.salida;
+                const completo = tieneEntrada && tieneSalida;
+                const parcial = (tieneEntrada && !tieneSalida) || (!tieneEntrada && tieneSalida);
+                const vacio = !tieneEntrada && !tieneSalida;
+
                 return (
-                  <Box key={t.label} sx={{ bgcolor: COLORES.fondoBlanco, p: 2, borderRadius: "14px", border: `1px solid ${COLORES.borde}` }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
-                      <IconoTurno size={15} color={COLORES.primarioOscuro} />
-                      <Typography sx={{ fontSize: 13, fontWeight: 700, color: COLORES.textoPrimario }}>{t.label}</Typography>
+                  <Box
+                    key={t.label}
+                    sx={{
+                      bgcolor: COLORES.fondoBlanco,
+                      p: 2,
+                      borderRadius: "14px",
+                      border: `1px solid ${COLORES.borde}`,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 1.5,
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <IconoTurno size={16} color={COLORES.primarioOscuro} />
+                        <Typography sx={{ fontSize: 13, fontWeight: 700, color: COLORES.textoPrimario }}>
+                          {t.label}
+                        </Typography>
+                      </Box>
+                      {completo && (
+                        <Typography sx={{ fontSize: 10.5, fontWeight: 600, px: 1, py: 0.25, borderRadius: "6px", bgcolor: COLORES.successClaro, color: COLORES.verdeTexto }}>
+                          Marcado
+                        </Typography>
+                      )}
+                      {parcial && (
+                        <Typography sx={{ fontSize: 10.5, fontWeight: 600, px: 1, py: 0.25, borderRadius: "6px", bgcolor: "#FEF3C7", color: COLORES.warningOscuro }}>
+                          Incompleto
+                        </Typography>
+                      )}
+                      {vacio && (
+                        <Typography sx={{ fontSize: 10.5, fontWeight: 600, px: 1, py: 0.25, borderRadius: "6px", bgcolor: COLORES.dangerFondo, color: COLORES.dangerOscuro }}>
+                          Sin registro
+                        </Typography>
+                      )}
                     </Box>
+
                     <Box sx={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 1.5, alignItems: "center" }}>
                       <Box>
-                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase" }}>Esperado</Typography>
-                        <Typography sx={{ fontSize: 13, fontWeight: 500, color: COLORES.textoTerciario, mt: 0.3 }}>
+                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase" }}>
+                          Esperado
+                        </Typography>
+                        <Typography sx={{ fontSize: 12.5, fontWeight: 500, color: COLORES.textoTerciario, mt: 0.3 }}>
                           {t.esperadoE || "—"} → {t.esperadoS || "—"}
                         </Typography>
                       </Box>
-                      <Typography sx={{ fontSize: 11, fontWeight: 700, color: COLORES.textoTerciario }}>vs</Typography>
+                      <Typography sx={{ fontSize: 11, fontWeight: 700, color: COLORES.textoTerciario }}>
+                        vs
+                      </Typography>
                       <Box>
-                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase" }}>Real</Typography>
-                        <Typography sx={{ fontSize: 13, fontWeight: 700, color: tieneEntrada || tieneSalida ? COLORES.textoPrimario : COLORES.textoSuave, mt: 0.3 }}>
-                          {tieneEntrada || tieneSalida ? `${t.entrada || "—"} → ${t.salida || "—"}` : "Sin registro"}
+                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: COLORES.textoSuave, textTransform: "uppercase" }}>
+                          Real
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontSize: 12.5,
+                            fontWeight: 700,
+                            color: completo
+                              ? COLORES.verdeTexto
+                              : parcial
+                              ? COLORES.warningOscuro
+                              : COLORES.dangerOscuro,
+                            mt: 0.3,
+                          }}
+                        >
+                          {vacio
+                            ? "—"
+                            : `${t.entrada || "Sin ent."} → ${t.salida || "Sin sal."}`}
                         </Typography>
                       </Box>
                     </Box>

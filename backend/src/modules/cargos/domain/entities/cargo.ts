@@ -5,6 +5,8 @@ import type { Metadata } from '@shared/types/metadata';
 export interface UpdateCargoData {
   name?: string;
   description?: string;
+  areaId?: string | null;
+  active?: boolean;
 }
 
 export interface CargoWithCount {
@@ -16,6 +18,9 @@ export class Cargo extends GenericEntity {
   constructor(
     private _name: DataString,
     private _description: string = '',
+    private _areaId: string | null = null,
+    private _areaName: string | null = null,
+    private _active: boolean = true,
     metadata?: Metadata | null,
   ) {
     super(metadata);
@@ -29,11 +34,29 @@ export class Cargo extends GenericEntity {
     return this._description;
   }
 
+  get areaId(): string | null {
+    return this._areaId;
+  }
+
+  get areaName(): string | null {
+    return this._areaName;
+  }
+
+  get active(): boolean {
+    return this._active;
+  }
+
   updateData(updateData: UpdateCargoData) {
     this._name = updateData.name
       ? DataString.create(updateData.name)
       : this.name;
     this._description = updateData.description ?? this.description;
+    if (updateData.areaId !== undefined) {
+      this._areaId = updateData.areaId;
+    }
+    if (updateData.active !== undefined) {
+      this._active = updateData.active;
+    }
 
     this.metadata.updatedAt = new Date();
   }

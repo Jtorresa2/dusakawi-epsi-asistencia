@@ -11,11 +11,22 @@ interface AreaEmployeesResult {
 const dateAsLocalMidnight = (value: Date): Date =>
   new Date(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate());
 
+function toTitleCase(str: unknown): string {
+  if (!str || typeof str !== 'string') return '';
+  return str
+    .toLowerCase()
+    .replace(/(^|\s)\S/g, (l) => l.toUpperCase())
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export class GetAreaEmployeesHandler {
   async handle(areaId: string): Promise<AreaEmployeesResult> {
     try {
       const rows = await prisma.$queryRaw<Array<Record<string, unknown>>>`
         SELECT u.id, dd.document_number AS cedula, u.first_name AS nombre, u.first_surname AS apellido,
+               u.middle_name, u.second_surname,
+               TRIM(CONCAT(u.first_name, ' ', COALESCE(u.middle_name, ''), ' ', u.first_surname, ' ', COALESCE(u.second_surname, ''))) AS empleado,
                u.email AS correo, u.email, u.phone AS telefono,
                u.date_of_birth AS fecha_nacimiento, u.position_id AS cargo_id, u.area_id,
                u.schedule_id AS horario_id,
@@ -33,6 +44,11 @@ export class GetAreaEmployeesHandler {
       `;
 
       for (const row of rows) {
+        row.empleado =
+          toTitleCase(row.empleado) ||
+          `${toTitleCase(row.nombre)} ${toTitleCase(row.apellido)}`.trim();
+        if (row.cargo) row.cargo = toTitleCase(row.cargo);
+
         if (row.fecha_nacimiento instanceof Date) {
           row.fecha_nacimiento = dateAsLocalMidnight(row.fecha_nacimiento);
         }

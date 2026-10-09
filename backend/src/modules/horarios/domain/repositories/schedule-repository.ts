@@ -16,6 +16,7 @@ export interface ScheduleRepository {
   create(data: ScheduleData): Promise<string>;
   update(id: string, data: ScheduleUpdateData): Promise<void>;
   scheduleExists(id: string): Promise<boolean>;
+  isScheduleActive(id: string): Promise<boolean>;
   userExists(id: string): Promise<boolean>;
   getAssignmentCount(scheduleId: string): Promise<number>;
   deleteById(id: string): Promise<void>;

@@ -14,6 +14,7 @@ import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 import { obtenerHorarios, asignarHorario, desasignarHorario } from "../../horarios/horario.api";
 import PersonalPerfilModal from "../components/PersonalPerfilModal";
+import PageBreadcrumbs from "../../../shared/components/PageBreadcrumbs";
 import { onlyDigits } from "../../../shared/validators";
 import { COLORES } from "../../../shared/constants/colores.js";
 
@@ -88,15 +89,45 @@ export default function PersonalPage() {
   const [cargos, setCargos] = useState([]);
   const [horarios, setHorarios] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [perfilId, setPerfilId] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const cargoFiltro = searchParams.get("cargo") || "";
   const areaFiltro = searchParams.get("area") || "";
+  const perfilQuery = searchParams.get("perfil");
+  const [perfilId, setPerfilId] = useState(() => perfilQuery || null);
 
   // ─── Filtros ──────────────────────────────────────────────────────────────
   const [busqueda, setBusqueda] = useState("");
-  const [filtroEstado, setFiltroEstado] = useState("Todos");
+  const [filtroEstado, setFiltroEstado] = useState(() => searchParams.get("estado") || "Todos");
   const [filtroArea, setFiltroArea] = useState("Todas");
+
+  const abrirPerfil = (id) => {
+    setPerfilId(id);
+    const next = new URLSearchParams(searchParams);
+    if (id) next.set("perfil", String(id));
+    else next.delete("perfil");
+    setSearchParams(next, { replace: true });
+  };
+
+  const cerrarPerfil = () => {
+    setPerfilId(null);
+    const next = new URLSearchParams(searchParams);
+    next.delete("perfil");
+    setSearchParams(next, { replace: true });
+    cargarDatos();
+  };
+
+  const cambiarFiltroEstado = (nuevo) => {
+    setFiltroEstado(nuevo);
+    const next = new URLSearchParams(searchParams);
+    if (nuevo && nuevo !== "Todos") next.set("estado", nuevo);
+    else next.delete("estado");
+    setSearchParams(next, { replace: true });
+  };
+
+  useEffect(() => {
+    const p = searchParams.get("perfil");
+    if (p && p !== perfilId) setPerfilId(p);
+  }, [searchParams]);
 
   // ─── Modales / acciones ───────────────────────────────────────────────────
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -263,7 +294,7 @@ export default function PersonalPage() {
     <Box sx={{ p: 3 }}>
       {/* ENCABEZADO */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, gap: 2, flexWrap: "wrap" }}>
-        <Typography sx={{ fontSize: 13, color: COLORES.textoMuted }}>Inicio / Gestión del personal / Personal</Typography>
+        <PageBreadcrumbs items={["Gestión del personal", "Personal"]} sx={{ mb: 0 }} />
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
           <Button startIcon={<Plus size={18} />} onClick={abrirCrear}
             sx={{ bgcolor: COLORES.primarioOscuro, color: COLORES.fondoBlanco, borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: 13, px: 2.5, height: 42, "&:hover": { bgcolor: COLORES.primario } }}>
@@ -303,7 +334,7 @@ export default function PersonalPage() {
                 sx: { borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, py: 0 },
               },
             }} />
-          <Select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} size="small"
+          <Select value={filtroEstado} onChange={(e) => cambiarFiltroEstado(e.target.value)} size="small"
             sx={{ borderRadius: "8px", fontSize: 13, height: 40, bgcolor: COLORES.fondoGris, "& fieldset": { borderColor: COLORES.borde } }}>
             {ESTADOS_FILTRO.map((e) => <MenuItem key={e} value={e}>{e}</MenuItem>)}
           </Select>
@@ -399,7 +430,7 @@ export default function PersonalPage() {
                   return (
                     <TableRow
                       key={e.id}
-                      onClick={() => setPerfilId(e.id)}
+                      onClick={() => abrirPerfil(e.id)}
                       sx={{
                         "&:hover": { bgcolor: COLORES.fondoGris, cursor: "pointer" },
                         transition: "background .15s",
@@ -469,7 +500,7 @@ export default function PersonalPage() {
                       <TableCell align="right" sx={{ py: 1.3, pr: 3 }}>
                         <Box sx={{ display: "flex", gap: 0.6, alignItems: "center", justifyContent: "flex-end" }}>
                           <Box
-                            onClick={(evt) => { evt.stopPropagation(); setPerfilId(e.id); }}
+                            onClick={(evt) => { evt.stopPropagation(); abrirPerfil(e.id); }}
                             title="Ver perfil completo"
                             sx={{
                               width: 32, height: 32, borderRadius: "8px",
@@ -715,7 +746,7 @@ export default function PersonalPage() {
       <PersonalPerfilModal
         open={perfilId !== null}
         id={perfilId}
-        onClose={() => { setPerfilId(null); cargarDatos(); }}
+        onClose={cerrarPerfil}
         onSaved={() => cargarDatos()}
       />
 

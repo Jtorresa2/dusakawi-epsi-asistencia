@@ -4,10 +4,13 @@ import type { ScheduleRepository } from '@modules/horarios/domain/repositories/s
 export interface UpdateScheduleCommand {
   name?: ScheduleSqlValue;
   toleranceMinutes?: ScheduleSqlValue;
+  toleranceDepartureMinutes?: ScheduleSqlValue;
   details?: unknown;
   description?: ScheduleSqlValue;
   modality?: ScheduleSqlValue;
   workdayType?: ScheduleSqlValue;
+  expectedHours?: ScheduleSqlValue;
+  active?: ScheduleSqlValue;
 }
 
 export class UpdateScheduleHandler {
@@ -17,9 +20,12 @@ export class UpdateScheduleHandler {
     await this.scheduleRepository.update(id, {
       name: command.name ?? null,
       toleranceMinutes: command.toleranceMinutes ?? 0,
+      toleranceDepartureMinutes: command.toleranceDepartureMinutes,
       description: command.description ?? null,
       modality: command.modality ?? null,
       workdayType: command.workdayType ?? null,
+      expectedHours: command.expectedHours,
+      active: command.active,
       details: command.details,
     });
     return 'updated';

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Box, Paper, Typography, Chip, Button, Snackbar, Alert, Divider,
 } from "@mui/material";
 import { ShieldCheck, Badge, UserRound, Eye, Info, Layers, Users } from "lucide-react";
 import { obtenerRoles, obtenerPermisosRol } from "../roles.api";
 import RolDrawer from "../components/RolDrawer";
+import PageBreadcrumbs from "../../../shared/components/PageBreadcrumbs";
 import { MODULOS_PERMISOS, ACCIONES } from "../config/modulosPermisos";
 import { COLORES } from "../../../shared/constants/colores.js";
 
@@ -18,12 +20,28 @@ const estiloFallback = { icon: <ShieldCheck size={26} />, bg: COLORES.fondoGris2
 const todosModulos = MODULOS_PERMISOS.flatMap((s) => s.modulos);
 
 export default function RolesPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rolQuery = searchParams.get("rol");
   const [roles, setRoles] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [permisosPorRol, setPermisosPorRol] = useState({});
   const [rolDrawer, setRolDrawer] = useState(null);
   const [snack, setSnack] = useState(null);
+
+  const abrirRol = (r) => {
+    setRolDrawer(r);
+    const next = new URLSearchParams(searchParams);
+    next.set("rol", String(r.id));
+    setSearchParams(next, { replace: true });
+  };
+
+  const cerrarRol = () => {
+    setRolDrawer(null);
+    const next = new URLSearchParams(searchParams);
+    next.delete("rol");
+    setSearchParams(next, { replace: true });
+  };
 
   const cargarRoles = async () => {
     try {
@@ -32,6 +50,10 @@ export default function RolesPage() {
       const lista = data.roles || [];
       setRoles(lista);
       setError(null);
+      if (rolQuery) {
+        const found = lista.find((r) => String(r.id) === String(rolQuery) || r.nombre?.toLowerCase() === rolQuery.toLowerCase());
+        if (found) setRolDrawer(found);
+      }
 
       // Permisos reales por rol (para contar módulos con acceso y mostrar la matriz)
       const mapa = {};
@@ -71,9 +93,10 @@ export default function RolesPage() {
       {/* ENCABEZADO */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 2, flexWrap: "wrap" }}>
         <Box>
-          <Typography sx={{ fontSize: 13, color: COLORES.textoMuted, mb: 0.5 }}>
-            Inicio / Gestión del Sistema / Roles
-          </Typography>
+          <PageBreadcrumbs
+            items={["Gestión del Sistema", "Roles"]}
+            sx={{ mb: 1 }}
+          />
           <Typography sx={{ fontSize: 20, fontWeight: 700, color: COLORES.textoPrimario }}>
             Roles del sistema
           </Typography>
@@ -169,7 +192,7 @@ export default function RolesPage() {
                     size="small"
                     variant="outlined"
                     startIcon={<Eye size={14} />}
-                    onClick={() => setRolDrawer(r)}
+                    onClick={() => abrirRol(r)}
                     sx={{ borderRadius: "9px", textTransform: "none", fontSize: 12.5, fontWeight: 600, px: 2, py: 0.7, color: COLORES.primarioOscuro, borderColor: COLORES.acento, "&:hover": { borderColor: COLORES.primarioOscuro, bgcolor: COLORES.successClaro } }}
                   >
                     Ver detalles
@@ -202,7 +225,7 @@ export default function RolesPage() {
         open={!!rolDrawer}
         rol={rolDrawer}
         permisosIniciales={rolDrawer ? permisosPorRol[rolDrawer.id] : null}
-        onClose={() => setRolDrawer(null)}
+        onClose={cerrarRol}
         onSuccess={handleGuardado}
         onError={(mensaje) => setSnack({ tipo: "error", mensaje })}
       />

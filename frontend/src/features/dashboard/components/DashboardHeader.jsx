@@ -39,7 +39,7 @@ export default function DashboardHeader({ usuario, filtroActivo = "Hoy", onFiltr
           Hola, {nombreLimpio} 👋
         </Typography>
         <Typography sx={{ mt: 0.3, fontSize: 13, opacity: 0.88, fontWeight: 400 }}>
-          Resumen operativo del control de asistencia
+          Resumen del control de asistencia
         </Typography>
       </Box>
 

@@ -1,12 +1,22 @@
 import { useState, useEffect } from "react";
-import { Box, Paper, Typography, Button, Breadcrumbs, Link, TextField, MenuItem, InputLabel } from "@mui/material";
-import { ArrowLeft, ChevronRight, Search, RotateCcw, FileSpreadsheet, FileText } from "lucide-react";
+import {
+  Box, Paper, Typography, Button, TextField, MenuItem,
+  InputLabel, Autocomplete, Avatar,
+} from "@mui/material";
+import { Search, RotateCcw, FileSpreadsheet, FileText } from "lucide-react";
 import { obtenerPersonal } from "../../personal/personal.api";
 import { obtenerAreas } from "../../areas/area.api";
 import { obtenerCargos } from "../../cargos/cargo.api";
 import DataTable from "../../../shared/components/DataTable";
+import PageBreadcrumbs from "../../../shared/components/PageBreadcrumbs";
 import { COLORES } from "../../../shared/constants/colores.js";
 import useRol from "../../../shared/hooks/useRol";
+
+function getInitials(name = "") {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  return (parts[0]?.[0] || "?").toUpperCase();
+}
 
 const ETIQUETAS = {
   porEmpleado: "Reporte por Empleado", asistencia: "Reporte de Asistencia", tardanzas: "Reporte de Tardanzas",
@@ -111,10 +121,75 @@ function FiltrosReporte({ tipoReporte, empleados, onGenerar, onExportarPDF, onEx
           if (c === "usuario_id") return (
             <Box key={c}>
               <InputLabel sx={{ fontSize: 12, fontWeight: 600, color: COLORES.textoTerciario, mb: 0.5 }}>Empleado</InputLabel>
-              <TextField select size="small" value={f.usuario_id||""} onChange={e => set("usuario_id",e.target.value)} sx={{minWidth:180,...SX}}>
-                <MenuItem value="">{tipoReporte==="porEmpleado"?"Seleccione...":"Todos"}</MenuItem>
-                {(empleados||[]).map(e => <MenuItem key={e.id} value={e.id}>{e.nombre} {e.apellido}</MenuItem>)}
-              </TextField>
+              <Autocomplete
+                size="small"
+                options={empleados || []}
+                value={(empleados || []).find((e) => e.id === f.usuario_id) || null}
+                onChange={(_, nuevo) => set("usuario_id", nuevo ? nuevo.id : "")}
+                getOptionLabel={(opt) =>
+                  `${opt.nombre || ""} ${opt.apellido || ""}`.trim() || String(opt.documento || opt.cedula || "")
+                }
+                isOptionEqualToValue={(option, val) => option.id === val.id}
+                filterOptions={(options, { inputValue }) => {
+                  const query = inputValue.toLowerCase().trim();
+                  if (!query) return options;
+                  return options.filter((opt) => {
+                    const nombreCompleto = `${opt.nombre || ""} ${opt.apellido || ""}`.toLowerCase();
+                    const doc = String(opt.documento || opt.cedula || "").toLowerCase();
+                    const area = String(opt.area || opt.area_nombre || "").toLowerCase();
+                    return nombreCompleto.includes(query) || doc.includes(query) || area.includes(query);
+                  });
+                }}
+                renderOption={(props, emp) => (
+                  <Box
+                    component="li"
+                    {...props}
+                    key={emp.id}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      py: 1,
+                      px: 1.5,
+                      "&:hover": { bgcolor: COLORES.fondoGris },
+                    }}
+                  >
+                    <Avatar
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        bgcolor: COLORES.primarioClaro,
+                        color: COLORES.primarioOscuro,
+                      }}
+                    >
+                      {getInitials(`${emp.nombre || ""} ${emp.apellido || ""}`)}
+                    </Avatar>
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <Typography sx={{ fontSize: 13, fontWeight: 600, color: COLORES.textoPrimario }} noWrap>
+                        {emp.nombre} {emp.apellido}
+                      </Typography>
+                      <Typography sx={{ fontSize: 11, color: COLORES.textoSuave }} noWrap>
+                        {emp.documento || emp.cedula ? `C.C. ${emp.documento || emp.cedula} · ` : ""}
+                        {emp.area || emp.area_nombre || "Sin área"}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder={
+                      tipoReporte === "porEmpleado"
+                        ? "Buscar por apellido, nombre o cédula..."
+                        : "Todos los empleados (o buscar...)"
+                    }
+                    sx={{ minWidth: { xs: 240, sm: 300 }, ...SX }}
+                  />
+                )}
+                noOptionsText="No se encontraron empleados"
+              />
             </Box>
           );
           if (c === "mes") return (
@@ -301,13 +376,22 @@ export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarP
 
   const generar = async (f) => {
     try {
+      if (isPorEmpleado && !f.usuario_id && !f.empleado_id) {
+        setErrorMsg("Seleccione un empleado para generar el reporte");
+        setRegistros(null);
+        return;
+      }
       setCargando(true); setErrorMsg(null); setFiltros(f);
       const fn = apiFns[API_MAP[tipoReporte]];
       if (!fn) return;
       const p = {};
       if (f.fecha_desde) p.fecha_desde = f.fecha_desde;
       if (f.fecha_hasta) p.fecha_hasta = f.fecha_hasta;
-      if (f.usuario_id || f.empleado_id) p.usuario_id = f.usuario_id || f.empleado_id;
+      if (f.usuario_id || f.empleado_id) {
+        const empId = f.usuario_id || f.empleado_id;
+        p.usuario_id = empId;
+        p.empleado_id = empId;
+      }
       if (f.area_id) p.area_id = f.area_id;
       if (f.cargo_id) p.cargo_id = f.cargo_id;
       if (f.estado) p.estado = f.estado;
@@ -326,23 +410,32 @@ export default function ReporteView({ tipoReporte, apiFns, onVolver, onExportarP
 
   const limpiar = () => { setRegistros(null); setTotal(0); setFiltros({}); setErrorMsg(null); };
 
+  const handleExportarPDF = () => {
+    if (isPorEmpleado && !filtros.usuario_id && !filtros.empleado_id) {
+      setErrorMsg("Seleccione y genere el reporte de un empleado antes de exportar a PDF");
+      return;
+    }
+    onExportarPDF?.(tipoReporte, filtros);
+  };
+
   return (
     <Box>
       <Paper elevation={0} sx={{ p: 2.5, borderRadius: "16px", border: `1px solid ${COLORES.grisContorno}`, mb: 2 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-          <Button onClick={onVolver} sx={{ minWidth: 0, p: 0.5, borderRadius: "8px", color: COLORES.textoTerciario }}><ArrowLeft size={18} /></Button>
-          <Breadcrumbs separator={<ChevronRight size={14} />} sx={{ fontSize: 12, color: COLORES.textoSuave }}>
-            <Link underline="hover" color="inherit" sx={{ cursor: "pointer" }} onClick={onVolver}>Inicio</Link>
-            <Link underline="hover" color="inherit" sx={{ cursor: "pointer" }} onClick={onVolver}>Operación</Link>
-            <Link underline="hover" color="inherit" sx={{ cursor: "pointer" }} onClick={onVolver}>Reportes</Link>
-            <Typography sx={{ fontSize: 12, color: COLORES.textoPrimario, fontWeight: 600 }}>{ETIQUETAS[tipoReporte]}</Typography>
-          </Breadcrumbs>
-        </Box>
+        <PageBreadcrumbs
+          showBack={true}
+          onVolver={onVolver}
+          items={[
+            { label: "Gestión de reportes", path: "/reportes" },
+            { label: "Reportes", path: "/reportes" },
+            { label: ETIQUETAS[tipoReporte] },
+          ]}
+          sx={{ mb: 2 }}
+        />
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
           <Box sx={{ width: 36, height: 36, borderRadius: "10px", background: COLORES.successClaro, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{ICONOS[tipoReporte]}</Box>
           <Typography sx={{ fontSize: 17, fontWeight: 700, color: COLORES.textoPrimario }}>{ETIQUETAS[tipoReporte]}</Typography>
         </Box>
-        <FiltrosReporte tipoReporte={tipoReporte} empleados={empleados} onGenerar={generar} onExportarPDF={() => onExportarPDF?.(tipoReporte, filtros)} onExportarExcel={() => onExportarExcel?.(tipoReporte, registros)} onLimpiar={limpiar} />
+        <FiltrosReporte tipoReporte={tipoReporte} empleados={empleados} onGenerar={generar} onExportarPDF={handleExportarPDF} onExportarExcel={() => onExportarExcel?.(tipoReporte, registros)} onLimpiar={limpiar} />
       </Paper>
       {cargando ? (
         <Box sx={{ textAlign: "center", py: 4, color: COLORES.textoSuave }}>Generando reporte...</Box>

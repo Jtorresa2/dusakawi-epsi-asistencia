@@ -11,11 +11,19 @@ export class GetSchedulesHandler {
         id: string;
         nombre: string;
         tolerancia_minutos: number;
+        tolerancia_salida_minutos: number;
         description: string | null;
+        descripcion: string | null;
         modality: string;
+        modalidad: string;
         workday_type: string;
+        tipo_jornada: string;
         expected_hours: string | null;
+        horas_esperadas: string | null;
         active: boolean;
+        activo: boolean;
+        es_por_defecto: boolean;
+        is_default: boolean;
         creado_en: Date;
         detalles: Array<{
           id: string;
@@ -34,11 +42,19 @@ export class GetSchedulesHandler {
           id: row.id,
           nombre: row.name,
           tolerancia_minutos: row.toleranceMinutes,
+          tolerancia_salida_minutos: row.toleranceDepartureMinutes,
           description: row.description,
+          descripcion: row.description,
           modality: row.modality,
+          modalidad: row.modality,
           workday_type: row.workdayType,
+          tipo_jornada: row.workdayType,
           expected_hours: row.expectedHours,
+          horas_esperadas: row.expectedHours,
           active: row.active,
+          activo: row.active,
+          es_por_defecto: Boolean(row.isDefault),
+          is_default: Boolean(row.isDefault),
           creado_en: row.createdAt,
           detalles: [],
         };

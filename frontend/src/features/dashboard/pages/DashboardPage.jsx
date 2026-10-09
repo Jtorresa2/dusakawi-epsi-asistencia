@@ -86,7 +86,7 @@ export default function DashboardPage() {
         ))}
       </Box>
 
-      {/* 2. FILA CENTRAL DE GRÁFICOS BALANCEADOS (50/50 o 5fr/7fr) */}
+      {/* 2. FILA CENTRAL DE GRÁFICOS BALANCEADOS (50/50 ) */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "5fr 7fr" }, gap: 2.5, mb: 2.5 }}>
         <Box sx={{ minWidth: 0 }}><DonutChart data={hoyStats} /></Box>
         <Box sx={{ minWidth: 0 }}><OnTimeBarChart data={semanal} /></Box>

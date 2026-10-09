@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import {
   User, Mail, Phone, Calendar, FileText, Briefcase, MapPin,
-  Clock, Edit2, Save, X, Building2, Layers, AlertTriangle, XCircle, ShieldCheck
+  Clock, Edit3, Save, X, Building2, Layers, AlertTriangle, XCircle, ShieldCheck
 } from "lucide-react";
 import { obtenerPersonalPorId, actualizarPersonal } from "../personal.api";
 import { obtenerAreas } from "../../areas/area.api";
@@ -454,9 +454,9 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
                         aria-label="Editar datos personales"
                         size="small"
                         onClick={() => handleEdit("personal")}
-                        sx={{ bgcolor: COLORES.fondoBlanco, color: COLORES.primarioOscuro, border: `1px solid ${COLORES.borde2}`, borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: COLORES.primarioClaro } }}
+                        sx={{ bgcolor: COLORES.fondoGris2, color: COLORES.textoSecundario, borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: COLORES.borde2 } }}
                       >
-                        <Edit2 size={14} />
+                        <Edit3 size={14} />
                       </IconButton>
                     )}
                   </Box>
@@ -643,9 +643,9 @@ export default function PersonalPerfilModal({ open, id, onClose, onSaved }) {
                         aria-label="Editar información laboral"
                         size="small"
                         onClick={() => handleEdit("laboral")}
-                        sx={{ bgcolor: COLORES.fondoBlanco, color: COLORES.primarioOscuro, border: `1px solid ${COLORES.borde2}`, borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: COLORES.primarioClaro } }}
+                        sx={{ bgcolor: COLORES.fondoGris2, color: COLORES.textoSecundario, borderRadius: "8px", width: 28, height: 28, "&:hover": { bgcolor: COLORES.borde2 } }}
                       >
-                        <Edit2 size={14} />
+                        <Edit3 size={14} />
                       </IconButton>
                     )}
                   </Box>

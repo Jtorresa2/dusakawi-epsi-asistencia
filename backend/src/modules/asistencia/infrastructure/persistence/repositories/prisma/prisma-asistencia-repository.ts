@@ -14,8 +14,7 @@ import type {
 } from '@modules/asistencia/domain/entities/asistencia';
 import { statusFromDB } from '@modules/asistencia/application/services/asistencia-rules';
 
-const require = createRequire(import.meta.url);
-const { excluirRolesPorUserId } = require('../../../../../../services/rolesFiltro.js');
+import { excluirRolesPorUserId } from '../../../../../../services/rolesFiltro.js';
 
 // Las columnas numéricas que el driver legacy (node-pg) exponía como string
 // (numeric, EXTRACT) se castean a ::text para réplica byte a byte. minutes
